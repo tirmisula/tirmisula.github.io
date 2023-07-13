@@ -15,6 +15,12 @@ TocOpen: true
 
 This article offers a basic knowledge of machine learning.
 
+```bash
+{{ if or .Params.math .Site.Params.math }}
+{{ partial "math.html" . }}
+{{ end }}
+```
+
 {{< math.inline >}}
 {{ if or .Page.Params.math .Site.Params.math }}
 
