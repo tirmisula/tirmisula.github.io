@@ -88,7 +88,10 @@ actual derivation involves more mathematical steps and calculations.
 
 ## Step 7: Sage
 
-Given a dataset \(\mathcal{D} = \{x_1, x_2, ..., x_n\}\), where each data point \(x_i\) is drawn from a Gaussian distribution with unknown mean \(\mu\) and variance \(\sigma^2\), we want to estimate the parameters \(\mu\) and \(\sigma^2\) using the Maximum Likelihood Estimation (MLE) method.
+{{< math.inline >}}
+
+Given a dataset <p>\(\mathcal{D} = \{x_1, x_2, ..., x_n\}\)</p>, where each data point \(x_i\) is drawn from a Gaussian distribution with unknown mean \(\mu\) and variance \(\sigma^2\), we want to estimate the parameters \(\mu\) and \(\sigma^2\) using the Maximum Likelihood Estimation (MLE) method.
+{{</ math.inline >}}
 
 The likelihood function for a single data point \(x_i\) is given by the PDF of the Gaussian distribution:
 
