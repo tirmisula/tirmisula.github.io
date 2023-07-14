@@ -91,7 +91,8 @@ actual derivation involves more mathematical steps and calculations.
 {{< math.inline >}}
 <p>
 Given a dataset \(\mathcal{D} = \{x_1, x_2, ..., x_n\}\), where each data point \(x_i\) is drawn from a Gaussian distribution with unknown mean \(\mu\) and variance \(\sigma^2\), we want to estimate the parameters \(\mu\) and \(\sigma^2\) using the Maximum Likelihood Estimation (MLE) method.
-
+</p>
+<p>
 The likelihood function for a single data point \(x_i\) is given by the PDF of the Gaussian distribution:
 </p>
 {{</ math.inline >}}
