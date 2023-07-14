@@ -1,6 +1,6 @@
 baseURL: "https://adityatelange.github.io/hugo-PaperMod/" # if your site is in 'https', then make sure your base url isn't written using 'http' otherwise your sitemap would contain http (as opposeed to https) URLs. This would affect Google indexing of your URLs.
 title: PaperMod
-paginate: 5
+paginate: 10
 theme: hugo-PaperMod
 
 enableInlineShortcodes: true
@@ -123,24 +123,16 @@ params:
     homeInfoParams:
         Title: "PaperMod"
         Content: >
-            Welcome to demo of hugo's theme PaperMod.
-
-            - **PaperMod** is a simple but fast and responsive theme with useful feature-set that enhances UX.
-
-            - Do give a 🌟 on Github !
-
-            - PaperMod is based on theme [Paper](https://github.com/nanxiaobei/hugo-paper).
+            Personal blog.
 
     socialIcons:
         - name: github
-          url: "https://github.com/adityatelange/hugo-PaperMod"
-        - name: KoFi
-          url: "https://ko-fi.com/adityatelange"
+          url: "https://github.com/tirmisula"
         - name: Rss
           url: "index.xml"
 
     editPost:
-        URL: "https://github.com/adityatelange/hugo-PaperMod/tree/exampleSite/content"
+        URL: "https://github.com/tirmisula"
         Text: "Suggest Changes" # edit text
         appendFilePath: true # to append file path to Edit link
 
@@ -189,20 +181,20 @@ markup:
 
 privacy:
     vimeo:
-        disabled: false
+        disabled: true
         simple: true
 
     twitter:
-        disabled: false
+        disabled: true
         enableDNT: true
         simple: true
 
     instagram:
-        disabled: false
+        disabled: true
         simple: true
 
     youtube:
-        disabled: false
+        disabled: true
         privacyEnhanced: true
 
 services:
