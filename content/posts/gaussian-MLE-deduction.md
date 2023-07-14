@@ -83,8 +83,7 @@ Interpret the estimated values of \((\mu)\) and \((\sigma^2)\) in the context of
 represent the maximum likelihood estimates for the mean and variance of the Gaussian distribution based  
 on the observed data.                                                                                    
 
-Note: This is a detailed step-by-step explanation of the MLE deduction for a Gaussian distribution. The  
-actual derivation involves more mathematical steps and calculations.        
+Note: This is a detailed step-by-step explanation of the MLE deduction for a Gaussian distribution. The actual derivation involves more mathematical steps and calculations.        
 
 ## Step 7: Sage
 
@@ -99,37 +98,66 @@ The likelihood function for a single data point \(x_i\) is given by the PDF of t
 
 $$p(x_i|\mu,\sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)$$
 
-The likelihood function for the entire dataset $\mathcal{D}$ is the product of the likelihoods of individual data points:
+{{< math.inline >}}
+<p>
+The likelihood function for the entire dataset \(\mathcal{D}\) is the product of the likelihoods of individual data points:
+</p>
+{{</ math.inline >}}
 
 $$\mathcal{L}(\mu,\sigma^2|\mathcal{D}) = \prod_{i=1}^{n} p(x_i|\mu,\sigma^2)$$
 
-To find the maximum likelihood estimates of $\mu$ and $\sigma^2$, we need to maximize the likelihood function $\mathcal{L}(\mu,\sigma^2|\mathcal{D})$ with respect to these parameters. Taking the logarithm of the likelihood function, we get:
+{{< math.inline >}}
+<p>
+To find the maximum likelihood estimates of \(\mu\) and \(\sigma^2\), we need to maximize the likelihood function \(\mathcal{L}(\mu,\sigma^2|\mathcal{D})\) with respect to these parameters. Taking the logarithm of the likelihood function, we get:
+</p>
+{{</ math.inline >}}
 
 $$\ln \mathcal{L}(\mu,\sigma^2|\mathcal{D}) = -\frac{n}{2} \ln (2\pi) - \frac{n}{2} \ln \sigma^2 - \frac{1}{2\sigma^2} \sum_{i=1}^{n} (x_i - \mu)^2$$
 
-To find the maximum likelihood estimates, we differentiate the log-likelihood function with respect to the parameters $\mu$ and $\sigma^2$, set the derivatives equal to zero, and solve for the parameters. 
-
-First, we differentiate with respect to $\mu$:
+{{< math.inline >}}
+<p>
+To find the maximum likelihood estimates, we differentiate the log-likelihood function with respect to the parameters \(\mu\) and \(\sigma^2\), set the derivatives equal to zero, and solve for the parameters. 
+</p>
+<p>
+First, we differentiate with respect to \(\mu\):
+</p>
+{{</ math.inline >}}
 
 $$\frac{\partial}{\partial\mu} \ln \mathcal{L}(\mu,\sigma^2|\mathcal{D}) = \frac{1}{\sigma^2} \sum_{i=1}^{n} (x_i - \mu) = 0$$
 
-Solving for $\mu$, we get:
+{{< math.inline >}}
+<p>
+Solving for \(\mu\), we get:
+</p>
+{{</ math.inline >}}
 
 $$\hat{\mu}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
 
 This is the sample mean of the data, which is an unbiased estimator of the population mean.
 
-Next, we differentiate with respect to $\sigma^2$:
+{{< math.inline >}}
+<p>
+Next, we differentiate with respect to \(\sigma^2\):
+</p>
+{{</ math.inline >}}
 
 $$\frac{\partial}{\partial\sigma^2} \ln \mathcal{L}(\mu,\sigma^2|\mathcal{D}) = -\frac{n}{2\sigma^2} + \frac{1}{2(\sigma^2)^2} \sum_{i=1}^{n} (x_i - \mu)^2 = 0$$
 
-Solving for $\sigma^2$, we get:
+{{< math.inline >}}
+<p>
+Solving for \(\sigma^2\), we get:
+</p>
+{{</ math.inline >}}
 
 $$\hat{\sigma}^2_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} (x_i - \hat{\mu}_{\text{MLE}})^2$$
 
 This is the sample variance of the data, which is an unbiased estimator of the population variance.
 
-Therefore, the maximum likelihood estimates of the parameters $\mu$ and $\sigma^2$ are given by the sample mean and sample variance of the data, respectively:
+{{< math.inline >}}
+<p>
+Therefore, the maximum likelihood estimates of the parameters \(\mu\) and \(\sigma^2\) are given by the sample mean and sample variance of the data, respectively:
+</p>
+{{</ math.inline >}}
 
 $$\hat{\mu}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
 
