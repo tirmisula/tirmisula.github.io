@@ -36,7 +36,7 @@ $$
 [f(x; \mu, \sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x - \mu)^2}{2\sigma^2}\right)]
 $$
 
-where $$(x)$$ is the observed value, $$(\mu)$$ is the mean, and $$(\sigma^2)$$ is the variance.                      
+where $(x)$ is the observed value, $(\mu)$ is the mean, and $(\sigma^2)$ is the variance.                      
 
 ## Step 2: Formulate the Likelihood Function                                                                
 
@@ -45,11 +45,10 @@ dataset given the parameters. Since the observations are assumed to be independe
 distributed (i.i.d.), the likelihood function is the product of the individual probabilities:            
 
 $$
-[L(\mu, \sigma^2) = f(x_1; \mu, \sigma^2) \cdot f(x_2; \mu, \sigma^2) \cdot ... \cdot f(x_n; \mu,        
-\sigma^2)]               
+[L(\mu, \sigma^2) = f(x_1; \mu, \sigma^2) \cdot f(x_2; \mu, \sigma^2) \cdot ... \cdot f(x_n; \mu, \sigma^2)]
 $$                                                                                
 
-where (x_1, x_2, ..., x_n) are the observed values.                                                      
+where $(x_1, x_2, ..., x_n)$ are the observed values.                                                      
 
 ## Step 3: Take the Logarithm of the Likelihood Function                                                    
 
@@ -57,13 +56,12 @@ To simplify the calculations, we take the logarithm of the likelihood function. 
 and does not affect the location of the maximum:                                                         
 
 $$
-[\log L(\mu, \sigma^2) = \log f(x_1; \mu, \sigma^2) + \log f(x_2; \mu, \sigma^2) + ... + \log f(x_n; \mu,
-\sigma^2)]                                                                                               
+[\log L(\mu, \sigma^2) = \log f(x_1; \mu, \sigma^2) + \log f(x_2; \mu, \sigma^2) + ... + \log f(x_n; \mu,\sigma^2)]                                                                               
 $$
 
 ## Step 4: Differentiate the Log-Likelihood Function                                                        
 
-To find the maximum likelihood estimates for (\mu) and (\sigma^2), we differentiate the log-likelihood   
+To find the maximum likelihood estimates for $(\mu)$ and $(\sigma^2)$, we differentiate the log-likelihood   
 function with respect to each parameter and set the derivatives equal to zero.                           
 
 4.1. Differentiate with respect to (\mu):                                                                
@@ -77,15 +75,59 @@ $$[\frac{d}{d(\sigma^2)} (\log L(\mu, \sigma^2)) = 0]$$
 ## Step 5: Solve the Equations                                                                              
 
 
-Solve the equations obtained in Step 4 to find the values of $$(\mu)$$ and $$(\sigma^2)$$ that maximize the      
+Solve the equations obtained in Step 4 to find the values of $(\mu)$ and $(\sigma^2)$ that maximize the      
 log-likelihood function. This can be done by solving the equations analytically or using numerical       
 optimization techniques.                                                                                 
 
 ## Step 6: Interpret the Results                                                                            
 
-Interpret the estimated values of (\mu) and (\sigma^2) in the context of the problem. These estimates    
+Interpret the estimated values of $(\mu)$ and $(\sigma^2)$ in the context of the problem. These estimates    
 represent the maximum likelihood estimates for the mean and variance of the Gaussian distribution based  
 on the observed data.                                                                                    
 
 Note: This is a detailed step-by-step explanation of the MLE deduction for a Gaussian distribution. The  
 actual derivation involves more mathematical steps and calculations.        
+
+## Step 7: Sage
+
+Given a dataset $\mathcal{D} = \{x_1, x_2, ..., x_n\}$, where each data point $x_i$ is drawn from a Gaussian distribution with unknown mean $\mu$ and variance $\sigma^2$, we want to estimate the parameters $\mu$ and $\sigma^2$ using the Maximum Likelihood Estimation (MLE) method.
+
+The likelihood function for a single data point $x_i$ is given by the PDF of the Gaussian distribution:
+
+$$p(x_i|\mu,\sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)$$
+
+The likelihood function for the entire dataset $\mathcal{D}$ is the product of the likelihoods of individual data points:
+
+$$\mathcal{L}(\mu,\sigma^2|\mathcal{D}) = \prod_{i=1}^{n} p(x_i|\mu,\sigma^2)$$
+
+To find the maximum likelihood estimates of $\mu$ and $\sigma^2$, we need to maximize the likelihood function $\mathcal{L}(\mu,\sigma^2|\mathcal{D})$ with respect to these parameters. Taking the logarithm of the likelihood function, we get:
+
+$$\ln \mathcal{L}(\mu,\sigma^2|\mathcal{D}) = -\frac{n}{2} \ln (2\pi) - \frac{n}{2} \ln \sigma^2 - \frac{1}{2\sigma^2} \sum_{i=1}^{n} (x_i - \mu)^2$$
+
+To find the maximum likelihood estimates, we differentiate the log-likelihood function with respect to the parameters $\mu$ and $\sigma^2$, set the derivatives equal to zero, and solve for the parameters. 
+
+First, we differentiate with respect to $\mu$:
+
+$$\frac{\partial}{\partial\mu} \ln \mathcal{L}(\mu,\sigma^2|\mathcal{D}) = \frac{1}{\sigma^2} \sum_{i=1}^{n} (x_i - \mu) = 0$$
+
+Solving for $\mu$, we get:
+
+$$\hat{\mu}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
+
+This is the sample mean of the data, which is an unbiased estimator of the population mean.
+
+Next, we differentiate with respect to $\sigma^2$:
+
+$$\frac{\partial}{\partial\sigma^2} \ln \mathcal{L}(\mu,\sigma^2|\mathcal{D}) = -\frac{n}{2\sigma^2} + \frac{1}{2(\sigma^2)^2} \sum_{i=1}^{n} (x_i - \mu)^2 = 0$$
+
+Solving for $\sigma^2$, we get:
+
+$$\hat{\sigma}^2_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} (x_i - \hat{\mu}_{\text{MLE}})^2$$
+
+This is the sample variance of the data, which is an unbiased estimator of the population variance.
+
+Therefore, the maximum likelihood estimates of the parameters $\mu$ and $\sigma^2$ are given by the sample mean and sample variance of the data, respectively:
+
+$$\hat{\mu}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
+
+$$\hat{\sigma}^2_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} (x_i - \hat{\mu}_{\text{MLE}})^2$$
