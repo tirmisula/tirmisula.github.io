@@ -55,9 +55,7 @@ where $(x_1, x_2, ..., x_n)$ are the observed values.
 To simplify the calculations, we take the logarithm of the likelihood function. This is a common practice
 and does not affect the location of the maximum:                                                         
 
-$$
-[\log L(\mu, \sigma^2) = \log f(x_1; \mu, \sigma^2) + \log f(x_2; \mu, \sigma^2) + ... + \log f(x_n; \mu,\sigma^2)]                                                                               
-$$
+$$[\log L(\mu, \sigma^2) = \log f(x_1; \mu, \sigma^2) + \log f(x_2; \mu, \sigma^2) + ... + \log f(x_n; \mu,\sigma^2)]$$
 
 ## Step 4: Differentiate the Log-Likelihood Function                                                        
 
@@ -75,13 +73,13 @@ $$[\frac{d}{d(\sigma^2)} (\log L(\mu, \sigma^2)) = 0]$$
 ## Step 5: Solve the Equations                                                                              
 
 
-Solve the equations obtained in Step 4 to find the values of $(\mu)$ and $(\sigma^2)$ that maximize the      
+Solve the equations obtained in Step 4 to find the values of \((\mu)\) and \((\sigma^2)\) that maximize the      
 log-likelihood function. This can be done by solving the equations analytically or using numerical       
 optimization techniques.                                                                                 
 
 ## Step 6: Interpret the Results                                                                            
 
-Interpret the estimated values of $(\mu)$ and $(\sigma^2)$ in the context of the problem. These estimates    
+Interpret the estimated values of \((\mu)\) and \((\sigma^2)\) in the context of the problem. These estimates    
 represent the maximum likelihood estimates for the mean and variance of the Gaussian distribution based  
 on the observed data.                                                                                    
 
@@ -90,9 +88,9 @@ actual derivation involves more mathematical steps and calculations.
 
 ## Step 7: Sage
 
-Given a dataset $\mathcal{D} = \{x_1, x_2, ..., x_n\}$, where each data point $x_i$ is drawn from a Gaussian distribution with unknown mean $\mu$ and variance $\sigma^2$, we want to estimate the parameters $\mu$ and $\sigma^2$ using the Maximum Likelihood Estimation (MLE) method.
+Given a dataset \(\mathcal{D} = \{x_1, x_2, ..., x_n\}\), where each data point \(x_i\) is drawn from a Gaussian distribution with unknown mean \(\mu\) and variance \(\sigma^2\), we want to estimate the parameters \(\mu\) and \(\sigma^2\) using the Maximum Likelihood Estimation (MLE) method.
 
-The likelihood function for a single data point $x_i$ is given by the PDF of the Gaussian distribution:
+The likelihood function for a single data point \(x_i\) is given by the PDF of the Gaussian distribution:
 
 $$p(x_i|\mu,\sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)$$
 
