@@ -159,8 +159,6 @@ Therefore, the maximum likelihood estimates of the parameters \(\mu\) and \(\sig
 </p>
 {{</ math.inline >}}
 
-$${\hat{\mu}}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
-
-and
+$$\hat{\mu}^2_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
 
 $$\hat{\sigma}^2_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} (x_i - \hat{\mu}_{\text{MLE}})^2$$
