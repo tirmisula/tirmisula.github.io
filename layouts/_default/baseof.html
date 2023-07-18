@@ -1,10 +1,17 @@
-{{ define "main" }}
+<!-- {{ define "main" }}
 {{ block "main" . }}
 <main>
   {{ .Content }}
 </main>
 {{ end }}
-{{/* end define "main" */}}
+{{/* end define "main" */}} -->
+
+{{ define "main" }}
+<main>
+  {{ block "main" . }}
+  {{ end }}
+</main>
+{{ end }}
 
 {{ define "sidebar" }}
 {{ block "sidebar" . }}
