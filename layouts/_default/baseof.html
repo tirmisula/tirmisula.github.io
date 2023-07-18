@@ -26,7 +26,7 @@
 {{/* include the rest of the PaperMod baseof.html template */}}
 {{- partial "baseof.html" . -}} -->
 
-{{ define "main" }}
+<!-- {{ define "main" }}
 {{ block "main" . }}
 <main>
   {{ .Content }}
@@ -45,4 +45,34 @@
 {{/* end define "sidebar" */}}
 
 {{/* include the rest of the PaperMod baseof.html template */}}
-{{- partial "baseof.html" . -}}
+{{- partial "baseof.html" . -}} -->
+
+<!DOCTYPE html>
+<html lang="{{ .Site.Language }}" dir="{{ .Language.LanguageDirection | default "auto" }}">
+
+<head>
+    {{- partial "head.html" . }}
+</head>
+
+<body class="
+{{- if (or (ne .Kind `page` ) (eq .Layout `archives`) (eq .Layout `search`)) -}}
+{{- print "list" -}}
+{{- end -}}
+{{- if eq $.Site.Params.defaultTheme `dark` -}}
+{{- print " dark" }}
+{{- end -}}
+" id="top">
+    {{- partialCached "header.html" . .Page -}}
+    <main class="main">
+        {{- block "main" . }}{{ end }}
+    </main>
+    <aside>
+        <div>
+          <a href="https://info.flagcounter.com/4KsH"><img src="https://s01.flagcounter.com/count2/4KsH/bg_FFFFFF/txt_000000/border_CCCCCC/columns_2/maxflags_10/viewers_0/labels_0/pageviews_0/flags_0/percent_0/" alt="Flag Counter" border="0"></a>
+        </div>
+      </aside>
+    {{ partialCached "footer.html" . .Layout .Kind (.Param "hideFooter") (.Param "ShowCodeCopyButtons") -}}
+
+</body>
+
+</html>
