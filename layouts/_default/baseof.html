@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <!-- Add the JavaScript file -->
+    <!-- <script src="/js/visitor-location.js"></script> -->
+    <script src="https://cdn.ipgeolocation.io/js/ipgeo.js"></script>
+  </head>
+  <body>
+    <!-- Add an HTML element to display the visitor's location -->
+    <!-- <p>Your location: <span id="visitor-location"></span></p> -->
+    <p>Your location: <span id="ipgeo-location"></span></p>
+    <script>
+        // Load the IP geolocation script
+        ipgeo.load({
+          apiKey: 'aa4e00166636440faafc0d78e2f65d97',
+          fields: ['city', 'region', 'country_name']
+        }, function(result) {
+          // Get the visitor's location information
+          var visitorLocation = result.city + ', ' + result.region + ', ' + result.country_name;
+          // Update the HTML element with the visitor's location
+          document.getElementById('ipgeo-location').textContent = visitorLocation;
+        });
+      </script>
+  </body>
+
+</html>
