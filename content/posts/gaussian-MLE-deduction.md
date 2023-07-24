@@ -120,7 +120,19 @@ To find the maximum likelihood estimates of \(\mu\) and \(\sigma^2\), we need to
 </p>
 {{</ math.inline >}}
 
-$$\ln \mathcal{L}(\mu,\sigma^2|\mathcal{D}) = -\frac{n}{2} \ln (2\pi) - \frac{n}{2} \ln \sigma^2 - \frac{1}{2\sigma^2} \sum_{i=1}^{n} (x_i - \mu)^2$$
+$$
+\begin{equation}
+\begin{aligned}
+\ln \mathcal{L}(\mu,\sigma^2|\mathcal{D}) &= \sum_{i=1}^{n} (\ln p(x_i|\mu,\sigma^2)) \\
+&= \sum_{i=1}^{n} (\ln \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)) \\
+&= \sum_{i=1}^{n} (\ln \frac{1}{\sqrt{2\pi\sigma^2}} + \ln \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)) \\
+&= n\ln \frac{1}{\sqrt{2\pi\sigma^2}}  + \sum_{i=1}^{n} \ln \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right) \\
+&= n\ln \frac{1}{\sqrt{2\pi\sigma^2}}  + \sum_{i=1}^{n} \left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right) \\
+&= -\frac{n}{2} \ln (2\pi) - \frac{n}{2} \ln \sigma^2 - \frac{1}{2\sigma^2} \sum_{i=1}^{n} (x_i - \mu)^2
+\end{aligned}
+\end{equation}
+$$
+<!-- $$\ln \mathcal{L}(\mu,\sigma^2|\mathcal{D}) &= -\frac{n}{2} \ln (2\pi) - \frac{n}{2} \ln \sigma^2 - \frac{1}{2\sigma^2} \sum_{i=1}^{n} (x_i - \mu)^2$$ -->
 
 {{< math.inline >}}
 <p>
