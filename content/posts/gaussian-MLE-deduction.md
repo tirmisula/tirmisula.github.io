@@ -35,6 +35,13 @@ Gaussian distribution using Markdown with KaTeX:
 {{ end }}
 {{</ math.inline >}}
 
+<style>
+    /* Set the font size of all math elements to 16px */
+    .katex {
+        font-size: 16px !important;
+    }
+</style>
+
 ## Step 1: Define the Gaussian Distribution                                                                 
 
 We start by defining the Gaussian distribution, also known as the Normal distribution. The probability   
@@ -190,7 +197,7 @@ Therefore, the maximum likelihood estimates of the parameters \(\mu\) and \(\sig
 </p>
 {{</ math.inline >}}
 
-$$\hat{\sigma}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
+$$\hat{\mu}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
 {{< math.inline >}}
 <p align="center">
 \(\hat{\mu}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i\)
