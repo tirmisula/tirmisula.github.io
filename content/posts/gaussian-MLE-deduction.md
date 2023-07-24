@@ -136,11 +136,11 @@ a &= -\frac{n}{2} \ln (2\pi) - \frac{n}{2} \ln \sigma^2 - \frac{1}{2\sigma^2} \s
 $$
 \begin{align*}
 \ln \mathcal{L}(\mu,\sigma^2|\mathcal{D}) &= \sum_{i=1}^{n} (\ln p(x_i|\mu,\sigma^2)) \\\
-a &= \sum_{i=1}^{n} (\ln \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)) \\\
-a &= \sum_{i=1}^{n} (\ln \frac{1}{\sqrt{2\pi\sigma^2}} + \ln \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)) \\\
-a &= n\ln \frac{1}{\sqrt{2\pi\sigma^2}}  + \sum_{i=1}^{n} \ln \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right) \\\
-a &= n\ln \frac{1}{\sqrt{2\pi\sigma^2}}  + \sum_{i=1}^{n} \left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right) \\\
-a &= -\frac{n}{2} \ln (2\pi) - \frac{n}{2} \ln \sigma^2 - \frac{1}{2\sigma^2} \sum_{i=1}^{n} (x_i - \mu)^2
+&= \sum_{i=1}^{n} (\ln \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)) \\\
+&= \sum_{i=1}^{n} (\ln \frac{1}{\sqrt{2\pi\sigma^2}} + \ln \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)) \\\
+&= n\ln \frac{1}{\sqrt{2\pi\sigma^2}}  + \sum_{i=1}^{n} \ln \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right) \\\
+&= n\ln \frac{1}{\sqrt{2\pi\sigma^2}}  + \sum_{i=1}^{n} \left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right) \\\
+&= -\frac{n}{2} \ln (2\pi) - \frac{n}{2} \ln \sigma^2 - \frac{1}{2\sigma^2} \sum_{i=1}^{n} (x_i - \mu)^2
 \end{align*}
 $$
 <!-- $$\ln \mathcal{L}(\mu,\sigma^2|\mathcal{D}) &= -\frac{n}{2} \ln (2\pi) - \frac{n}{2} \ln \sigma^2 - \frac{1}{2\sigma^2} \sum_{i=1}^{n} (x_i - \mu)^2$$ -->
@@ -190,7 +190,7 @@ Therefore, the maximum likelihood estimates of the parameters \(\mu\) and \(\sig
 </p>
 {{</ math.inline >}}
 
-<!-- $$\hat{\mu}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i$$ -->
+$$\hat{\mu}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
 {{< math.inline >}}
 <p align="center">
 \(\hat{\mu}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i\)
@@ -200,7 +200,7 @@ Therefore, the maximum likelihood estimates of the parameters \(\mu\) and \(\sig
     \hat{\mu}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i
 ``` -->
 
-<!-- $$\hat{\sigma}^2_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} (x_i - \hat{\mu}_{\text{MLE}})^2$$ -->
+$$\hat{\sigma}^2_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} (x_i - \hat{\mu}_{\text{MLE}})^2$$
 {{< math.inline >}}
 <p align="center">
 \(\hat{\sigma}^2_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} (x_i - \hat{\mu}_{\text{MLE}})^2\)
