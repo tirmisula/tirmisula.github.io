@@ -51,7 +51,6 @@ A simple NN from scratch.
 Use `footer` or `cite` element.
 
 ## Reference
-> Neural Network.
 >
 > — <cite>[^1]</cite>
 

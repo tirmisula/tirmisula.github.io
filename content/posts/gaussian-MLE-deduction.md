@@ -169,7 +169,7 @@ Solving for \(\mu\), we get:
 </p>
 {{</ math.inline >}}
 
-$$\hat{\mu}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
+$$\hat{\mu}^1_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
 
 This is the sample mean of the data, which is an unbiased estimator of the population mean.
 
@@ -197,7 +197,7 @@ Therefore, the maximum likelihood estimates of the parameters \(\mu\) and \(\sig
 </p>
 {{</ math.inline >}}
 
-$$\hat{\mu}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
+$$\hat{\mu}^1_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
 {{< math.inline >}}
 <p align="center">
 \(\hat{\mu}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i\)
