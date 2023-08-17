@@ -42,7 +42,7 @@ Gaussian distribution using Markdown with KaTeX:
     }
 </style>
 
-## Step 1: Define the Gaussian Distribution                                                                 
+<!-- ## Step 1: Define the Gaussian Distribution                                                                 
 
 We start by defining the Gaussian distribution, also known as the Normal distribution. The probability   
 density function (PDF) of a Gaussian distribution is given by:                                           
@@ -98,9 +98,9 @@ Interpret the estimated values of \((\mu)\) and \((\sigma^2)\) in the context of
 represent the maximum likelihood estimates for the mean and variance of the Gaussian distribution based  
 on the observed data.                                                                                    
 
-Note: This is a detailed step-by-step explanation of the MLE deduction for a Gaussian distribution. The actual derivation involves more mathematical steps and calculations.        
+Note: This is a detailed step-by-step explanation of the MLE deduction for a Gaussian distribution. The actual derivation involves more mathematical steps and calculations.         -->
 
-## Step 7: Sage
+## Procedure
 
 {{< math.inline >}}
 <p>
