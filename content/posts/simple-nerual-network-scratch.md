@@ -180,6 +180,35 @@ Tables aren't part of the core Markdown spec, but Hugo supports them out-of-the-
   print("Predictions:", predictions)
 ```
 
+## Result
+
+```
+    Epoch 0: Loss = 0.3060656066293951
+    Epoch 100: Loss = 0.25066249100807964
+    Epoch 200: Loss = 0.24982331330597957
+    Epoch 300: Loss = 0.2491844461131309
+    Epoch 400: Loss = 0.24863531210577455
+    Epoch 500: Loss = 0.24809611351618605
+    Epoch 600: Loss = 0.24750393501568144
+    Epoch 700: Loss = 0.24680378145400256
+    ...
+    Epoch 3500: Loss = 0.010558501466111108
+    Epoch 3600: Loss = 0.009182106584112025
+    Epoch 3700: Loss = 0.008081112131682146
+    Epoch 3800: Loss = 0.0071858110296151925
+    Epoch 3900: Loss = 0.00644709568248813
+    Epoch 4000: Loss = 0.005829657321950228
+    Epoch 4100: Loss = 0.00530762392432208
+    ...
+    Epoch 9600: Loss = 0.0007075685061388181
+    Epoch 9700: Loss = 0.0006952538273707388
+    Epoch 9800: Loss = 0.0006833331361541319
+    Epoch 9900: Loss = 0.0006717883777302878
+    Predictions: [[0.02846879]
+    [0.97986793]
+    [0.97039998]
+    [0.02346224]]
+```
 <!-- #### Code block with Hugo's internal highlight shortcode
 
 {{< highlight html >}}
