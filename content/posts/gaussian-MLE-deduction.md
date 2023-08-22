@@ -242,13 +242,13 @@ $$
 To prove that the MLE of (\sigma^2) is biased, we need to compute the expected value of (\sigma^2):
 $$
 \begin{align*}
-E(\hat{\sigma}^2_{\text{MLE}}) &= E\left(\frac{1}{n} \sum_{i=1}^n (x_i - \hat{\mu}_{\text{MLE}})^2\right) \\\
-&= E\left(\frac{1}{n} \sum_{i=1}^n (x_i^2-2x_i\hat{\mu}_{\text{MLE}}+\hat{\mu}_{\text{MLE}}^2)\right) \\\
-&= E\left(\frac{1}{n} \sum_{i=1}^n x_i^2 - \frac{1}{n} \sum_{i=1}^n 2x_i\hat{\mu}_{\text{MLE}} + \frac{1}{n} \sum_{i=1}^n \hat{\mu}_{\text{MLE}}^2 \right) \\\
-&= E\left(\frac{1}{n} \sum_{i=1}^n x_i^2 - 2\hat{\mu}_{\text{MLE}}\frac{1}{n} \sum_{i=1}^n x_i + \hat{\mu}_{\text{MLE}}^2 \right) \\\
+E(\hat{\mu}^1_{\text{MLE}}) &= E\left(\frac{1}{n} \sum_{i=1}^n (x_i - \hat{\mu}^1_{\text{MLE}})^2\right) \\\
+&= E\left(\frac{1}{n} \sum_{i=1}^n (x_i^2-2x_i\hat{\mu}^1_{\text{MLE}}+\hat{\mu}_{\text{MLE}}^2)\right) \\\
+&= E\left(\frac{1}{n} \sum_{i=1}^n x_i^2 - \frac{1}{n} \sum_{i=1}^n 2x_i\hat{\mu}^1_{\text{MLE}} + \frac{1}{n} \sum_{i=1}^n \hat{\mu}_{\text{MLE}}^2 \right) \\\
+&= E\left(\frac{1}{n} \sum_{i=1}^n x_i^2 - 2\hat{\mu}^1_{\text{MLE}}\frac{1}{n} \sum_{i=1}^n x_i + \hat{\mu}_{\text{MLE}}^2 \right) \\\
 &= E\left(\frac{1}{n} \sum_{i=1}^n x_i^2 - 2\hat{\mu}_{\text{MLE}}^2 + \hat{\mu}_{\text{MLE}}^2 \right) \\\
 &= E\left(\frac{1}{n} \sum_{i=1}^n x_i^2 - \hat{\mu}_{\text{MLE}}^2 \right) \\\
-&= E\left((\frac{1}{n} \sum_{i=1}^n x_i^2 - \mu^2) - (\hat{\mu}_{\text{MLE}}-\mu^2) \right) \\\
+&= E\left((\frac{1}{n} \sum_{i=1}^n x_i^2 - \mu^2) - (\hat{\mu}_{\text{MLE}}^2-\mu^2) \right) \\\
 \end{align*}
 $$
 
