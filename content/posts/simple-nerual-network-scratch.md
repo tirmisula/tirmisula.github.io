@@ -1,5 +1,5 @@
 ---
-author: "Xuan Wang"
+author: "X. Wang"
 title: " Machine Learning Guide"
 date: "2023-07-13"
 description: "A simple neural network from scratch."
