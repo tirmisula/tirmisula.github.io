@@ -1,5 +1,5 @@
 ---
-author: "Xuan Wang"
+author: "X. Wang"
 title: " Gaussian MLE Guide"
 date: "2023-07-13"
 description: "A simple deduction of Gaussian MLE."
@@ -13,9 +13,7 @@ ShowToc: true
 TocOpen: true
 ---
 
-To simplify the calculations, we take the logarithm of the likelihood function. This is a common practice
-Certainly! Here's a detailed step-by-step explanation of the Maximum Likelihood Estimation (MLE) for a   
-Gaussian distribution using Markdown with KaTeX:                                                         
+To simplify the calculations, we take the logarithm of the likelihood function:                                                         
 
 {{< math.inline >}}
 {{ if or .Page.Params.math .Site.Params.math }}
@@ -213,3 +211,62 @@ $$\hat{\sigma}^2_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} (x_i - \hat{\mu}_{\te
 \(\hat{\sigma}^2_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} (x_i - \hat{\mu}_{\text{MLE}})^2\)
 </p>
 {{</ math.inline >}}
+
+{{< math.inline >}}
+<p>
+To prove that the MLE of \(\hat{\mu}_{\text{MLE}}\) is unbiased, we need to compute the expected value of \(\hat{\mu}_{\text{MLE}}\):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+E(\hat{\mu}_{\text{MLE}}) &= E\left(\frac{1}{n} \sum_{i=1}^n x_i\right) \\\
+&= \frac{1}{n} E\left(\sum_{i=1}^n x_i\right)
+\end{align*}
+$$
+{{< math.inline >}}
+<p>
+Since the observations \(x_1, x_2, \ldots, x_n\) are independent and identically distributed (i.i.d.), their expectations are equal:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+E(\hat{\mu}_{\text{MLE}}) &= \frac{1}{n} \sum_{i=1}^n E(x_i) \\\
+&= \frac{1}{n} \sum_{i=1}^n \mu \\\
+&= \frac{1}{n} (n\mu) \\\
+&= \mu
+\end{align*}
+$$
+
+To prove that the MLE of (\sigma^2) is biased, we need to compute the expected value of (\sigma^2):
+$$
+\begin{align*}
+E(\hat{\sigma}^2_{\text{MLE}}) &= E\left(\frac{1}{n} \sum_{i=1}^n (x_i - \hat{\mu}_{\text{MLE}})^2\right) \\\
+&= E\left(\frac{1}{n} \sum_{i=1}^n (x_i^2-2x_i\hat{\mu}_{\text{MLE}}+\hat{\mu}_{\text{MLE}}^2)\right) \\\
+&= E\left(\frac{1}{n} \sum_{i=1}^n x_i^2 - \frac{1}{n} \sum_{i=1}^n 2x_i\hat{\mu}_{\text{MLE}} + \frac{1}{n} \sum_{i=1}^n \hat{\mu}_{\text{MLE}}^2 \right) \\\
+&= E\left(\frac{1}{n} \sum_{i=1}^n x_i^2 - 2\hat{\mu}_{\text{MLE}}\frac{1}{n} \sum_{i=1}^n x_i + \hat{\mu}_{\text{MLE}}^2 \right) \\\
+&= E\left(\frac{1}{n} \sum_{i=1}^n x_i^2 - 2\hat{\mu}_{\text{MLE}}^2 + \hat{\mu}_{\text{MLE}}^2 \right) \\\
+&= E\left(\frac{1}{n} \sum_{i=1}^n x_i^2 - \hat{\mu}_{\text{MLE}}^2 \right) \\\
+&= E\left((\frac{1}{n} \sum_{i=1}^n x_i^2 - \mu^2) - (\hat{\mu}_{\text{MLE}}-\mu^2) \right) \\\
+\end{align*}
+$$
+
+Since each observation ((x_i)) is drawn from a Gaussian distribution with mean (\mu) and variance (\sigma^2), we have:
+$$
+\text{Var}(x_i) = \sigma^2
+$$
+
+$$
+E(x_i) = \mu
+$$
+
+Substituting these values, we get:
+$$
+E(\sigma^2) = \frac{1}{n} \sum_{i=1}^n (\sigma^2 + [\mu - \mu]^2)
+$$
+
+Simplifying, we have:
+$$
+E(\sigma^2) = \frac{1}{n} \sum_{i=1}^n \sigma^2 = \sigma^2
+$$
