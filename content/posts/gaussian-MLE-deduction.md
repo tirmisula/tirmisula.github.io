@@ -220,7 +220,7 @@ To prove that the MLE of \(\hat{\mu}_{\text{MLE}}\) is unbiased, we need to comp
 
 $$
 \begin{align*}
-E(\hat{\mu}_{\text{MLE}}) &= E\left(\frac{1}{n} \sum_{i=1}^n x_i\right) \\\
+E(\hat{\mu}^1_{\text{MLE}}) &= E\left(\frac{1}{n} \sum_{i=1}^n x_i\right) \\\
 &= \frac{1}{n} E\left(\sum_{i=1}^n x_i\right)
 \end{align*}
 $$
@@ -232,7 +232,7 @@ Since the observations \(x_1, x_2, \ldots, x_n\) are independent and identically
 
 $$
 \begin{align*}
-E(\hat{\mu}_{\text{MLE}}) &= \frac{1}{n} \sum_{i=1}^n E(x_i) \\\
+E(\hat{\mu}^1_{\text{MLE}}) &= \frac{1}{n} \sum_{i=1}^n E(x_i) \\\
 &= \frac{1}{n} \sum_{i=1}^n \mu \\\
 &= \frac{1}{n} (n\mu) \\\
 &= \mu
