@@ -254,24 +254,44 @@ E(\hat{\sigma}^2_{\text{MLE}}) &= E\left(\frac{1}{n} \sum_{i=1}^n (x_i - \hat{\m
 &= E\left(\frac{1}{n} \sum_{i=1}^n x_i^2 - 2\hat{\mu}^2_{\text{MLE}} + \hat{\mu}^2_{\text{MLE}} \right) \\\
 &= E\left(\frac{1}{n} \sum_{i=1}^n x_i^2 - \hat{\mu}^2_{\text{MLE}} \right) \\\
 &= E\left((\frac{1}{n} \sum_{i=1}^n x_i^2 - \mu^2) - (\hat{\mu}^2_{\text{MLE}}-\mu^2) \right) \\\
+&= E\left((\frac{1}{n} \sum_{i=1}^n x_i^2 - \frac{1}{n} \sum_{i=1}^n \mu^2) - (\hat{\mu}^2_{\text{MLE}}-\mu^2) \right) \\\
+&= E\left(\frac{1}{n}\sum_{i=1}^n \left(x_i^2 - \mu^2\right) - \left(\hat{\mu}^2_{\text{MLE}}-\mu^2 \right)\right)\\\
+&= E\left(\frac{1}{n}\sum_{i=1}^n \left(x_i^2 - \mu^2\right) \right) - E\left(\hat{\mu}^2_{\text{MLE}}-\mu^2 \right)\\\
+&= \frac{1}{n}E\left(\sum_{i=1}^n \left(x_i^2 - \mu^2\right) \right) - E\left(\hat{\mu}^2_{\text{MLE}}-\mu^2 \right)\\\
+&= \frac{1}{n}\sum_{i=1}^n E\left( x_i^2 - \mu^2 \right) - E\left(\hat{\mu}^2_{\text{MLE}}-\mu^2 \right)\\\
+&= \frac{1}{n}\sum_{i=1}^n \left(E\left( x_i^2 \right)-E\left( \mu^2 \right)\right) - E\left(\hat{\mu}^2_{\text{MLE}}-\mu^2 \right)\\\
 \end{align*}
 $$
 
-Since each observation ((x_i)) is drawn from a Gaussian distribution with mean (\mu) and variance (\sigma^2), we have:
-$$
-\text{Var}(x_i) = \sigma^2
-$$
+{{< math.inline >}}
+<p>
+Since \(\mu=E(x_i)\) and \(\sigma^2=Var(X) = E(X^2)-E(X)^2\) , we have:
+</p>
+{{</ math.inline >}}
 
 $$
-E(x_i) = \mu
+\begin{align*}
+E(\hat{\sigma}^2_{\text{MLE}}) &= \frac{1}{n}\sum_{i=1}^n \left(E\left( x_i^2 \right)-E\left( x_i \right)^2\right) - E\left(\hat{\mu}^2_{\text{MLE}}-\mu^2 \right)\\\
+&= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) - E\left(\hat{\mu}^2_{\text{MLE}}-\mu^2 \right)\\\
+&= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) - E\left(\hat{\mu}^2_{\text{MLE}}-\mu^2 \right)\\\
+\end{align*}
 $$
 
-Substituting these values, we get:
-$$
-E(\sigma^2) = \frac{1}{n} \sum_{i=1}^n (\sigma^2 + [\mu - \mu]^2)
-$$
+{{< math.inline >}}
+<p>
+Recall that we have unbiased parameter \(E(\hat{\mu}^1_{\text{MLE}}) = \mu\) so we can get:
+</p>
+{{</ math.inline >}}
 
-Simplifying, we have:
 $$
-E(\sigma^2) = \frac{1}{n} \sum_{i=1}^n \sigma^2 = \sigma^2
+\begin{align*}
+E(\hat{\sigma}^2_{\text{MLE}}) &= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) - E\left(\hat{\mu}^2_{\text{MLE}}-E(\hat{\mu}^1_{\text{MLE}})^2 \right)\\\
+&= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) - \left(E\left(\hat{\mu}^2_{\text{MLE}}\right) -E(\hat{\mu}^1_{\text{MLE}})^2 \right)\\\
+&= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) - Var(\hat{\mu}^1_{\text{MLE}})\\\
+&= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) - Var(\frac{1}{n} \sum_{i=1}^{n} x_i)\\\
+&= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) - \frac{1}{n^2}\sum_{i=1}^{n}Var(x_i)\\\
+&= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) - \frac{1}{n^2}\sum_{i=1}^{n}\sigma^2\\\
+&= \frac{1}{n}n\sigma^2 - \frac{1}{n^2}n\sigma^2\\\
+&= \frac{n-1}{n}\sigma^2\\\
+\end{align*}
 $$
