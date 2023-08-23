@@ -98,7 +98,7 @@ on the observed data.
 
 Note: This is a detailed step-by-step explanation of the MLE deduction for a Gaussian distribution. The actual derivation involves more mathematical steps and calculations.         -->
 
-## Procedure
+## Procedure <cite>[^1]</cite>
 
 {{< math.inline >}}
 <p>
@@ -295,3 +295,7 @@ E(\hat{\sigma}^2_{\text{MLE}}) &= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) 
 &= \frac{n-1}{n}\sigma^2\\\
 \end{align*}
 $$
+
+## Reference
+
+[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=4).
