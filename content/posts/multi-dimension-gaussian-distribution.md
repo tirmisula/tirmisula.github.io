@@ -193,6 +193,11 @@ $$
 \end{align*}
 $$
 
+{{< math.inline >}}
+<p>
+\(\sum_{i=1}^p \frac{{y_i}^2}{\lambda_{i}} = c\) is a p-D ellipse equation representing a p-D ellipse whose centroid is \(\mu_1, \mu_2, ..., \mu_p\), 
+</p>
+{{</ math.inline >}}
 
 
 ## Reference
