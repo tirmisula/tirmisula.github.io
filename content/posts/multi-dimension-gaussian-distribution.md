@@ -195,7 +195,7 @@ $$
 
 {{< math.inline >}}
 <p>
-\(\sum_{i=1}^p \frac{{y_i}^2}{\lambda_{i}} = c\) is a p-D ellipse equation 
+a1
 </p>
 {{</ math.inline >}}
 
