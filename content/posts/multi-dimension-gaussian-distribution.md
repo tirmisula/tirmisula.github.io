@@ -53,7 +53,7 @@ $$p(x_i|\mu,\sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x_i-\mu)
 
 {{< math.inline >}}
 <p>
-When it comes to N-D Gaussian distribution, we have:
+Given a dataset \(\mathcal{D} = \{x_1, x_2, ..., x_n\}\), where each data point \(x_i\) is drawn from a N-D Gaussian distribution with unknown mean \(\mu\) and variance \(\Sigma\).
 </p>
 {{</ math.inline >}}
 
@@ -67,25 +67,25 @@ If variable \(x\) has \(p\) dimensions, we have:
 
 $$
 \begin{cases}
-x \in \mathbb{R}^p\\\
 x = \begin{bmatrix}
     x_{1} \\\
     x_{2} \\\
     \vdots \\\
     x_{p}
 \end{bmatrix},
+x \in \mathbb{R}^p\\\
 \mu = \begin{bmatrix}
     \mu_{1} \\\
     \mu_{2} \\\
     \vdots \\\
     \mu_{p}
-\end{bmatrix},
+\end{bmatrix}\\\
 \Sigma =\begin{bmatrix}
     \sigma_{11} & \sigma_{12} & \cdots & \sigma_{1p} \\\
     \sigma_{21} & \sigma_{22} & \cdots & \sigma_{2p} \\\
     \vdots & \vdots & \ddots & \vdots \\\
     \sigma_{p1} & \sigma_{p2} & \cdots & \sigma_{pp}
-\end{bmatrix}
+\end{bmatrix}, & \Sigma\text{ is semi-positive definite}
 \end{cases}
 $$
 
