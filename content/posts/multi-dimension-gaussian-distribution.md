@@ -73,6 +73,12 @@ x = \begin{bmatrix}
     x_{2} \\\
     \vdots \\\
     x_{p}
+\end{bmatrix},
+\mu = \begin{bmatrix}
+    \mu_{1} \\\
+    \mu_{2} \\\
+    \vdots \\\
+    \mu_{p}
 \end{bmatrix}
 \end{cases}
 $$
@@ -85,9 +91,7 @@ The likelihood function for the entire dataset \(\mathcal{D}\) is the product of
 
 $$\mathcal{L}(\mu,\sigma^2|\mathcal{D}) = \prod_{i=1}^{n} p(x_i|\mu,\sigma^2)$$
 
-$$
 
-$$
 
 {{< math.inline >}}
 <p>
