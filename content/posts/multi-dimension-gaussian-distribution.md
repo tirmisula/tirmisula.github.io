@@ -57,7 +57,7 @@ Given a dataset \(\mathcal{D} = \{x_1, x_2, ..., x_n\}\), where each data point 
 </p>
 {{</ math.inline >}}
 
-$$p(x_i|\mu,\Sigma) = \frac{1}{(2\pi)^\frac{p}{2} |\Sigma|^\frac{1}{2}} \exp\left( -\frac{1}{2}(x_i-\mu) \Sigma^{-1} (x_i-\mu)^T \right)$$
+$$p(x_i|\mu,\Sigma) = \frac{1}{(2\pi)^\frac{p}{2} |\Sigma|^\frac{1}{2}} \exp\left( -\frac{1}{2}(x_i-\mu)^T \Sigma^{-1} (x_i-\mu) \right)$$
 
 {{< math.inline >}}
 <p>
@@ -89,193 +89,116 @@ x \in \mathbb{R}^p\\\
 \end{cases}
 $$
 
-{{< math.inline >}}
-<p>
-The likelihood function for the entire dataset \(\mathcal{D}\) is the product of the likelihoods of individual data points:
-</p>
-{{</ math.inline >}}
-
-$$\mathcal{L}(\mu,\sigma^2|\mathcal{D}) = \prod_{i=1}^{n} p(x_i|\mu,\sigma^2)$$
-
-
+## Explainable quadratic form
 
 {{< math.inline >}}
 <p>
-To find the maximum likelihood estimates of \(\mu\) and \(\sigma^2\), we need to maximize the likelihood function \(\mathcal{L}(\mu,\sigma^2|\mathcal{D})\) with respect to these parameters. Taking the logarithm of the likelihood function, we get:
-</p>
-{{</ math.inline >}}
-
-<!-- {{< math.inline >}}
-<p align="center">
-\(\begin{align*}
-\ln \mathcal{L}(\mu,\sigma^2|\mathcal{D}) &= \sum_{i=1}^{n} (\ln p(x_i|\mu,\sigma^2)) \\
-a &= \sum_{i=1}^{n} (\ln \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)) \\
-a &= \sum_{i=1}^{n} (\ln \frac{1}{\sqrt{2\pi\sigma^2}} + \ln \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)) \\
-a &= n\ln \frac{1}{\sqrt{2\pi\sigma^2}}  + \sum_{i=1}^{n} \ln \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right) \\
-a &= n\ln \frac{1}{\sqrt{2\pi\sigma^2}}  + \sum_{i=1}^{n} \left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right) \\
-a &= -\frac{n}{2} \ln (2\pi) - \frac{n}{2} \ln \sigma^2 - \frac{1}{2\sigma^2} \sum_{i=1}^{n} (x_i - \mu)^2
-\end{align*}\)
-</p>
-{{</ math.inline >}} -->
-
-$$
-\begin{align*}
-\ln \mathcal{L}(\mu,\sigma^2|\mathcal{D}) &= \sum_{i=1}^{n} \left(\ln p\left(x_i|\mu,\sigma^2\right)\right) \\\
-&= \sum_{i=1}^{n} (\ln \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)) \\\
-&= \sum_{i=1}^{n} (\ln \frac{1}{\sqrt{2\pi\sigma^2}} + \ln \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)) \\\
-&= n\ln \frac{1}{\sqrt{2\pi\sigma^2}}  + \sum_{i=1}^{n} \ln \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right) \\\
-&= n\ln \frac{1}{\sqrt{2\pi\sigma^2}}  + \sum_{i=1}^{n} \left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right) \\\
-&= -\frac{n}{2} \ln (2\pi) - \frac{n}{2} \ln \sigma^2 - \frac{1}{2\sigma^2} \sum_{i=1}^{n} (x_i - \mu)^2
-\end{align*}
-$$
-<!-- $$\ln \mathcal{L}(\mu,\sigma^2|\mathcal{D}) &= -\frac{n}{2} \ln (2\pi) - \frac{n}{2} \ln \sigma^2 - \frac{1}{2\sigma^2} \sum_{i=1}^{n} (x_i - \mu)^2$$ -->
-
-{{< math.inline >}}
-<p>
-To find the maximum likelihood estimates, we differentiate the log-likelihood function with respect to the parameters \(\mu\) and \(\sigma^2\), set the derivatives equal to zero, and solve for the parameters. 
-</p>
-<p>
-First, we differentiate with respect to \(\mu\):
-</p>
-{{</ math.inline >}}
-
-$$\frac{\partial}{\partial\mu} \ln \mathcal{L}(\mu,\sigma^2|\mathcal{D}) = \frac{1}{\sigma^2} \sum_{i=1}^{n} (x_i - \mu) = 0$$
-
-{{< math.inline >}}
-<p>
-Solving for \(\mu\), we get:
-</p>
-{{</ math.inline >}}
-
-$$\hat{\mu}^1_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
-
-This is the sample mean of the data, which is an unbiased estimator of the population mean.
-
-{{< math.inline >}}
-<p>
-Next, we differentiate with respect to \(\sigma^2\):
-</p>
-{{</ math.inline >}}
-
-$$\frac{\partial}{\partial\sigma^2} \ln \mathcal{L}(\mu,\sigma^2|\mathcal{D}) = -\frac{n}{2\sigma^2} + \frac{1}{2(\sigma^2)^2} \sum_{i=1}^{n} (x_i - \mu)^2 = 0$$
-
-{{< math.inline >}}
-<p>
-Solving for \(\sigma^2\), we get:
-</p>
-{{</ math.inline >}}
-
-$$\hat{\sigma}^2_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} (x_i - \hat{\mu}_{\text{MLE}})^2$$
-
-This is the sample variance of the data, which is an unbiased estimator of the population variance.
-
-{{< math.inline >}}
-<p>
-Therefore, the maximum likelihood estimates of the parameters \(\mu\) and \(\sigma^2\) are given by the sample mean and sample variance of the data, respectively:
-</p>
-{{</ math.inline >}}
-
-$$\hat{\mu}^1_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i$$
-{{< math.inline >}}
-<p align="center">
-\(\hat{\mu}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i\)
-</p>
-{{</ math.inline >}}
-<!-- ```math
-    \hat{\mu}_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} x_i
-``` -->
-
-$$\hat{\sigma}^2_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} (x_i - \hat{\mu}_{\text{MLE}})^2$$
-{{< math.inline >}}
-<p align="center">
-\(\hat{\sigma}^2_{\text{MLE}} = \frac{1}{n} \sum_{i=1}^{n} (x_i - \hat{\mu}_{\text{MLE}})^2\)
-</p>
-{{</ math.inline >}}
-
-{{< math.inline >}}
-<p>
-To prove that the MLE of \(\hat{\mu}_{\text{MLE}}\) is unbiased, we need to compute the expected value of \(\hat{\mu}_{\text{MLE}}\):
+\((x-\mu)^T \Sigma^{-1} (x-\mu)\) can be roughly considered as Mahalanobis distance between \(x\) and \(\mu\), when \(\Sigma=I\) it becomes Euclidean distance, prove it in 2-D situation:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-E(\hat{\mu}^1_{\text{MLE}}) &= E\left(\frac{1}{n} \sum_{i=1}^n x_i\right) \\\
-&= \frac{1}{n} E\left(\sum_{i=1}^n x_i\right)
-\end{align*}
-$$
-{{< math.inline >}}
-<p>
-Since the observations \(x_1, x_2, \ldots, x_n\) are independent and identically distributed (i.i.d.), their expectations are equal:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-E(\hat{\mu}^1_{\text{MLE}}) &= \frac{1}{n} \sum_{i=1}^n E(x_i) \\\
-&= \frac{1}{n} \sum_{i=1}^n \mu \\\
-&= \frac{1}{n} (n\mu) \\\
-&= \mu
+(x-\mu)^T \Sigma^{-1} (x-\mu) &= \begin{bmatrix}
+x_1-\mu_1 & x_2-\mu_2
+\end{bmatrix} I^{-1} \begin{bmatrix}
+x_1-\mu_1\\\
+x_2-\mu_2
+\end{bmatrix}\\\
+&= (x_1-\mu_1)^2 + (x_2-\mu_2)^2
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-To prove that the MLE of \(\sigma^2\) is biased, we need to compute the expected value of \(\sigma^2\):
+Since \(\Sigma\) must be symmetric, we can do eigen decomposition on \(\Sigma\) and \(\Sigma^{-1}\):
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-E(\hat{\sigma}^2_{\text{MLE}}) &= E\left(\frac{1}{n} \sum_{i=1}^n (x_i - \hat{\mu}^1_{\text{MLE}})^2\right) \\\
-&= E\left(\frac{1}{n} \sum_{i=1}^n (x_i^2-2x_i\hat{\mu}^1_{\text{MLE}}+\hat{\mu}^2_{\text{MLE}})\right) \\\
-&= E\left(\frac{1}{n} \sum_{i=1}^n x_i^2 - \frac{1}{n} \sum_{i=1}^n 2x_i\hat{\mu}^1_{\text{MLE}} + \frac{1}{n} \sum_{i=1}^n \hat{\mu}^2_{\text{MLE}} \right) \\\
-&= E\left(\frac{1}{n} \sum_{i=1}^n x_i^2 - 2\hat{\mu}^1_{\text{MLE}}\frac{1}{n} \sum_{i=1}^n x_i + \hat{\mu}^2_{\text{MLE}} \right) \\\
-&= E\left(\frac{1}{n} \sum_{i=1}^n x_i^2 - 2\hat{\mu}^2_{\text{MLE}} + \hat{\mu}^2_{\text{MLE}} \right) \\\
-&= E\left(\frac{1}{n} \sum_{i=1}^n x_i^2 - \hat{\mu}^2_{\text{MLE}} \right) \\\
-&= E\left((\frac{1}{n} \sum_{i=1}^n x_i^2 - \mu^2) - (\hat{\mu}^2_{\text{MLE}}-\mu^2) \right) \\\
-&= E\left((\frac{1}{n} \sum_{i=1}^n x_i^2 - \frac{1}{n} \sum_{i=1}^n \mu^2) - (\hat{\mu}^2_{\text{MLE}}-\mu^2) \right) \\\
-&= E\left(\frac{1}{n}\sum_{i=1}^n \left(x_i^2 - \mu^2\right) - \left(\hat{\mu}^2_{\text{MLE}}-\mu^2 \right)\right)\\\
-&= E\left(\frac{1}{n}\sum_{i=1}^n \left(x_i^2 - \mu^2\right) \right) - E\left(\hat{\mu}^2_{\text{MLE}}-\mu^2 \right)\\\
-&= \frac{1}{n}E\left(\sum_{i=1}^n \left(x_i^2 - \mu^2\right) \right) - E\left(\hat{\mu}^2_{\text{MLE}}-\mu^2 \right)\\\
-&= \frac{1}{n}\sum_{i=1}^n E\left( x_i^2 - \mu^2 \right) - E\left(\hat{\mu}^2_{\text{MLE}}-\mu^2 \right)\\\
-&= \frac{1}{n}\sum_{i=1}^n \left(E\left( x_i^2 \right)-E\left( \mu^2 \right)\right) - E\left(\hat{\mu}^2_{\text{MLE}}-\mu^2 \right)\\\
+\Sigma &= U\Lambda U^T & \text{, }UU^T=U^TU=I\\\
+\Sigma^{-1} &= (U\Lambda U^T)^{-1}\\\
+&= (U^T)^{-1}\Lambda^{-1}U^{-1}\\\
+&= U\Lambda^{-1}U^T\\\
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-Since \(\mu=E(x_i)\) and \(\sigma^2=Var(X) = E(X^2)-E(X)^2\) , we have:
+Let \(U=\begin{bmatrix}
+u_1 & u_2 & \cdots & u_p
+\end{bmatrix}_{p*p}\), \(u_i\) is the eigen vector, we get:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-E(\hat{\sigma}^2_{\text{MLE}}) &= \frac{1}{n}\sum_{i=1}^n \left(E\left( x_i^2 \right)-E\left( x_i \right)^2\right) - E\left(\hat{\mu}^2_{\text{MLE}}-\mu^2 \right)\\\
-&= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) - E\left(\hat{\mu}^2_{\text{MLE}}-\mu^2 \right)\\\
-&= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) - E\left(\hat{\mu}^2_{\text{MLE}}-\mu^2 \right)\\\
+\Sigma^{-1} &= \begin{bmatrix}
+u_1 & u_2 & \cdots & u_p
+\end{bmatrix}
+\begin{bmatrix}
+    \frac{1}{\lambda_{1}} & 0 & \cdots & 0 \\\
+    0 & \frac{1}{\lambda_{2}} & \cdots & 0 \\\
+    \vdots & \vdots & \ddots & \vdots \\\
+    0 & 0 & \cdots & \frac{1}{\lambda_{p}}
+\end{bmatrix}
+\begin{bmatrix}
+{u_1}^T\\\
+{u_2}^T\\\
+\vdots\\\
+{u_p}^T
+\end{bmatrix} \\\
+&=\sum_{i=1}^p u_i\frac{1}{\lambda_{i}}{u_i}^T
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-Recall that we have unbiased parameter \(E(\hat{\mu}^1_{\text{MLE}}) = \mu\) so we can get:
+Put it back to the formula, we can get:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-E(\hat{\sigma}^2_{\text{MLE}}) &= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) - E\left(\hat{\mu}^2_{\text{MLE}}-E(\hat{\mu}^1_{\text{MLE}})^2 \right)\\\
-&= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) - \left(E\left(\hat{\mu}^2_{\text{MLE}}\right) -E(\hat{\mu}^1_{\text{MLE}})^2 \right)\\\
-&= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) - Var(\hat{\mu}^1_{\text{MLE}})\\\
-&= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) - Var(\frac{1}{n} \sum_{i=1}^{n} x_i)\\\
-&= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) - \frac{1}{n^2}\sum_{i=1}^{n}Var(x_i)\\\
-&= \frac{1}{n}\sum_{i=1}^n \left(\sigma^2\right) - \frac{1}{n^2}\sum_{i=1}^{n}\sigma^2\\\
-&= \frac{1}{n}n\sigma^2 - \frac{1}{n^2}n\sigma^2\\\
-&= \frac{n-1}{n}\sigma^2\\\
+(x-\mu)^T \Sigma^{-1} (x-\mu) &= (x-\mu)^T \sum_{i=1}^p u_i\frac{1}{\lambda_{i}}{u_i}^T (x-\mu)\\\
+&= \sum_{i=1}^p (x-\mu)^T u_i\frac{1}{\lambda_{i}}{u_i}^T (x-\mu)
 \end{align*}
 $$
+
+{{< math.inline >}}
+<p>
+Let \(y_i = (x-\mu)^T u_i\), \(y_i\) is a scalar:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+(x-\mu)^T \Sigma^{-1} (x-\mu) &= \sum_{i=1}^p y_i \frac{1}{\lambda_{i}} {y_i}^T\\\
+&= \sum_{i=1}^p \frac{{y_i}^2}{\lambda_{i}}
+\end{align*}
+$$
+
+## Conclusion
+
+{{< math.inline >}}
+<p>
+If we consider \((x-\mu)^T \Sigma^{-1} (x-\mu)\) equals a constant, which is a fixed Mahalanobis distance:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+(x-\mu)^T \Sigma^{-1} (x-\mu) &= \sum_{i=1}^p \frac{{y_i}^2}{\lambda_{i}} = c
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+\(\sum_{i=1}^p \frac{{y_i}^2}{\lambda_{i}} = c\) is a p-D ellipse equation representing a p-D ellipse whose centroid is \(\mu_1, \mu_2, ..., \mu_p\), length of major axis is \(\lambda_1, \lambda_2, ..., \lambda_p\), rotation direction is \(u_1, u_2, ..., u_p\)
+</p>
+{{</ math.inline >}}
 
 ## Reference
 
-[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=4).
+[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=5).
