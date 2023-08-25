@@ -168,7 +168,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Let \(y_i = (x-\mu)^T u_i\), \(y_i\) is a scalar:
+Let \(y_i = (x-\mu)^T u_i\), \(y_i\) is a scalar, we can get:
 </p>
 {{</ math.inline >}}
 
@@ -183,7 +183,7 @@ $$
 
 {{< math.inline >}}
 <p>
-If we consider \((x-\mu)^T \Sigma^{-1} (x-\mu)\) equals a constant, which is a fixed Mahalanobis distance:
+Now consider \((x-\mu)^T \Sigma^{-1} (x-\mu)\) equals to a constant,  in other words a fixed Mahalanobis distance:
 </p>
 {{</ math.inline >}}
 
@@ -195,7 +195,7 @@ $$
 
 {{< math.inline >}}
 <p>
-representing a p-D ellipse whose centroid is \(\{\mu_1, \mu_2, ..., \mu_p\}\), length of major axis is \(\{\lambda_1, \lambda_2, ..., \lambda_p\}\), rotation direction is \(\{u_1, u_2, ..., u_p\}\)
+Equation \(\sum_{i=1}^p \frac{{y_i}^2}{\lambda_{i}}=c\) represented a p-dimensional ellipse with a centroid of \(\{\mu_1, \mu_2, ..., \mu_p\}\), a major axis's length of \(\{\lambda_1, \lambda_2, ..., \lambda_p\}\) \(\lambda_i\) related to eigen value of \Sigma, a rotation direction of \(\{u_1, u_2, ..., u_p\}\), \(u_i\) related to eigen vector of \(\Sigma\).
 </p>
 {{</ math.inline >}}
 
