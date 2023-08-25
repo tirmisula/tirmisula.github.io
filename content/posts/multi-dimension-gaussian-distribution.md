@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
 title: " Introduction to Multidimension Gaussian Distribution"
-date: "2023-07-13"
+date: "2023-08-21"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -61,31 +61,31 @@ $$p(x_i|\mu,\Sigma) = \frac{1}{(2\pi)^\frac{p}{2} |\Sigma|^\frac{1}{2}} \exp\lef
 
 {{< math.inline >}}
 <p>
-If variable \(x\) has p dimensions, we have:
+If variable \(x\) has \(p\) dimensions, we have:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{cases}
-x \in \mathbb{R}^p\\
+x \in \mathbb{R}^p\\\
 
 x = \begin{bmatrix}
-    x_{1} \\
-    x_{2} \\
-    \vdots \\
-    x_{p} \\
+    x_{1} \\\
+    x_{2} \\\
+    \vdots \\\
+    x_{p}
 \end{bmatrix},
 \mu = \begin{bmatrix}
-    \mu_{1} \\
-    \mu_{2} \\
-    \vdots \\
-    \mu_{p} \\
+    \mu_{1} \\\
+    \mu_{2} \\\
+    \vdots \\\
+    \mu_{p}
 \end{bmatrix},
 \Sigma =\begin{bmatrix}
-    \sigma_{11} & \sigma_{12} & \cdots & \sigma_{1p} \\
-    \sigma_{21} & \sigma_{22} & \cdots & \sigma_{2p} \\
-    \vdots & \vdots & \ddots & \vdots \\
-    \sigma_{p1} & \sigma_{p2} & \cdots & \sigma_{pp} \\
+    \sigma_{11} & \sigma_{12} & \cdots & \sigma_{1p} \\\
+    \sigma_{21} & \sigma_{22} & \cdots & \sigma_{2p} \\\
+    \vdots & \vdots & \ddots & \vdots \\\
+    \sigma_{p1} & \sigma_{p2} & \cdots & \sigma_{pp}
 \end{bmatrix}
 \end{cases}
 $$
