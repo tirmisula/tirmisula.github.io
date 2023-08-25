@@ -195,7 +195,7 @@ $$
 
 {{< math.inline >}}
 <p>
-a1
+representing a p-D ellipse whose centroid is \(\{\mu_1, \mu_2, ..., \mu_p\}\), length of major axis is \(\{\lambda_1, \lambda_2, ..., \lambda_p\}\), rotation direction is \(\{u_1, u_2, ..., u_p\}\)
 </p>
 {{</ math.inline >}}
 
