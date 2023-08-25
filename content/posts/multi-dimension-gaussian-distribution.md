@@ -79,6 +79,12 @@ x = \begin{bmatrix}
     \mu_{2} \\\
     \vdots \\\
     \mu_{p}
+\end{bmatrix},
+\Sigma =\begin{bmatrix}
+    \sigma_{11} & \sigma_{12} & \cdots & \sigma_{1p} \\\
+    \sigma_{21} & \sigma_{22} & \cdots & \sigma_{2p} \\\
+    \vdots & \vdots & \ddots & \vdots \\\
+    \sigma_{p1} & \sigma_{p2} & \cdots & \sigma_{pp}
 \end{bmatrix}
 \end{cases}
 $$
