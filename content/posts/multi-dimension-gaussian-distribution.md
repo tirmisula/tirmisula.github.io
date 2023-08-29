@@ -199,7 +199,25 @@ This Equation represented a p-dimensional ellipse with a centroid of \(\{\mu_1, 
 </p>
 {{</ math.inline >}}
 
+## Limitations of Gaussian model[^2]</cite>
+### Parameter size
+$$
+\Sigma_{p\times p} \rightarrow \frac{p(p+1)}{2}=O(p^2)
+$$
+{{< math.inline >}}
+<p>
+\(\Sigma\) matrix has \(O(p^2)\) number of parameters to be estimated which might leads to a slow computation. It can be optimized by transform \(\Sigma\) to a diagnal matrix.
+</p>
+{{</ math.inline >}}
+
+### Oversimplified model
+{{< math.inline >}}
+<p>
+The assumption of a Gaussian mixture model for the dataset \(\mathcal{D} = \{x_1, x_2, ..., x_n\}\) can be considered in cases where a single Gaussian model may not adequately capture the underlying distribution. By incorporating multiple Gaussian components, a Gaussian mixture model offers a more flexible and expressive representation, allowing for the modeling of complex and diverse patterns within the data.
+</p>
+{{</ math.inline >}}
 
 ## Reference
 
 [^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=5).
+[^2]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=6).
