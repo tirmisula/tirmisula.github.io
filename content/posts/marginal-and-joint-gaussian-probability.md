@@ -287,9 +287,6 @@ Before dig into \(p(x_b|x_a)\), let's define a new variable \(x_{b \cdot a}\)
 {{</ math.inline >}}
 
 $$
-\Sigma_{aa}
-$$
-$$
 \begin{align*}
 x_{b \cdot a} &= x_b - \Sigma_{ba} \Sigma_{aa}^{-1} x_a\\\
 &= \underset{
@@ -316,13 +313,13 @@ According to Lemma 1:
 $$
 \begin{align*}
 E[x_{b \cdot a}] &= \begin{bmatrix}
-    -\Sigma_{ba}\Sigma^{-1}_{aa} & 1_n
+    -\Sigma_{ba}\Sigma_{aa}^{-1} & 1_n
 \end{bmatrix}
 \begin{bmatrix}
     \mu_{a}\\\
     \mu_{b}
 \end{bmatrix}\\\
-&= -\Sigma_{ba}\Sigma^{-1}_{aa} \mu_{a} + \mu_{b}
+&= -\Sigma_{ba}\Sigma_{aa}^{-1} \mu_{a} + \mu_{b}
 \end{align*}
 $$
 
