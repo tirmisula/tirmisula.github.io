@@ -156,9 +156,11 @@ Based on **Lemma 1** we can construct \(x_a\) by \(Ax+B\):
 {{</ math.inline >}}
 
 $$
-x_a = \underbrace{\begin{bmatrix}
+x_a = \underbrace{
+    \begin{bmatrix}
     1_m & 0_n
-\end{bmatrix}}_A
+\end{bmatrix}
+}_A
 \underbrace{\begin{bmatrix}
     x_{a}\\\
     x_{b}
