@@ -287,12 +287,15 @@ Before dig into \(p(x_b|x_a)\), let's define a new variable \(x_{b \cdot a}\)
 {{</ math.inline >}}
 
 $$
+\Sigma_{aa}
+$$
+$$
 \begin{align*}
-x_{b \cdot a} &= x_b - \Sigma_{ba}\Sigma^{-1}_{aa}x_a\\\
+x_{b \cdot a} &= x_b - \Sigma_{ba} \Sigma_{aa}^{-1} x_a\\\
 &= \underset{
     \color{red}{A}
 }{\begin{bmatrix}
-    -\Sigma_{ba}\Sigma^{-1}_{aa} & 1_n
+    -\Sigma_{ba} \Sigma_{aa}^{-1} & 1_n
 \end{bmatrix}}
 \underset{
     \color{red}{x}
