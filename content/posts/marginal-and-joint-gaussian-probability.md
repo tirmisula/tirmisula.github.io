@@ -40,7 +40,7 @@ To simplify the calculations, we take the logarithm of the likelihood function:
     }
 </style>
 
-## Prove1
+## Lemma 1
 If we have the following,
 $$
 \begin{cases}
@@ -106,7 +106,7 @@ $$
 
 {{< math.inline >}}
 <p>
-If x is made up of two parts \(x_a\) and \(x_b\), we can rewrite above with block matrix:
+If x is made up of two parts \(x_a\) and \(x_b\), we can rewrite \(x\), \(\mu\), \(\Sigma\) above with block matrix:
 </p>
 {{</ math.inline >}}
 
@@ -143,45 +143,99 @@ $$
 
 {{< math.inline >}}
 <p>
-We want to know the marginal pdf \(p(x_a)\) and \(p(x_b)\), the conditional pdf \(p(x_b|x_a)\) and \(p(x_a|x_b)\)
+We want to obtain the **marginal pdf** \(p(x_a)\) and \(p(x_b)\), the **conditional pdf** \(p(x_b|x_a)\) and \(p(x_a|x_b)\)
 </p>
 {{</ math.inline >}}
 
-## Explainable quadratic form
+## Solve the marginal pdf
 
 {{< math.inline >}}
 <p>
-\((x-\mu)^T \Sigma^{-1} (x-\mu)\) can be roughly considered as Mahalanobis distance between \(x\) and \(\mu\), when \(\Sigma=I\) it becomes Euclidean distance, prove it in 2-D situation:
+Based on **Lemma 1** we can construct \(x_a\) by \(Ax+B\):
 </p>
 {{</ math.inline >}}
 
 $$
+x_a = \underbrace{\begin{bmatrix}
+    1_m & 0_n
+\end{bmatrix}}_{A}
+\underbrace{\begin{bmatrix}
+    x_{a}\\\
+    x_{b}
+\end{bmatrix}}_{x}
+$$
+
+Then we can get:
+$$
 \begin{align*}
-(x-\mu)^T \Sigma^{-1} (x-\mu) &= \begin{bmatrix}
-x_1-\mu_1 & x_2-\mu_2
-\end{bmatrix} I^{-1} \begin{bmatrix}
-x_1-\mu_1\\\
-x_2-\mu_2
+E[x_a] &= E\left[\begin{bmatrix}
+    1_m & 0_n
+\end{bmatrix}\begin{bmatrix}
+    x_{a}\\\
+    x_{b}
+\end{bmatrix}\right]\\\
+&= \begin{bmatrix}
+    1_m & 0_n
+\end{bmatrix}E\left[\begin{bmatrix}
+    x_{a}\\\
+    x_{b}
+\end{bmatrix}\right]\\\
+&= \begin{bmatrix}
+    1_m & 0_n
+\end{bmatrix}\begin{bmatrix}
+    \mu_{a}\\\
+    \mu_{b}
 \end{bmatrix}\\\
-&= (x_1-\mu_1)^2 + (x_2-\mu_2)^2
+&= \mu_{a}
+\end{align*}
+$$
+
+$$
+\begin{align*}
+Var[x_a] &= \begin{bmatrix}
+    1_m & 0_n
+\end{bmatrix}
+\Sigma
+\begin{bmatrix}
+    1_m\\\
+    0_n
+\end{bmatrix}\\\
+&= \begin{bmatrix}
+    1_m & 0_n
+\end{bmatrix}
+\begin{bmatrix}
+    \Sigma_{aa} & \Sigma_{ab}\\\
+    \Sigma_{ba} & \Sigma_{bb}
+\end{bmatrix}
+\begin{bmatrix}
+    1_m\\\
+    0_n
+\end{bmatrix}\\\
+&= \begin{bmatrix}
+    \Sigma_{aa} & \Sigma_{ab}
+\end{bmatrix}
+\begin{bmatrix}
+    1_m\\\
+    0_n
+\end{bmatrix}\\\
+&= \Sigma_{aa}
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-Since \(\Sigma\) must be symmetric, we can do eigen decomposition on \(\Sigma\) and \(\Sigma^{-1}\):
+Deduction of \(x_b\) is similar, so the conclusion is:
 </p>
 {{</ math.inline >}}
 
 $$
-\begin{align*}
-\Sigma &= U\Lambda U^T & \text{, }UU^T=U^TU=I\\\
-\Sigma^{-1} &= (U\Lambda U^T)^{-1}\\\
-&= (U^T)^{-1}\Lambda^{-1}U^{-1}\\\
-&= U\Lambda^{-1}U^T\\\
-\end{align*}
+x_a \sim \mathcal{N}(\mu_{a},\Sigma_{aa})
+$$
+$$
+x_b \sim \mathcal{N}(\mu_{b},\Sigma_{bb})
 $$
 
+## Solve the conditonal pdf
 {{< math.inline >}}
 <p>
 Let \(U=\begin{bmatrix}
