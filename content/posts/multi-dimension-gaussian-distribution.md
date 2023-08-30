@@ -217,9 +217,6 @@ The assumption of a Gaussian mixture model for the dataset \(\mathcal{D} = \{x_1
 </p>
 {{</ math.inline >}}
 
-$$
-\underbrace{a + b + c}_{\text{Description}}
-$$
 ## Reference
 
 [^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=5).

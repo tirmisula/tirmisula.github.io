@@ -156,15 +156,17 @@ Based on **Lemma 1** we can construct \(x_a\) by \(Ax+B\):
 {{</ math.inline >}}
 
 $$
-x_a = \underbrace{
-    \begin{bmatrix}
+x_a = \underset{
+    \color{red}{A}
+}{\begin{bmatrix}
     1_m & 0_n
-\end{bmatrix}
-}^{sss}_{A}
-\underbrace{\begin{bmatrix}
+\end{bmatrix}}
+\underset{
+    \color{red}{x}
+    }{\begin{bmatrix}
     x_{a}\\\
     x_{b}
-\end{bmatrix}}^{x}_{}
+\end{bmatrix}}
 $$
 
 Then we can get:
@@ -330,8 +332,10 @@ The assumption of a Gaussian mixture model for the dataset \(\mathcal{D} = \{x_1
 {{</ math.inline >}}
 
 $$
-\underbrace{a + b + c}^{sss}_{}
+\underset{A}{x}\\\
+\color{red}{E = mc^2}
 $$
+
 ## Reference
 
 [^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=5).
