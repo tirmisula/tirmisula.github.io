@@ -143,7 +143,7 @@ $$
 
 {{< math.inline >}}
 <p>
-We want to obtain the **marginal pdf** \(p(x_a)\) and \(p(x_b)\), the **conditional pdf** \(p(x_b|x_a)\) and \(p(x_a|x_b)\)
+We want to obtain the marginal pdf \(p(x_a)\) and \(p(x_b)\), the conditional pdf \(p(x_b|x_a)\) and \(p(x_a|x_b)\)
 </p>
 {{</ math.inline >}}
 
@@ -158,11 +158,11 @@ Based on **Lemma 1** we can construct \(x_a\) by \(Ax+B\):
 $$
 x_a = \underbrace{\begin{bmatrix}
     1_m & 0_n
-\end{bmatrix}}_{A}
+\end{bmatrix}}_A
 \underbrace{\begin{bmatrix}
     x_{a}\\\
     x_{b}
-\end{bmatrix}}_{x}
+\end{bmatrix}}_x
 $$
 
 Then we can get:
@@ -238,9 +238,7 @@ $$
 ## Solve the conditonal pdf
 {{< math.inline >}}
 <p>
-Let \(U=\begin{bmatrix}
-u_1 & u_2 & \cdots & u_p
-\end{bmatrix}_{p*p}\), \(u_i\) is the eigen vector, we get:
+Before dig into \(p(x_b|x_a)\), let's introduce a new variable \(x_{b \cdot a}\)
 </p>
 {{</ math.inline >}}
 
