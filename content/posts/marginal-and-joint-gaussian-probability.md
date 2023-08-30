@@ -74,6 +74,46 @@ Var[y] &= Var[Ax+B] \\\
 \end{align*}
 $$
 
+## Lemma 2
+If we have the following,
+$$
+\begin{cases}
+x \sim \mathcal{N}(\mu,\Sigma),
+x \in \mathbb{R}^p\\\
+y_1 = A_1 x\\\
+y_2 = A_2 x
+\end{cases}
+$$
+
+Then,
+$$
+y_1 \perp y_2 \iff A_1 \Sigma A_2^T=0
+$$
+
+Prove,
+$$
+\begin{rcases}
+y_1 \sim \mathcal{N}(A_1\mu, A_1 \Sigma A_1^T)\\\
+y_2 \sim \mathcal{N}(A_2\mu, A_2 \Sigma A_2^T)
+\end{rcases}
+\implies \text{Lemma 1}
+$$
+
+$$
+\begin{align*}
+Cov(y_1,y_2) &= E\left[ (y_1 - E[y_1])(y_2 - E[y_2])^T \right]\\\
+&= E\left[ (A_1 x - A_1 \mu)(A_2 x - A_2 \mu)^T \right]\\\
+&= E\left[ A_1(x - \mu)(x - \mu)^TA_2^T \right]\\\
+&= A_1 E\left[ (x - \mu)(x - \mu)^T \right] A_2^T\\\
+&= A_1 Cov(x,x) A_2\\\
+&= A_1 \Sigma A_2\\\
+\end{align*}
+$$
+
+$$
+\therefore Cov(y_1,y_2) =  A_1 \Sigma A_2 =0 \iff y_1 \perp y_2
+$$
+
 ## Problem clarification <cite>[^1]</cite>
 {{< math.inline >}}
 <p>
@@ -242,41 +282,76 @@ $$
 ## Solve the conditonal pdf
 {{< math.inline >}}
 <p>
-Before dig into \(p(x_b|x_a)\), let's introduce a new variable \(x_{b \cdot a}\)
+Before dig into \(p(x_b|x_a)\), let's define a new variable \(x_{b \cdot a}\)
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-\Sigma^{-1} &= \begin{bmatrix}
-u_1 & u_2 & \cdots & u_p
-\end{bmatrix}
-\begin{bmatrix}
-    \frac{1}{\lambda_{1}} & 0 & \cdots & 0 \\\
-    0 & \frac{1}{\lambda_{2}} & \cdots & 0 \\\
-    \vdots & \vdots & \ddots & \vdots \\\
-    0 & 0 & \cdots & \frac{1}{\lambda_{p}}
-\end{bmatrix}
-\begin{bmatrix}
-{u_1}^T\\\
-{u_2}^T\\\
-\vdots\\\
-{u_p}^T
-\end{bmatrix} \\\
-&=\sum_{i=1}^p u_i\frac{1}{\lambda_{i}}{u_i}^T
+x_{b \cdot a} &= x_b - \Sigma_{ba}\Sigma^{-1}_{aa}x_a\\\
+&= \underset{
+    \color{red}{A}
+}{\begin{bmatrix}
+    -\Sigma_{ba}\Sigma^{-1}_{aa} & 1_n
+\end{bmatrix}}
+\underset{
+    \color{red}{x}
+    }{\begin{bmatrix}
+    x_{a}\\\
+    x_{b}
+\end{bmatrix}}
 \end{align*}
 $$
 
+
 {{< math.inline >}}
 <p>
-Put it back to the formula, we can get:
+According to Lemma 1:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-(x-\mu)^T \Sigma^{-1} (x-\mu) &= (x-\mu)^T \sum_{i=1}^p u_i\frac{1}{\lambda_{i}}{u_i}^T (x-\mu)\\\
-&= \sum_{i=1}^p (x-\mu)^T u_i\frac{1}{\lambda_{i}}{u_i}^T (x-\mu)
+E[x_{b \cdot a}] &= \begin{bmatrix}
+    -\Sigma_{ba}\Sigma^{-1}_{aa} & 1_n
+\end{bmatrix}
+\begin{bmatrix}
+    \mu_{a}\\\
+    \mu_{b}
+\end{bmatrix}\\\
+&= -\Sigma_{ba}\Sigma^{-1}_{aa} \mu_{a} + \mu_{b}
+\end{align*}
+$$
+
+$$
+\begin{align*}
+Var[x_{b \cdot a}] &= \begin{bmatrix}
+    -\Sigma_{ba}\Sigma^{-1}_{aa} & 1_n
+\end{bmatrix}
+\Sigma
+\begin{bmatrix}
+    -\Sigma_{ba}\Sigma^{-1}_{aa}\\\
+    1_{n}
+\end{bmatrix}\\\
+&= \begin{bmatrix}
+    -\Sigma_{ba}\Sigma^{-1}_{aa} & 1_n
+\end{bmatrix}
+\begin{bmatrix}
+    \Sigma_{aa} & \Sigma_{ab}\\\
+    \Sigma_{ba} & \Sigma_{bb}
+\end{bmatrix}
+\begin{bmatrix}
+    -\Sigma_{ba}\Sigma^{-1}_{aa}\\\
+    1_{n}
+\end{bmatrix}\\\
+&= \begin{bmatrix}
+    0 & -\Sigma_{ba}\Sigma^{-1}_{aa}\Sigma_{ab}+\Sigma_{bb}
+\end{bmatrix}
+\begin{bmatrix}
+    -\Sigma_{ba}\Sigma^{-1}_{aa}\\\
+    1_{n}
+\end{bmatrix}\\\
+&= -\Sigma_{ba}\Sigma^{-1}_{aa}\Sigma_{ab}+\Sigma_{bb}
 \end{align*}
 $$
 
@@ -290,6 +365,66 @@ $$
 \begin{align*}
 (x-\mu)^T \Sigma^{-1} (x-\mu) &= \sum_{i=1}^p y_i \frac{1}{\lambda_{i}} {y_i}^T\\\
 &= \sum_{i=1}^p \frac{{y_i}^2}{\lambda_{i}}
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Based on Lemma 2, we can prove that \(x_{b \cdot a}\) is independent from \(x_a\):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+Cov(x_{b \cdot a}, x_a) &= \begin{bmatrix}
+    -\Sigma_{ba}\Sigma^{-1}_{aa} & 1_n
+\end{bmatrix}
+\begin{bmatrix}
+    \Sigma_{aa} & \Sigma_{ab}\\\
+    \Sigma_{ba} & \Sigma_{bb}
+\end{bmatrix}
+\begin{bmatrix}
+    1_m \\\
+    0_n
+\end{bmatrix}\\\
+&= \begin{bmatrix}
+    0_m & -\Sigma_{ba}\Sigma^{-1}_{aa}\Sigma_{ab} + \Sigma_{bb}
+\end{bmatrix}
+\begin{bmatrix}
+    1_m \\\
+    0_n
+\end{bmatrix}\\\
+&= 0
+\end{align*}
+\\\
+\therefore 
+x_{b \cdot a} \perp x_a \implies p(x_{b \cdot a}) = p(x_{b \cdot a}|x_a)
+$$
+
+{{< math.inline >}}
+<p>
+It is clear that \( x_{b \cdot a} \) is a bridge connect to \(x_a\) and \(x_b|x_a\):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\therefore p(x_b|x_a) &= p((x_{b \cdot a} + \Sigma_{ba}\Sigma_{aa}^{-1}x_a) | x_a)\\\
+&= p(x_{b \cdot a}|x_a + \Sigma_{ba}\Sigma_{aa}^{-1}x_a|x_a)\\\
+&= p(x_{b \cdot a} + \Sigma_{ba}\Sigma_{aa}^{-1}x_a)
+\end{align*}
+$$
+$$
+\begin{align*}
+\therefore x_b|x_a &= x_{b \cdot a} + \Sigma_{ba}\Sigma_{aa}^{-1}x_a\\\
+x_b|x_a &= \underset{\color{red}{A}}{
+\begin{bmatrix}
+    1_m \\\
+    1_n
+\end{bmatrix}
+}
+x_{b \cdot a}+
+\underset{\color{red}{B}}{\Sigma_{ba}\Sigma_{aa}^{-1}x_a}
 \end{align*}
 $$
 
