@@ -160,11 +160,11 @@ x_a = \underbrace{
     \begin{bmatrix}
     1_m & 0_n
 \end{bmatrix}
-}_A
+}^{sss}_{A}
 \underbrace{\begin{bmatrix}
     x_{a}\\\
     x_{b}
-\end{bmatrix}}_x
+\end{bmatrix}}^{x}_{}
 $$
 
 Then we can get:
@@ -330,7 +330,7 @@ The assumption of a Gaussian mixture model for the dataset \(\mathcal{D} = \{x_1
 {{</ math.inline >}}
 
 $$
-\underbrace{a + b + c}_{\text{Description}}
+\underbrace{a + b + c}^{sss}_{}
 $$
 ## Reference
 
