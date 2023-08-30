@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
-title: " Introduction to N-dimensional Gaussian Distribution"
-date: "2023-08-21"
+title: "Solve marginal conditional and joint Gaussian pdf"
+date: "2023-08-28"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -40,54 +40,112 @@ To simplify the calculations, we take the logarithm of the likelihood function:
     }
 </style>
 
-## Definition <cite>[^1]</cite>
+## Prove1
+If we have the following,
+$$
+\begin{cases}
+x \sim \mathcal{N}(\mu,\Sigma),
+x \in \mathbb{R}^p\\\
+y = Ax+B,
+y \in \mathbb{R}^q
+\end{cases}
+$$
 
 {{< math.inline >}}
 <p>
-Given a dataset \(\mathcal{D} = \{x_1, x_2, ..., x_n\}\), where each data point \(x_i\) is drawn from a 1-D Gaussian distribution with unknown mean \(\mu\) and variance \(\sigma^2\).
-</p>
-
-{{</ math.inline >}}
-
-$$p(x_i|\mu,\sigma^2) = \frac{1}{\sqrt{2\pi\sigma^2}} \exp\left(-\frac{(x_i-\mu)^2}{2\sigma^2}\right)$$
-
-{{< math.inline >}}
-<p>
-Given a dataset \(\mathcal{D} = \{x_1, x_2, ..., x_n\}\), where each data point \(x_i\) is drawn from a N-D Gaussian distribution with unknown mean \(\mu\) and variance \(\Sigma\).
-</p>
-{{</ math.inline >}}
-
-$$p(x_i|\mu,\Sigma) = \frac{1}{(2\pi)^\frac{p}{2} |\Sigma|^\frac{1}{2}} \exp\left( -\frac{1}{2}(x_i-\mu)^T \Sigma^{-1} (x_i-\mu) \right)$$
-
-{{< math.inline >}}
-<p>
-If variable \(x\) has \(p\) dimensions, we have:
+Then \(y\) is subject to Gaussian distribution,
 </p>
 {{</ math.inline >}}
 
 $$
-\begin{cases}
+y \sim \mathcal{N}(A\mu+B,A\Sigma A^T)
+$$
+Because,
+$$
+\begin{align*}
+E[y] &= E[Ax+B]\\\
+&= AE[x]+B\\\
+&= A\mu+B
+\end{align*}\\\
+\begin{align*}
+Var[y] &= Var[Ax+B] \\\
+&= AVar[x]A^T \\\
+&= A\Sigma A^T
+\end{align*}
+$$
+
+## Problem clarification <cite>[^1]</cite>
+{{< math.inline >}}
+<p>
+Given a dataset \(\mathcal{D} = \{x_1, x_2, ..., x_n\}\), where each data point \(x_i\) is drawn from a p-D Gaussian distribution with unknown mean \(\mu\) and variance \(\Sigma\), we have:
+</p>
+{{</ math.inline >}}
+
+$$p(x|\mu,\Sigma) = \frac{1}{(2\pi)^\frac{p}{2} |\Sigma|^\frac{1}{2}} \exp\left( -\frac{1}{2}(x-\mu)^T \Sigma^{-1} (x-\mu) \right)$$
+
+$$
 x = \begin{bmatrix}
     x_{1} \\\
     x_{2} \\\
     \vdots \\\
     x_{p}
 \end{bmatrix},
-x \in \mathbb{R}^p\\\
 \mu = \begin{bmatrix}
     \mu_{1} \\\
     \mu_{2} \\\
     \vdots \\\
     \mu_{p}
-\end{bmatrix}\\\
+\end{bmatrix},
 \Sigma =\begin{bmatrix}
     \sigma_{11} & \sigma_{12} & \cdots & \sigma_{1p} \\\
     \sigma_{21} & \sigma_{22} & \cdots & \sigma_{2p} \\\
     \vdots & \vdots & \ddots & \vdots \\\
     \sigma_{p1} & \sigma_{p2} & \cdots & \sigma_{pp}
-\end{bmatrix}, & \Sigma\text{ is semi-positive definite}
-\end{cases}
+\end{bmatrix}
 $$
+
+{{< math.inline >}}
+<p>
+If x is made up of two parts \(x_a\) and \(x_b\), we can rewrite above with block matrix:
+</p>
+{{</ math.inline >}}
+
+$$
+x=\begin{bmatrix}
+    x_1\\\
+    x_2\\\
+    \vdots\\\
+    x_m\\\
+    x_{m+1}\\\
+    x_{m+2}\\\
+    \vdots\\\
+    x_{m+n}
+\end{bmatrix}
+=\begin{bmatrix}
+    x_a\\\
+    x_b
+\end{bmatrix}, m+n=p
+$$
+
+$$
+\mu = \begin{bmatrix}
+    \mu_{a}\\\
+    \mu_{b}
+\end{bmatrix}
+$$
+
+$$
+\Sigma = \begin{bmatrix}
+    \Sigma_{aa} & \Sigma_{ab}\\\
+    \Sigma_{ba} & \Sigma_{bb}
+\end{bmatrix}
+$$
+
+{{< math.inline >}}
+<p>
+We want to know the marginal pdf \(p(x_a)\) and \(p(x_b)\), the conditional pdf \(p(x_b|x_a)\) and \(p(x_a|x_b)\)
+</p>
+{{</ math.inline >}}
 
 ## Explainable quadratic form
 
