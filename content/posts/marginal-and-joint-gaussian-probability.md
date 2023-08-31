@@ -40,7 +40,7 @@ Before we started, two lemmas will be given first:
     }
 </style>
 
-## prerequisite
+## Prerequisite
 ### Lemma 1
 If we have the following,
 $$
@@ -115,7 +115,7 @@ $$
 \therefore Cov(y_1,y_2) =  A_1 \Sigma A_2 =0 \iff y_1 \perp y_2
 $$
 
-## Problem clarification <cite>[^1]</cite>
+## Margianl and Conditional PDF Problem clarification <cite>[^1]</cite>
 {{< math.inline >}}
 <p>
 Given a dataset \(\mathcal{D} = \{x_1, x_2, ..., x_n\}\), where each data point \(x_i\) is drawn from a p-D Gaussian distribution with unknown mean \(\mu\) and variance \(\Sigma\), we have:
@@ -147,7 +147,7 @@ $$
 
 {{< math.inline >}}
 <p>
-If x is made up of two parts \(x_a\) and \(x_b\), we can rewrite \(x\), \(\mu\), \(\Sigma\) above with block matrix:
+If we consider x is the <b>joint pdf</b> of two parts \(x_a\) and \(x_b\), we can rewrite \(x\), \(\mu\), \(\Sigma\) above with block matrix:
 </p>
 {{</ math.inline >}}
 
@@ -188,7 +188,7 @@ We want to obtain the marginal pdf \(p(x_a)\) and \(p(x_b)\), the conditional pd
 </p>
 {{</ math.inline >}}
 
-## Solve the marginal pdf
+### Solve the marginal pdf
 
 {{< math.inline >}}
 <p>
@@ -280,7 +280,7 @@ $$
 x_b \sim \mathcal{N}(\mu_{b},\Sigma_{bb})
 $$
 
-## Solve the conditonal pdf
+### Solve the conditonal pdf
 {{< math.inline >}}
 <p>
 Before dig into \(p(x_b|x_a)\), let's define a new variable \(x_{b \cdot a}\)
@@ -433,7 +433,7 @@ $$
 x_a|x_b \sim \mathcal{N}(\Sigma_{ab}\Sigma_{bb}^{-1} (x_b-\mu_{b}) + \mu_{a}, -\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}+\Sigma_{aa})
 $$
 
-## Conclusion
+### Conclusion
 
 Marginal PDF:
 
@@ -453,7 +453,19 @@ $$
 x_a|x_b \sim \mathcal{N}(\Sigma_{ab}\Sigma_{bb}^{-1} (x_b-\mu_{b}) + \mu_{a}, -\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}+\Sigma_{aa})
 $$
 
+## Joint PDF Problem clarification <cite>[^2]</cite>
+{{< math.inline >}}
+<p>
+Assuming we have variable \(x\) from a p-dimensional Gaussian distribution with mean \(\mu\) and covariance matrix \(\Sigma\):
+</p>
+{{</ math.inline >}}
+
+$$
+x \sim \mathcal{N} (\mu, \Lambda^{-1})\\\
+\Lambda \text{ is precision matrix, }\Lambda=\Sigma^{-1}
+$$
+
 ## Reference
 
-[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=5).
-[^2]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=6).
+[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=7).
+[^2]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=8).
