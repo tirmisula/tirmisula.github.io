@@ -13,7 +13,7 @@ ShowToc: true
 TocOpen: true
 ---
 
-To simplify the calculations, we take the logarithm of the likelihood function:                                                         
+Before we started, two lemmas will be given first:                                                         
 
 {{< math.inline >}}
 {{ if or .Page.Params.math .Site.Params.math }}
@@ -40,7 +40,8 @@ To simplify the calculations, we take the logarithm of the likelihood function:
     }
 </style>
 
-## Lemma 1
+## prerequisite
+### Lemma 1
 If we have the following,
 $$
 \begin{cases}
@@ -74,7 +75,7 @@ Var[y] &= Var[Ax+B] \\\
 \end{align*}
 $$
 
-## Lemma 2
+### Lemma 2
 If we have the following,
 $$
 \begin{cases}
@@ -90,7 +91,7 @@ $$
 y_1 \perp y_2 \iff A_1 \Sigma A_2^T=0
 $$
 
-Prove,
+Because,
 $$
 \begin{rcases}
 y_1 \sim \mathcal{N}(A_1\mu, A_1 \Sigma A_1^T)\\\
@@ -390,7 +391,7 @@ $$
 
 {{< math.inline >}}
 <p>
-It is clear that \( x_{b \cdot a} \) is a bridge connect to \(x_a\) and \(x_b|x_a\):
+It's clear \( x_{b \cdot a} \) is a well-structured variable that links \(x_a\) and \(x_b|x_a\) together, so that \( p(x_b|x_a) \) can be derived from \( p(x_a) \):
 </p>
 {{</ math.inline >}}
 
@@ -411,51 +412,45 @@ x_b|x_a &= \underset{\color{red}{A}}{
 \end{bmatrix}
 }
 x_{b \cdot a}+
-\underset{\color{red}{B}}{\Sigma_{ba}\Sigma_{aa}^{-1}x_a}
+\underset{\color{red}{B}}{\Sigma_{ba}\Sigma_{aa}^{-1}x_a}\\\
+E[x_b|x_a] &= -\Sigma_{ba}\Sigma_{aa}^{-1} \mu_{a} + \mu_{b} + \Sigma_{ba}\Sigma_{aa}^{-1}x_a\\\
+&= \Sigma_{ba}\Sigma_{aa}^{-1} (x_a-\mu_{a}) + \mu_{b}\\\
+Var[x_b|x_a] &= I (-\Sigma_{ba}\Sigma_{aa}^{-1}\Sigma_{ab}+\Sigma_{bb}) I^T\\\
+&= -\Sigma_{ba}\Sigma_{aa}^{-1}\Sigma_{ab}+\Sigma_{bb}
 \end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Deduction of \(x_a|x_b\) is similar, so the conclusion is :
+</p>
+{{</ math.inline >}}
+
+$$
+x_b|x_a \sim \mathcal{N}(\Sigma_{ba}\Sigma_{aa}^{-1} (x_a-\mu_{a}) + \mu_{b}, -\Sigma_{ba}\Sigma_{aa}^{-1}\Sigma_{ab}+\Sigma_{bb})
+$$
+$$
+x_a|x_b \sim \mathcal{N}(\Sigma_{ab}\Sigma_{bb}^{-1} (x_b-\mu_{b}) + \mu_{a}, -\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}+\Sigma_{aa})
 $$
 
 ## Conclusion
 
-{{< math.inline >}}
-<p>
-Now consider \((x-\mu)^T \Sigma^{-1} (x-\mu)\) equals to a constant,  in other words a fixed Mahalanobis distance:
-</p>
-{{</ math.inline >}}
+Marginal PDF:
 
 $$
-\begin{align*}
-(x-\mu)^T \Sigma^{-1} (x-\mu) &= \sum_{i=1}^p \frac{{y_i}^2}{\lambda_{i}} = c
-\end{align*}
+x_a \sim \mathcal{N}(\mu_{a},\Sigma_{aa})
+$$
+$$
+x_b \sim \mathcal{N}(\mu_{b},\Sigma_{bb})
 $$
 
-{{< math.inline >}}
-<p>
-This Equation represented a p-dimensional ellipse with a centroid of \(\{\mu_1, \mu_2, ..., \mu_p\}\), a major axis's length of \(\{\lambda_1, \lambda_2, ..., \lambda_p\}\) \(\lambda_i\) which is the eigen value of \(\Sigma\), a rotation direction of \(\{u_1, u_2, ..., u_p\}\), \(u_i\) which is the eigen vector of \(\Sigma\).
-</p>
-{{</ math.inline >}}
-
-## Limitations of Gaussian model[^2]</cite>
-### Parameter size
-$$
-\Sigma_{p\times p} \rightarrow \frac{p(p+1)}{2}=O(p^2)
-$$
-{{< math.inline >}}
-<p>
-\(\Sigma\) matrix has \(O(p^2)\) number of parameters to be estimated which might leads to a slow computation. It can be optimized by transform \(\Sigma\) to a diagnal matrix.
-</p>
-{{</ math.inline >}}
-
-### Oversimplified model
-{{< math.inline >}}
-<p>
-The assumption of a Gaussian mixture model for the dataset \(\mathcal{D} = \{x_1, x_2, ..., x_n\}\) can be considered in cases where a single Gaussian model may not adequately capture the underlying distribution. By incorporating multiple Gaussian components, a Gaussian mixture model offers a more flexible and expressive representation, allowing for the modeling of complex and diverse patterns within the data.
-</p>
-{{</ math.inline >}}
+Conditional PDF:
 
 $$
-\underset{A}{x}\\\
-\color{red}{E = mc^2}
+x_b|x_a \sim \mathcal{N}(\Sigma_{ba}\Sigma_{aa}^{-1} (x_a-\mu_{a}) + \mu_{b}, -\Sigma_{ba}\Sigma_{aa}^{-1}\Sigma_{ab}+\Sigma_{bb})
+$$
+$$
+x_a|x_b \sim \mathcal{N}(\Sigma_{ab}\Sigma_{bb}^{-1} (x_b-\mu_{b}) + \mu_{a}, -\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}+\Sigma_{aa})
 $$
 
 ## Reference
