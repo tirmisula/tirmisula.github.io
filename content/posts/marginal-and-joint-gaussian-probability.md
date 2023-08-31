@@ -465,6 +465,218 @@ x \sim \mathcal{N} (\mu, \Lambda^{-1})\\\
 \Lambda \text{ is precision matrix, }\Lambda=\Sigma^{-1}
 $$
 
+{{< math.inline >}}
+<p>
+And a linear transformation \(\y\):
+</p>
+{{</ math.inline >}}
+
+$$
+y=Ax+B+\epsilon\\\
+\epsilon \sim \mathcal{N}(0, L^{-1}), \epsilon \perp x
+$$
+
+{{< math.inline >}}
+<p>
+Let z be the joint variable:
+</p>
+{{</ math.inline >}}
+
+$$
+z = \begin{bmatrix}
+    x\\\
+    y
+\end{bmatrix}
+$$
+
+{{< math.inline >}}
+<p>
+We want to obtain the joint pdf \(p(z)\) and conditional pdf \(p(x|y)\)
+</p>
+{{</ math.inline >}}
+
+### Solve the joint pdf
+{{< math.inline >}}
+<p>
+Since \(x\) is known, we can solve \(y\) first:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+E[y] &= E[Ax+B+\epsilon]\\\
+&= E[Ax+B] + E[\epsilon]\\\
+&= AE[x]+B+0\\\
+&= A\mu + B
+\end{align*}
+$$
+
+$$
+\begin{align*}
+Var[y] &= Var[Ax+B+\epsilon]\\\
+&= Var[Ax+B] + Var[\epsilon] + 2Cov[Ax+B, \epsilon]\\\
+&= Var[Ax+B] + Var[\epsilon], \because \epsilon \perp x\\\
+&= A \Lambda^{-1} A^T + L^{-1}
+\end{align*}
+$$
+
+$$
+y \sim \mathcal{N}(A\mu+B, A \Lambda^{-1} A^T + L^{-1})
+$$
+
+{{< math.inline >}}
+<p>
+Then we solve \(z\):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+E[z] &= E\left[
+    \begin{bmatrix}
+    x \\\
+    y
+\end{bmatrix}
+\right]\\\
+&= \begin{bmatrix}
+    E[x] \\\
+    E[y]
+\end{bmatrix}\\\
+&= \begin{bmatrix}
+    \mu \\\
+    A\mu + B
+\end{bmatrix}
+\end{align*}
+$$
+
+$$
+\begin{align*}
+Var[z] &= Var\left[
+    \begin{bmatrix}
+    x \\\
+    y
+\end{bmatrix}
+\right]\\\
+&= \begin{bmatrix}
+    Cov[x,x] & Cov[x,y]\\\
+    Cov[y,x] & Cov[y,y]
+\end{bmatrix}\\\
+&= \begin{bmatrix}
+    \Lambda^{-1} & Cov[x,y]\\\
+    Cov[y,x] & A \Lambda^{-1} A^T + L^{-1}
+\end{bmatrix}\\\
+&= \begin{bmatrix}
+    \Lambda^{-1} & Cov[x,y]\\\
+    Cov[x,y]^T & A \Lambda^{-1} A^T + L^{-1}
+\end{bmatrix}
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+For the \(Cov[x,y]\):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+Cov[x,y] &= E\left[
+    \left( x-E[x] \right) \left( y-E[y] \right)^T
+\right]\\\
+&= E\left[
+    \left( x-\mu \right) \left( y-A\mu-B \right)^T
+\right]\\\
+&= E\left[
+    \left( x-\mu \right) \left( Ax+B-A\mu-B \right)^T
+\right]\\\
+&= E\left[
+    \left( x-\mu \right) \left( x-\mu \right)^T A^T
+\right]\\\
+&= E\left[
+    \left( x-\mu \right) \left( x-\mu \right)^T
+\right] A^T\\\
+&= Var[x] A^T\\\
+&= \Lambda^{-1} A^T
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+So continue solving \(Var[z]\):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+Var[z] &= \begin{bmatrix}
+    \Lambda^{-1} & Cov[x,y]\\\
+    Cov[x,y]^T & A \Lambda^{-1} A^T + L^{-1}
+\end{bmatrix}\\\
+&= \begin{bmatrix}
+    \Lambda^{-1} & \Lambda^{-1} A^T\\\
+    (\Lambda^{-1} A^T)^T & A \Lambda^{-1} A^T + L^{-1}
+\end{bmatrix}
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+So the conclusion is:
+</p>
+{{</ math.inline >}}
+
+$$
+y \sim \mathcal{N}(A\mu+B, A \Lambda^{-1} A^T + L^{-1})
+$$
+
+$$
+z = \begin{bmatrix}
+    x\\\
+    y
+\end{bmatrix} \sim \mathcal{N}(\begin{bmatrix}
+    \mu \\\
+    A\mu + B
+\end{bmatrix}, \begin{bmatrix}
+    \Lambda^{-1} & \Lambda^{-1} A^T\\\
+    (\Lambda^{-1} A^T)^T & A \Lambda^{-1} A^T + L^{-1}
+\end{bmatrix})
+$$
+
+### Solve the conditonal pdf
+{{< math.inline >}}
+<p>
+Based on previous conclusion,
+</p>
+{{</ math.inline >}}
+
+$$
+x_b|x_a \sim \mathcal{N}(\Sigma_{ba}\Sigma_{aa}^{-1} (x_a-\mu_{a}) + \mu_{b}, -\Sigma_{ba}\Sigma_{aa}^{-1}\Sigma_{ab}+\Sigma_{bb})
+$$
+
+We have:
+$$
+\begin{align*}
+E[x|y] &= 
+    \Lambda^{-1} A^T (A \Lambda^{-1} A^T + L^{-1})^{-1} (y - A\mu-B) + \mu 
+\end{align*}
+$$
+
+$$
+\begin{align*}
+Var[x|y] &= 
+    -\Lambda^{-1} A^T (A \Lambda^{-1} A^T + L^{-1})^{-1}  (\Lambda^{-1} A^T)^T + \Lambda^{-1} \\\
+&= -\Lambda^{-1} A^T (A \Lambda^{-1} A^T + L^{-1})^{-1}  A (\Lambda^{-1})^{T} + \Lambda^{-1}
+\end{align*}
+$$
+
+$$
+\begin{align*}
+x|y \sim \mathcal{N} \left( \Lambda^{-1} A^T (A \Lambda^{-1} A^T + L^{-1})^{-1} (y - A\mu-B) + \mu , 
+    -\Lambda^{-1} A^T (A \Lambda^{-1} A^T + L^{-1})^{-1}  (\Lambda^{-1} A^T)^T + \Lambda^{-1}
+    \right)
+\end{align*}
+$$
+
 ## Reference
 
 [^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=7).
