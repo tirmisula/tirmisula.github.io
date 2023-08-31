@@ -326,45 +326,32 @@ $$
 $$
 \begin{align*}
 Var[x_{b \cdot a}] &= \begin{bmatrix}
-    -\Sigma_{ba}\Sigma^{-1}_{aa} & 1_n
+    -\Sigma_{ba}\Sigma_{aa}^{-1} & 1_n
 \end{bmatrix}
 \Sigma
 \begin{bmatrix}
-    -\Sigma_{ba}\Sigma^{-1}_{aa}\\\
+    -\Sigma_{ba}\Sigma_{aa}^{-1}\\\
     1_{n}
 \end{bmatrix}\\\
 &= \begin{bmatrix}
-    -\Sigma_{ba}\Sigma^{-1}_{aa} & 1_n
+    -\Sigma_{ba}\Sigma_{aa}^{-1} & 1_n
 \end{bmatrix}
 \begin{bmatrix}
     \Sigma_{aa} & \Sigma_{ab}\\\
     \Sigma_{ba} & \Sigma_{bb}
 \end{bmatrix}
 \begin{bmatrix}
-    -\Sigma_{ba}\Sigma^{-1}_{aa}\\\
+    -\Sigma_{ba}\Sigma_{aa}^{-1}\\\
     1_{n}
 \end{bmatrix}\\\
 &= \begin{bmatrix}
-    0 & -\Sigma_{ba}\Sigma^{-1}_{aa}\Sigma_{ab}+\Sigma_{bb}
+    0 & -\Sigma_{ba}\Sigma_{aa}^{-1}\Sigma_{ab}+\Sigma_{bb}
 \end{bmatrix}
 \begin{bmatrix}
-    -\Sigma_{ba}\Sigma^{-1}_{aa}\\\
+    -\Sigma_{ba}\Sigma_{aa}^{-1}\\\
     1_{n}
 \end{bmatrix}\\\
-&= -\Sigma_{ba}\Sigma^{-1}_{aa}\Sigma_{ab}+\Sigma_{bb}
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-Let \(y_i = (x-\mu)^T u_i\), \(y_i\) is a scalar, we can get:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-(x-\mu)^T \Sigma^{-1} (x-\mu) &= \sum_{i=1}^p y_i \frac{1}{\lambda_{i}} {y_i}^T\\\
-&= \sum_{i=1}^p \frac{{y_i}^2}{\lambda_{i}}
+&= -\Sigma_{ba}\Sigma_{aa}^{-1}\Sigma_{ab}+\Sigma_{bb}
 \end{align*}
 $$
 
@@ -377,7 +364,7 @@ Based on Lemma 2, we can prove that \(x_{b \cdot a}\) is independent from \(x_a\
 $$
 \begin{align*}
 Cov(x_{b \cdot a}, x_a) &= \begin{bmatrix}
-    -\Sigma_{ba}\Sigma^{-1}_{aa} & 1_n
+    -\Sigma_{ba}\Sigma_{aa}^{-1} & 1_n
 \end{bmatrix}
 \begin{bmatrix}
     \Sigma_{aa} & \Sigma_{ab}\\\
@@ -388,7 +375,7 @@ Cov(x_{b \cdot a}, x_a) &= \begin{bmatrix}
     0_n
 \end{bmatrix}\\\
 &= \begin{bmatrix}
-    0_m & -\Sigma_{ba}\Sigma^{-1}_{aa}\Sigma_{ab} + \Sigma_{bb}
+    0_m & -\Sigma_{ba}\Sigma_{aa}^{-1}\Sigma_{ab} + \Sigma_{bb}
 \end{bmatrix}
 \begin{bmatrix}
     1_m \\\
