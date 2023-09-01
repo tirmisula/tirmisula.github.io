@@ -166,4 +166,4 @@ $$
 ## Reference
 
 [^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=7).
-[^2]: From [video](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
+[^2]: From [source](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).

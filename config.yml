@@ -1,5 +1,5 @@
 baseURL: "https://adityatelange.github.io/hugo-PaperMod/" # if your site is in 'https', then make sure your base url isn't written using 'http' otherwise your sitemap would contain http (as opposeed to https) URLs. This would affect Google indexing of your URLs.
-title: PaperMod
+title: WX's blog
 paginate: 10
 theme: hugo-PaperMod
 
@@ -109,7 +109,7 @@ params:
 
     profileMode:
         enabled: false
-        title: PaperMod
+        title: WX's blog
         imageUrl: "#"
         imageTitle: my image
         # imageWidth: 120
@@ -121,7 +121,7 @@ params:
               url: tags
 
     homeInfoParams:
-        Title: "PaperMod"
+        Title: "WX's blog"
         Content: >
             Personal blog.
 
