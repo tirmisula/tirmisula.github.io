@@ -467,7 +467,7 @@ $$
 
 {{< math.inline >}}
 <p>
-And a linear transformation \(\y\):
+And a linear transformation \(y\):
 </p>
 {{</ math.inline >}}
 
@@ -587,8 +587,20 @@ Cov[x,y] &= E\left[
     \left( x-\mu \right) \left( y-A\mu-B \right)^T
 \right]\\\
 &= E\left[
-    \left( x-\mu \right) \left( Ax+B-A\mu-B \right)^T
+    \left( x-\mu \right) \left( Ax+B+\epsilon-A\mu-B \right)^T
 \right]\\\
+&= E\left[
+    \left( x-\mu \right) \left( Ax-A\mu+\epsilon \right)^T
+\right]\\\
+& = E\left[
+    \left( x-\mu \right) \left( Ax-A\mu \right)^T + \left( x-\mu \right) \epsilon^T
+\right]\\\
+&= E\left[
+    \left( x-\mu \right) \left( Ax-A\mu \right)^T \right] + E\left[\left( x-\mu \right) \epsilon^T
+\right]\\\
+&= E\left[
+    \left( x-\mu \right) \left( Ax-A\mu \right)^T \right] + E\left[x-\mu
+\right] E\left[ \epsilon^T \right], \because x \perp \epsilon\\\
 &= E\left[
     \left( x-\mu \right) \left( x-\mu \right)^T A^T
 \right]\\\
