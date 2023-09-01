@@ -115,7 +115,7 @@ $$
 \therefore Cov(y_1,y_2) =  A_1 \Sigma A_2 =0 \iff y_1 \perp y_2
 $$
 
-## Margianl and Conditional PDF Problem clarification <cite>[^1]</cite>
+## Marginal and Conditional PDF Problem clarification <cite>[^1]</cite>
 {{< math.inline >}}
 <p>
 Given a dataset \(\mathcal{D} = \{x_1, x_2, ..., x_n\}\), where each data point \(x_i\) is drawn from a p-D Gaussian distribution with unknown mean \(\mu\) and variance \(\Sigma\), we have:
@@ -184,7 +184,7 @@ $$
 
 {{< math.inline >}}
 <p>
-We want to obtain the marginal pdf \(p(x_a)\) and \(p(x_b)\), the conditional pdf \(p(x_b|x_a)\) and \(p(x_a|x_b)\)
+Because joint pdf \( p(x) \) is known, we want to obtain the marginal pdf \(p(x_a)\) and \(p(x_b)\), the conditional pdf \(p(x_b|x_a)\) and \(p(x_a|x_b)\)
 </p>
 {{</ math.inline >}}
 
@@ -491,7 +491,7 @@ $$
 
 {{< math.inline >}}
 <p>
-We want to obtain the joint pdf \(p(z)\) and conditional pdf \(p(x|y)\)
+Because marginal pdf \( p(x) \) is known, we want to obtain the joint pdf \(p(z)\) and conditional pdf \(p(x|y)\)
 </p>
 {{</ math.inline >}}
 
