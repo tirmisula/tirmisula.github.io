@@ -172,7 +172,8 @@ X &= \begin{bmatrix}
     x_{21} & x_{22} & \dots & x_{2p}\\\
     \dots & \dots & \dots & \dots\\\
     x_{N1} & x_{N2} & \dots & x_{Np}
-\end{bmatrix}_{N \times p}\\\
+\end{bmatrix}_{N \times p}
+\\\
 &= \begin{bmatrix}
     x_{col1} & x_{col2} & \dots & x_{colp}
 \end{bmatrix}
