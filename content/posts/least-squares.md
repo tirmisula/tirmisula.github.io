@@ -182,44 +182,17 @@ $$
 
 {{< math.inline >}}
 <p>
-We consider martix \( X \) a p-dimensional hyperplane built up by \( p \) column vectors, \( Y \) is a vector from N-dimensional space. Since \( N>>p \), \( Y \) is highly unlikely expressed by a linear combination of these p vectors, p-D space is a subspace of N-D space. The geometric meaning of \( Xw \) is project a p-D space vector \( w \) into a N-D space. \( Xw \) can be written as:
+We consider martix \( X \) consists of \( p \) column vectors, \( Xw \) can be written as:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
 Xw &= \begin{bmatrix}
-    {x_1}^T \\\
-    {x_2}^T \\\
-    \dots \\\
-    {x_N}^T
+    x_{col1} & x_{col2} & \dots & x_{col4}
 \end{bmatrix}
 w
 \\\
-&= \begin{bmatrix}
-    {x_1}^Tw\\\
-    {x_2}^Tw\\\
-    \dots \\\
-    {x_N}^Tw
-\end{bmatrix}\\\
-&= \begin{bmatrix}
-    \sum_{i=1}^{p} {x_{1i}w_i}\\\
-    \sum_{i=1}^{p} {x_{2i}w_i}\\\
-    \dots \\\
-    \sum_{i=1}^{p} {x_{Ni}w_i}
-\end{bmatrix}\\\
-&= \sum_{i=1}^{p} \begin{bmatrix}
-    {x_{1i}w_i}\\\
-    {x_{2i}w_i}\\\
-    \dots \\\
-    {x_{Ni}w_i}
-\end{bmatrix}\\\
-&= \sum_{i=1}^{p} w_i \begin{bmatrix}
-    {x_{1i}}\\\
-    {x_{2i}}\\\
-    \dots \\\
-    {x_{Ni}}
-\end{bmatrix}\\\
 &= \sum_{i=1}^{p} w_i x_{coli}
 \end{align*}
 $$
@@ -243,7 +216,47 @@ $$
 
 So we got the same conclusion.
 
+## Find definition of LS from aspect of probability<cite>[^3]</cite>
+{{< math.inline >}}
+<p>
+Given a dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\), where \(x_i \in \mathbb{R}^p \), \( y_i \in \mathbb{R} \), we assume \(y\) is a linear mapping of \(x\) plus a noise which subjected to Gaussian distribution:
+</p>
+{{</ math.inline >}}
+
+$$
+y = w^Tx + \epsilon\\\
+\epsilon \sim \mathcal{N}(0, \sigma^2)
+$$
+
+Based on the previous [provement](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/), we know that:
+
+$$
+y|w^Tx \sim \mathcal{N}(w^Tx, \sigma^2)\\\
+p(y|w^Tx) = \frac{1}{ \sqrt{2\pi} \sigma} \mathrm{e}^{-\frac{(y-w^Tx)^2}{2\sigma^2}}
+$$
+
+Then we can do maximum-likelihood estimation:
+
+$$
+\begin{align*}
+\argmax_w \mathcal{L}(w|y) &= \argmax_w \log\left( \prod_{i=1}^N p(y_i|w^Tx_i) \right)\\\
+&= \argmax_w \sum_{i=1}^N \log\left( p(y_i|w^Tx_i) \right)\\\
+&= \argmax_w \sum_{i=1}^N \log\left( \frac{1}{ \sqrt{2\pi} \sigma} \mathrm{e}^{-\frac{(y_i-w^Tx_i)^2}{2\sigma^2}} \right)\\\
+&= \argmax_w \sum_{i=1}^N \log\left( \frac{1}{ \sqrt{2\pi} \sigma} \right) + \sum_{i=1}^N \log\left( \mathrm{e}^{-\frac{(y_i-w^Tx_i)^2}{2\sigma^2}} \right)\\\
+&= \argmax_w N\log\left( \frac{1}{\sqrt{2\pi}\sigma} \right) + \sum_{i=1}^N -\frac{(y_i-w^Tx_i)^2}{2\sigma^2}\\\
+&= \argmax_w \sum_{i=1}^N -\frac{(y_i-w^Tx_i)^2}{2\sigma^2}\\\
+&= \argmin_w \sum_{i=1}^N (y_i-w^Tx_i)^2 \iff \argmin_w \sum_{i=1}^N {\lVert w^Tx_i - y_i \rVert}^2
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+MLE result is exactly the same as the definition of LS, so we can say that finding the best fitted line by LS indicates \(y\) is close to a linear mapping of \(x\) but with a random Gaussian noise.
+</p>
+{{</ math.inline >}}
+
 ## Reference
 
-[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=7).
+[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=9).
 [^2]: From [source](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
+[^3]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=10).
