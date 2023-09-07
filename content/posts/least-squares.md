@@ -1,6 +1,6 @@
 ---
 author: "X. Wang"
-title: "Least Squares Method"
+title: "Linear Regression"
 date: "2023-08-30"
 description: "A brief introduction."
 tags: ["machine learning"]
@@ -256,6 +256,17 @@ MLE result is exactly the same as the definition of LS, so we can say that findi
 {{</ math.inline >}}
 
 ## Linear regression with regularization
+{{< math.inline >}}
+<p>
+If \( N \) < \(p \) it will cause overfitting because:
+</p>
+{{</ math.inline >}}
+
+$$
+Rank(X^TX)=Rank(X)<p\\\
+X^TX \text{ is not revertible}
+$$
+
 Adding regularization part to LS helps prevent overfitting. A common regularization framework is presented as follows:
 
 $$
@@ -275,7 +286,62 @@ P(\theta) = {\lVert w \rVert}^2_2 = w^Tw & \text{Ridge regression}
 $$
 
 ### Ridge regression from aspect of frequency
-[Previous Section](#matrix-representation-of-ls)
+We use matrix representation form from [Previous Section](#matrix-representation-of-ls) to simplify Ridge regression:
+
+$$
+\begin{align*}
+\mathcal{J}(w) &= (w^TX^T-Y^T)(Xw-Y) + \lambda w^Tw\\\
+&= w^TX^TXw - \underset{\color{red}{Scalar}}{w^TX^TY} - \underset{\color{red}{Scalar}}{Y^TXw} + Y^TY + \lambda w^Tw\\\
+&= w^TX^TXw + \lambda w^Tw - 2w^TX^TY + Y^TY\\\
+&= w^T(X^TX+\lambda I)w - 2w^TX^TY + Y^TY
+\end{align*}
+$$
+
+$$
+\argmin_w \mathcal{J}(w) \iff \frac{\partial \mathcal{J}(w)}{\partial w}=0
+$$
+
+$$
+\begin{align*}
+\frac{\partial \mathcal{J}(w)}{\partial w} &= 0\\\
+\frac{\partial}{\partial w} w^T(X^TX+\lambda I)w - 2w^TX^TY + Y^TY &= 0\\\
+2(X^TX+\lambda I)w - 2X^TY &= 0\\\
+w &= (X^TX+\lambda I)^{-1}X^TY
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+The analytic expression of \( \mathcal{J}(w) \):
+</p>
+{{</ math.inline >}}
+
+$$
+\hat{w} = \argmin_{w} \mathcal{J}(w) = (X^TX+\lambda I )^{-1}X^TY
+$$
+
+{{< math.inline >}}
+<p>
+Compared to \( \mathcal{L}(w) \), the different part is the additional diagnal identity matrix which makes \( X^TX+\lambda I \) invertible:
+</p>
+{{</ math.inline >}}
+
+$$
+\because \text{ Given } \forall a \\\
+\begin{align*}
+a^TX^TXa &= (Xa)^TXa\\\
+&={\lVert Xa \rVert}^2 \\\
+&\geq 0 
+\end{align*}\\\
+
+\begin{align*}
+a^T(X^TX+\lambda I)a &= a^TX^TXa + \lambda a^TIa\\\
+&={\lVert Xa \rVert}^2+\lambda{\lVert Ia \rVert}^2 , \text{If }\lambda > 0\\\
+&> 0
+\end{align*}\\\
+ \therefore (X^TX+\lambda I)\text{ is positive definite and \color{red}{revertible}}\\\
+\therefore \text{Solving a revertible matrix prevents overfitting}
+$$
 
 ## Reference
 
