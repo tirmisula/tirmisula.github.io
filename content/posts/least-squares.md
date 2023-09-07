@@ -330,7 +330,8 @@ $$
 \because \text{ Given } \forall{a} \\\
 \begin{align*}
 a^TX^TXa &= (Xa)^TXa\\\
-&={\lVert Xa \rVert}^2 >= 0 
+&={\lVert Xa \rVert}^2 \\\
+&\geq 0 
 \end{align*}
 $$
 
