@@ -1,6 +1,6 @@
 ---
 author: "X. Wang"
-title: "Introduction to Least Squares Method"
+title: "Least Squares Method"
 date: "2023-08-30"
 description: "A brief introduction."
 tags: ["machine learning"]
@@ -40,7 +40,7 @@ LS method:
     }
 </style>
 
-## Matrix representation of LS<cite>[^1]</cite>
+## Matrix representation of LS
 {{< math.inline >}}
 <p>
 Given a dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\), where each data point \( (x_i,y_i) \) has attribution \(x_i \in \mathbb{R}^p \), \( y_i \in \mathbb{R} \), we combine all \(x_i\) to matrix form so that each row represents a data point, data point has p dimension:
@@ -78,7 +78,7 @@ $$
 
 {{< math.inline >}}
 <p>
-The definition of Least Squares method is:
+ <cite>[^1]</cite>The definition of Least Squares method is:
 </p>
 {{</ math.inline >}}
 
@@ -254,6 +254,28 @@ $$
 MLE result is exactly the same as the definition of LS, so we can say that finding the best fitted line by LS indicates \(y\) is close to a linear mapping of \(x\) but with a random Gaussian noise.
 </p>
 {{</ math.inline >}}
+
+## Linear regression with regularization
+Adding regularization part to LS helps prevent overfitting. A common regularization framework is presented as follows:
+
+$$
+\begin{align*}
+\argmin_{\theta} \left[ \underset{\text{Loss}}{\mathcal{L}(\theta)} + \lambda \underset{\text{Penalty}}{P(\theta)} \right]
+\end{align*}
+$$
+
+There are 2 common choices of penalty function, L1 norm and  L2 norm which corresponds to Lasso and Ridge regression respectively.
+
+$$
+\argmin_{\theta} \left[ \sum_{i=1}^N {\lVert w^Tx_i-y_i \rVert}^2 + \lambda {P(\theta)} \right] \implies
+\begin{cases}
+P(\theta) = {\lVert w \rVert}_1 & \text{Lasso regression}\\\
+P(\theta) = {\lVert w \rVert}^2_2 = w^Tw & \text{Ridge regression}
+\end{cases}
+$$
+
+### Ridge regression from aspect of frequency
+[Previous Section](#matrix-representation-of-ls)
 
 ## Reference
 
