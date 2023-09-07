@@ -331,8 +331,10 @@ $$
 \begin{align*}
 a^TX^TXa &= (Xa)^TXa\\\
 &={\lVert Xa \rVert}^2 >= 0 
-\end{align*}\\\
+\end{align*}
+$$
 
+$$
 \begin{align*}
 a^T(X^TX+\lambda I)a &= a^TX^TXa + \lambda a^TIa\\\
 &={\lVert Xa \rVert}^2+\lambda{\lVert Ia \rVert}^2 , \text{If }\lambda > 0\\\
