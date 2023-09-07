@@ -327,11 +327,10 @@ Compared to \( \mathcal{L}(w) \), the different part is the additional diagnal i
 {{</ math.inline >}}
 
 $$
-\because \text{ Given } \forall a \\\
+\because \text{ Given } \forall{a} \\\
 \begin{align*}
 a^TX^TXa &= (Xa)^TXa\\\
-&={\lVert Xa \rVert}^2 \\\
-&\geq 0 
+&={\lVert Xa \rVert}^2 >= 0 
 \end{align*}\\\
 
 \begin{align*}
