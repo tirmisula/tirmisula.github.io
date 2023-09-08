@@ -39,8 +39,9 @@ LS method:
         font-size: 16px !important;
     }
 </style>
+## Linear regression
 
-## Matrix representation of LS
+### Matrix representation of LS
 {{< math.inline >}}
 <p>
 Given a dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\), where each data point \( (x_i,y_i) \) has attribution \(x_i \in \mathbb{R}^p \), \( y_i \in \mathbb{R} \), we combine all \(x_i\) to matrix form so that each row represents a data point, data point has p dimension:
@@ -127,7 +128,7 @@ LS(w) &= \sum_{i=1}^N {\lVert w^Tx_i - y_i \rVert}^2 \\\
 \end{align*}
 $$
 
-## Solve LS by derivation
+### Solve LS
 
 {{< math.inline >}}
 <p>
@@ -163,7 +164,7 @@ $$
 \hat{w} = \argmin_{w} L(w) = (X^TX)^{-1}X^TY
 $$
 
-## Solve LS by geometric projection
+### Understand LS by geometric projection
 
 $$
 \begin{align*}
@@ -216,7 +217,7 @@ $$
 
 So we got the same conclusion.
 
-## Find definition of LS from aspect of probability<cite>[^3]</cite>
+### Find definition of LS from aspect of probability<cite>[^3]</cite>
 {{< math.inline >}}
 <p>
 Given a dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\), where \(x_i \in \mathbb{R}^p \), \( y_i \in \mathbb{R} \), we assume \(y\) is a linear mapping of \(x\) plus a noise which subjected to Gaussian distribution:
@@ -290,7 +291,7 @@ We use matrix representation form from [Previous Section](#matrix-representation
 
 $$
 \begin{align*}
-\mathcal{J}(w) &= (w^TX^T-Y^T)(Xw-Y) + \lambda w^Tw\\\
+J(w) &= (w^TX^T-Y^T)(Xw-Y) + \lambda w^Tw\\\
 &= w^TX^TXw - \underset{\color{red}{Scalar}}{w^TX^TY} - \underset{\color{red}{Scalar}}{Y^TXw} + Y^TY + \lambda w^Tw\\\
 &= w^TX^TXw + \lambda w^Tw - 2w^TX^TY + Y^TY\\\
 &= w^T(X^TX+\lambda I)w - 2w^TX^TY + Y^TY
@@ -298,12 +299,12 @@ $$
 $$
 
 $$
-\argmin_w \mathcal{J}(w) \iff \frac{\partial \mathcal{J}(w)}{\partial w}=0
+\argmin_w J(w) \iff \frac{\partial J(w)}{\partial w}=0
 $$
 
 $$
 \begin{align*}
-\frac{\partial \mathcal{J}(w)}{\partial w} &= 0\\\
+\frac{\partial J(w)}{\partial w} &= 0\\\
 \frac{\partial}{\partial w} w^T(X^TX+\lambda I)w - 2w^TX^TY + Y^TY &= 0\\\
 2(X^TX+\lambda I)w - 2X^TY &= 0\\\
 w &= (X^TX+\lambda I)^{-1}X^TY
@@ -312,12 +313,12 @@ $$
 
 {{< math.inline >}}
 <p>
-The analytic expression of \( \mathcal{J}(w) \):
+The analytic expression of \( J(w) \):
 </p>
 {{</ math.inline >}}
 
 $$
-\hat{w} = \argmin_{w} \mathcal{J}(w) = (X^TX+\lambda I )^{-1}X^TY
+\hat{w} = \argmin_{w} J(w) = (X^TX+\lambda I )^{-1}X^TY
 $$
 
 {{< math.inline >}}
@@ -343,6 +344,96 @@ a^T(X^TX+\lambda I)a &= a^TX^TXa + \lambda a^TIa\\\
 \end{align*}\\\
  \therefore (X^TX+\lambda I)\text{ is positive definite and \color{red}{revertible}}\\\
 \therefore \text{Solving a revertible matrix prevents overfitting}
+$$
+
+### Ridge regression from aspect of bayesian
+Similar to maximum likelihood estimation of LS from [Previous Section](#find-definition-of-ls-from-aspect-of-probability), we have:
+
+$$
+y = w^Tx + \epsilon\\\
+\epsilon \sim \mathcal{N}(0, \sigma^2)
+$$
+
+$$
+y|w^Tx \sim \mathcal{N}(w^Tx, \sigma^2)\\\
+p(y|w) = \frac{1}{ \sqrt{2\pi} \sigma} \mathrm{e}^{-\frac{(y-w^Tx)^2}{2\sigma^2}}
+$$
+
+{{< math.inline >}}
+<p>
+If we consider \(w\) has a prior distribution, \(y\) is the data already happened, then we can do maximum posterier estimation on \(w\) based on \(y\) we observed:
+</p>
+{{</ math.inline >}}
+
+$$
+w \sim \mathcal{N}(0, \sigma_0^2)\\\
+p(w) = \frac{1}{ \sqrt{2\pi} \sigma_0} \mathrm{e}^{-\frac{{\lVert w \rVert}^2}{2\sigma_0^2}}
+$$
+
+$$
+\begin{align*}
+\hat{w} &= \argmax_w p(w|y)\\\
+&= \argmax_w \frac{p(y|w)p(w)}{p(y)}\\\
+&= \argmax_w \frac{\prod_{i=1}^Np(y_i|w)p(w)}{p(y)}\\\
+&= \argmax_w \prod_{i=1}^Np(y_i|w)p(w)\\\
+&= \argmax_w \log\left( \prod_{i=1}^Np(y_i|w)p(w) \right)\\\
+&= \argmax_w \sum_{i=1}^N \log\left( \frac{1}{ \sqrt{2\pi} \sigma} \mathrm{e}^{-\frac{(y_i-w^Tx_i)^2}{2\sigma^2}} \right) + \log\left( \frac{1}{ \sqrt{2\pi} \sigma_0} \mathrm{e}^{-\frac{{\lVert w \rVert}^2}{2\sigma_0^2}} \right)\\\
+&= \argmax_w \sum_{i=1}^N -\frac{(y_i-w^Tx_i)^2}{2\sigma^2}  -\frac{{\lVert w \rVert}^2}{2\sigma_0^2}\\\
+&= \argmin_w \sum_{i=1}^N (y_i-w^Tx_i)^2 + \frac{\sigma^2}{\sigma_0^2}{\lVert w \rVert}^2 \iff \argmin_{w} \left[ \sum_{i=1}^N {\lVert w^Tx_i-y_i \rVert}^2 + \lambda {w^Tw} \right]
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+MAP result is exactly the same as the definition of ridge regression, penalty weight \(\lambda\) equals to the ratio of variances between noise and parameter. Larger variance of noise leads to larger penalty weight.
+</p>
+{{</ math.inline >}}
+
+## Conclusion
+In this chapter we discussed about linear regression, first we give the definition of LS:
+
+$$
+\begin{align*}
+LS(w) &= \sum_{i=1}^N {\lVert w^Tx_i - y_i \rVert}^2 \\\
+&= (w^T X^T - Y^T) (Xw - Y)
+\end{align*}
+$$
+
+And it's analytic expression:
+
+$$
+\hat{w}_{LS} = (X^TX)^{-1}X^TY
+$$
+
+Then we find that with Gaussian distribution noise, solving MLE equals to solving LS:
+
+$$
+\hat{w}_{MLE} = \hat{w}_{LS} \iff
+\begin{cases}
+y = w^Tx + \epsilon\\\
+\epsilon \sim \mathcal{N}(0, \sigma^2)
+\end{cases}
+$$
+
+Second part we give the definition of Ridge regression or LS + L2 regularizer and  it's analytic expression:
+
+$$
+J(w) = \sum_{i=1}^N {\lVert w^Tx_i-y_i \rVert}^2 + \lambda {w^Tw}
+$$
+
+$$
+\hat{w}_{Ridge} = (X^TX+\lambda I )^{-1}X^TY
+$$
+
+Then we find that with Gaussian distribution noise and Gaussian distribution prior, solving MAP equals to solving Ridge regression:
+
+$$
+\hat{w}_{MAP} = \hat{w}_{Ridge} \iff
+\begin{cases}
+y = w^Tx + \epsilon\\\
+\epsilon \sim \mathcal{N}(0, \sigma^2)\\\
+w \sim \mathcal{N}(0, \sigma_0^2)
+\end{cases}
 $$
 
 ## Reference
