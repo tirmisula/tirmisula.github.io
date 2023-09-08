@@ -408,7 +408,7 @@ $$
 Then we find that with Gaussian distribution noise, solving MLE equals to solving LS:
 
 $$
-\hat{w}_{MLE} = \hat{w}_{LS} 
+\hat{w}_{MLE} =(X^TX)^{-1}X^TY= \hat{w}_{LS} 
 $$
 
 $$
