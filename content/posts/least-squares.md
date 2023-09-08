@@ -77,11 +77,7 @@ Y = \begin{bmatrix}
 \end{bmatrix}_{N \times 1}
 $$
 
-{{< math.inline >}}
-<p>
  <cite>[^1]</cite>The definition of Least Squares method is:
-</p>
-{{</ math.inline >}}
 
 $$
 \begin{align*}
@@ -220,9 +216,11 @@ So we got the same conclusion.
 ### Find definition of LS from aspect of probability
 {{< math.inline >}}
 <p>
-Given a dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\), where \(x_i \in \mathbb{R}^p \), \( y_i \in \mathbb{R} \), we assume \(y\) is a linear mapping of \(x\) plus a noise which subjected to Gaussian distribution:<cite>[^3]</cite>
+Given a dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\), where \(x_i \in \mathbb{R}^p \), \( y_i \in \mathbb{R} \), we assume \(y\) is a linear mapping of \(x\) plus a noise which subjected to Gaussian distribution:
 </p>
 {{</ math.inline >}}
+
+<cite>[^3]</cite>
 
 $$
 y = w^Tx + \epsilon\\\
