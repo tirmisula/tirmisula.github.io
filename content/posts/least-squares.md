@@ -408,13 +408,13 @@ $$
 Then we find that with Gaussian distribution noise, solving MLE equals to solving LS:
 
 $$
-\hat{w}_{MLE} 
+\text{MLE} 
 \begin{cases}
 y = w^Tx + \epsilon\\\
 \epsilon \sim \mathcal{N}(0, \sigma^2)
 \end{cases}
 \iff
-\hat{w}_{LS}
+\text{LS}
 $$
 
 Second part we give the definition of Ridge regression or LS + L2 regularizer and  it's analytic expression:
@@ -430,12 +430,13 @@ $$
 Then we find that with Gaussian distribution noise and Gaussian distribution prior, solving MAP equals to solving Ridge regression:
 
 $$
-\hat{w}_{MAP} = \hat{w}_{Ridge} \iff
-\begin{cases}
+\text{MAP} \begin{cases}
 y = w^Tx + \epsilon\\\
 \epsilon \sim \mathcal{N}(0, \sigma^2)\\\
 w \sim \mathcal{N}(0, \sigma_0^2)
 \end{cases}
+\iff
+\text{Ridge}
 $$
 
 ## Reference
