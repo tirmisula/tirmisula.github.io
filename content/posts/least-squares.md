@@ -217,10 +217,10 @@ $$
 
 So we got the same conclusion.
 
-### Find definition of LS from aspect of probability<cite>[^3]</cite>
+### Find definition of LS from aspect of probability
 {{< math.inline >}}
 <p>
-Given a dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\), where \(x_i \in \mathbb{R}^p \), \( y_i \in \mathbb{R} \), we assume \(y\) is a linear mapping of \(x\) plus a noise which subjected to Gaussian distribution:
+Given a dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\), where \(x_i \in \mathbb{R}^p \), \( y_i \in \mathbb{R} \), we assume \(y\) is a linear mapping of \(x\) plus a noise which subjected to Gaussian distribution:<cite>[^3]</cite>
 </p>
 {{</ math.inline >}}
 
@@ -406,6 +406,10 @@ $$
 $$
 
 Then we find that with Gaussian distribution noise, solving MLE equals to solving LS:
+
+$$
+\hat{w}_{MLE} = \hat{w}_{LS} 
+$$
 
 $$
 \hat{w}_{MLE} = \hat{w}_{LS} \iff
