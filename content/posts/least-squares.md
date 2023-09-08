@@ -202,7 +202,7 @@ $$
 <p>
 Thus \( Xw \) is a linear combination of column vectors \( x_{coli} \) or in other words \( Xw \) is a vector built up by \( p \) basis. Different \(w_i\) leads to different vectors in this p-D hyperplane.
 
-Since \( Y \) does not belong to this hyperplane which because \( N>>p \) and \( Y \) is highly unlikely be expressed by a linear combination of \( p \) basis, \( Xw-Y \), \( Y \) and \( Xw\) forms a triangular. Minimize \( Xw-Y \) means \( Xw-Y \) is perpendicular to the p-D hyperplane, so \( Xw-Y \) is perpendicular to each basis, then we have:
+Since \( Y \) does not belong to this hyperplane which because \( N>>p \) and \( Y \) is highly unlikely be expressed by a linear combination of \( p \) basis, \( Xw-Y \), \( Y \) and \( Xw\) forms a triangular. Minimize \( Xw-Y \) means \( Xw-Y \) is perpendicular to the p-D hyperplane, so \( Xw-Y \) is perpendicular to each basis \( x_{coli} \), then we have:
 </p>
 {{</ math.inline >}}
 
@@ -403,6 +403,12 @@ And it's analytic expression:
 
 $$
 \hat{w}_{LS} = (X^TX)^{-1}X^TY
+$$
+
+And it's geometric explanation:
+
+$$
+X^T (X\hat{w}_{LS}-Y) = 0
 $$
 
 Then we find that with Gaussian distribution noise, solving MLE equals to solving LS:
