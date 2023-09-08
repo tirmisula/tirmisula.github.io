@@ -408,15 +408,13 @@ $$
 Then we find that with Gaussian distribution noise, solving MLE equals to solving LS:
 
 $$
-\hat{w}_{MLE} \equiv \hat{w}_{LS} 
-$$
-
-$$
-\hat{w}_{MLE} = \hat{w}_{LS} \iff
+\hat{w}_{MLE} 
 \begin{cases}
 y = w^Tx + \epsilon\\\
 \epsilon \sim \mathcal{N}(0, \sigma^2)
 \end{cases}
+\iff
+\hat{w}_{LS}
 $$
 
 Second part we give the definition of Ridge regression or LS + L2 regularizer and  it's analytic expression:
