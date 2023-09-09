@@ -63,14 +63,58 @@ $$
 \end{cases}
 $$
 
- <cite>[^1]</cite>Perceptron model outputs \( f(x_i) \) as classification result of \(x_i\)
+ <cite>[^1]</cite>
+ {{< math.inline >}}
+<p>
+Perceptron model outputs \( f(x_i) \) as classification result of \(x_i\)
+</p>
+{{</ math.inline >}}
 
 ## Perpceptron loss function
 
+{{< math.inline >}}
+<p>
+The naive thought is to find prediction accuracy of \(f(x_i)\) on \( y_i \), thus we can design a indicator function to count the number of false predictions.
+</p>
+{{</ math.inline >}}
 
+A correctly predict contains 2 conditions, and can be summarized in 1 equation:
+
+$$
+w^Tx_i \geq 0, y_i=1\\\
+w^Tx_i < 0, y_i=-1\\\
+\dArr\\\
+y_iw^Tx_i \geq 0
+$$
+
+So falsely predict has the opposite form:
+
+$$
+y_iw^Tx_i < 0
+$$
+
+Then we can design loss function like:
+
+$$
+\begin{align*}
+L(w) &= \sum_{i=1}^N I\{ y_iw^Tx_i < 0 \}
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+However indicator function is not <br>derivable</br>, because tiny change \( \Delta w \) may results 0 \( \rarr \) 1 or 1 \( \rarr \) 0. The way is to remove indicator operation and multiply -1 to change convergence from \( -\infty \rarr 0\) to \( \infty \rarr 0 \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+L(w) &= \sum_{x_i \in D_{err}}  -y_iw^Tx_i
+\end{align*}\\\
+D_{err}: \{x_i | (x_i,y_i) \in \mathcal{D},y_iw^Tx_i < 0\}
+$$
 
 ## Reference
 
-[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=9).
+[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=14).
 [^2]: From [source](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
-[^3]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=10).
