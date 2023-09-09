@@ -70,7 +70,7 @@ Perceptron model outputs \( f(x_i) \) as classification result of \(x_i\)
 </p>
 {{</ math.inline >}}
 
-## Perpceptron loss function
+## Design perpceptron loss function
 
 {{< math.inline >}}
 <p>
@@ -97,15 +97,17 @@ Then we can design loss function like:
 
 $$
 \begin{align*}
-L(w) &= \sum_{i=1}^N I\{ y_iw^Tx_i < 0 \}
+L(w) &= \sum_{i=1}^N I\lbrace y_iw^Tx_i < 0 \rbrace
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-However indicator function is not <br>derivable</br>, because tiny change \( \Delta w \) may results 0 \( \rarr \) 1 or 1 \( \rarr \) 0. The way is to remove indicator operation and multiply -1 to change convergence from \( -\infty \rarr 0\) to \( \infty \rarr 0 \):
+However indicator function is not <mark>derivable</mark>, because tiny change \( \Delta w \) may results 0 \( \rarr \) 1 or 1 \( \rarr \) 0. The way is to remove indicator operation and multiply -1 to change convergence from \( -\infty \rarr 0\) to \( \infty \rarr 0 \).
 </p>
 {{</ math.inline >}}
+
+The final loss function is designed as follow:
 
 $$
 \begin{align*}
@@ -113,6 +115,31 @@ L(w) &= \sum_{x_i \in D_{err}}  -y_iw^Tx_i
 \end{align*}\\\
 D_{err}: \{x_i | (x_i,y_i) \in \mathcal{D},y_iw^Tx_i < 0\}
 $$
+
+## Solve preceptron weights
+
+{{< math.inline >}}
+<p>
+Since \( L(w) \) is derivable, the most common way is to use stochastic gradient decent(SGD) method to find \( \hat{w} \):
+</p>
+{{</ math.inline >}}
+
+$$
+\text{SGD Procedure:}\\\
+\text{Initialize } w \larr w_0, w_0 \in \text{any real num vector}\\\
+\begin{rcases}
+\text{Update } D_{err} \text{ by } w^t \\\
+w^{t+1} \larr w^{t} - \lambda \nabla_w L(w^t)
+\end{rcases} \text{iterate t imes}\\\
+\hat{w} = w^{t+1}
+$$
+
+$$
+\because \nabla_{w^t} L(w^t) = \sum_{x_i \in D_{err}} -y_ix_i \\\
+\therefore w^{t+1} \larr w^{t} + \lambda \sum_{x_i \in D_{err}} y_ix_i
+$$
+
+## Convergence of perceptron
 
 ## Reference
 
