@@ -125,6 +125,10 @@ Since \( L(w) \) is derivable, the most common way is to use stochastic gradient
 {{</ math.inline >}}
 
 $$
+\hat{w} = \argmin_w L(w)
+$$
+
+$$
 \text{SGD Procedure:}\\\
 \text{Initialize } w \larr w_0, w_0 \in \text{any real num vector}\\\
 \begin{rcases}
