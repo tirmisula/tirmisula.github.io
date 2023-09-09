@@ -143,7 +143,9 @@ $$
 \therefore w^{t+1} \larr w^{t} + \lambda \sum_{x_i \in D_{err}} y_ix_i
 $$
 
-## Convergence of perceptron
+## Further readings
+1. Convergence of perceptron
+2. Pocket algorithm: dataset can not be linearly classified
 
 ## Reference
 
