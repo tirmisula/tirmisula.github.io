@@ -104,7 +104,7 @@ $$
 
 {{< math.inline >}}
 <p>
-\(z_i\) is the projection point scalar of \(x_i\) on \(w\) axis. We can still split 2 classes for \(z_i\):
+\(z_i\) is the projection point <mark>scalar</mark> of \(x_i\) on \(w\) axis. We can still split 2 classes for \(z_i\):
 </p>
 {{</ math.inline >}}
 
@@ -179,9 +179,20 @@ $$
 
 $$
 \begin{align*}
-J(w) &= \frac{(\bar{z_{C1}}-\bar{z_{C2}})^2}{ \sigma_{z_{C1}}^2 + \sigma_{z_{C2}}^2 }\\\
-
+\frac{\partial}{\partial w}J(w) &= 0\\\
+\frac{\partial}{\partial w} \frac{w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^T w}{ w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w } &= 0 \\\
+\frac{\partial}{\partial w} w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw  \left(w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w\right)^{-1}  &= 0,uv \implies u'v+uv'\\\ 
+2(\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw
+\left(w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w\right)^{-1}
++
+w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw
+\cdot(-1)\cdot \left(w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w\right)^{-2} \cdot 2(\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)w
+&= 0 \\\
+(\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw
+\left(w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w\right)^{-1}
 &= 
+w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw
+ \left(w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w\right)^{-2} (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)w
 \end{align*}
 $$
 
