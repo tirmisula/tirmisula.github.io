@@ -109,8 +109,11 @@ $$
 {{</ math.inline >}}
 
 $$
-\bar{z}_{C1} = \frac{1}{N_1} \sum_{x_i \in x_{C1}} w^Tx_i \\\
-\bar{z}_{C2} = \frac{1}{N_2} \sum_{x_i \in x_{C2}} w^Tx_i \\\
+\bar{z_{C1}} = \frac{1}{N_1} \sum_{x_i \in x_{C1}} w^Tx_i \\\
+\bar{z_{C2}} = \frac{1}{N_2} \sum_{x_i \in x_{C2}} w^Tx_i \\\
+$$
+
+$$
 \sigma_{C1}^2 = w^Tx_i - \bar{z}_{C1}
 $$
 
