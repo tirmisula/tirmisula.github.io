@@ -197,10 +197,29 @@ w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw
 \end{align*}
 $$
 
-So falsely predict has the opposite form:
+{{< math.inline >}}
+<p>
+Notice that \( w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w \) and \( w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw \)are <mark>scalars</mark>, we can continue the simplification:
+</p>
+{{</ math.inline >}}
 
 $$
-y_iw^Tx_i < 0
+\begin{align*}
+(\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw
+w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w
+&= 
+w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw
+ (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)w \\\
+(\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw 
+&=
+\frac{w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw}
+{w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w} 
+(\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)w \\\
+w &= \frac{w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw}
+{w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w}
+
+\end{align*}
+
 $$
 
 Then we can design loss function like:
