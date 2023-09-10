@@ -1,6 +1,6 @@
 ---
 author: "X. Wang"
-title: "Linear Classification - Perceptron"
+title: "Linear Classification - LDA"
 date: "2023-08-31"
 description: "A brief introduction."
 tags: ["machine learning"]
@@ -13,7 +13,7 @@ ShowToc: true
 TocOpen: true
 ---
 
-Perceptron algorithm:                                                         
+LDA algorithm:                                                         
 
 {{< math.inline >}}
 {{ if or .Page.Params.math .Site.Params.math }}
@@ -39,28 +39,79 @@ Perceptron algorithm:
         font-size: 16px !important;
     }
 </style>
-## Perceptron model
+
+## Prerequisite
+### Geometric meaning of vector inner product
+Given that,
+$$
+w \in \mathbb{R}^p, \lvert w \rvert = 1\\\
+x \in \mathbb{R}^p
+$$
+
+We have the inner product by definition:
+
+$$
+\begin{align*}
+w^Tx &= \lvert w \rvert \lvert x \rvert \cos(\alpha) \\\
+&= \lvert x \rvert \cos(\alpha)
+\end{align*}
+$$
+{{< math.inline >}}
+<p>
+So \( w^Tx \) means the \(x\)'s projection point on aixs \( w \), it is  a scalar.
+</p>
+{{</ math.inline >}}
+
+
+## LDA model
+
+Linear discriminant analysis(LDA) is a linear classification method similar to perceptron model.
 
 {{< math.inline >}}
 <p>
-Given a dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\), where each data point \( (x_i,y_i) \) has attribution \(x_i \in \mathbb{R}^p \), \( y_i \in \{ -1,1 \} \), consider put the linear regression result of \(x_i\) into a sign function, then we get perceptron model:
+Given a dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\), it is described as:
 </p>
 {{</ math.inline >}}
 
 $$
+\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\\\
+x_i \in \mathbb{R}^p, y_i \in \{1,-1\}
+$$
+
+We define 2 classes C1 and C2, it has following attributes:
+
+$$
+x_{C1} = \{ x_i|y_i=1 \} \\\
+x_{C2} = \{ x_i|y_i=-1 \} \\\
+|x_{C1}| = N_1 \\\
+|x_{C2}| = N_2 \\\
+N = N_1+N_2
+$$
+
+{{< math.inline >}}
+<p>
+The core idea of LDA method is reducing dimensions. By projecting \(x_i\) to a 1-dimensional axis, LDA tries to minimize variance of samples inside a class and maximize distance between 2 classes simutaneously.
+</p>
+{{</ math.inline >}}
+
+From [Prerequisite](#prerequisite) we can define projection first:
+
+$$
 \begin{align*}
-f(x) &= \operatorname{sign}(w^Tx)\\\
-x_i &\in \mathbb{R}^p\\\
-w &\in \mathbb{R}^p
+z_i = w^Tx_i
 \end{align*}
 $$
 
+{{< math.inline >}}
+<p>
+\(z_i\) is the projection point scalar of \(x_i\) on \(w\) axis. Then we can define centroid for each class and sample variance for each class:
+</p>
+{{</ math.inline >}}
+
 $$
-\operatorname{sign}(a) = 
-\begin{cases}
-1, a \geq 0\\\
--1, a < 0
-\end{cases}
+\bar{z}_{C1} = \frac{1}{N_1} \sum_{x_i \in x_{C1}} w^Tx_i \\\
+\bar{z}_{C2} = \frac{1}{N_2} \sum_{x_i \in x_{C2}} w^Tx_i \\\
+\sigma_{C1}^2 = w^Tx_i - \bar{z}_{C1}
 $$
 
  <cite>[^1]</cite>
