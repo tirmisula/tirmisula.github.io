@@ -177,17 +177,18 @@ $$
 
 ## Solve LDA object function
 
-$$
-\begin{align*}
-\frac{\partial}{\partial w}J(w) &= 0\\\
-\frac{\partial}{\partial w} \frac{w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^T w}{ w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w } &= 0 \\\
-\frac{\partial}{\partial w} w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw  \left(w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w\right)^{-1}  &= 0,uv \implies u'v+uv'\\\ 
+<!-- \frac{\partial}{\partial w} w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw  \left(w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w\right)^{-1}  &= 0,uv \implies u'v+uv'\\\ 
 2(\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw
 \left(w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w\right)^{-1}
 +
 w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw
 \cdot(-1)\cdot \left(w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w\right)^{-2} \cdot 2(\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)w
-&= 0 \\\
+= 0 \\\ -->
+
+$$
+\begin{align*}
+\frac{\partial}{\partial w}J(w) &= 0\\\
+\frac{\partial}{\partial w} \frac{w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^T w}{ w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w } &= 0\\\
 (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw
 \left(w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w\right)^{-1}
 &= 
