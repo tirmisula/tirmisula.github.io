@@ -104,41 +104,85 @@ $$
 
 {{< math.inline >}}
 <p>
-\(z_i\) is the projection point scalar of \(x_i\) on \(w\) axis. Then we can define centroid for each class and sample variance for each class:
+\(z_i\) is the projection point scalar of \(x_i\) on \(w\) axis. We can still split 2 classes for \(z_i\):
 </p>
 {{</ math.inline >}}
 
 $$
-\bar{z_{C1}} = \frac{1}{N_1} \sum_{x_i \in x_{C1}} w^Tx_i \\\
-\bar{z_{C2}} = \frac{1}{N_2} \sum_{x_i \in x_{C2}} w^Tx_i \\\
+z_{C1} = \{ z_i|x_i \in C1 \}\\\
+z_{C2} = \{ z_i|x_i \in C2 \}
+$$
+
+Then for each class we can define centroid and sample variance:
+
+$$
+\begin{align*}
+\bar{z_{C1}} &= \frac{1}{N_1} \sum_{z_i \in z_{C1}} z_i \\\
+&= \frac{1}{N_1} \sum_{x_i \in x_{C1}} w^Tx_i \\\
+&= w^T \bar{x_{C1}}
+\end{align*}
 $$
 
 $$
-\sigma_{C1}^2 = w^Tx_i - \bar{z}_{C1}
+\begin{align*}
+\bar{z_{C2}} &= \frac{1}{N_2} \sum_{z_i \in z_{C2}} z_i \\\
+&= \frac{1}{N_2} \sum_{x_i \in x_{C2}} w^Tx_i \\\
+&= w^T \bar{x_{C2}}
+\end{align*}
+$$
+
+$$
+\begin{align*}
+\sigma_{z_{C1}}^2 &= Cov(z_{C1},z_{C1})\\\
+&= E\left[ (w^Tx_i - \bar{z}_{C1})(w^Tx_i - \bar{z}_{C1})^T \right]\\\
+&= \frac{1}{N_1} \sum_{x_i \in x_{C1}} (w^Tx_i - \bar{z}_{C1})(w^Tx_i - \bar{z}_{C1})^T \\\
+&= \frac{1}{N_1} \sum_{x_i \in x_{C1}} (w^Tx_i - w^T \bar{x_{C1}})(w^Tx_i - w^T \bar{x_{C1}})^T \\\
+&= \frac{1}{N_1} \sum_{x_i \in x_{C1}} w^T(x_i - \bar{x_{C1}})(x_i - \bar{x_{C1}})^Tw \\\
+&= w^T \left[\frac{1}{N_1} \sum_{x_i \in x_{C1}} (x_i - \bar{x_{C1}})(x_i - \bar{x_{C1}})^T\right] w \\\
+&= w^T \sigma_{x_{C1}}^2 w
+\end{align*}
+$$
+
+$$
+\begin{align*}
+\sigma_{z_{C2}}^2 &= Cov(z_{C2},z_{C2})\\\
+&= E\left[ (w^Tx_i - \bar{z}_{C2})(w^Tx_i - \bar{z}_{C2})^T \right]\\\
+&= \frac{1}{N_2} \sum_{x_i \in x_{C2}} (w^Tx_i - \bar{z}_{C2})(w^Tx_i - \bar{z}_{C2})^T \\\
+&= \frac{1}{N_2} \sum_{x_i \in x_{C2}} (w^Tx_i - w^T \bar{x_{C2}})(w^Tx_i - w^T \bar{x_{C2}})^T \\\
+&= \frac{1}{N_2} \sum_{x_i \in x_{C2}} w^T(x_i - \bar{x_{C2}})(x_i - \bar{x_{C2}})^Tw \\\
+&= w^T \left[\frac{1}{N_1} \sum_{x_i \in x_{C2}} (x_i - \bar{x_{C2}})(x_i - \bar{x_{C1}})^T\right] w \\\
+&= w^T \sigma_{x_{C2}}^2 w
+\end{align*}
+$$
+
+Then we can design the object function:
+
+$$
+\begin{align*}
+J(w) &= \frac{(\bar{z_{C1}}-\bar{z_{C2}})^2}{ \sigma_{z_{C1}}^2 + \sigma_{z_{C2}}^2 }\\\
+&= \frac{(w^T \bar{x_{C1}}-w^T \bar{x_{C2}})^2}{ \sigma_{z_{C1}}^2 + \sigma_{z_{C2}}^2 } \\\
+&= \frac{(w^T (\bar{x_{C1}}-\bar{x_{C2}}))^2}{ \sigma_{z_{C1}}^2 + \sigma_{z_{C2}}^2 } \\\
+&= \frac{w^T (\bar{x_{C1}}-\bar{x_{C2}})(w^T (\bar{x_{C1}}-\bar{x_{C2}}))^T}{ \sigma_{z_{C1}}^2 + \sigma_{z_{C2}}^2 } \\\
+&= \frac{w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^T w}{ \sigma_{z_{C1}}^2 + \sigma_{z_{C2}}^2 } \\\
+&= \frac{w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^T w}{ w^T \sigma_{x_{C1}}^2 w + w^T \sigma_{x_{C2}}^2 w } \\\
+&= \frac{w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^T w}{ w^T (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2) w }
+\end{align*}
+$$
+
+$$
+\hat{w} = \argmax_w J(w)
 $$
 
  <cite>[^1]</cite>
- {{< math.inline >}}
-<p>
-Perceptron model outputs \( f(x_i) \) as classification result of \(x_i\)
-</p>
-{{</ math.inline >}}
 
-## Design perpceptron loss function
-
-{{< math.inline >}}
-<p>
-The naive thought is to find prediction accuracy of \(f(x_i)\) on \( y_i \), thus we can design a indicator function to count the number of false predictions.
-</p>
-{{</ math.inline >}}
-
-A correctly predict contains 2 conditions, and can be summarized in 1 equation:
+## Solve LDA object function
 
 $$
-w^Tx_i \geq 0, y_i=1\\\
-w^Tx_i < 0, y_i=-1\\\
-\dArr\\\
-y_iw^Tx_i \geq 0
+\begin{align*}
+J(w) &= \frac{(\bar{z_{C1}}-\bar{z_{C2}})^2}{ \sigma_{z_{C1}}^2 + \sigma_{z_{C2}}^2 }\\\
+
+&= 
+\end{align*}
 $$
 
 So falsely predict has the opposite form:
