@@ -75,7 +75,7 @@ Given a dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\), it i
 
 $$
 \mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\\\
-x_i \in \mathbb{R}^p, y_i \in \{1,-1\}
+x_i \in \mathbb{R}^p, y_i \in \lbrace 1,-1 \rbrace
 $$
 
 We define 2 classes C1 and C2, it has following attributes:
@@ -134,8 +134,8 @@ $$
 $$
 \begin{align*}
 \sigma_{z_{C1}}^2 &= Cov(z_{C1},z_{C1})\\\
-&= E\left[ (w^Tx_i - \bar{z}_{C1})(w^Tx_i - \bar{z}_{C1})^T \right]\\\
-&= \frac{1}{N_1} \sum_{x_i \in x_{C1}} (w^Tx_i - \bar{z}_{C1})(w^Tx_i - \bar{z}_{C1})^T \\\
+&= E\left[ (w^Tx_i - \bar{z_{C1}})(w^Tx_i - \bar{z_{C1}})^T \right]\\\
+&= \frac{1}{N_1} \sum_{x_i \in x_{C1}} (w^Tx_i - \bar{z_{C1}})(w^Tx_i - \bar{z_{C1}})^T \\\
 &= \frac{1}{N_1} \sum_{x_i \in x_{C1}} (w^Tx_i - w^T \bar{x_{C1}})(w^Tx_i - w^T \bar{x_{C1}})^T \\\
 &= \frac{1}{N_1} \sum_{x_i \in x_{C1}} w^T(x_i - \bar{x_{C1}})(x_i - \bar{x_{C1}})^Tw \\\
 &= w^T \left[\frac{1}{N_1} \sum_{x_i \in x_{C1}} (x_i - \bar{x_{C1}})(x_i - \bar{x_{C1}})^T\right] w \\\
@@ -146,8 +146,8 @@ $$
 $$
 \begin{align*}
 \sigma_{z_{C2}}^2 &= Cov(z_{C2},z_{C2})\\\
-&= E\left[ (w^Tx_i - \bar{z}_{C2})(w^Tx_i - \bar{z}_{C2})^T \right]\\\
-&= \frac{1}{N_2} \sum_{x_i \in x_{C2}} (w^Tx_i - \bar{z}_{C2})(w^Tx_i - \bar{z}_{C2})^T \\\
+&= E\left[ (w^Tx_i - \bar{z_{C2}})(w^Tx_i - \bar{z_{C2}})^T \right]\\\
+&= \frac{1}{N_2} \sum_{x_i \in x_{C2}} (w^Tx_i - \bar{z_{C2}})(w^Tx_i - \bar{z_{C2}})^T \\\
 &= \frac{1}{N_2} \sum_{x_i \in x_{C2}} (w^Tx_i - w^T \bar{x_{C2}})(w^Tx_i - w^T \bar{x_{C2}})^T \\\
 &= \frac{1}{N_2} \sum_{x_i \in x_{C2}} w^T(x_i - \bar{x_{C2}})(x_i - \bar{x_{C2}})^Tw \\\
 &= w^T \left[\frac{1}{N_1} \sum_{x_i \in x_{C2}} (x_i - \bar{x_{C2}})(x_i - \bar{x_{C1}})^T\right] w \\\
