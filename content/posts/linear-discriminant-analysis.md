@@ -219,7 +219,6 @@ w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw
 &\propto
 (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)w
 \end{align*}
-
 $$
 
 Then we can design loss function like:
