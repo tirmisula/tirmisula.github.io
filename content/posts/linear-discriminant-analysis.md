@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
 title: "Linear Classification - LDA"
-date: "2023-08-31"
+date: "2023-09-01"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -217,65 +217,64 @@ w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw
 (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)w \\\
 (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw 
 &\propto
-(\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)w
-\end{align*}
-$$
-
-Then we can design loss function like:
-
-$$
-\begin{align*}
-L(w) &= \sum_{i=1}^N I\lbrace y_iw^Tx_i < 0 \rbrace
+(\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)w \\\
+&\Darr\\\
+(\bar{x_{C1}}-\bar{x_{C2}}) &\propto (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)w
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-However indicator function is not <mark>derivable</mark>, because tiny change \( \Delta w \) may results 0 \( \rarr \) 1 or 1 \( \rarr \) 0. The way is to remove indicator operation and multiply -1 to change convergence from \( -\infty \rarr 0\) to \( \infty \rarr 0 \).
+Since \( (\bar{x_{C1}}-\bar{x_{C2}})^Tw \) is a scalar:
 </p>
 {{</ math.inline >}}
-
-The final loss function is designed as follow:
 
 $$
 \begin{align*}
-L(w) &= \sum_{x_i \in D_{err}}  -y_iw^Tx_i
-\end{align*}\\\
-D_{err}: \{x_i | (x_i,y_i) \in \mathcal{D},y_iw^Tx_i < 0\}
+(\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw 
+&\propto
+(\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)w \\\
+&\Darr\\\
+(\bar{x_{C1}}-\bar{x_{C2}}) &\propto (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)w \\\
+w &\propto (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)^{-1}(\bar{x_{C1}}-\bar{x_{C2}})
+\end{align*}
 $$
-
-## Solve preceptron weights
 
 {{< math.inline >}}
 <p>
-Since \( L(w) \) is derivable, the most common way is to use stochastic gradient decent(SGD) method to find \( \hat{w} \):
+Furthermore, if \( (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)^{-1} \) is diagnal:
 </p>
 {{</ math.inline >}}
 
 $$
-\hat{w} = \argmin_w L(w)
+(\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)^{-1} \propto I \implies w \propto (\bar{x_{C1}}-\bar{x_{C2}})
 $$
 
-$$
-\text{SGD Procedure:}\\\
-\text{Initialize } w \larr w_0, w_0 \in \text{any real num vector}\\\
-\begin{rcases}
-\text{Update } D_{err} \text{ by } w^t \\\
-w^{t+1} \larr w^{t} - \lambda \nabla_w L(w^t)
-\end{rcases} \text{iterate t imes}\\\
-\hat{w} = w^{t+1}
-$$
+## Conclusion
+
+In general situation:
 
 $$
-\because \nabla_{w^t} L(w^t) = \sum_{x_i \in D_{err}} -y_ix_i \\\
-\therefore w^{t+1} \larr w^{t} + \lambda \sum_{x_i \in D_{err}} y_ix_i
+\hat{w} \propto (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)^{-1}(\bar{x_{C1}}-\bar{x_{C2}})
 $$
 
-## Further readings
-1. Convergence of perceptron
-2. Pocket algorithm: dataset can not be linearly classified
+{{< math.inline >}}
+<p>
+If \( (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)^{-1} \propto I \):
+</p>
+{{</ math.inline >}}
+
+$$
+\hat{w} \propto (\bar{x_{C1}}-\bar{x_{C2}})
+$$
+
+{{< math.inline >}}
+<p>
+\( \hat{w} \) is the normal to the discrimant hyperplane.
+</p>
+{{</ math.inline >}}
 
 ## Reference
 
-[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=14).
+[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=16).
 [^2]: From [source](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
