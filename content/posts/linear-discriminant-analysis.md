@@ -150,7 +150,7 @@ $$
 &= \frac{1}{N_2} \sum_{x_i \in x_{C2}} (w^Tx_i - \bar{z_{C2}})(w^Tx_i - \bar{z_{C2}})^T \\\
 &= \frac{1}{N_2} \sum_{x_i \in x_{C2}} (w^Tx_i - w^T \bar{x_{C2}})(w^Tx_i - w^T \bar{x_{C2}})^T \\\
 &= \frac{1}{N_2} \sum_{x_i \in x_{C2}} w^T(x_i - \bar{x_{C2}})(x_i - \bar{x_{C2}})^Tw \\\
-&= w^T \left[\frac{1}{N_1} \sum_{x_i \in x_{C2}} (x_i - \bar{x_{C2}})(x_i - \bar{x_{C1}})^T\right] w \\\
+&= w^T \left[\frac{1}{N_2} \sum_{x_i \in x_{C2}} (x_i - \bar{x_{C2}})(x_i - \bar{x_{C2}})^T\right] w \\\
 &= w^T \sigma_{x_{C2}}^2 w
 \end{align*}
 $$
@@ -217,9 +217,7 @@ w^T (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw
 (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)w \\\
 (\bar{x_{C1}}-\bar{x_{C2}}) (\bar{x_{C1}}-\bar{x_{C2}})^Tw 
 &\propto
-(\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)w \\\
-&\Darr\\\
-(\bar{x_{C1}}-\bar{x_{C2}}) &\propto (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)w
+(\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)w
 \end{align*}
 $$
 
@@ -242,7 +240,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Furthermore, if \( (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)^{-1} \) is diagnal:
+Furthermore, if \( (\sigma_{x_{C1}}^2 + \sigma_{x_{C2}}^2)^{-1} \) is diagnal and isotropic:
 </p>
 {{</ math.inline >}}
 
