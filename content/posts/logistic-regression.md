@@ -39,7 +39,7 @@ TocOpen: true
         font-size: 16px !important;
     }
 </style>
-## Perceptron model
+## Definition
 
 {{< math.inline >}}
 <p>
@@ -52,8 +52,7 @@ sigmoid function is defined as follows:<cite>[^1]</cite>
 
 $$
 \begin{align*}
-\sigma(z) &= \frac{1}{1+\mathrm{e}^{-z}}\\\
-
+\sigma(z) &= \frac{1}{1+\mathrm{e}^{-z}}
 \end{align*}
 $$
 
@@ -109,9 +108,22 @@ $$
 \end{align*}
 $$
 
-## Further readings
-1. Convergence of perceptron
-2. Pocket algorithm: dataset can not be linearly classified
+$$
+\begin{align*}
+\frac{\partial}{\partial w} \sum_{i=1}^N\left[ y_i\log(\sigma(w^Tx_i))+(1-y_i)\log(1-\sigma(w^Tx_i)) \right] &= 0 \\\
+\sum_{i=1}^N \left[ y_i(1+e^{-w^Tx})(-1)(1+e^{-w^Tx})^{-2}e^{-w^Tx}(-x)+ \cdots \right] &= 0 \\\
+\sum_{i=1}^N \left[ y_i\frac{x_ie^{-w^Tx_i}}{(1+e^{-w^Tx_i})} + (1-y_i)\frac{1+e^{-w^Tx}}{e^{-w^Tx}}(1+e^{-w^Tx})^{-2}e^{-w^Tx}(-x) \right] &= 0 \\\
+\sum_{i=1}^N \left[ y_i\frac{x_ie^{-w^Tx_i}}{(1+e^{-w^Tx_i})} + (y_i-1)\frac{x_i}{(1+e^{-w^Tx_i})} \right] &= 0 \implies
+\sum_{x_i \in C1}\frac{x_ie^{-w^Tx_i}}{1+e^{-w^Tx_i}} &= \sum_{x_i \in C0} \frac{x_i}{1+e^{-w^Tx_i}} \\\
+\sum_{i=1}^N \left[ y_ix_i -\frac{1}{(1+e^{-w^Tx_i})}x_i \right]  &= 0 \\\
+\sum_{i=1}^N \left[ \left(y_i-\sigma(x_i)\right)x_i \right] &= 0
+\end{align*}
+$$
+
+Unlike linear regression with normally distributed residuals, it is not possible to find a closed-form expression for the coefficient values that maximize the likelihood function, so that an iterative process must be used instead.
+
+## Conclusion
+
 
 ## Reference
 
