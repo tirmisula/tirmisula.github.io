@@ -130,8 +130,8 @@ $$
 \text{\textcircled 1 }\text{Initialize } w \larr w_0, w_0 \in \text{any real num vector} \\\
 \text{\textcircled 2 }\text{Randomly shuffle }(x_i,y_i) \text{ in }\mathcal{D} \\\
 \text{\textcircled 3 }\text{For } i=1,\cdots,N \text{ do: } \\\
-\quad w^{t+1} \larr w^{t} - \lambda \nabla_w L, \text{If } (x_i,y_i)\in\mathcal{D}_{err} \\\
-\text{Repeat \text{\textcircled 2}\text{\textcircled 3} until }\mathcal{D}_{err} = \emptyset \\\
+\quad w^{t+1} \larr w^{t} - \lambda \nabla_w L \\\
+\text{Repeat \text{\textcircled 2}\text{\textcircled 3} until } w \text{ converge OR terminate after T loops} \\\
 \text{\textcircled 4 }\text{Output result as }\hat{w}
 \end{array}
 $$
