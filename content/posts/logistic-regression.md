@@ -93,7 +93,7 @@ y=0, p_1^y p_0^{1-y}=p_0
 \end{cases}
 $$
 
-## Solve logistic regression by MLE
+## MLE of logistic regression
 
 MLE:
 
@@ -111,21 +111,51 @@ $$
 $$
 \begin{align*}
 \frac{\partial}{\partial w} \sum_{i=1}^N\left[ y_i\log(\sigma(w^Tx_i))+(1-y_i)\log(1-\sigma(w^Tx_i)) \right] &= 0 \\\
-\sum_{i=1}^N \left[ y_i(1+e^{-w^Tx})(-1)(1+e^{-w^Tx})^{-2}e^{-w^Tx}(-x)+ \cdots \right] &= 0 \\\
+\sum_{i=1}^N \left[ y_i(1+e^{-w^Tx})(-1)(1+e^{-w^Tx})^{-2}e^{-w^Tx}(-x)+ (1-y_i)\log(1-\sigma(w^Tx_i)) \right] &= 0 \\\
 \sum_{i=1}^N \left[ y_i\frac{x_ie^{-w^Tx_i}}{(1+e^{-w^Tx_i})} + (1-y_i)\frac{1+e^{-w^Tx}}{e^{-w^Tx}}(1+e^{-w^Tx})^{-2}e^{-w^Tx}(-x) \right] &= 0 \\\
 \sum_{i=1}^N \left[ y_i\frac{x_ie^{-w^Tx_i}}{(1+e^{-w^Tx_i})} + (y_i-1)\frac{x_i}{(1+e^{-w^Tx_i})} \right] &= 0 \implies
-\sum_{x_i \in C1}\frac{x_ie^{-w^Tx_i}}{1+e^{-w^Tx_i}} &= \sum_{x_i \in C0} \frac{x_i}{1+e^{-w^Tx_i}} \\\
+\sum_{x_i \in C1}x_i(1-\sigma(w^Tx_i)) &= \sum_{x_i \in C0} x_i\sigma(w^Tx_i) \\\
 \sum_{i=1}^N \left[ y_ix_i -\frac{1}{(1+e^{-w^Tx_i})}x_i \right]  &= 0 \\\
-\sum_{i=1}^N \left[ \left(y_i-\sigma(x_i)\right)x_i \right] &= 0
+\sum_{i=1}^N \left[ \left(y_i-\sigma(w^Tx_i)\right)x_i \right] &= 0
 \end{align*}
 $$
 
-Unlike linear regression with normally distributed residuals, it is not possible to find a closed-form expression for the coefficient values that maximize the likelihood function, so that an iterative process must be used instead.
+Unlike linear regression with normally distributed residuals, it is not possible to find a closed-form expression for the coefficient values that maximize the likelihood function, so that an iterative process must be used instead.<cite>[^2]</cite>
+
+We use stochastic gradient decent here:
+
+$$
+\begin{array}{l}
+\text{SGD Procedure:} \\\
+\text{\textcircled 1 }\text{Initialize } w \larr w_0, w_0 \in \text{any real num vector} \\\
+\text{\textcircled 2 }\text{Randomly shuffle }(x_i,y_i) \text{ in }\mathcal{D} \\\
+\text{\textcircled 3 }\text{For } i=1,\cdots,N \text{ do: } \\\
+\quad w^{t+1} \larr w^{t} - \lambda \nabla_w L, \text{If } (x_i,y_i)\in\mathcal{D}_{err} \\\
+\text{Repeat \text{\textcircled 2}\text{\textcircled 3} until }\mathcal{D}_{err} = \emptyset \\\
+\text{\textcircled 4 }\text{Output result as }\hat{w}
+\end{array}
+$$
+
+$$
+\because \nabla_{w} L = \left(y_i-\sigma(w^Tx_i)\right)x_i \\\
+\therefore w^{t+1} \larr w^{t} + \lambda \left(y_i-\frac{1}{1+\mathrm{e}^{-w^Tx}}\right)x_i
+$$
 
 ## Conclusion
 
+The pdf function of 2-classes logistic regression is:
+
+$$
+p(y|x) = {\frac{1}{1+\mathrm{e}^{-w^Tx}}}^y \cdot {\frac{\mathrm{e}^{-w^Tx}}{1+\mathrm{e}^{-w^Tx}}}^{1-y}
+$$
+
+Weight is updated by SGD:
+
+$$
+w^{t+1} \larr w^{t} + \lambda \left(y_i-\frac{1}{1+\mathrm{e}^{-w^Tx}}\right)x_i
+$$
 
 ## Reference
 
 [^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=14).
-[^2]: From [source](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
+[^2]: From [source](https://en.wikipedia.org/wiki/Logistic_regression).

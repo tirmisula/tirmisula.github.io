@@ -113,7 +113,7 @@ $$
 \begin{align*}
 L(w) &= \sum_{x_i \in D_{err}}  -y_iw^Tx_i
 \end{align*}\\\
-D_{err}: \{x_i | (x_i,y_i) \in \mathcal{D},y_iw^Tx_i < 0\}
+\mathcal{D}_{err}: \{x_i | (x_i,y_i) \in \mathcal{D},y_iw^Tx_i < 0\}
 $$
 
 ## Solve preceptron weights
@@ -129,18 +129,20 @@ $$
 $$
 
 $$
-\text{SGD Procedure:}\\\
-\text{Initialize } w \larr w_0, w_0 \in \text{any real num vector}\\\
-\begin{rcases}
-\text{Update } D_{err} \text{ by } w^t \\\
-w^{t+1} \larr w^{t} - \lambda \nabla_w L(w^t)
-\end{rcases} \text{iterate t imes}\\\
-\hat{w} = w^{t+1}
+\begin{array}{l}
+\text{SGD Procedure:} \\\
+\text{\textcircled 1 }\text{Initialize } w \larr w_0, w_0 \in \text{any real num vector} \\\
+\text{\textcircled 2 }\text{Randomly shuffle }(x_i,y_i) \text{ in }\mathcal{D} \\\
+\text{\textcircled 3 }\text{For } i=1,\cdots,N \text{ do: } \\\
+\quad w^{t+1} \larr w^{t} - \lambda \nabla_w L(w^t), \text{If } (x_i,y_i)\in\mathcal{D}_{err} \\\
+\text{Repeat \text{\textcircled 2}\text{\textcircled 3} until }\mathcal{D}_{err} = \emptyset \\\
+\text{\textcircled 4 }\text{Output result as }\hat{w}
+\end{array}
 $$
 
 $$
-\because \nabla_{w^t} L(w^t) = \sum_{x_i \in D_{err}} -y_ix_i \\\
-\therefore w^{t+1} \larr w^{t} + \lambda \sum_{x_i \in D_{err}} y_ix_i
+\because \nabla_{w^t} L(w^t) = -y_ix_i \\\
+\therefore w^{t+1} \larr w^{t} + \lambda y_ix_i
 $$
 
 ## Further readings
