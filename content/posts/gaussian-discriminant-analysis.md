@@ -35,6 +35,20 @@ TocOpen: true
         font-size: 16px !important;
     }
 </style>
+
+## Prerequisite
+### Matrix trace derivation
+
+$$
+\begin{align}
+\frac{\partial}{\partial A}Tr(AB) &= B^T \\\
+\frac{\partial}{\partial A}\lvert A \rvert &= \lvert A \rvert A^{-1} \\\
+Tr(AB) &= Tr(BA) \\\
+Tr(ABC) &= Tr(CAB) = Tr(BCA) \\\
+Tr(A) &= A \iff A \text{ is a scalar}
+\end{align}
+$$
+
 ## Definition
 
 {{< math.inline >}}
@@ -202,6 +216,73 @@ $$
 \end{align*}
 $$
 
+{{< math.inline >}}
+<p>
+Finally we solve \(\Sigma\):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\frac{\partial}{\partial \Sigma} L(\theta) &= 0 \\\
+\frac{\partial}{\partial \Sigma} \sum_{i=1}^N \left[ \log \mathcal{N}(\mu_1, \Sigma)^{y_i} + \log\mathcal{N}(\mu_2, \Sigma)^{1-y_i} + \log \phi^{y_i} (1-\phi)^{1-y_i} \right] &=  0 \\\
+\frac{\partial}{\partial \Sigma} \sum_{i=1}^N \left[ \log \mathcal{N}(\mu_1, \Sigma)^{y_i} + \log \mathcal{N}(\mu_2, \Sigma)^{1-y_i} \right] &= 0 \\\
+\frac{\partial}{\partial \Sigma} \sum_{x_i\in C1} \log \mathcal{N}(\mu_1, \Sigma) + \sum_{x_i\in C2} \log \mathcal{N}(\mu_2, \Sigma) &= 0
+\end{align*}
+$$
+
+For C1 Part:
+
+$$
+\begin{align*}
+\frac{\partial}{\partial \Sigma} \sum_{x_i\in C1} \log \mathcal{N}(\mu_1, \Sigma) &= \frac{\partial}{\partial \Sigma} \sum_{x_i \in C1}  \left[\log\frac{1}{(2\pi)^{\frac{p}{2}}\lvert\Sigma\rvert^{\frac{1}{2}}} + \log\mathrm{e}^{-\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
+&= \frac{\partial}{\partial \Sigma} \sum_{x_i \in C1}  \left[\log\frac{1}{(2\pi)^{\frac{p}{2}}} + \log\lvert\Sigma\rvert^{-\frac{1}{2}} + \log\mathrm{e}^{-\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
+&= \frac{\partial}{\partial \Sigma} \sum_{x_i \in C1}  \left[\log\lvert\Sigma\rvert^{-\frac{1}{2}} - {\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
+&= \frac{\partial}{\partial \Sigma} \sum_{x_i \in C1}  \left[-\frac{1}{2}\log\lvert\Sigma\rvert\right] - \sum_{x_i \in C1}  \left[{\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
+&= -\frac{1}{2}\sum_{x_i \in C1} \frac{1}{\lvert\Sigma\rvert}\cdot\frac{\partial \lvert\Sigma\rvert}{\partial \Sigma} - \frac{\partial}{\partial \Sigma}\sum_{x_i \in C1}  \left[{\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
+\because \text{ According to \textcolor{aqua}{Prerequisite} } \frac{\partial}{\partial A}\lvert A \rvert = \lvert A \rvert A^{-1} \\\
+&= -\frac{1}{2}\sum_{x_i \in C1} \frac{1}{\lvert\Sigma\rvert}\cdot \lvert\Sigma\rvert\Sigma^{-1} - \frac{\partial}{\partial \Sigma}\sum_{x_i \in C1}  \left[{\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
+&= -\frac{1}{2}\sum_{x_i \in C1} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\sum_{x_i \in C1}  \left[{\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
+&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\sum_{x_i \in C1}  \left[{\frac{1}{2}\underset{\color{red}{scalar}}{(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}}\right] \\\
+&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\sum_{x_i \in C1}  \left[\frac{1}{2}Tr\left((x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)\right)\right] \\\
+\because \text{ circular shifts of trace shown in \textcolor{aqua}{Prerequisite}} \\\
+&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}Tr\left(\sum_{x_i \in C1}  \left[\frac{1}{2}(x_i-\mu_1)(x_i-\mu_1)^T\Sigma^{-1}\right]\right) \\\
+&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}Tr\left(\sum_{x_i \in C1}  \left[\frac{1}{2}(x_i-\mu_1)(x_i-\mu_1)^T\right]\cdot\Sigma^{-1}\right) \\\
+&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}Tr\left(\frac{1}{2}\sum_{x_i \in C1}  \left[(x_i-\mu_1)(x_i-\mu_1)^T\right]\cdot\Sigma^{-1}\right) \\\
+&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}Tr\left(\frac{1}{2}N_1Var(x_{C1})\cdot\Sigma^{-1}\right) \\\
+&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\frac{1}{2}N_1Tr\left(Var(x_{C1})\cdot\Sigma^{-1}\right) \\\
+&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\frac{1}{2}N_1Tr\left(\Sigma^{-1}Var(x_{C1})\right) \\\
+\because \text{ According to \textcolor{aqua}{Prerequisite} } \frac{\partial}{\partial A}Tr(AB) = B^T \\\
+&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{1}{2}N_1Var(x_{C1})^T \cdot \frac{\partial \Sigma^{-1}}{\partial \Sigma} \\\
+&= -\frac{N_1}{2} \frac{1}{\Sigma} + \frac{1}{2}N_1Var(x_{C1}) \Sigma^{-2}
+\end{align*}
+$$
+
+For C2 Part, Similarly:
+
+$$
+\begin{align*}
+\frac{\partial}{\partial \Sigma} \sum_{x_i\in C2} \log \mathcal{N}(\mu_2, \Sigma) &= -\frac{N_2}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}Tr\left(\frac{1}{2}\sum_{x_i \in C2}  \left[(x_i-\mu_2)(x_i-\mu_2)^T\right]\cdot\Sigma^{-1}\right) \\\
+&= -\frac{N_2}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}Tr\left(\frac{1}{2}N_2Var(x_{C2})\cdot\Sigma^{-1}\right) \\\
+&= -\frac{N_2}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\frac{1}{2}N_2Tr\left(Var(x_{C2})\cdot\Sigma^{-1}\right) \\\
+&= -\frac{N_2}{2} \frac{1}{\Sigma} + \frac{1}{2}N_2Var(x_{C2}) \Sigma^{-2}
+\end{align*}
+$$
+
+Back to original equation:
+
+$$
+\begin{align*}
+\frac{\partial}{\partial \Sigma} \sum_{x_i\in C1} \log \mathcal{N}(\mu_1, \Sigma) + \frac{\partial}{\partial \Sigma} \sum_{x_i\in C2} \log \mathcal{N}(\mu_2, \Sigma) &= 0 \\\
+-\frac{N_1}{2} \frac{1}{\Sigma} + \frac{1}{2}N_1Var(x_{C1}) \Sigma^{-2} -\frac{N_2}{2} \frac{1}{\Sigma} + \frac{1}{2}N_2Var(x_{C2}) \Sigma^{-2} &= 0 \\\
+-\frac{1}{2} \frac{N_1+N_2}{\Sigma} + \frac{1}{2}(N_1Var(x_{C1})+N_2Var(x_{C2}))\Sigma^{-2} &= 0 \\\
+(N_1Var(x_{C1})+N_2Var(x_{C2}))\Sigma^{-2} &= (N_1+N_2)\Sigma^{-1} \\\
+N_1Var(x_{C1})+N_2Var(x_{C2}) &= N\Sigma \\\
+\Sigma &= \frac{N_1Var(x_{C1})+N_2Var(x_{C2})}{N} \\\
+\Sigma &= \frac{N_1\Sigma_{x_{C1}}+N_2\Sigma_{x_{C2}}}{N}
+\end{align*}
+$$
+
 ## Conclusion
 
 The pdf function of 2-classes logistic regression is:
@@ -218,5 +299,5 @@ $$
 
 ## Reference
 
-[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=14).
+[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=18).
 [^2]: From [source](https://en.wikipedia.org/wiki/Logistic_regression).
