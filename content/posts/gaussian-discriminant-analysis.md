@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
-title: "Linear Classification - Logistic Regression"
-date: "2023-09-02"
+title: "Linear Classification - Gaussian Discriminant Analysis"
+date: "2023-09-03"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -43,17 +43,16 @@ TocOpen: true
 
 {{< math.inline >}}
 <p>
-Given a dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\), where each data point \( (x_i,y_i) \) has attribution \(x_i \in \mathbb{R}^p \), \( y_i \in \{ 0,1 \} \). Logistic regression is a probability discriminant model, it assumes \( p(y_i|x_i) \) subjects to a certain distribution. Similar to <a href="https://tirmisula.github.io/posts/perceptron/">perceptron model</a> logistic model choose a activate function for further process, the different thing is that logistic model choose sigmoid function, because logistic model solves soft classification problem, and sigmoid function outputs probability ranges in \( [0,1] \) which satisfies the requirement.
+Given a dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\), where each data point \( (x_i,y_i) \) has attribution \(x_i \in \mathbb{R}^p \), \( y_i \in \{ 0,1 \} \). In gaussian discriminant analysis(GDA) we don't directly model \(p(y|x)\) like <a href="https://tirmisula.github.io/posts/logistic-regression/">logistic regression</a>, we model \(p(x|y)\) instead and then solve \(p(y|x)\) by maximum posterier estimation(MAP).
 <br/>
 <br/>
-Sigmoid function is defined as follows:<cite>[^1]</cite>
+The problem is shown as:<cite>[^1]</cite>
 </p>
 {{</ math.inline >}}
 
+
 $$
-\begin{align*}
-\sigma(z) &= \frac{1}{1+\mathrm{e}^{-z}}
-\end{align*}
+\hat{\theta} = \argmax_{\theta} p(y|x)
 $$
 
 It has following attributes:
@@ -70,7 +69,7 @@ $$
  
  {{< math.inline >}}
 <p>
-We assume probability of \(p(y=1|x)\) equals to sigmoid output. Then we can define probability of \(y\) by these functions:
+Then we can define probability of \(y\) by this function:
 </p>
 {{</ math.inline >}}
 

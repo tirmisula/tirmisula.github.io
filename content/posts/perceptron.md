@@ -120,7 +120,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Since \( L(w) \) is derivable, the most common way is to use stochastic gradient decent(SGD) method to find \( \hat{w} \):
+Since \( L(w) \) is derivable, the most common way is to use stochastic gradient descent(SGD) method to find \( \hat{w} \):
 </p>
 {{</ math.inline >}}
 
