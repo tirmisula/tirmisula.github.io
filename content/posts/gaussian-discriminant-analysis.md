@@ -18,10 +18,6 @@ TocOpen: true
 {{< math.inline >}}
 {{ if or .Page.Params.math .Site.Params.math }}
 
-<!-- KaTeX -->
-<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css" integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js" integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js" integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script> -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
 
 <!-- The loading of KaTeX is deferred to speed up page rendering -->
@@ -43,101 +39,167 @@ TocOpen: true
 
 {{< math.inline >}}
 <p>
-Given a dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\), where each data point \( (x_i,y_i) \) has attribution \(x_i \in \mathbb{R}^p \), \( y_i \in \{ 0,1 \} \). In gaussian discriminant analysis(GDA) we don't directly model \(p(y|x)\) like <a href="https://tirmisula.github.io/posts/logistic-regression/">logistic regression</a>, we model \(p(x|y)\) instead and then solve \(p(y|x)\) by maximum posterier estimation(MAP).
-<br/>
-<br/>
-The problem is shown as:<cite>[^1]</cite>
-</p>
-{{</ math.inline >}}
-
-
-$$
-\hat{\theta} = \argmax_{\theta} p(y|x)
-$$
-
-It has following attributes:
-
-$$
-\sigma(z)=
-\begin{cases}
-0, z \rarr -\infty\\\
-\frac{1}{2}, z = 0\\\
-1, z \rarr \infty
-\end{cases}
-$$
-
- 
- {{< math.inline >}}
-<p>
-Then we can define probability of \(y\) by this function:
+Given a dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\), where each data point \( (x_i,y_i) \) has attribution \(x_i \in \mathbb{R}^p \), \( y_i \in \{ 0,1 \} \). We define 2 classes C1 and C2:
 </p>
 {{</ math.inline >}}
 
 $$
-p_1=p(y=1|x)=\sigma(w^Tx)=\frac{1}{1+\mathrm{e}^{-w^Tx}}\\\
-p_0=p(y=0|x)=1-p_1=\frac{\mathrm{e}^{-w^Tx}}{1+\mathrm{e}^{-w^Tx}}
+x_{C1} = \{ x_i|y_i=1 \} \\\
+x_{C2} = \{ x_i|y_i=0 \} \\\
+|x_{C1}| = N_1 \\\
+|x_{C2}| = N_2 \\\
+N = N_1+N_2
 $$
 
 {{< math.inline >}}
 <p>
-Combine \(p_1\), \(p_2\) together, we get:
+In gaussian discriminant analysis(GDA) we don't directly model \(p(y|x)\) like <a href="https://tirmisula.github.io/posts/logistic-regression/">logistic regression</a>, we model \(p(x|y)\) instead and then solve \(p(y|x)\) by maximum posterier estimation(MAP).
+<br/>
+<br/>
+MAP is shown as:<cite>[^1]</cite>
 </p>
 {{</ math.inline >}}
 
 $$
-p(y|x) = p_1^y p_0^{1-y} \\\
-\because
-\begin{cases}y=1, p_1^y p_0^{1-y}=p_1\\\
-y=0, p_1^y p_0^{1-y}=p_0
+\underset{posterier}{p(y|x)} \propto \underset{likelihood}{p(x|y)}\underset{prior}{p(y)}
+$$
+
+{{< math.inline >}}
+<p>
+Since it is porpotional value, we don't directly solve \(p(y=1|x)\) and \(p(y=0|x)), but we can determine which one is larger:
+</p>
+{{</ math.inline >}}
+
+$$
+p(y=1|x) \triangleq p(y=0|x)
+$$
+
+{{< math.inline >}}
+<p>
+We assume \(p(y)\) subject to Bernoulli distribution, which is:
+</p>
+{{</ math.inline >}}
+
+$$
+y \sim \mathcal{Bernoulli}(\phi) \\\
+p(y) = \phi^y (1-\phi)^{1-y} \implies
+\begin{cases}
+p(y=1) = \phi \\\
+p(y=0) = 1-\phi
 \end{cases}
 $$
 
-## MLE of logistic regression
+{{< math.inline >}}
+<p>
+We assume \(p(x|y=0)\) and \(p(x|y=1)\) subject to Gaussian distribution, which is:
+</p>
+{{</ math.inline >}}
 
-MLE:
+$$
+x|{y=1} \sim \mathcal{N}(\mu_1, \Sigma) \\\
+x|{y=0} \sim \mathcal{N}(\mu_2, \Sigma) \\\
+\dArr \\\
+p(x|y) = \mathcal{N}(\mu_1, \Sigma)^y \mathcal{N}(\mu_2, \Sigma)^{1-y}
+$$
+
+{{< math.inline >}}
+<p>
+Let \(\theta\) be the parameters to be estimated, which is:
+</p>
+{{</ math.inline >}}
+
+$$
+\theta = (\mu_1, \mu_2, \Sigma, \phi)
+$$
+
+Then we can define the likelihood function:
+
+$$
+L(\theta) = \prod_{i=1}^N p(x_i|y_i)p(y_i)
+$$
+
+{{< math.inline >}}
+<p>
+The problem is find \( \hat{\theta} \) by maximizing \(L(\theta)\):
+</p>
+{{</ math.inline >}}
 
 $$
 \begin{align*}
-\hat{w} &= \argmax_w \prod_{i=1}^N p(y_i|x_i) \\\
-&= \argmax_w \log\left( \prod_{i=1}^N p(y_i|x_i) \right) \\\
-&= \argmax_w \sum_{i=1}^N \log\left( p(y_i|x_i) \right) \\\
-&= \argmax_w \sum_{i=1}^N\left[ \log(p_1^{y_i})+\log(p_0^{1-{y_i}}) \right] \\\
-&= \argmax_w \sum_{i=1}^N\left[ y_i\log(p_1)+(1-y_i)\log(p_0) \right] \\\
-&= \argmax_w \underset{\color{red}{-\text{ cross entropy loss}}}{\sum_{i=1}^N\left[ y_i\log(\sigma(w^Tx_i))+(1-y_i)\log(1-\sigma(w^Tx_i)) \right]}
+\hat{\theta} &= \argmax_{\theta} L(\theta) \\\
+&= \argmax_{\theta} \prod_{i=1}^N p(x_i|y_i)p(y_i) \\\
+&= \argmax_{\theta} \sum_{i=1}^N \log\left( p(x_i|y_i)p(y_i) \right) \\\
+&= \argmax_{\theta} \sum_{i=1}^N \left[ \log p(x_i|y_i) + \log p(y_i) \right] \\\
+&= \argmax_{\theta} \sum_{i=1}^N \left[ \log \mathcal{N}(\mu_1, \Sigma)^{y_i} \mathcal{N}(\mu_2, \Sigma)^{1-y_i} + \log \phi^{y_i} (1-\phi)^{1-y_i} \right] \\\
+&= \argmax_{\theta} \sum_{i=1}^N \left[ \log \mathcal{N}(\mu_1, \Sigma)^{y_i} + \log\mathcal{N}(\mu_2, \Sigma)^{1-y_i} + \log \phi^{y_i} (1-\phi)^{1-y_i} \right]
 \end{align*}
 $$
+
+## Solve parameters
+
+{{< math.inline >}}
+<p>
+We solve \(\phi\) first:
+</p>
+{{</ math.inline >}}
 
 $$
 \begin{align*}
-\frac{\partial}{\partial w} \sum_{i=1}^N\left[ y_i\log(\sigma(w^Tx_i))+(1-y_i)\log(1-\sigma(w^Tx_i)) \right] &= 0 \\\
-\sum_{i=1}^N \left[ y_i(1+e^{-w^Tx})(-1)(1+e^{-w^Tx})^{-2}e^{-w^Tx}(-x)+ (1-y_i)\log(1-\sigma(w^Tx_i)) \right] &= 0 \\\
-\sum_{i=1}^N \left[ y_i\frac{x_ie^{-w^Tx_i}}{(1+e^{-w^Tx_i})} + (1-y_i)\frac{1+e^{-w^Tx}}{e^{-w^Tx}}(1+e^{-w^Tx})^{-2}e^{-w^Tx}(-x) \right] &= 0 \\\
-\sum_{i=1}^N \left[ y_i\frac{x_ie^{-w^Tx_i}}{(1+e^{-w^Tx_i})} + (y_i-1)\frac{x_i}{(1+e^{-w^Tx_i})} \right] &= 0 \implies
-\sum_{x_i \in C1}x_i(1-\sigma(w^Tx_i)) &= \sum_{x_i \in C0} x_i\sigma(w^Tx_i) \\\
-\sum_{i=1}^N \left[ y_ix_i -\frac{1}{(1+e^{-w^Tx_i})}x_i \right]  &= 0 \\\
-\sum_{i=1}^N \left[ \left(y_i-\sigma(w^Tx_i)\right)x_i \right] &= 0
+\frac{\partial}{\partial \phi} L(\theta) &= 0 \\\
+\frac{\partial}{\partial \phi} \sum_{i=1}^N \left[ \log \mathcal{N}(\mu_1, \Sigma)^{y_i} + \log\mathcal{N}(\mu_2, \Sigma)^{1-y_i} + \log \phi^{y_i} (1-\phi)^{1-y_i} \right] &=  0 \\\
+\frac{\partial}{\partial \phi} \sum_{i=1}^N \left[ \log \phi^{y_i} (1-\phi)^{1-y_i} \right] &= 0 \\\
+\frac{\partial}{\partial \phi} \sum_{i=1}^N \left[ \log \phi^{y_i}  + \log (1-\phi)^{1-y_i} \right] &= 0 \\\
+\frac{\partial}{\partial \phi} \sum_{i=1}^N \left[ y_i\log\phi + (1-y_i)\log(1-\phi) \right] &= 0 \\\
+\sum_{i=1}^N \left[ y_i\frac{1}{\phi} - (1-y_i)\frac{1}{1-\phi} \right] &= 0 \\\
+\sum_{i=1}^N \left[ y_i(1-\phi) - (1-y_i)\phi \right] &= 0 \\\
+\sum_{i=1}^N \left[ y_i-\phi \right] &= 0 \\\
+\sum_{i=1}^N y_i - N\phi &= 0 \\\
+\phi &= \frac{1}{N}\sum_{i=1}^N y_i \\\
+\phi &= \frac{N_1}{N}
 \end{align*}
 $$
 
-Unlike linear regression with normally distributed residuals, it is not possible to find a closed-form expression for the coefficient values that maximize the likelihood function, so that an iterative process must be used instead.<cite>[^2]</cite>
-
-We use stochastic gradient descent here:
-
-$$
-\begin{array}{l}
-\text{SGD Procedure:} \\\
-\text{\textcircled 1 }\text{Initialize } w \larr w_0, w_0 \in \text{any real num vector} \\\
-\text{\textcircled 2 }\text{Randomly shuffle }(x_i,y_i) \text{ in }\mathcal{D} \\\
-\text{\textcircled 3 }\text{For } i=1,\cdots,N \text{ do: } \\\
-\quad w^{t+1} \larr w^{t} - \lambda \nabla_w L \\\
-\text{Repeat \text{\textcircled 2}\text{\textcircled 3} until } w \text{ converge OR terminate after T loops} \\\
-\text{\textcircled 4 }\text{Output result as }\hat{w}
-\end{array}
-$$
+{{< math.inline >}}
+<p>
+Next, we solve \(\mu_1\):
+</p>
+{{</ math.inline >}}
 
 $$
-\because \nabla_{w} L = \left(y_i-\sigma(w^Tx_i)\right)x_i \\\
-\therefore w^{t+1} \larr w^{t} + \lambda \left(y_i-\frac{1}{1+\mathrm{e}^{-w^Tx}}\right)x_i
+\begin{align*}
+\frac{\partial}{\partial \mu_1} L(\theta) &= 0 \\\
+\frac{\partial}{\partial \mu_1} \sum_{i=1}^N \left[ \log \mathcal{N}(\mu_1, \Sigma)^{y_i} + \log\mathcal{N}(\mu_2, \Sigma)^{1-y_i} + \log \phi^{y_i} (1-\phi)^{1-y_i} \right] &=  0 \\\
+\frac{\partial}{\partial \mu_1} \sum_{i=1}^N \left[ \log \mathcal{N}(\mu_1, \Sigma)^{y_i} \right] &= 0 \\\
+\frac{\partial}{\partial \mu_1} \sum_{i=1}^N \left[ y_i \log\frac{1}{(2\pi)^{\frac{p}{2}}\lvert\Sigma\rvert^{\frac{1}{2}}}\mathrm{e}^{-\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)} \right] &= 0 \\\
+\frac{\partial}{\partial \mu_1} \sum_{i=1}^N \left[ y_i \log\frac{1}{(2\pi)^{\frac{p}{2}}\lvert\Sigma\rvert^{\frac{1}{2}}} + y_i\log\mathrm{e}^{-\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)} \right] &= 0 \\\
+\frac{\partial}{\partial \mu_1} \sum_{i=1}^N \left[ {y_i(-\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1))} \right] &= 0 \\\
+\frac{\partial}{\partial \mu_1} -\frac{1}{2}\sum_{i=1}^N \left[ {y_i(x_i^T\Sigma^{-1}-\mu_1^T\Sigma^{-1})(x_i-\mu_1)} \right] &= 0 \\\
+\frac{\partial}{\partial \mu_1} \sum_{i=1}^N \left[ {y_i(x_i^T\Sigma^{-1}x_i-x_i^T\Sigma^{-1}\mu_1-\mu_1^T\Sigma^{-1}x_i+\mu_1^T\Sigma^{-1}\mu_1)} \right] &= 0 \\\
+\frac{\partial}{\partial \mu_1} \sum_{i=1}^N \left[ {y_i(-2\mu_1^T\Sigma^{-1}x_i+\mu_1^T\Sigma^{-1}\mu_1)} \right] &= 0 \\\
+\sum_{i=1}^N \left[ {-2y_i\Sigma^{-1}x_i+2y_i\Sigma^{-1}\mu_1} \right] &= 0 \\\
+\sum_{i=1}^N \left[ {y_i(\Sigma^{-1}\mu_1-\Sigma^{-1}x_i}) \right] &= 0 \\\
+\Sigma \cdot \sum_{i=1}^N \left[ {y_i(\Sigma^{-1}\mu_1-\Sigma^{-1}x_i}) \right] &= 0 \\\
+\sum_{i=1}^N \left[ {y_i\Sigma(\Sigma^{-1}\mu_1-\Sigma^{-1}x_i}) \right] &= 0 \\\
+\sum_{i=1}^N y_i\mu_1 &= \sum_{i=1}^N y_ix_i \\\
+\mu_1 &= \frac{\sum_{i=1}^N y_ix_i}{\sum_{i=1}^N y_i} \\\
+\mu_1 &= \frac{\sum_{i=1}^N y_ix_i}{N_1}
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Similarly, we get \(\mu_2\):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\frac{\partial}{\partial \mu_2} L(\theta) &= 0 \\\
+\sum_{i=1}^N \left[ {(1-y_i)\Sigma(\Sigma^{-1}\mu_2-\Sigma^{-1}x_i}) \right] &= 0 \\\
+\sum_{i=1}^N (1-y_i)\mu_2 &= \sum_{i=1}^N y_ix_i \\\
+\mu_2 &= \frac{\sum_{i=1}^N y_ix_i}{\sum_{i=1}^N (1-y_i)} \\\
+\mu_2 &= \frac{\sum_{i=1}^N y_ix_i}{N_2}
+\end{align*}
 $$
 
 ## Conclusion
