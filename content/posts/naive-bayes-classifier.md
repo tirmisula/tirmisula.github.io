@@ -127,7 +127,8 @@ $$
 \begin{cases}
 y \in \lbrace 1,2,\cdots,k \rbrace \\\
 y \sim \mathcal{Cat}(k,\phi_1,\cdots,\phi_k) \\\
-p(y) = \prod_{i=1}^k \phi_i^{[y=i]}, \text{ where } [y=i]=1 \text{ if }y=i \text{ otherwise } 0
+p(y) = \prod_{i=1}^k \phi_i^{[y=i]}, \text{ where } [y=i]=1 \text{ if }y=i \text{ otherwise } 0 \\\
+\sum_{i=1}^k \phi_i = 1
 \end{cases}
 $$
 
@@ -140,7 +141,8 @@ We assume \(p(x_i^j|y)\) subject to Categorical distribution if it \(x\) is disc
 $$
 x \text{ is discrete} \implies
 \begin{cases}
-x_i^j \sim \mathcal{Cat}(k,\phi^{x^j}_1,\cdots,\phi^{x^j}_m) \\\
+x_i^j \in \lbrace 1,2,\cdots,m \rbrace \\\
+x_i^j \sim \mathcal{Cat}(m,p^{x^j}_1,\cdots,p^{x^j}_m) \\\
 p(x_i^j|y) = \prod_{i=1}^k \phi_i^{[y=i]}, \text{ where } [y=i]=1 \text{ if }y=i \text{ otherwise } 0
 \end{cases}
 $$
