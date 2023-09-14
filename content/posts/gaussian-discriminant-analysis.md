@@ -240,19 +240,19 @@ $$
 &= \frac{\partial}{\partial \Sigma} \sum_{x_i \in C1}  \left[\log\lvert\Sigma\rvert^{-\frac{1}{2}} - {\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
 &= \frac{\partial}{\partial \Sigma} \sum_{x_i \in C1}  \left[-\frac{1}{2}\log\lvert\Sigma\rvert\right] - \sum_{x_i \in C1}  \left[{\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
 &= -\frac{1}{2}\sum_{x_i \in C1} \frac{1}{\lvert\Sigma\rvert}\cdot\frac{\partial \lvert\Sigma\rvert}{\partial \Sigma} - \frac{\partial}{\partial \Sigma}\sum_{x_i \in C1}  \left[{\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
-\because \text{ According to \textcolor{aqua}{Prerequisite} } \frac{\partial}{\partial A}\lvert A \rvert = \lvert A \rvert A^{-1} \\\
+\because \text{ According to \textbf{Prerequisite} } \frac{\partial}{\partial A}\lvert A \rvert = \lvert A \rvert A^{-1} \\\
 &= -\frac{1}{2}\sum_{x_i \in C1} \frac{1}{\lvert\Sigma\rvert}\cdot \lvert\Sigma\rvert\Sigma^{-1} - \frac{\partial}{\partial \Sigma}\sum_{x_i \in C1}  \left[{\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
 &= -\frac{1}{2}\sum_{x_i \in C1} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\sum_{x_i \in C1}  \left[{\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
 &= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\sum_{x_i \in C1}  \left[{\frac{1}{2}\underset{\color{red}{scalar}}{(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}}\right] \\\
 &= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\sum_{x_i \in C1}  \left[\frac{1}{2}Tr\left((x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)\right)\right] \\\
-\because \text{ circular shifts of trace shown in \textcolor{aqua}{Prerequisite}} \\\
+\because \text{ Circular shifts of trace shown in \textbf{Prerequisite }} Tr(ABC) &= Tr(CAB) = Tr(BCA)\\\
 &= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}Tr\left(\sum_{x_i \in C1}  \left[\frac{1}{2}(x_i-\mu_1)(x_i-\mu_1)^T\Sigma^{-1}\right]\right) \\\
 &= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}Tr\left(\sum_{x_i \in C1}  \left[\frac{1}{2}(x_i-\mu_1)(x_i-\mu_1)^T\right]\cdot\Sigma^{-1}\right) \\\
 &= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}Tr\left(\frac{1}{2}\sum_{x_i \in C1}  \left[(x_i-\mu_1)(x_i-\mu_1)^T\right]\cdot\Sigma^{-1}\right) \\\
 &= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}Tr\left(\frac{1}{2}N_1Var(x_{C1})\cdot\Sigma^{-1}\right) \\\
 &= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\frac{1}{2}N_1Tr\left(Var(x_{C1})\cdot\Sigma^{-1}\right) \\\
 &= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\frac{1}{2}N_1Tr\left(\Sigma^{-1}Var(x_{C1})\right) \\\
-\because \text{ According to \textcolor{aqua}{Prerequisite} } \frac{\partial}{\partial A}Tr(AB) = B^T \\\
+\because \text{ According to \textbf{Prerequisite} } \frac{\partial}{\partial A}Tr(AB) = B^T \\\
 &= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{1}{2}N_1Var(x_{C1})^T \cdot \frac{\partial \Sigma^{-1}}{\partial \Sigma} \\\
 &= -\frac{N_1}{2} \frac{1}{\Sigma} + \frac{1}{2}N_1Var(x_{C1}) \Sigma^{-2}
 \end{align*}
@@ -285,16 +285,33 @@ $$
 
 ## Conclusion
 
-The pdf function of 2-classes logistic regression is:
+GDA likelihood is defined as:
 
 $$
-p(y|x) = {\frac{1}{1+\mathrm{e}^{-w^Tx}}}^y \cdot {\frac{\mathrm{e}^{-w^Tx}}{1+\mathrm{e}^{-w^Tx}}}^{1-y}
+L(\theta) = \prod_{i=1}^N p(x_i|y_i)p(y_i)
 $$
 
-Weight is updated by SGD:
+We assume:
 
 $$
-w^{t+1} \larr w^{t} + \lambda \left(y_i-\frac{1}{1+\mathrm{e}^{-w^Tx}}\right)x_i
+y \sim \mathcal{Bernoulli}(\phi) \\\
+x|{y=1} \sim \mathcal{N}(\mu_1, \Sigma) \\\
+x|{y=0} \sim \mathcal{N}(\mu_2, \Sigma) \\\
+$$
+
+{{< math.inline >}}
+<p>
+The final result of \( \theta=(\mu_1, \mu_2, \Sigma, \phi) \) is :
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\hat{\phi} &= \frac{N_1}{N} \\\
+\hat{\mu}_1 &= \frac{\sum_{i=1}^N y_ix_i}{N_1} \\\
+\hat{\mu}_2 &= \frac{\sum_{i=1}^N y_ix_i}{N_2} \\\
+\hat{\Sigma} &= \frac{N_1\Sigma_{x_{C1}}+N_2\Sigma_{x_{C2}}}{N}
+\end{align*}
 $$
 
 ## Reference
