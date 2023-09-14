@@ -308,8 +308,8 @@ The final result of \( \theta=(\mu_1, \mu_2, \Sigma, \phi) \) is :
 $$
 \begin{align*}
 \hat{\phi} &= \frac{N_1}{N} \\\
-\hat{\mu}_1 &= \frac{\sum_{i=1}^N y_ix_i}{N_1} \\\
-\hat{\mu}_2 &= \frac{\sum_{i=1}^N y_ix_i}{N_2} \\\
+\hat{\mu_1} &= \frac{\sum_{i=1}^N y_ix_i}{N_1} \\\
+\hat{\mu_2} &= \frac{\sum_{i=1}^N y_ix_i}{N_2} \\\
 \hat{\Sigma} &= \frac{N_1\Sigma_{x_{C1}}+N_2\Sigma_{x_{C2}}}{N}
 \end{align*}
 $$
