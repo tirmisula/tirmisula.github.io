@@ -142,8 +142,9 @@ $$
 x \text{ is discrete} \implies
 \begin{cases}
 x_i^j \in \lbrace 1,2,\cdots,m \rbrace \\\
-x_i^j \sim \mathcal{Cat}(m,p^{x^j}_1,\cdots,p^{x^j}_m) \\\
-p(x_i^j|y) = \prod_{i=1}^k \phi_i^{[y=i]}, \text{ where } [y=i]=1 \text{ if }y=i \text{ otherwise } 0
+x_i^j|y=c \sim \mathcal{Cat}(m,p_{j1c},\cdots,p_{jmc}) \\\
+p(x_i^j|y=c) = \prod_{i=1}^m p_{i}^{[x_i^j=i]}, \text{ where } [x_i^j=i]=1 \text{ if }x_i^j=i \text{ otherwise } 0 \\\
+\sum_{i=1}^k p_{jic} = 1
 \end{cases}
 $$
 
