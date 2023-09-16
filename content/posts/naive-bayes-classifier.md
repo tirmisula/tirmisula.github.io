@@ -143,25 +143,31 @@ x \text{ is discrete} \implies
 \begin{cases}
 x_i^j \in \lbrace 1,2,\cdots,m \rbrace \\\
 x_i^j|y=c \sim \mathcal{Cat}(m,p_{j1c},\cdots,p_{jmc}) \\\
-p(x_i^j|y=c) = \prod_{i=1}^m p_{i}^{[x_i^j=i]}, \text{ where } [x_i^j=i]=1 \text{ if }x_i^j=i \text{ otherwise } 0 \\\
-\sum_{i=1}^k p_{jic} = 1
+p(x_i^j|y=c) = \prod_{ii=1}^m p_{i}^{[x_i^j=ii]}, \text{ where } [x_i^j=ii]=1 \text{ if }x_i^j=ii \text{ otherwise } 0 \\\
+\sum_{i=1}^m p_{jic} = 1
+\end{cases}
+$$
+
+$$
+x \text{ is continous} \implies
+\begin{cases}
+x_i^j|y=c \sim \mathcal{N}(\mu_{jc}, \sigma_{jc}) \\\
+p(x_i^j|y=c) = \frac{1}{\sqrt{2\pi} \sigma_{jc}} \mathrm{e}^{-\frac{(x_i^j - \mu_{jc})^2}{2\sigma_{jc}^2}}
 \end{cases}
 $$
 
 {{< math.inline >}}
 <p>
-Let \(\theta\) be the parameters to be estimated, which is:
+For simplification,  we consider prior is Bernoulli model and likelihood is Categorical model, and the likelihood function is :
 </p>
 {{</ math.inline >}}
 
 $$
-\theta = (\mu_1, \mu_2, \Sigma, \phi)
-$$
-
-Then we can define the likelihood function:
-
-$$
-L(\theta) = \prod_{i=1}^N p(x_i|y_i)p(y_i)
+\begin{align*}
+L(\theta) &= \prod_{i=1}^N p(x_i|y_i)p(y_i) \\\
+&= \prod_{i=1}^N \left(\prod_{j=1}^p p(x_i^j|y_i)\right) p(y_i) \\\
+&= \prod_{i=1}^N \left(\prod_{j=1}^p \mathcal{Cat}(m,p_{j11},\cdots,p_{jm1})^{y_i} \mathcal{Cat}(m,p_{j12},\cdots,p_{jm2})^{1-y_i}\right) p(y_i) \\\
+\end{align*}
 $$
 
 {{< math.inline >}}
