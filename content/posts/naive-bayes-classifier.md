@@ -143,7 +143,7 @@ x \text{ is discrete} \implies
 \begin{cases}
 x_i^j \in \lbrace 1,2,\cdots,m \rbrace \\\
 x_i^j|y=c \sim \mathcal{Cat}(m,p_{j1c},\cdots,p_{jmc}) \\\
-p(x_i^j|y=c) = \prod_{ii=1}^m p_{i}^{[x_i^j=ii]}, \text{ where } [x_i^j=ii]=1 \text{ if }x_i^j=ii \text{ otherwise } 0 \\\
+p(x_i^j|y=c) = \prod_{ii=1}^m p_{jiic}^{[x_i^j=ii]}, \text{ where } [x_i^j=ii]=1 \text{ if }x_i^j=ii \text{ otherwise } 0 \\\
 \sum_{i=1}^m p_{jic} = 1
 \end{cases}
 $$
@@ -158,15 +158,17 @@ $$
 
 {{< math.inline >}}
 <p>
-For simplification,  we consider prior is Bernoulli model and likelihood is Categorical model, and the likelihood function is :
+For simplification,  we consider prior is Bernoulli model and likelihood is Categorical model, and the log-likelihood function is :
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-L(\theta) &= \prod_{i=1}^N p(x_i|y_i)p(y_i) \\\
-&= \prod_{i=1}^N \left(\prod_{j=1}^p p(x_i^j|y_i)\right) p(y_i) \\\
-&= \prod_{i=1}^N \left(\prod_{j=1}^p \mathcal{Cat}(m,p_{j11},\cdots,p_{jm1})^{y_i} \mathcal{Cat}(m,p_{j12},\cdots,p_{jm2})^{1-y_i}\right) p(y_i) \\\
+L(\theta) &= \log\left(\prod_{i=1}^N p(x_i|y_i)p(y_i)\right) \\\
+&= \log\left(\prod_{i=1}^N \left(\prod_{j=1}^p p(x_i^j|y_i)\right) p(y_i)\right) \\\
+&= \sum_{i=1}^N \sum_{j=1}^p \log(p(x_i^j|y_i)) + \sum_{i=1}^N \log(p(y_i)) \\\
+&= \sum_{i=1}^N \sum_{j=1}^p \log\left(  (\prod_{ii=1}^m p_{jiiy_i}^{[x_i^j=ii]})^{y_i} (\prod_{ii=1}^m p_{jiiy_i}^{[x_i^j=ii]})^{1-y_i} \right) + \sum_{i=1}^N \log\left(\phi^{y_i} (1-\phi)^{1-y_i}\right) \\\
+&= \log \prod_{i=1}^N \left(\prod_{j=1}^p \mathcal{Cat}(m,p_{j11},\cdots,p_{jm1})^{y_i} \mathcal{Cat}(m,p_{j12},\cdots,p_{jm2})^{1-y_i}\right) p(y_i) \\\
 \end{align*}
 $$
 
