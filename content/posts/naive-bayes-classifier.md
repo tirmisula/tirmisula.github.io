@@ -144,7 +144,7 @@ x \text{ is discrete} \implies
 x_i^j \in \lbrace 1,2,\cdots,m \rbrace \\\
 x_i^j|y=c \sim \mathcal{Cat}(m,p_{j1c},\cdots,p_{jmc}) \\\
 p(x_i^j|y=c) = \prod_{ii=1}^m p_{jiic}^{[x_i^j=ii]}, \text{ where } [x_i^j=ii]=1 \text{ if }x_i^j=ii \text{ otherwise } 0 \\\
-\sum_{i=1}^m p_{jic} = 1
+\sum_{i=1}^m p_{jiic} = 1
 \end{cases}
 $$
 
@@ -168,24 +168,27 @@ L(\theta) &= \log\left(\prod_{i=1}^N p(x_i|y_i)p(y_i)\right) \\\
 &= \log\left(\prod_{i=1}^N \left(\prod_{j=1}^p p(x_i^j|y_i)\right) p(y_i)\right) \\\
 &= \sum_{i=1}^N \sum_{j=1}^p \log(p(x_i^j|y_i)) + \sum_{i=1}^N \log(p(y_i)) \\\
 &= \sum_{i=1}^N \sum_{j=1}^p \log\left(  (\prod_{ii=1}^m p_{jiiy_i}^{[x_i^j=ii]})^{y_i} (\prod_{ii=1}^m p_{jiiy_i}^{[x_i^j=ii]})^{1-y_i} \right) + \sum_{i=1}^N \log\left(\phi^{y_i} (1-\phi)^{1-y_i}\right) \\\
-&= \log \prod_{i=1}^N \left(\prod_{j=1}^p \mathcal{Cat}(m,p_{j11},\cdots,p_{jm1})^{y_i} \mathcal{Cat}(m,p_{j12},\cdots,p_{jm2})^{1-y_i}\right) p(y_i) \\\
+&= \sum_{i=1}^N \sum_{j=1}^p \left[y_i\log\left( \prod_{ii=1}^m p_{jiiy_i}^{[x_i^j=ii]} \right) + (1-y_i)\log\left( \prod_{ii=1}^m p_{jiiy_i}^{[x_i^j=ii]} \right)\right]
++
+\sum_{i=1}^N \left[ y_i\log\phi + (1-y_i)\log(1-\phi) \right]\\\
+&= \sum_{i=1}^N \sum_{j=1}^p \left[y_i\sum_{ii=1}^m[x_i^j=ii]\log(p_{jiiy_i}) + (1-y_i)\sum_{ii=1}^m[x_i^j=ii]\log(p_{jiiy_i})\right]
++
+\sum_{i=1}^N \left[ y_i\log\phi + (1-y_i)\log(1-\phi) \right]\\\
+&= \sum_{i=1}^N \sum_{j=1}^p \left[y_i\log(p_{jx_i^jy_i}) + (1-y_i)\log(p_{jx_i^jy_i})\right]
++
+\sum_{i=1}^N \left[ y_i\log\phi + (1-y_i)\log(1-\phi) \right]\\\
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-The problem is find \( \hat{\theta} \) by maximizing \(L(\theta)\):
+By adding Lagrange multiplier, we get:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-\hat{\theta} &= \argmax_{\theta} L(\theta) \\\
-&= \argmax_{\theta} \prod_{i=1}^N p(x_i|y_i)p(y_i) \\\
-&= \argmax_{\theta} \sum_{i=1}^N \log\left( p(x_i|y_i)p(y_i) \right) \\\
-&= \argmax_{\theta} \sum_{i=1}^N \left[ \log p(x_i|y_i) + \log p(y_i) \right] \\\
-&= \argmax_{\theta} \sum_{i=1}^N \left[ \log \mathcal{N}(\mu_1, \Sigma)^{y_i} \mathcal{N}(\mu_2, \Sigma)^{1-y_i} + \log \phi^{y_i} (1-\phi)^{1-y_i} \right] \\\
-&= \argmax_{\theta} \sum_{i=1}^N \left[ \log \mathcal{N}(\mu_1, \Sigma)^{y_i} + \log\mathcal{N}(\mu_2, \Sigma)^{1-y_i} + \log \phi^{y_i} (1-\phi)^{1-y_i} \right]
+\hat{\theta} &= \argmax_{\theta} \left[L(\theta) + \sum_{j=1}^p\alpha_{1j}(1-\sum_{ii=1}^m p_{jii0}) + \sum_{j=1}^p\alpha_{2j}(1-\sum_{ii=1}^m p_{jii1})\right]
 \end{align*}
 $$
 
@@ -199,11 +202,8 @@ We solve \(\phi\) first:
 
 $$
 \begin{align*}
-\frac{\partial}{\partial \phi} L(\theta) &= 0 \\\
-\frac{\partial}{\partial \phi} \sum_{i=1}^N \left[ \log \mathcal{N}(\mu_1, \Sigma)^{y_i} + \log\mathcal{N}(\mu_2, \Sigma)^{1-y_i} + \log \phi^{y_i} (1-\phi)^{1-y_i} \right] &=  0 \\\
-\frac{\partial}{\partial \phi} \sum_{i=1}^N \left[ \log \phi^{y_i} (1-\phi)^{1-y_i} \right] &= 0 \\\
-\frac{\partial}{\partial \phi} \sum_{i=1}^N \left[ \log \phi^{y_i}  + \log (1-\phi)^{1-y_i} \right] &= 0 \\\
-\frac{\partial}{\partial \phi} \sum_{i=1}^N \left[ y_i\log\phi + (1-y_i)\log(1-\phi) \right] &= 0 \\\
+\frac{\partial}{\partial \phi}\left[L(\theta) + \sum_{j=1}^p\alpha_{1j}(1-\sum_{ii=1}^m p_{jii0}) + \sum_{j=1}^p\alpha_{2j}(1-\sum_{ii=1}^m p_{jii1})\right] &= 0 \\\
+\frac{\partial}{\partial \phi} \sum_{i=1}^Ny_i\log\phi + (1-y_i)\log(1-\phi) &= 0 \\\
 \sum_{i=1}^N \left[ y_i\frac{1}{\phi} - (1-y_i)\frac{1}{1-\phi} \right] &= 0 \\\
 \sum_{i=1}^N \left[ y_i(1-\phi) - (1-y_i)\phi \right] &= 0 \\\
 \sum_{i=1}^N \left[ y_i-\phi \right] &= 0 \\\
@@ -215,44 +215,52 @@ $$
 
 {{< math.inline >}}
 <p>
-Next, we solve \(\mu_1\):
+Then we solve \(\p_{jii1}\):
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-\frac{\partial}{\partial \mu_1} L(\theta) &= 0 \\\
-\frac{\partial}{\partial \mu_1} \sum_{i=1}^N \left[ \log \mathcal{N}(\mu_1, \Sigma)^{y_i} + \log\mathcal{N}(\mu_2, \Sigma)^{1-y_i} + \log \phi^{y_i} (1-\phi)^{1-y_i} \right] &=  0 \\\
-\frac{\partial}{\partial \mu_1} \sum_{i=1}^N \left[ \log \mathcal{N}(\mu_1, \Sigma)^{y_i} \right] &= 0 \\\
-\frac{\partial}{\partial \mu_1} \sum_{i=1}^N \left[ y_i \log\frac{1}{(2\pi)^{\frac{p}{2}}\lvert\Sigma\rvert^{\frac{1}{2}}}\mathrm{e}^{-\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)} \right] &= 0 \\\
-\frac{\partial}{\partial \mu_1} \sum_{i=1}^N \left[ y_i \log\frac{1}{(2\pi)^{\frac{p}{2}}\lvert\Sigma\rvert^{\frac{1}{2}}} + y_i\log\mathrm{e}^{-\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)} \right] &= 0 \\\
-\frac{\partial}{\partial \mu_1} \sum_{i=1}^N \left[ {y_i(-\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1))} \right] &= 0 \\\
-\frac{\partial}{\partial \mu_1} -\frac{1}{2}\sum_{i=1}^N \left[ {y_i(x_i^T\Sigma^{-1}-\mu_1^T\Sigma^{-1})(x_i-\mu_1)} \right] &= 0 \\\
-\frac{\partial}{\partial \mu_1} \sum_{i=1}^N \left[ {y_i(x_i^T\Sigma^{-1}x_i-x_i^T\Sigma^{-1}\mu_1-\mu_1^T\Sigma^{-1}x_i+\mu_1^T\Sigma^{-1}\mu_1)} \right] &= 0 \\\
-\frac{\partial}{\partial \mu_1} \sum_{i=1}^N \left[ {y_i(-2\mu_1^T\Sigma^{-1}x_i+\mu_1^T\Sigma^{-1}\mu_1)} \right] &= 0 \\\
-\sum_{i=1}^N \left[ {-2y_i\Sigma^{-1}x_i+2y_i\Sigma^{-1}\mu_1} \right] &= 0 \\\
-\sum_{i=1}^N \left[ {y_i(\Sigma^{-1}\mu_1-\Sigma^{-1}x_i}) \right] &= 0 \\\
-\Sigma \cdot \sum_{i=1}^N \left[ {y_i(\Sigma^{-1}\mu_1-\Sigma^{-1}x_i}) \right] &= 0 \\\
-\sum_{i=1}^N \left[ {y_i\Sigma(\Sigma^{-1}\mu_1-\Sigma^{-1}x_i}) \right] &= 0 \\\
-\sum_{i=1}^N y_i\mu_1 &= \sum_{i=1}^N y_ix_i \\\
-\mu_1 &= \frac{\sum_{i=1}^N y_ix_i}{\sum_{i=1}^N y_i} \\\
-\mu_1 &= \frac{\sum_{i=1}^N y_ix_i}{N_1}
+\frac{\partial}{\partial p_{jii1}} \left[L(\theta) + \sum_{j=1}^p\alpha_{1j}(1-\sum_{ii=1}^m p_{jii1}) + \sum_{j=1}^p\alpha_{2j}(1-\sum_{ii=1}^m p_{jii0})\right] &= 0 \\\
+\frac{\partial}{\partial p_{jii1}} \left[\sum_{i=1}^N \sum_{j=1}^p \left[y_i\log(p_{jx_i^j1}) \right] + \sum_{j=1}^p\alpha_{1j}(1-\sum_{ii=1}^m p_{jii1}) \right] &= 0 \\\
+\frac{\partial}{\partial p_{jii1}} \left[\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} \left[y_i\log(p_{jii1}) \right] + \alpha_{1j}(1- p_{jii1}) \right] &= 0 \\\
+\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} y_i\frac{1}{p_{jii1}} - \alpha_{1j} &= 0 \\\
+p_{jii1} &= \frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} y_i}{\alpha_{1j}}
+\end{align*}
+$$
+
+$$
+\begin{align*}
+\because \sum_{ii=1}^mp_{jii1} &= 1 \\\
+\sum_{ii=1}^m\frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} y_i}{\alpha_{1j}} &= 1 \\\
+\frac{\sum_{i=1}^N y_i}{\alpha_{1j}} &= 1 \\\
+\alpha_{1j} &= \sum_{i=1}^N y_i \\\
+\therefore p_{jii1} &= \frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} y_i}{\sum_{i=1}^N y_i}
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-Similarly, we get \(\mu_2\):
+The same operation for \(p_{jii0}\):
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-\frac{\partial}{\partial \mu_2} L(\theta) &= 0 \\\
-\sum_{i=1}^N \left[ {(1-y_i)\Sigma(\Sigma^{-1}\mu_2-\Sigma^{-1}x_i}) \right] &= 0 \\\
-\sum_{i=1}^N (1-y_i)\mu_2 &= \sum_{i=1}^N y_ix_i \\\
-\mu_2 &= \frac{\sum_{i=1}^N y_ix_i}{\sum_{i=1}^N (1-y_i)} \\\
-\mu_2 &= \frac{\sum_{i=1}^N y_ix_i}{N_2}
+\frac{\partial}{\partial p_{jii0}} \left[L(\theta) + \sum_{j=1}^p\alpha_{1j}(1-\sum_{ii=1}^m p_{jii1}) + \sum_{j=1}^p\alpha_{2j}(1-\sum_{ii=1}^m p_{jii0})\right] &= 0 \\\
+\frac{\partial}{\partial p_{jii0}} \left[\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} \left[(1-y_i)\log(p_{jii0}) \right] + \alpha_{2j}(1- p_{jii0}) \right] &= 0 \\\
+\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} \frac{1}{p_{jii0}}-y_i\frac{1}{p_{jii0}} - \alpha_{2j} &= 0 \\\
+p_{jii0} &= \frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} (1-y_i)}{\alpha_{2j}}
+\end{align*}
+$$
+
+$$
+\begin{align*}
+\because \sum_{ii=1}^mp_{jii1} &= 1 \\\
+\sum_{ii=1}^m\frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} y_i}{\alpha_{1j}} &= 1 \\\
+\frac{\sum_{i=1}^N y_i}{\alpha_{1j}} &= 1 \\\
+\alpha_{1j} &= \sum_{i=1}^N y_i \\\
+\therefore p_{jii1} &= \frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} y_i}{\sum_{i=1}^N y_i}
 \end{align*}
 $$
 
@@ -357,4 +365,4 @@ $$
 ## Reference
 
 [^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=18).
-[^2]: From [source](https://en.wikipedia.org/wiki/Logistic_regression).
+[^2]: From [source](https://zhuanlan.zhihu.com/p/71960086).
