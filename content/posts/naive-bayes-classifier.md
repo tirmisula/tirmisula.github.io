@@ -36,19 +36,6 @@ TocOpen: true
     }
 </style>
 
-## Prerequisite
-### Matrix trace derivation
-
-$$
-\begin{align}
-\frac{\partial}{\partial A}Tr(AB) &= B^T \\\
-\frac{\partial}{\partial A}\lvert A \rvert &= \lvert A \rvert A^{-1} \\\
-Tr(AB) &= Tr(BA) \\\
-Tr(ABC) &= Tr(CAB) = Tr(BCA) \\\
-Tr(A) &= A \iff A \text{ is a scalar}
-\end{align}
-$$
-
 ## Definition
 
 {{< math.inline >}}
@@ -163,6 +150,10 @@ For simplification,  we consider prior is Bernoulli model and likelihood is Cate
 {{</ math.inline >}}
 
 $$
+\theta=(\phi, \underset{m\times p}{\lbrace p_{jii0, \cdots} \rbrace}, \underset{m\times p}{\lbrace p_{jii1, \cdots} \rbrace})
+$$
+
+$$
 \begin{align*}
 L(\theta) &= \log\left(\prod_{i=1}^N p(x_i|y_i)p(y_i)\right) \\\
 &= \log\left(\prod_{i=1}^N \left(\prod_{j=1}^p p(x_i^j|y_i)\right) p(y_i)\right) \\\
@@ -196,7 +187,7 @@ $$
 
 {{< math.inline >}}
 <p>
-We solve \(\phi\) first:
+We solve \(\phi\) first:<cite>[^1]</cite>
 </p>
 {{</ math.inline >}}
 
@@ -215,7 +206,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Then we solve \(\p_{jii1}\):
+Then we solve \(\p_{jii1}\):<cite>[^2]</cite>
 </p>
 {{</ math.inline >}}
 
@@ -256,113 +247,44 @@ $$
 
 $$
 \begin{align*}
-\because \sum_{ii=1}^mp_{jii1} &= 1 \\\
-\sum_{ii=1}^m\frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} y_i}{\alpha_{1j}} &= 1 \\\
-\frac{\sum_{i=1}^N y_i}{\alpha_{1j}} &= 1 \\\
-\alpha_{1j} &= \sum_{i=1}^N y_i \\\
-\therefore p_{jii1} &= \frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} y_i}{\sum_{i=1}^N y_i}
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-Finally we solve \(\Sigma\):
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-\frac{\partial}{\partial \Sigma} L(\theta) &= 0 \\\
-\frac{\partial}{\partial \Sigma} \sum_{i=1}^N \left[ \log \mathcal{N}(\mu_1, \Sigma)^{y_i} + \log\mathcal{N}(\mu_2, \Sigma)^{1-y_i} + \log \phi^{y_i} (1-\phi)^{1-y_i} \right] &=  0 \\\
-\frac{\partial}{\partial \Sigma} \sum_{i=1}^N \left[ \log \mathcal{N}(\mu_1, \Sigma)^{y_i} + \log \mathcal{N}(\mu_2, \Sigma)^{1-y_i} \right] &= 0 \\\
-\frac{\partial}{\partial \Sigma} \sum_{x_i\in C1} \log \mathcal{N}(\mu_1, \Sigma) + \sum_{x_i\in C2} \log \mathcal{N}(\mu_2, \Sigma) &= 0
-\end{align*}
-$$
-
-For C1 Part:
-
-$$
-\begin{align*}
-\frac{\partial}{\partial \Sigma} \sum_{x_i\in C1} \log \mathcal{N}(\mu_1, \Sigma) &= \frac{\partial}{\partial \Sigma} \sum_{x_i \in C1}  \left[\log\frac{1}{(2\pi)^{\frac{p}{2}}\lvert\Sigma\rvert^{\frac{1}{2}}} + \log\mathrm{e}^{-\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
-&= \frac{\partial}{\partial \Sigma} \sum_{x_i \in C1}  \left[\log\frac{1}{(2\pi)^{\frac{p}{2}}} + \log\lvert\Sigma\rvert^{-\frac{1}{2}} + \log\mathrm{e}^{-\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
-&= \frac{\partial}{\partial \Sigma} \sum_{x_i \in C1}  \left[\log\lvert\Sigma\rvert^{-\frac{1}{2}} - {\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
-&= \frac{\partial}{\partial \Sigma} \sum_{x_i \in C1}  \left[-\frac{1}{2}\log\lvert\Sigma\rvert\right] - \sum_{x_i \in C1}  \left[{\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
-&= -\frac{1}{2}\sum_{x_i \in C1} \frac{1}{\lvert\Sigma\rvert}\cdot\frac{\partial \lvert\Sigma\rvert}{\partial \Sigma} - \frac{\partial}{\partial \Sigma}\sum_{x_i \in C1}  \left[{\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
-\because \text{ According to \textbf{Prerequisite} } \frac{\partial}{\partial A}\lvert A \rvert = \lvert A \rvert A^{-1} \\\
-&= -\frac{1}{2}\sum_{x_i \in C1} \frac{1}{\lvert\Sigma\rvert}\cdot \lvert\Sigma\rvert\Sigma^{-1} - \frac{\partial}{\partial \Sigma}\sum_{x_i \in C1}  \left[{\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
-&= -\frac{1}{2}\sum_{x_i \in C1} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\sum_{x_i \in C1}  \left[{\frac{1}{2}(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}\right] \\\
-&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\sum_{x_i \in C1}  \left[{\frac{1}{2}\underset{\color{red}{scalar}}{(x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)}}\right] \\\
-&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\sum_{x_i \in C1}  \left[\frac{1}{2}Tr\left((x_i-\mu_1)^T\Sigma^{-1}(x_i-\mu_1)\right)\right] \\\
-\because \text{ Circular shifts of trace shown in \textbf{Prerequisite }} Tr(ABC) &= Tr(CAB) = Tr(BCA)\\\
-&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}Tr\left(\sum_{x_i \in C1}  \left[\frac{1}{2}(x_i-\mu_1)(x_i-\mu_1)^T\Sigma^{-1}\right]\right) \\\
-&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}Tr\left(\sum_{x_i \in C1}  \left[\frac{1}{2}(x_i-\mu_1)(x_i-\mu_1)^T\right]\cdot\Sigma^{-1}\right) \\\
-&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}Tr\left(\frac{1}{2}\sum_{x_i \in C1}  \left[(x_i-\mu_1)(x_i-\mu_1)^T\right]\cdot\Sigma^{-1}\right) \\\
-&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}Tr\left(\frac{1}{2}N_1Var(x_{C1})\cdot\Sigma^{-1}\right) \\\
-&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\frac{1}{2}N_1Tr\left(Var(x_{C1})\cdot\Sigma^{-1}\right) \\\
-&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\frac{1}{2}N_1Tr\left(\Sigma^{-1}Var(x_{C1})\right) \\\
-\because \text{ According to \textbf{Prerequisite} } \frac{\partial}{\partial A}Tr(AB) = B^T \\\
-&= -\frac{N_1}{2} \frac{1}{\Sigma} - \frac{1}{2}N_1Var(x_{C1})^T \cdot \frac{\partial \Sigma^{-1}}{\partial \Sigma} \\\
-&= -\frac{N_1}{2} \frac{1}{\Sigma} + \frac{1}{2}N_1Var(x_{C1}) \Sigma^{-2}
-\end{align*}
-$$
-
-For C2 Part, Similarly:
-
-$$
-\begin{align*}
-\frac{\partial}{\partial \Sigma} \sum_{x_i\in C2} \log \mathcal{N}(\mu_2, \Sigma) &= -\frac{N_2}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}Tr\left(\frac{1}{2}\sum_{x_i \in C2}  \left[(x_i-\mu_2)(x_i-\mu_2)^T\right]\cdot\Sigma^{-1}\right) \\\
-&= -\frac{N_2}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}Tr\left(\frac{1}{2}N_2Var(x_{C2})\cdot\Sigma^{-1}\right) \\\
-&= -\frac{N_2}{2} \frac{1}{\Sigma} - \frac{\partial}{\partial \Sigma}\frac{1}{2}N_2Tr\left(Var(x_{C2})\cdot\Sigma^{-1}\right) \\\
-&= -\frac{N_2}{2} \frac{1}{\Sigma} + \frac{1}{2}N_2Var(x_{C2}) \Sigma^{-2}
-\end{align*}
-$$
-
-Back to original equation:
-
-$$
-\begin{align*}
-\frac{\partial}{\partial \Sigma} \sum_{x_i\in C1} \log \mathcal{N}(\mu_1, \Sigma) + \frac{\partial}{\partial \Sigma} \sum_{x_i\in C2} \log \mathcal{N}(\mu_2, \Sigma) &= 0 \\\
--\frac{N_1}{2} \frac{1}{\Sigma} + \frac{1}{2}N_1Var(x_{C1}) \Sigma^{-2} -\frac{N_2}{2} \frac{1}{\Sigma} + \frac{1}{2}N_2Var(x_{C2}) \Sigma^{-2} &= 0 \\\
--\frac{1}{2} \frac{N_1+N_2}{\Sigma} + \frac{1}{2}(N_1Var(x_{C1})+N_2Var(x_{C2}))\Sigma^{-2} &= 0 \\\
-(N_1Var(x_{C1})+N_2Var(x_{C2}))\Sigma^{-2} &= (N_1+N_2)\Sigma^{-1} \\\
-N_1Var(x_{C1})+N_2Var(x_{C2}) &= N\Sigma \\\
-\Sigma &= \frac{N_1Var(x_{C1})+N_2Var(x_{C2})}{N} \\\
-\Sigma &= \frac{N_1\Sigma_{x_{C1}}+N_2\Sigma_{x_{C2}}}{N}
+\because \sum_{ii=1}^mp_{jii0} &= 1 \\\
+\sum_{ii=1}^m\frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} (1-y_i)}{\alpha_{2j}} &= 1 \\\
+\frac{\sum_{i=1}^N (1-y_i)}{\alpha_{2j}} &= 1 \\\
+\alpha_{2j} &= \sum_{i=1}^N (1-y_i) \\\
+\therefore p_{jii0} &= \frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} (1-y_i)}{\sum_{i=1}^N (1-y_i)}
 \end{align*}
 $$
 
 ## Conclusion
 
-GDA likelihood is defined as:
+Given that:
 
 $$
-L(\theta) = \prod_{i=1}^N p(x_i|y_i)p(y_i)
+L(\theta) = \prod_{i=1}^N \prod_{j=1}^p p(x_i^j|y_i)p(y_i)
 $$
 
 We assume:
 
 $$
 y \sim \mathcal{Bernoulli}(\phi) \\\
-x|{y=1} \sim \mathcal{N}(\mu_1, \Sigma) \\\
-x|{y=0} \sim \mathcal{N}(\mu_2, \Sigma) \\\
+x_i^j|y=c \sim \mathcal{Cat}(m,p_{j1c},\cdots,p_{jmc})
 $$
 
 {{< math.inline >}}
 <p>
-The final result of \( \theta=(\mu_1, \mu_2, \Sigma, \phi) \) is :
+Then the solved parameters are :
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
 \hat{\phi} &= \frac{N_1}{N} \\\
-\hat{\mu_1} &= \frac{\sum_{i=1}^N y_ix_i}{N_1} \\\
-\hat{\mu_2} &= \frac{\sum_{i=1}^N y_ix_i}{N_2} \\\
-\hat{\Sigma} &= \frac{N_1\Sigma_{x_{C1}}+N_2\Sigma_{x_{C2}}}{N}
+p_{jii1} &= \frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} y_i}{\sum_{i=1}^N y_i} \\\
+p_{jii0} &= \frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} (1-y_i)}{\sum_{i=1}^N (1-y_i)}
 \end{align*}
 $$
 
 ## Reference
 
-[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=18).
+[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=21).
 [^2]: From [source](https://zhuanlan.zhihu.com/p/71960086).
