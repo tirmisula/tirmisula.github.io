@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
-title: "Linear Classification - Naive Bayes Classifier"
-date: "2023-09-04"
+title: "Dimensionality Reduction"
+date: "2023-09-05"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -36,7 +36,38 @@ TocOpen: true
     }
 </style>
 
-## Definition
+## Background
+### Curse of Dimensionality
+
+Given a p-dimensional unit hypercube and it's incribed hypersphere, we can calculate volume:
+
+$$
+V_{\text{hypercube}} = 1 \\\
+V_{\text{hypersphere}} = K\cdot0.5^p
+$$
+
+If dimension p is large enough, we can get:
+
+$$
+\lim_{p\rarr\infty} \frac{V_{\text{hypersphere}}}{V_{\text{hypercube}}} = 0
+$$
+
+That means if we randomly sample in this hypercube, most of the sampled data locates at corner rather than in the hypersphere which leads to sparse and uneven data distribution.
+
+### Dimension reduction method
+
+$$
+\begin{cases}
+\text{Direct reduction} \rarr \text{feature selection like Lasso} \\\
+\text{Linear reduction} \rarr \text{PCA or Multidimensional scaling} \\\
+\text{Nonlinear reduction} \rarr \text{Flow model}\begin{cases}
+\text{Isomap} \\\
+\text{LLE}
+\end{cases}
+\end{cases}
+$$
+
+## Definition of PCA
 
 {{< math.inline >}}
 <p>
