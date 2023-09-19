@@ -1,6 +1,6 @@
 ---
 author: "X. Wang"
-title: "Dimensionality Reduction"
+title: "Dimensionality Reduction - Principal Component Analysis"
 date: "2023-09-05"
 description: "A brief introduction."
 tags: ["machine learning"]
@@ -165,6 +165,7 @@ H^2 &= HH \\\
 &= I_N - \frac{1}{N}1_N1_N^T \\\
 &= H \\\
 H^3 &= H^2H = H \\\
+&\cdots \\\
 H^n &= H^{n-1}H = H
 \end{align*}
 $$
@@ -179,228 +180,150 @@ $$
 \end{align*}
 $$
 
-## Definition of PCA
+## Understand PCA
+### Maximize projection variance
 
-{{< math.inline >}}
-<p>
-Given a dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\), where each data point \( (x_i,y_i) \) has attribution \(x_i \in \mathbb{R}^p \), \( y_i \in \{ 0,1 \} \). We define 2 classes C1 and C2:
-</p>
-{{</ math.inline >}}
+The core idea of Principal component analysis(PCA) is to <mark>maximze projection variance</mark>. When a high dimensional data project to a low dimensional hyperplane, we want the projection position to be as disperse as possible.
 
-$$
-x_{C1} = \{ x_i|y_i=1 \} \\\
-x_{C2} = \{ x_i|y_i=0 \} \\\
-|x_{C1}| = N_1 \\\
-|x_{C2}| = N_2 \\\
-N = N_1+N_2
-$$
-
-{{< math.inline >}}
-<p>
-For each \(x_i\):
-</p>
-{{</ math.inline >}}
+First, we need to centerize data sample:
 
 $$
-x_i = \begin{bmatrix}
-x_i^1 \\\
-x_i^2 \\\
-\vdots \\\
-x_i^p
-\end{bmatrix}
-, x_i^j \implies \text{j-th element of } x_i
+x_i - \mu_x
+$$
+
+Then the projection operation([mentioned before](https://tirmisula.github.io/posts/linear-discriminant-analysis/#prerequisite)) is defined by:
+
+$$
+(x_i-\mu_x)^Tu_1 \\\
+\lVert u_1 \rVert=1, u_1 \text{ is the first principal component}
 $$
 
 {{< math.inline >}}
 <p>
-Naive bayes is the simplest graph model. By given a data \(x_i\), it assumes the conditional probability of \(x_i^j\) is independent from each other:
-</p>
-{{</ math.inline >}}
-
-$$
-x_i^{j_1} \perp x_i^{j_2} | y 
-\implies
-p(x_i|y) = \prod_{j=1}^p p(x_i^j|y)
-$$
-
-Motivation for naive bayes thought: <mark>simplify computation</mark>.
-
-{{< math.inline >}}
-<p>
-Similar to <a href="https://tirmisula.github.io/posts/gaussian-discriminant-analysis/#definition">Gaussian discriminant analysis</a>, the object is to maximize joint probability \( p(x,y) \):
+Then we can define the object function or variance \(J\):
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-\hat{y} &= \argmax_y p(y|x) \\\
-&= \argmax p(x|y)p(y)
+J &= \frac{1}{N} \sum_{i=1}^N((x_i-\mu_x)^Tu_1)^2 \\\
+&= \frac{1}{N} \sum_{i=1}^Nu_1^T(x_i-\mu_x)(x_i-\mu_x)^Tu_1 \\\
+&= u_1^T \frac{1}{N} \sum_{i=1}^N(x_i-\mu_x)(x_i-\mu_x)^T u_1 \\\
+&= u_1^T\Sigma_xu_1
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-We assume \(p(y)\) subject to Bernoulli distribution if it is binary class, subject to Categorical distribution if it has k classes:
+The problem is to maximize \(J\):
 </p>
 {{</ math.inline >}}
 
 $$
-\text{ 2 classes} \implies
 \begin{cases}
-y \sim \mathcal{Bernoulli}(\phi) \\\
-p(y) = \phi^y (1-\phi)^{1-y}
+\hat{u_1} = \argmax_u u_1^T\Sigma_xu_1 \\\
+\text{subject to } u_1^Tu_1=1
 \end{cases}
 $$
 
 $$
-\text{ k classes} \implies
+\begin{align*}
+L(u_1,\lambda) &= u_1^T\Sigma_x u_1+\lambda(1-u_1^Tu_1) \\\
+\frac{\partial L}{\partial u_1} &= 2\Sigma_xu_1-2\lambda u_1 = 0 \\\
+\Sigma_xu_1 &= \lambda u_1
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+We can conclude that finding \(u_1\) equals to finding eigen vector of \(\Sigma_x\) and \(\lambda\) is  the eigen value of \(\Sigma_x\).
+</p>
+{{</ math.inline >}}
+
+### Minimize reconstruct cost
+
+When we recover a q-dimensional data to original p-dimensional data, we want to <mark>minimize reconstruction cost</mark>. In particular, we want to minimize the distance between original vector and recovered vector.
+
+{{< math.inline >}}
+<p>
+Given \( \{u_1,u_2,\cdots,u_p\} \) a group of orthonormal basis, \( x_i^Tu_i \) is the coordinate, we can rewrite \(x_i\) like:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+x_i &= (x_i^Tu_1)u_1+(x_i^Tu_2)u_2+\cdots+(x_i^Tu_p)u_p \\\
+&= \sum_{k=1}^p (x_i^Tu_k)u_k
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Similarly we can write recovered data \(\tilde{x_i}\), since \(q\) dimensions are recovered by first \(q\) principal components and the left \(p-q\) dimensions are zero:
+</p>
+{{</ math.inline >}}
+
+$$
+\tilde{x_i} = \sum_{k=1}^q (x_i^Tu_k)u_k + \sum_{k=q+1}^p 0
+$$
+
+Then the object function is:
+
+$$
+\begin{align*}
+J &= \frac{1}{N}\sum_{i=1}^N \lVert x_i-\tilde{x_i} \rVert^2 \\\
+&= \frac{1}{N}\sum_{i=1}^N \lVert \sum_{k=q+1}^p (x_i^Tu_k)u_k \rVert^2 \\\
+&= \frac{1}{N}\sum_{i=1}^N \lVert \overbrace{x_i}^{q+1,q+2,\cdots, p} \rVert^2 \\\
+&= \frac{1}{N}\sum_{i=1}^N \sum_{k=q+1}^p (x_i^Tu_k)^2 \\\
+\text{replace } x_i \text{ with } &x_i-\mu_x \text{ because of centralization} \\\
+&\triangleq \frac{1}{N}\sum_{i=1}^N \sum_{k=q+1}^p ((x_i-\mu_x)^Tu_k)^2 \\\
+&= \frac{1}{N}\sum_{i=1}^N \sum_{k=q+1}^p u_k^T(x_i-\mu_x)(x-\mu_x)^Tu_k \\\
+&= \sum_{k=q+1}^p u_k^T\left[\frac{1}{N}\sum_{i=1}^N (x_i-\mu_x)(x-\mu_x)^T\right]u_k \\\
+&= \sum_{k=q+1}^p u_k^T\Sigma_xu_k \\\
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Similar to previous subsection, the problem is to minimize \(J\):
+</p>
+{{</ math.inline >}}
+
+$$
 \begin{cases}
-y \in \lbrace 1,2,\cdots,k \rbrace \\\
-y \sim \mathcal{Cat}(k,\phi_1,\cdots,\phi_k) \\\
-p(y) = \prod_{i=1}^k \phi_i^{[y=i]}, \text{ where } [y=i]=1 \text{ if }y=i \text{ otherwise } 0 \\\
-\sum_{i=1}^k \phi_i = 1
+\hat{u_k} = \argmin_u \sum_{k=q+1}^p u_k^T\Sigma_xu_k \\\
+\text{subject to } u_k^Tu_k=1, k=q+1,\cdots,p
 \end{cases}
 $$
 
-{{< math.inline >}}
-<p>
-We assume \(p(x_i^j|y)\) subject to Categorical distribution if it \(x\) is discrete with \(m\) categories, subject to Gaussian distribution if \(x\) is continous:
-</p>
-{{</ math.inline >}}
-
-$$
-x \text{ is discrete} \implies
-\begin{cases}
-x_i^j \in \lbrace 1,2,\cdots,m \rbrace \\\
-x_i^j|y=c \sim \mathcal{Cat}(m,p_{j1c},\cdots,p_{jmc}) \\\
-p(x_i^j|y=c) = \prod_{ii=1}^m p_{jiic}^{[x_i^j=ii]}, \text{ where } [x_i^j=ii]=1 \text{ if }x_i^j=ii \text{ otherwise } 0 \\\
-\sum_{i=1}^m p_{jiic} = 1
-\end{cases}
-$$
-
-$$
-x \text{ is continous} \implies
-\begin{cases}
-x_i^j|y=c \sim \mathcal{N}(\mu_{jc}, \sigma_{jc}) \\\
-p(x_i^j|y=c) = \frac{1}{\sqrt{2\pi} \sigma_{jc}} \mathrm{e}^{-\frac{(x_i^j - \mu_{jc})^2}{2\sigma_{jc}^2}}
-\end{cases}
-$$
-
-{{< math.inline >}}
-<p>
-For simplification,  we consider prior is Bernoulli model and likelihood is Categorical model, and the log-likelihood function is :
-</p>
-{{</ math.inline >}}
-
-$$
-\theta=(\phi, \underset{m\times p}{\lbrace p_{jii0, \cdots} \rbrace}, \underset{m\times p}{\lbrace p_{jii1, \cdots} \rbrace})
-$$
-
 $$
 \begin{align*}
-L(\theta) &= \log\left(\prod_{i=1}^N p(x_i|y_i)p(y_i)\right) \\\
-&= \log\left(\prod_{i=1}^N \left(\prod_{j=1}^p p(x_i^j|y_i)\right) p(y_i)\right) \\\
-&= \sum_{i=1}^N \sum_{j=1}^p \log(p(x_i^j|y_i)) + \sum_{i=1}^N \log(p(y_i)) \\\
-&= \sum_{i=1}^N \sum_{j=1}^p \log\left(  (\prod_{ii=1}^m p_{jiiy_i}^{[x_i^j=ii]})^{y_i} (\prod_{ii=1}^m p_{jiiy_i}^{[x_i^j=ii]})^{1-y_i} \right) + \sum_{i=1}^N \log\left(\phi^{y_i} (1-\phi)^{1-y_i}\right) \\\
-&= \sum_{i=1}^N \sum_{j=1}^p \left[y_i\log\left( \prod_{ii=1}^m p_{jiiy_i}^{[x_i^j=ii]} \right) + (1-y_i)\log\left( \prod_{ii=1}^m p_{jiiy_i}^{[x_i^j=ii]} \right)\right]
-+
-\sum_{i=1}^N \left[ y_i\log\phi + (1-y_i)\log(1-\phi) \right]\\\
-&= \sum_{i=1}^N \sum_{j=1}^p \left[y_i\sum_{ii=1}^m[x_i^j=ii]\log(p_{jiiy_i}) + (1-y_i)\sum_{ii=1}^m[x_i^j=ii]\log(p_{jiiy_i})\right]
-+
-\sum_{i=1}^N \left[ y_i\log\phi + (1-y_i)\log(1-\phi) \right]\\\
-&= \sum_{i=1}^N \sum_{j=1}^p \left[y_i\log(p_{jx_i^jy_i}) + (1-y_i)\log(p_{jx_i^jy_i})\right]
-+
-\sum_{i=1}^N \left[ y_i\log\phi + (1-y_i)\log(1-\phi) \right]\\\
+L(u_{q+1},\cdots,u_p,\lambda) &= \sum_{k=q+1}^p u_k^T\Sigma_xu_k + \sum_{k=q+1}^p\lambda_k(1-u_k^Tu_k) \\\
+\frac{\partial L}{\partial u_k} &= 2\Sigma_xu_k-2\lambda_k u_k = 0 \\\
+\Sigma_xu_k &= \lambda_k u_k
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-By adding Lagrange multiplier, we get:
+By replacing \( \Sigma_xu_k \) with \( \lambda_ku_k \), we get:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-\hat{\theta} &= \argmax_{\theta} \left[L(\theta) + \sum_{j=1}^p\alpha_{1j}(1-\sum_{ii=1}^m p_{jii0}) + \sum_{j=1}^p\alpha_{2j}(1-\sum_{ii=1}^m p_{jii1})\right]
-\end{align*}
-$$
-
-## Solve parameters
-
-{{< math.inline >}}
-<p>
-We solve \(\phi\) first:
-</p>
-{{</ math.inline >}}
-
-<cite>[^1]</cite>
-
-$$
-\begin{align*}
-\frac{\partial}{\partial \phi}\left[L(\theta) + \sum_{j=1}^p\alpha_{1j}(1-\sum_{ii=1}^m p_{jii0}) + \sum_{j=1}^p\alpha_{2j}(1-\sum_{ii=1}^m p_{jii1})\right] &= 0 \\\
-\frac{\partial}{\partial \phi} \sum_{i=1}^Ny_i\log\phi + (1-y_i)\log(1-\phi) &= 0 \\\
-\sum_{i=1}^N \left[ y_i\frac{1}{\phi} - (1-y_i)\frac{1}{1-\phi} \right] &= 0 \\\
-\sum_{i=1}^N \left[ y_i(1-\phi) - (1-y_i)\phi \right] &= 0 \\\
-\sum_{i=1}^N \left[ y_i-\phi \right] &= 0 \\\
-\sum_{i=1}^N y_i - N\phi &= 0 \\\
-\phi &= \frac{1}{N}\sum_{i=1}^N y_i \\\
-\phi &= \frac{N_1}{N}
+\sum_{k=q+1}^p u_k^T\Sigma_xu_k &= \sum_{k=q+1}^p u_k^T\lambda_ku_k \\\
+&= \sum_{k=q+1}^p \lambda_ku_k^Tu_k \\\
+&= \sum_{k=q+1}^p \lambda_k
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-Then we solve \(\p_{jii1}\):
+Then we can conclude that to minimize reconstruction cost, we need to find \(p-q\) smallest eigen values and there eigen vectors, the smallest reconstruction cost is the summation of \(p-q\) smallest eigen values.
 </p>
 {{</ math.inline >}}
 
-<cite>[^2]</cite>
-
-$$
-\begin{align*}
-\frac{\partial}{\partial p_{jii1}} \left[L(\theta) + \sum_{j=1}^p\alpha_{1j}(1-\sum_{ii=1}^m p_{jii1}) + \sum_{j=1}^p\alpha_{2j}(1-\sum_{ii=1}^m p_{jii0})\right] &= 0 \\\
-\frac{\partial}{\partial p_{jii1}} \left[\sum_{i=1}^N \sum_{j=1}^p \left[y_i\log(p_{jx_i^j1}) \right] + \sum_{j=1}^p\alpha_{1j}(1-\sum_{ii=1}^m p_{jii1}) \right] &= 0 \\\
-\frac{\partial}{\partial p_{jii1}} \left[\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} \left[y_i\log(p_{jii1}) \right] + \alpha_{1j}(1- p_{jii1}) \right] &= 0 \\\
-\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} y_i\frac{1}{p_{jii1}} - \alpha_{1j} &= 0 \\\
-p_{jii1} &= \frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} y_i}{\alpha_{1j}}
-\end{align*}
-$$
-
-$$
-\begin{align*}
-\because \sum_{ii=1}^mp_{jii1} &= 1 \\\
-\sum_{ii=1}^m\frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} y_i}{\alpha_{1j}} &= 1 \\\
-\frac{\sum_{i=1}^N y_i}{\alpha_{1j}} &= 1 \\\
-\alpha_{1j} &= \sum_{i=1}^N y_i \\\
-\therefore p_{jii1} &= \frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} y_i}{\sum_{i=1}^N y_i}
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-The same operation for \(p_{jii0}\):
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-\frac{\partial}{\partial p_{jii0}} \left[L(\theta) + \sum_{j=1}^p\alpha_{1j}(1-\sum_{ii=1}^m p_{jii1}) + \sum_{j=1}^p\alpha_{2j}(1-\sum_{ii=1}^m p_{jii0})\right] &= 0 \\\
-\frac{\partial}{\partial p_{jii0}} \left[\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} \left[(1-y_i)\log(p_{jii0}) \right] + \alpha_{2j}(1- p_{jii0}) \right] &= 0 \\\
-\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} \frac{1}{p_{jii0}}-y_i\frac{1}{p_{jii0}} - \alpha_{2j} &= 0 \\\
-p_{jii0} &= \frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} (1-y_i)}{\alpha_{2j}}
-\end{align*}
-$$
-
-$$
-\begin{align*}
-\because \sum_{ii=1}^mp_{jii0} &= 1 \\\
-\sum_{ii=1}^m\frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} (1-y_i)}{\alpha_{2j}} &= 1 \\\
-\frac{\sum_{i=1}^N (1-y_i)}{\alpha_{2j}} &= 1 \\\
-\alpha_{2j} &= \sum_{i=1}^N (1-y_i) \\\
-\therefore p_{jii0} &= \frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} (1-y_i)}{\sum_{i=1}^N (1-y_i)}
-\end{align*}
-$$
 
 ## Conclusion
 
