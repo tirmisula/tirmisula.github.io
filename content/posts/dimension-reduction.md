@@ -58,13 +58,125 @@ That means if we randomly sample in this hypercube, most of the sampled data loc
 
 $$
 \begin{cases}
-\text{Direct reduction} \rarr \text{feature selection like Lasso} \\\
+\text{ Direct reduction} \rarr \text{feature selection like Lasso} \\\
 \text{Linear reduction} \rarr \text{PCA or Multidimensional scaling} \\\
 \text{Nonlinear reduction} \rarr \text{Flow model}\begin{cases}
 \text{Isomap} \\\
 \text{LLE}
 \end{cases}
 \end{cases}
+$$
+
+## Prerequisite
+### Express mean and variance in matrix form
+
+Given a dataset:
+$$
+\begin{align*}
+X &= \begin{bmatrix}
+    x_{1} & x_2 & \dots & x_N
+\end{bmatrix}^T
+&= \begin{bmatrix}
+    {x_1}^T \\\
+    {x_2}^T \\\
+    \dots \\\
+    {x_N}^T
+\end{bmatrix}
+&= \begin{bmatrix}
+    x_{11} & x_{12} & \dots & x_{1p}\\\
+    x_{21} & x_{22} & \dots & x_{2p}\\\
+    \dots \\\
+    x_{N1} & x_{N2} & \dots & x_{Np}
+\end{bmatrix}_{N \times p}
+\end{align*}
+$$
+
+$$
+x_i \in \mathbb{R}^p, i=1,2,\cdots ,N
+$$
+
+We can write down samples mean and covariance in matrix form:
+
+$$
+\begin{align*}
+\mu_x &= \frac{1}{N} \sum_{i=1}^N x_i \\\
+&= \frac{1}{N}\begin{bmatrix}
+    x_1 & x_2 & \dots & x_N
+\end{bmatrix}
+\begin{bmatrix}
+1 \\\
+1 \\\
+\vdots \\\
+1
+\end{bmatrix} \\\
+&=\frac{1}{N}X^T 1_N
+\end{align*}
+$$
+
+$$
+\begin{align*}
+\Sigma_x &= \frac{1}{N}\sum_{i=1}^N(x_i-\mu_x)(x_i-\mu_x)^T \\\
+&= \frac{1}{N}\begin{bmatrix}
+    x_1-\mu_x & x_2-\mu_x & \dots & x_N-\mu_x
+\end{bmatrix}
+\begin{bmatrix}
+(x_1-\mu_x)^T \\\
+(x_2-\mu_x)^T \\\
+\vdots \\\
+(x_N-\mu_x)^T
+\end{bmatrix} \\\
+&= \frac{1}{N}\left(\begin{bmatrix}
+    x_1 & x_2 & \dots & x_N
+\end{bmatrix} - \mu_x\begin{bmatrix}
+    1 & 1 & \dots & 1
+\end{bmatrix}\right)
+\begin{bmatrix}
+(x_1-\mu_x)^T \\\
+(x_2-\mu_x)^T \\\
+\vdots \\\
+(x_N-\mu_x)^T
+\end{bmatrix} \\\
+&= \frac{1}{N} (X^T-\mu_x1_N^T)(X^T-\mu_x1_N^T)^T \\\
+&= \frac{1}{N} (X^T-\frac{1}{N}X^T 1_N 1_N^T)(X^T-\mu_x1_N^T)^T \\\
+&= \frac{1}{N}X^T (I_N-\frac{1}{N} 1_N 1_N^T)(X^T-\mu_x1_N^T)^T \\\
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Let \( I_N-\frac{1}{N} 1_N 1_N^T = H \) be the <mark>centering matrix</mark>, it has following attributes:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+H^T &= (I_N-\frac{1}{N} 1_N 1_N^T)^T \\\
+&= I_N - \frac{1}{N}1_N1_N^T \\\
+&= H
+\end{align*}
+$$
+
+$$
+\begin{align*}
+H^2 &= HH \\\
+&= (I_N-\frac{1}{N} 1_N 1_N^T)(I_N-\frac{1}{N} 1_N 1_N^T) \\\
+&= I_N - \frac{2}{N}1_N1_N^T + \frac{1}{N^2}1_N1_N^T1_N1_N^T \\\
+&= I_N - \frac{2}{N}1_N1_N^T + \frac{1}{N^2}N1_N1_N^T \\\
+&= I_N - \frac{1}{N}1_N1_N^T \\\
+&= H \\\
+H^3 &= H^2H = H \\\
+H^n &= H^{n-1}H = H
+\end{align*}
+$$
+
+Based on these attributes we can continue simplify covariance:
+
+$$
+\begin{align*}
+\Sigma_x &= \frac{1}{N}X^THH^TX \\\
+&= \frac{1}{N}X^THHX \\\
+&= \frac{1}{N}X^THX
+\end{align*}
 $$
 
 ## Definition of PCA
