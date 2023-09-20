@@ -363,7 +363,7 @@ $$
 #### method2
 {{< math.inline >}}
 <p>
-The second method is perform singular value decomposition on centerized data matrix \(HX\):
+The second method is perform singular value decomposition(SVD) on centerized data matrix \(HX\):
 </p>
 {{</ math.inline >}}
 
@@ -421,15 +421,17 @@ $$
 
 {{< math.inline >}}
 <p>
-We do not solve principal component, we solve new coordinates directly by finding eigen vectors of \(T\):
+We do not solve principal component, we solve new coordinates directly by finding eigen vectors of \(T\), this is called principle coordinate analysis(PCoA):
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
+\text{coordinates} &=U\Sigma \\\
+&\dArr \\\
 TU\Sigma &= U\Sigma^2 U^TU\Sigma \\\
 &= U\Sigma^3 \\\
-&= U\Sigma\Sigma^2 \\\
+&= (U\Sigma)\Sigma^2 \\\
 &\dArr \\\
 U\Sigma\text{ is eigen vector matrix of }&T \text{ just like }U\text{ but with different scale}
 \end{align*}
@@ -440,6 +442,42 @@ $$
 \(U\Sigma\) is the result we get.
 </p>
 {{</ math.inline >}}
+
+## P-PCA
+### PPCA model definition
+
+Probabilistic principal component analysis (PPCA) is a probalistic generation model just like gaussian discriminant analysis, it has following assumptions:
+
+$$
+\begin{align*}
+\text{observed data } x &\in \mathbb{R}^p \\\
+\text{latent variable } z &\in \mathbb{R}^q, q<p \\\
+x &= Wz+b+\epsilon \\\
+z &\sim \mathcal{N}(0_q, I_q) \\\
+\epsilon &\sim \mathcal{N}(0_p, \sigma^2I_p) \\\
+z,\epsilon &\text{ are isotropic gaussian variable}
+\end{align*}
+$$
+
+It represents a linear gaussian model, and the object is to solve:
+
+$$
+\text{P-PCA}
+\begin{cases}
+\text{probability: } p(z|x) \\\
+\text{parameters: } W, b, \sigma^2
+\end{cases}
+$$
+
+### Inference conditional probabilty
+
+{{< math.inline >}}
+<p>
+\(p(z)\) is known, \(p(x)\) is solvable, so we can compute joint probability \(p(x,z)\) first then conditional probability \(p(z|x)\).
+</p>
+{{</ math.inline >}}
+
+This part is mentioned in [previous article](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/)
 
 ## Conclusion
 
@@ -462,13 +500,6 @@ Then the solved parameters are :
 </p>
 {{</ math.inline >}}
 
-$$
-\begin{align*}
-\hat{\phi} &= \frac{N_1}{N} \\\
-p_{jii1} &= \frac{\sum_{\forall i \in \lbra ce x_i^j = ii \rbrace} y_i}{\sum_{i=1}^N y_i} \\\
-p_{jii0} &= \frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} (1-y_i)}{\sum_{i=1}^N (1-y_i)}
-\end{align*}
-$$
 
 ## Reference
 

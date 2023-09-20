@@ -1,6 +1,6 @@
 ---
 author: "X. Wang"
-title: "Solve marginal conditional and joint Gaussian pdf"
+title: "Marginal/Conditional/Joint Gaussian probability density function"
 date: "2023-08-28"
 description: "A brief introduction."
 tags: ["machine learning"]
