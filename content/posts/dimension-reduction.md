@@ -206,7 +206,7 @@ Then we can define the object function or variance \(J\):
 
 $$
 \begin{align*}
-J &= \frac{1}{N} \sum_{i=1}^N((x_i-\mu_x)^Tu_1)^2 \\\
+J &= \frac{1}{N} \sum_{i=1}^N((x_i-\mu_x)^Tu_1 - 0)^2 \\\
 &= \frac{1}{N} \sum_{i=1}^Nu_1^T(x_i-\mu_x)(x_i-\mu_x)^Tu_1 \\\
 &= u_1^T \frac{1}{N} \sum_{i=1}^N(x_i-\mu_x)(x_i-\mu_x)^T u_1 \\\
 &= u_1^T\Sigma_xu_1
@@ -267,7 +267,7 @@ $$
 \tilde{x_i} = \sum_{k=1}^q (x_i^Tu_k)u_k + \sum_{k=q+1}^p 0
 $$
 
-Then the object function is:
+Then the object function(recovery loss) is:
 
 $$
 \begin{align*}
@@ -320,10 +320,126 @@ $$
 
 {{< math.inline >}}
 <p>
-Then we can conclude that to minimize reconstruction cost, we need to find \(p-q\) smallest eigen values and there eigen vectors, the smallest reconstruction cost is the summation of \(p-q\) smallest eigen values.
+Then we can conclude that to minimize reconstruction cost, we need to find \(p-q\) smallest eigen values and corresponding eigen vectors, the smallest reconstruction cost is the summation of \(p-q\) smallest eigen values.
 </p>
 {{</ math.inline >}}
 
+### SVD and Eigendecomposition
+
+{{< math.inline >}}
+<p>
+In this subsection, we would like to prove that there are 3 matrix factorization methods to achieve PCA. Recall that PCA tries to find top-q principal components from a \(N \times p\) data matrix and it is equivalent to finding top-q eigen vectors from the \(p \times p\) covariance matrix.
+</p>
+{{</ math.inline >}}
+
+#### method1
+So the first method is eigendecomposite covariance matrix:
+
+$$
+\Sigma_x = Q\Lambda Q^T \\\
+Q^TQ = I, \Lambda = \underset{\lambda_1>\cdots>\lambda_p}{\begin{bmatrix}
+\lambda_1 & & \\\
+& \ddots & \\\
+& & \lambda_p 
+\end{bmatrix}}
+$$
+
+{{< math.inline >}}
+<p>
+Each column of \(Q\) represents a eigen vector we want to find. After finding principal components, we can do projection on each component and acquire new coordinates, these includes centralization and projection:
+</p>
+{{</ math.inline >}}
+
+$$
+\text{coordinates} = HXQ, H \text{ is centering matrix}
+$$
+
+{{< math.inline >}}
+<p>
+\(HXQ\) is the result we get.
+</p>
+{{</ math.inline >}}
+
+#### method2
+{{< math.inline >}}
+<p>
+The second method is perform singular value decomposition on centerized data matrix \(HX\):
+</p>
+{{</ math.inline >}}
+
+$$
+HX = U\Sigma V^T \\\
+U^TU = I, V^TV=I
+$$
+
+$$
+\begin{align*}
+\because \Sigma_x &= \frac{1}{N}X^THX \\\
+&\propto X^THHX \\\
+&= X^TH^THX \\\
+&= V\Sigma^T U^TU\Sigma V^T \\\
+&= V\Sigma^2 V^T \\\
+\therefore Q &= V \\\
+\Lambda &= \Sigma^2
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Each column of \(V\) represents a eigen vector we want to find. Then find new coordinates:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\text{coordinates} &= HXV \\\
+&= U\Sigma V^TV \\\
+&= U\Sigma
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+\(U\Sigma\) is the result we get.
+</p>
+{{</ math.inline >}}
+
+#### method3
+{{< math.inline >}}
+<p>
+The third method is perform eigendecomposition on matrix \(T=HXX^TH^T\)
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\because T &= HXX^TH^T \\\
+&= U\Sigma V^T V\Sigma U^T \\\
+&= U\Sigma^2 U^T
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+We do not solve principal component, we solve new coordinates directly by finding eigen vectors of \(T\):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+TU\Sigma &= U\Sigma^2 U^TU\Sigma \\\
+&= U\Sigma^3 \\\
+&= U\Sigma\Sigma^2 \\\
+&\dArr \\\
+U\Sigma\text{ is eigen vector matrix of }&T \text{ just like }U\text{ but with different scale}
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+\(U\Sigma\) is the result we get.
+</p>
+{{</ math.inline >}}
 
 ## Conclusion
 
@@ -349,7 +465,7 @@ Then the solved parameters are :
 $$
 \begin{align*}
 \hat{\phi} &= \frac{N_1}{N} \\\
-p_{jii1} &= \frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} y_i}{\sum_{i=1}^N y_i} \\\
+p_{jii1} &= \frac{\sum_{\forall i \in \lbra ce x_i^j = ii \rbrace} y_i}{\sum_{i=1}^N y_i} \\\
 p_{jii0} &= \frac{\sum_{\forall i \in \lbrace x_i^j = ii \rbrace} (1-y_i)}{\sum_{i=1}^N (1-y_i)}
 \end{align*}
 $$
