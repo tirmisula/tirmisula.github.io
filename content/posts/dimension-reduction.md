@@ -439,14 +439,14 @@ $$
 
 {{< math.inline >}}
 <p>
-\(U\Sigma\) is the result we get.
+\(U\Sigma\) is the result we get. This method is more effective when \(p>>N\).
 </p>
 {{</ math.inline >}}
 
 ## P-PCA
 ### PPCA model definition
 
-Probabilistic principal component analysis (PPCA) is a probalistic generation model just like gaussian discriminant analysis, it has following assumptions:
+Probabilistic principal component analysis (PPCA) is a probalistic generation model like gaussian discriminant analysis, it has following assumptions:<cite>[^1]</cite>
 
 $$
 \begin{align*}
@@ -455,14 +455,15 @@ $$
 x &= Wz+b+\epsilon \\\
 z &\sim \mathcal{N}(0_q, I_q) \\\
 \epsilon &\sim \mathcal{N}(0_p, \sigma^2I_p) \\\
-z,\epsilon &\text{ are isotropic gaussian variable}
+z,\epsilon &\text{ are isotropic gaussian variables} \\\
+z &\perp \epsilon
 \end{align*}
 $$
 
 It represents a linear gaussian model, and the object is to solve:
 
 $$
-\text{P-PCA}
+\text{PPCA}
 \begin{cases}
 \text{probability: } p(z|x) \\\
 \text{parameters: } W, b, \sigma^2
@@ -473,35 +474,129 @@ $$
 
 {{< math.inline >}}
 <p>
-\(p(z)\) is known, \(p(x)\) is solvable, so we can compute joint probability \(p(x,z)\) first then conditional probability \(p(z|x)\).
+\(p(z)\) is known, \(p(x|z)\) is solvable, so we can compute joint probability \(p(x,z)\) first then conditional probability \(p(z|x)\).
 </p>
 {{</ math.inline >}}
 
-This part is mentioned in [previous article](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/)
-
-## Conclusion
-
-Given that:
+Deduction process of thhis part is mentioned in [previous article](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/):
 
 $$
-L(\theta) = \prod_{i=1}^N \prod_{j=1}^p p(x_i^j|y_i)p(y_i)
+\begin{align*}
+E[x|z] &= E[Wz+b+\epsilon] \\\
+&=Wz+b+E[\epsilon] \\\
+&= Wz+b
+\end{align*}
 $$
 
-We assume:
+$$
+\begin{align*}
+Var[x|z] &= Var[Wz+b+\epsilon] \\\
+&= Var[\epsilon] \\\
+&= \sigma^2I
+\end{align*}
+$$
 
 $$
-y \sim \mathcal{Bernoulli}(\phi) \\\
-x_i^j|y=c \sim \mathcal{Cat}(m,p_{j1c},\cdots,p_{jmc})
+x|z \sim \mathcal{N}(Wz+b,\sigma^2I)
 $$
 
-{{< math.inline >}}
-<p>
-Then the solved parameters are :
-</p>
-{{</ math.inline >}}
+$$
+\begin{align*}
+E[x] &= E[Wz+b+\epsilon] \\\
+&= WE[z]+b+E[\epsilon] \\\
+&= b
+\end{align*}
+$$
+
+$$
+\begin{align*}
+Var[x] &= Var[Wz+b+\epsilon] \\\
+&= Var[Wz] + Var[\epsilon] \\\
+&= WIW^T + \sigma^2I \\\
+&= WW^T +\sigma^2I
+\end{align*}
+$$
+
+$$
+x \sim \mathcal{N}(b,WW^T+\sigma^2I)
+$$
+
+$$
+\begin{align*}
+E\left[\begin{bmatrix}
+x \\\
+z
+\end{bmatrix}\right] &= \begin{bmatrix}
+E[x] \\\
+E[z]
+\end{bmatrix} \\\
+&= \begin{bmatrix}
+b \\\
+0
+\end{bmatrix}
+\end{align*}
+$$
+
+$$
+\begin{align*}
+Var\left[\begin{bmatrix}
+x \\\
+z
+\end{bmatrix}\right] &= \begin{bmatrix}
+Cov[x,x] & Cov[x,z] \\\
+Cov[z,x] & Cov[z,z]
+\end{bmatrix} \\\
+&= \begin{bmatrix}
+WW^T+\sigma^2I & Cov[x,z] \\\
+Cov[z,x] & I
+\end{bmatrix} \\\
+\because Cov[x,z] &= E\left[ (x-b) (z-0)^T \right] \\\
+&= E\left[ (Wz+\epsilon) z^T \right] \\\
+&= E\left[Wzz^T\right] + E\left[\epsilon z^T\right] \\\
+&= WE\left[(z-0)(z-0)^T\right] + E[\epsilon]E[z^T] \\\
+&= WI \\\
+&= W \\\
+\therefore Var\left[\begin{bmatrix}
+x \\\
+z
+\end{bmatrix}\right] &= \begin{bmatrix}
+WW^T+\sigma^2I & W \\\
+W^T & I
+\end{bmatrix}
+\end{align*}
+$$
+
+$$
+\begin{bmatrix}
+x \\\
+z
+\end{bmatrix} \sim \mathcal{N}(\begin{bmatrix}
+b \\\
+0
+\end{bmatrix}, \begin{bmatrix}
+WW^T+\sigma^2I & W \\\
+W^T & I
+\end{bmatrix})
+$$
+
+Just use conclusion from [previous article](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/):
+
+$$
+\begin{align*}
+E[z|x] &= \Sigma_{zx}\Sigma_{xx}^{-1}(x-E[x])+E[z] \\\
+&= W^T(WW^T+\sigma^2I)^{-1}(x-b)
+\end{align*}
+$$
+
+$$
+\begin{align*}
+Var[z|x] &= -\Sigma_{zx}\Sigma_{xx}^{-1}\Sigma_{xz}+\Sigma_{zz} \\\
+&= -W^T(WW^T+\sigma^2I)^{-1}W + I
+\end{align*}
+$$
 
 
 ## Reference
 
-[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=21).
+[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=27).
 [^2]: From [source](https://zhuanlan.zhihu.com/p/71960086).
