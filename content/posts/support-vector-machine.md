@@ -44,7 +44,7 @@ $$
 \begin{cases}
 \text{Hard-margin SVM} \\\
 \text{Soft-margin SVM} \\\
-\text{Kernel}
+\text{Kernel SVM}
 \end{cases}
 $$
 
@@ -62,10 +62,8 @@ $$
 Similar to [perceptron model](https://tirmisula.github.io/posts/perceptron/), hard-margin SVM tries to find a decision hyperplane that 100% correctly classifies each data sample and the <mark>closest</mark> point to decision hyperplane should have it's distance as long as possible:
 
 $$
-\begin{cases}
 \max_{w,b}\min_{\forall x_i, i=1,\cdots,N} dist(x_i, w^Tx+b) \\\
 \text{subject to } y_i(w^Tx_i+b) > 0
-\end{cases}
 $$
 
 {{< math.inline >}}
@@ -84,7 +82,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Assuming we have \(x\)'s projection point \(h\), then \(x-h\) must be perpendicular to normal vector \(w\)
+Assuming we have \(x\)'s projection point \(h\), then \(x-h\) must be perpendicular to normal vector \(w\), then we can define distance function:
 </p>
 {{</ math.inline >}}
 
@@ -97,156 +95,36 @@ w^T(x-kw)+b &= 0 \\\
 w^Tx - k\lVert w\rVert^2 +b &= 0 \\\
 k &= \frac{w^Tx+b}{\lVert w\rVert^2} \\\
 &\dArr \\\
-\lvert x-h \rvert &= \frac{\lvert w^Tx+b \rvert}{\lVert w\rVert^2} \lVert w \rVert
+dist(x,h) = \lvert x-h \rvert &= \frac{\lvert w^Tx+b \rvert}{\lVert w\rVert^2} \lVert w \rVert \\\
+&= \frac{\lvert w^Tx+b \rvert}{\lVert w\rVert}
 \end{align*}
 $$
 
-{{< math.inline >}}
-<p>
-The problem is to maximize \(J\):
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{cases}
-\hat{u_1} = \argmax_u u_1^T\Sigma_xu_1 \\\
-\text{subject to } u_1^Tu_1=1
-\end{cases}
-$$
+The original problem becomes:
 
 $$
 \begin{align*}
-L(u_1,\lambda) &= u_1^T\Sigma_x u_1+\lambda(1-u_1^Tu_1) \\\
-\frac{\partial L}{\partial u_1} &= 2\Sigma_xu_1-2\lambda u_1 = 0 \\\
-\Sigma_xu_1 &= \lambda u_1
+\max_{w,b}\min_{\forall x_i, i=1,\cdots,N} dist(x_i, w^Tx+b) &= \max_{w,b}\min_{\forall x_i, i=1,\cdots,N} \frac{\lvert w^Tx_i+b \rvert}{\lVert w\rVert} \\\
+&= \max_{w,b}\frac{1}{\lVert w\rVert}\min_{\forall x_i, i=1,\cdots,N} \lvert w^Tx_i+b \rvert \\\
+&= \max_{w,b}\frac{1}{\lVert w\rVert}\min_{\forall x_i, i=1,\cdots,N} y_i(w^Tx_i+b)
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-We can conclude that finding \(u_1\) equals to finding eigen vector of \(\Sigma_x\) and \(\lambda\) is  the eigen value of \(\Sigma_x\).
+Since hyperplane \(w^Tx+b \implies 2w^Tx+2b \) is scalable, we normalize \( \min y_i(w^Tx_i+b) \) to a certain value:
 </p>
 {{</ math.inline >}}
+
+$$
+\min_{\forall x_i, i=1,\cdots,N} y_i(w^Tx_i+b) = \gamma
+$$
 
 ### Minimize reconstruct cost
 
-When we recover a q-dimensional data to original p-dimensional data, we want to <mark>minimize reconstruction cost</mark>. In particular, we want to minimize the distance between original vector and recovered vector.
 
-{{< math.inline >}}
-<p>
-Given \( \{u_1,u_2,\cdots,u_p\} \) a group of orthonormal basis, \( x_i^Tu_i \) is the coordinate, we can rewrite \(x_i\) like:
-</p>
-{{</ math.inline >}}
 
-$$
-\begin{align*}
-x_i &= (x_i^Tu_1)u_1+(x_i^Tu_2)u_2+\cdots+(x_i^Tu_p)u_p \\\
-&= \sum_{k=1}^p (x_i^Tu_k)u_k
-\end{align*}
-$$
 
-{{< math.inline >}}
-<p>
-Similarly we can write recovered data \(\tilde{x_i}\), since \(q\) dimensions are recovered by first \(q\) principal components and the left \(p-q\) dimensions are zero:
-</p>
-{{</ math.inline >}}
-
-$$
-\tilde{x_i} = \sum_{k=1}^q (x_i^Tu_k)u_k + \sum_{k=q+1}^p 0
-$$
-
-Then the object function(recovery loss) is:
-
-$$
-\begin{align*}
-J &= \frac{1}{N}\sum_{i=1}^N \lVert x_i-\tilde{x_i} \rVert^2 \\\
-&= \frac{1}{N}\sum_{i=1}^N \lVert \sum_{k=q+1}^p (x_i^Tu_k)u_k \rVert^2 \\\
-&= \frac{1}{N}\sum_{i=1}^N \lVert \overbrace{x_i}^{q+1,q+2,\cdots, p} \rVert^2 \\\
-&= \frac{1}{N}\sum_{i=1}^N \sum_{k=q+1}^p (x_i^Tu_k)^2 \\\
-\text{replace } x_i \text{ with } &x_i-\mu_x \text{ because of centralization} \\\
-&\triangleq \frac{1}{N}\sum_{i=1}^N \sum_{k=q+1}^p ((x_i-\mu_x)^Tu_k)^2 \\\
-&= \frac{1}{N}\sum_{i=1}^N \sum_{k=q+1}^p u_k^T(x_i-\mu_x)(x-\mu_x)^Tu_k \\\
-&= \sum_{k=q+1}^p u_k^T\left[\frac{1}{N}\sum_{i=1}^N (x_i-\mu_x)(x-\mu_x)^T\right]u_k \\\
-&= \sum_{k=q+1}^p u_k^T\Sigma_xu_k \\\
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-Similar to previous subsection, the problem is to minimize \(J\):
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{cases}
-\hat{u_k} = \argmin_u \sum_{k=q+1}^p u_k^T\Sigma_xu_k \\\
-\text{subject to } u_k^Tu_k=1, k=q+1,\cdots,p
-\end{cases}
-$$
-
-$$
-\begin{align*}
-L(u_{q+1},\cdots,u_p,\lambda) &= \sum_{k=q+1}^p u_k^T\Sigma_xu_k + \sum_{k=q+1}^p\lambda_k(1-u_k^Tu_k) \\\
-\frac{\partial L}{\partial u_k} &= 2\Sigma_xu_k-2\lambda_k u_k = 0 \\\
-\Sigma_xu_k &= \lambda_k u_k
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-By replacing \( \Sigma_xu_k \) with \( \lambda_ku_k \), we get:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-\sum_{k=q+1}^p u_k^T\Sigma_xu_k &= \sum_{k=q+1}^p u_k^T\lambda_ku_k \\\
-&= \sum_{k=q+1}^p \lambda_ku_k^Tu_k \\\
-&= \sum_{k=q+1}^p \lambda_k
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-Then we can conclude that to minimize reconstruction cost, we need to find \(p-q\) smallest eigen values and corresponding eigen vectors, the smallest reconstruction cost is the summation of \(p-q\) smallest eigen values.
-</p>
-{{</ math.inline >}}
-
-### SVD and Eigendecomposition
-
-{{< math.inline >}}
-<p>
-In this subsection, we would like to prove that there are 3 matrix factorization methods to achieve PCA. Recall that PCA tries to find top-q principal components from a \(N \times p\) data matrix and it is equivalent to finding top-q eigen vectors from the \(p \times p\) covariance matrix.
-</p>
-{{</ math.inline >}}
-
-#### method1
-So the first method is eigendecomposite covariance matrix:
-
-$$
-\Sigma_x = Q\Lambda Q^T \\\
-Q^TQ = I, \Lambda = \underset{\lambda_1>\cdots>\lambda_p}{\begin{bmatrix}
-\lambda_1 & & \\\
-& \ddots & \\\
-& & \lambda_p 
-\end{bmatrix}}
-$$
-
-{{< math.inline >}}
-<p>
-Each column of \(Q\) represents a eigen vector we want to find. After finding principal components, we can do projection on each component and acquire new coordinates, these includes centralization and projection:
-</p>
-{{</ math.inline >}}
-
-$$
-\text{coordinates} = HXQ, H \text{ is centering matrix}
-$$
-
-{{< math.inline >}}
-<p>
-\(HXQ\) is the result we get.
-</p>
-{{</ math.inline >}}
 
 #### method2
 {{< math.inline >}}
