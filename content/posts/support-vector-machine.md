@@ -112,7 +112,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Since hyperplane \(w^Tx+b \implies 2w^Tx+2b \) is scalable, we normalize \( \min y_i(w^Tx_i+b) \) to a certain value:
+Since hyperplane \(w^Tx+b \implies 2w^Tx+2b \) is scalable which doesn't affect which one is the closest point, we can normalize \( \min y_i(w^Tx_i+b) \) to a certain scale:
 </p>
 {{</ math.inline >}}
 
@@ -120,94 +120,159 @@ $$
 \min_{\forall x_i, i=1,\cdots,N} y_i(w^Tx_i+b) = \gamma
 $$
 
-### Minimize reconstruct cost
-
-
-
-
-
-#### method2
-{{< math.inline >}}
-<p>
-The second method is perform singular value decomposition(SVD) on centerized data matrix \(HX\):
-</p>
-{{</ math.inline >}}
-
-$$
-HX = U\Sigma V^T \\\
-U^TU = I, V^TV=I
-$$
+Then above max-min problem becomes:
 
 $$
 \begin{align*}
-\because \Sigma_x &= \frac{1}{N}X^THX \\\
-&\propto X^THHX \\\
-&= X^TH^THX \\\
-&= V\Sigma^T U^TU\Sigma V^T \\\
-&= V\Sigma^2 V^T \\\
-\therefore Q &= V \\\
-\Lambda &= \Sigma^2
+\max_{w,b}\frac{1}{\lVert w\rVert }\gamma &= \max_{w,b}\frac{1}{\lVert w\rVert } \\\
+&= \min_{w,b}\lVert w\rVert \\\
+&= \min_{w,b} \frac{1}{2}w^Tw
+\end{align*}
+$$
+
+And the constriant part becomes:
+
+$$
+\begin{align*}
+y_i(w^Tx_i+b) > 0 &\implies \exist \gamma>0, \min_i y_i(w^Tx_i+b) = \gamma \\\
+&\implies \exist \gamma>0, y_i(w^Tx_i+b) \geq \gamma
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-Each column of \(V\) represents a eigen vector we want to find. Then find new coordinates:
+Let \( \gamma=1 \), we have:
+</p>
+{{</ math.inline >}}
+
+$$
+\min_{w,b} \frac{1}{2}w^Tw \\\
+\text{subject to } y_i(w^Tx_i+b) \geq 1, i=1,2,\cdots,N
+$$
+
+SVM is transformed to a convex optimization problem which can be solved like quadratic programming.
+
+### Introduce non-constraint and dual problem
+
+#### non-constraint problem
+{{< math.inline >}}
+<p>
+The original problem can be transformed into a non-constraint problem with lagrange multiplier:
+</p>
+{{</ math.inline >}}
+
+$$
+L(w,b,\lambda) = \frac{1}{2}w^Tw+\sum_{i=1}^N\lambda_i(1-y_i(w^Tx_i+b)) \\\
+\begin{cases}
+\min_{w,b} \frac{1}{2}w^Tw \\\
+\text{subject to } y_i(w^Tx_i+b) \geq 1, i=1,2,\cdots,N
+\end{cases}
+\iff
+\begin{cases}
+\min_{w,b} \max_{\lambda} L(w,b,\lambda) \\\
+\text{subject to } \lambda_i \geq 0, i=1,2,\cdots,N
+\end{cases}
+$$
+
+{{< math.inline >}}
+<p>
+This can be proved:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{cases}
+\text{If } 1-y_i(w^Tx_i+b)>0, \max_{\lambda}L=\frac{1}{2}w^Tw+\infty=\infty \\\
+\text{if } 1-y_i(w^Tx_i+b)\leq 0, \max_{\lambda}L=\frac{1}{2}w^Tw+0=\frac{1}{2}w^Tw
+\end{cases} \\\
+\therefore \min_{w,b} \max_{\lambda} L(w,b,\lambda) = \min_{w,b} (\infty, \frac{1}{2}w^Tw)= \min_{w,b} \frac{1}{2}w^Tw
+$$
+
+#### dual problem
+{{< math.inline >}}
+<p>
+The dual problem is:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{cases}
+\min_{w,b} \max_{\lambda} L(w,b,\lambda) \\\
+\text{subject to } \lambda_i \geq 0, i=1,2,\cdots,N
+\end{cases}
+\iff
+\begin{cases}
+\max_{\lambda} \min_{w,b} L(w,b,\lambda) \\\
+\text{subject to } \lambda_i \geq 0, i=1,2,\cdots,N
+\end{cases}
+$$
+
+By weak duality theorem<cite>[^2]</cite>:
+
+$$
+\min_{w,b} \max_{\lambda} L(w,b,\lambda) \geq \max_{\lambda} \min_{w,b} L(w,b,\lambda)
+$$
+
+Because primal problem has a convex function and linear constraints, by strong duality theorem<cite>[^3]</cite>:
+
+$$
+\min_{w,b} \max_{\lambda} L(w,b,\lambda) = \max_{\lambda} \min_{w,b} L(w,b,\lambda)
+$$
+
+Solve primal problem is equivalent to solve it's dual problem.
+
+#### solve dual problem
+
+{{< math.inline >}}
+<p>
+We take the partial derivatives of \(L(w,b,\lambda)\):
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-\text{coordinates} &= HXV \\\
-&= U\Sigma V^TV \\\
-&= U\Sigma
+\frac{\partial}{\partial b}L(w,b,\lambda) &= 0 \\\
+\sum_{i=1}^N \lambda_iy_i &= 0
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-\(U\Sigma\) is the result we get.
-</p>
-{{</ math.inline >}}
-
-#### method3
-{{< math.inline >}}
-<p>
-The third method is perform eigendecomposition on matrix \(T=HXX^TH^T\)
+We put this condition\(\sum_{i=1}^N \lambda_iy_i = 0\) back to \(L(w,b,\lambda)\):
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-\because T &= HXX^TH^T \\\
-&= U\Sigma V^T V\Sigma U^T \\\
-&= U\Sigma^2 U^T
+L(w,b,\lambda) &= \frac{1}{2}w^Tw+\sum_{i=1}^N\lambda_i(1-y_i(w^Tx_i+b)) \\\
+&= \frac{1}{2}w^Tw+\sum_{i=1}^N\lambda_i-\sum_{i=1}^N\lambda_iy_iw^Tx_i-\sum_{i=1}^N\lambda_iy_ib \\\
+&= \frac{1}{2}w^Tw+\sum_{i=1}^N\lambda_i-\sum_{i=1}^N\lambda_iy_iw^Tx_i
+\end{align*}
+$$
+
+Next:
+
+$$
+\begin{align*}
+\frac{\partial}{\partial w}L(w,b,\lambda) &= 0 \\\
+w-\sum_{i=1}^N\lambda_iy_ix_i &= 0 \\\
+w &= \sum_{i=1}^N\lambda_iy_ix_i
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-We do not solve principal component, we solve new coordinates directly by finding eigen vectors of \(T\), this is called principle coordinate analysis(PCoA):
+We put this condition\(w = \sum_{i=1}^N\lambda_iy_ix_i\) back to \(L(w,b,\lambda)\):
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-\text{coordinates} &=U\Sigma \\\
-&\dArr \\\
-TU\Sigma &= U\Sigma^2 U^TU\Sigma \\\
-&= U\Sigma^3 \\\
-&= (U\Sigma)\Sigma^2 \\\
-&\dArr \\\
-U\Sigma\text{ is eigen vector matrix of }&T \text{ just like }U\text{ but with different scale}
+\min_{w,b}L(w,b,\lambda) &= \frac{1}{2}w^Tw+\sum_{i=1}^N\lambda_i-\sum_{i=1}^N\lambda_iy_iw^Tx_i \\\
+&= \frac{1}{2}\left(\sum_{i=1}^N\lambda_iy_ix_i\right)^T\sum_{i=1}^N\lambda_iy_ix_i + \sum_{i-1}^N\lambda_i - \sum_{i=1}^N\lambda_iy_i\left(\sum_{i=1}^N\lambda_iy_ix_i\right)^Tx_i \\\
+&= 1
 \end{align*}
 $$
-
-{{< math.inline >}}
-<p>
-\(U\Sigma\) is the result we get. This method is more effective when \(p>>N\).
-</p>
-{{</ math.inline >}}
 
 ## P-PCA
 ### PPCA model definition
@@ -365,4 +430,5 @@ $$
 ## Reference
 
 [^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=27).
-[^2]: From [source](https://zhuanlan.zhihu.com/p/71960086).
+[^2]: From [Weak duality](https://en.wikipedia.org/wiki/Weak_duality).
+[^3]: From [Strong duality](https://en.wikipedia.org/wiki/Strong_duality).
