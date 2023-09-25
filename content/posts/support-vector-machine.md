@@ -213,7 +213,7 @@ $$
 \min_{w,b} \max_{\lambda} L(w,b,\lambda) \geq \max_{\lambda} \min_{w,b} L(w,b,\lambda)
 $$
 
-Because primal problem has a convex function and linear constraints, by strong duality theorem<cite>[^3]</cite>:
+Because primal problem has a convex function and linear constraints it satisfies [KKT condition](https://tirmisula.github.io/posts/support-vector-machine/#kkt-conditions), which means a strong duality exsits in between primal and dual problem<cite>[^3]</cite>:
 
 $$
 \min_{w,b} \max_{\lambda} L(w,b,\lambda) = \max_{\lambda} \min_{w,b} L(w,b,\lambda)
@@ -274,16 +274,70 @@ $$
 &= \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j + \sum_{i-1}^N\lambda_i - \sum_{i=1}^N\left(\sum_{j=1}^N\lambda_iy_i\lambda_jy_jx_j^T\right)x_i \\\
 &= \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j + \sum_{i-1}^N\lambda_i - \sum_{i=1}^N\sum_{j=1}^N\lambda_iy_i\lambda_jy_jx_j^Tx_i \\\
 &= \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j + \sum_{i-1}^N\lambda_i - \sum_{i=1}^N\sum_{j=1}^N\lambda_iy_i\lambda_jy_jx_i^Tx_j \\\
-&= -\frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j
+&= -\frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j + \sum_{i=1}^N\lambda_i
 \end{align*}
 $$
 
-Finally the dual problem becomes:
+Finally the dual optimization problem becomes:
 
 $$
-\max_{\lambda} -\frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j \\\
-\text{subject to } \lambda_i \geq 0 , i=1,2,\cdots,N
+\max_{\lambda} -\frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j + \sum_{i=1}^N\lambda_i \\\
+\text{subject to } \lambda_i \geq 0 , i=1,2,\cdots,N \\\
+\text{subject to } \sum_{i=1}^N \lambda_iy_i=0 , i=1,2,\cdots,N \\\
+\dArr \\\
+\min_{\lambda} \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j - \sum_{i=1}^N\lambda_i \\\
+\text{subject to } \lambda_i \geq 0 , i=1,2,\cdots,N \\\
+\text{subject to } \sum_{i=1}^N \lambda_iy_i=0 , i=1,2,\cdots,N \\\
 $$
+
+#### KKT conditions
+
+Karush-Kuhn-Tucker Conditions(KKT) for the primal problem with constraints are listed as follows:
+
+$$
+\begin{cases}
+\frac{\partial L(w,b,\lambda)}{\partial w} = 0,\frac{\partial L(w,b,\lambda)}{\partial b} = 0 \implies \text{satisfies because }w^*,b^* \text{ solvable} \\\
+\lambda_i(1-y_i(w^Tx_i+b)) = 0  \implies \text{complementary slackness}\\\
+\lambda_i \geq 0, i=1,2,\cdots,N \implies \text{satisfies because mentioned in no constraints primal problem} \\\
+1-y_i(w^Tx_i+b) \leq 0 \implies \text{satisfies because mentioned in constraints primal problem}
+\end{cases}
+$$
+
+{{< math.inline >}}
+<p>
+\(w^*\) is solved in last section:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+w^* &= \sum_{i=1}^N\lambda_iy_ix_i \\\
+\exist (x_k,y_k), 1-y_k((w^*)^Tx_k+b^*) &= 0 \\\
+y_k^2((w^*)^Tx_k+b^*) &= y_k \\\
+\sum_{i=1}^N\lambda_iy_ix_i^Tx_k+b^* &= y_k \\\
+b^* &= y_k - \sum_{i=1}^N\lambda_iy_ix_i^Tx_k
+\end{align*}
+$$
+
+<mark>complementary slackness</mark> can be divided into 2 situations:
+
+$$
+\lambda_i = 0 , y_i(w^Tx_i+b) > 1 \\\
+\lambda_i \not= 0 , y_i(w^Tx_i+b) = 1 \\\
+$$
+
+{{< math.inline >}}
+<p>
+Because primal problem maximize distance between closest point to decision boundary \( w^Tx+b=0 \), it must have 2 dual boundaries \( w^Tx+b=1 \), \( w^Tx+b=-1 \) where the closest points for each class locate at.
+
+So the first situation of satifying complementary slackness indicates other data samples that is far away from dual boundaries and have their weight \(\lambda_i\) determined to be zero, they play no rule in optimization.
+
+And the second situation indicates only the closest points from 2 class have effective weight \(\lambda_i\). 
+
+In conclusion, since \( w^* \), \( b^* \) is the linear combination of all data samples, complementary slackness contrained most of \(\lambda_i\) to zero, thus only a few points closest to class border determined the decision boundary.
+</p>
+{{</ math.inline >}}
+
 
 ## P-PCA
 ### PPCA model definition
