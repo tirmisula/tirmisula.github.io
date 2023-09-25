@@ -296,7 +296,7 @@ Karush-Kuhn-Tucker Conditions(KKT) for the primal problem with constraints are l
 
 $$
 \begin{cases}
-\frac{\partial L(w,b,\lambda)}{\partial w} = 0,\frac{\partial L(w,b,\lambda)}{\partial b} = 0 \implies \text{satisfies because }w^{*},b^{*} \text{ solvable} \\\
+\frac{\partial L(w,b,\lambda)}{\partial w} = 0,\frac{\partial L(w,b,\lambda)}{\partial b} = 0 \implies \text{satisfies because }w^{\ast},b^{\ast} \text{ solvable} \\\
 \lambda_i(1-y_i(w^Tx_i+b)) = 0  \implies \text{complementary slackness}\\\
 \lambda_i \geq 0, i=1,2,\cdots,N \implies \text{satisfies because mentioned in no constraints primal problem} \\\
 1-y_i(w^Tx_i+b) \leq 0 \implies \text{satisfies because mentioned in constraints primal problem}
@@ -311,11 +311,11 @@ $$
 
 $$
 \begin{align*}
-w^{*} &= \sum_{i=1}^N\lambda_iy_ix_i \\\
-\exist (x_k,y_k), 1-y_k((w^{*})^Tx_k+b^{*}) &= 0 \\\
-y_k^2((w^{*})^Tx_k+b^{*}) &= y_k \\\
-\sum_{i=1}^N\lambda_iy_ix_i^Tx_k+b^{*} &= y_k \\\
-b^{*} &= y_k - \sum_{i=1}^N\lambda_iy_ix_i^Tx_k
+w^{\ast} &= \sum_{i=1}^N\lambda_iy_ix_i \\\
+\exist (x_k,y_k), 1-y_k((w^{\ast})^Tx_k+b^{\ast}) &= 0 \\\
+y_k^2((w^{\ast})^Tx_k+b^{\ast}) &= y_k \\\
+\sum_{i=1}^N\lambda_iy_ix_i^Tx_k+b^{\ast} &= y_k \\\
+b^{\ast} &= y_k - \sum_{i=1}^N\lambda_iy_ix_i^Tx_k
 \end{align*}
 $$
 
