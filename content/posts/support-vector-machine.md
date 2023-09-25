@@ -296,7 +296,7 @@ Karush-Kuhn-Tucker Conditions(KKT) for the primal problem with constraints are l
 
 $$
 \begin{cases}
-\frac{\partial L(w,b,\lambda)}{\partial w} = 0,\frac{\partial L(w,b,\lambda)}{\partial b} = 0 \implies \text{satisfies because }w^*,b^* \text{ solvable} \\\
+\frac{\partial L(w,b,\lambda)}{\partial w} = 0,\frac{\partial L(w,b,\lambda)}{\partial b} = 0 \implies \text{satisfies because }w^{*},b^{*} \text{ solvable} \\\
 \lambda_i(1-y_i(w^Tx_i+b)) = 0  \implies \text{complementary slackness}\\\
 \lambda_i \geq 0, i=1,2,\cdots,N \implies \text{satisfies because mentioned in no constraints primal problem} \\\
 1-y_i(w^Tx_i+b) \leq 0 \implies \text{satisfies because mentioned in constraints primal problem}
@@ -311,11 +311,11 @@ $$
 
 $$
 \begin{align*}
-w^* &= \sum_{i=1}^N\lambda_iy_ix_i \\\
-\exist (x_k,y_k), 1-y_k((w^*)^Tx_k+b^*) &= 0 \\\
-y_k^2((w^*)^Tx_k+b^*) &= y_k \\\
-\sum_{i=1}^N\lambda_iy_ix_i^Tx_k+b^* &= y_k \\\
-b^* &= y_k - \sum_{i=1}^N\lambda_iy_ix_i^Tx_k
+w^{*} &= \sum_{i=1}^N\lambda_iy_ix_i \\\
+\exist (x_k,y_k), 1-y_k((w^{*})^Tx_k+b^{*}) &= 0 \\\
+y_k^2((w^{*})^Tx_k+b^{*}) &= y_k \\\
+\sum_{i=1}^N\lambda_iy_ix_i^Tx_k+b^{*} &= y_k \\\
+b^{*} &= y_k - \sum_{i=1}^N\lambda_iy_ix_i^Tx_k
 \end{align*}
 $$
 
@@ -329,17 +329,17 @@ $$
 {{< math.inline >}}
 <p>
 Because primal problem maximize distance between closest point to decision boundary \( w^Tx+b=0 \), it must have 2 dual boundaries \( w^Tx+b=1 \), \( w^Tx+b=-1 \) where the closest points for each class locate at.
-
+<br/>
 So the first situation of satifying complementary slackness indicates other data samples that is far away from dual boundaries and have their weight \(\lambda_i\) determined to be zero, they play no rule in optimization.
-
+<br/>
 And the second situation indicates only the closest points from 2 class have effective weight \(\lambda_i\). 
-
+<br/>
 In conclusion, since \( w^* \), \( b^* \) is the linear combination of all data samples, complementary slackness contrained most of \(\lambda_i\) to zero, thus only a few points closest to class border determined the decision boundary.
 </p>
 {{</ math.inline >}}
 
 
-## P-PCA
+## Soft-margin SVM
 ### PPCA model definition
 
 Probabilistic principal component analysis (PPCA) is a probalistic generation model like gaussian discriminant analysis, it has following assumptions:<cite>[^1]</cite>
