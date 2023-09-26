@@ -491,7 +491,101 @@ $$
 
 ### Geometric explanation of duality
 
+Given a primal problem and it's dual problem:
 
+$$
+\min_{x\in\mathbb{R}^p} f(x) \\\
+\text{subject to } m_1(x) \leq 0
+$$
+
+$$
+\max_{\lambda}\min_{x} f(x)+\lambda m_1(x) \\\
+\text{subject to }\lambda \geq 0
+$$
+
+{{< math.inline >}}
+<p>
+Let \(p^*\) and \(d^*\) be the optimization result of primal problem and dual problem:
+</p>
+{{</ math.inline >}}
+
+$$
+p^{\ast} = \min_{x}f(x), m_1(x)\leq 0 \\\
+d^{\ast} = \max_{\lambda}\min_{x} f(x)+\lambda m_1(x), \lambda\geq 0
+$$
+
+{{< math.inline >}}
+<p>
+Define domain \(D\) which represents the intersection of domain \(f(\cdot)\) and domain \(m_1(\cdot)\), and assuming it locates in a 2D cartesian axis, each domain represents horizontal axis \(u\) or vertical axis \(v\) and restricted area is defined as set \(G\): 
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+D &= f(\cdot) \cap m_1(\cdot) \\\
+t &= f(x) \\\
+u &= m_1(x) \\\
+G &= \lbrace (u,t)|x\in D \rbrace
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Then we can define \(p^*\) and \(d^*\) in this \(D\) space by inifimum of set:
+</p>
+{{</ math.inline >}}
+
+$$
+p^{\ast} = inf\lbrace t|(u,t)\in G,u\leq 0 \rbrace \\\
+d^{\ast} = \max_{\lambda} inf\lbrace t+\lambda u|(u,t)\in G,\lambda\geq 0 \rbrace
+$$
+
+{{< math.inline >}}
+<p>
+The geometry meaning of \(p^*\) is the smallest projection point on axis t of left half part of \(G\).
+</p>
+{{</ math.inline >}}
+
+{{< math.inline >}}
+<p>
+Let \(t+\lambda u = \gamma \) , it represents the line with slope equals \(-lambda\) has intercept on axis t equals \(\gamma\). Then we can rewrite \(d^*\):
+</p>
+{{</ math.inline >}}
+
+$$
+d^{\ast} = \max_{\lambda} inf\lbrace \gamma |(u,t)\in G,\lambda\geq 0 \rbrace \\\
+inf\lbrace \gamma |(u,t)\in G,\lambda\geq 0 \rbrace \implies 
+\begin{cases}
+\text{intercept of the line} \\\
+\text{it's a tangent line below G with negetive slope}
+\end{cases} \\\
+d^{\ast} = \max_{\lambda} \text{intercept} \implies 
+\text{line has }\begin{cases}
+\text{tangent position on left half part of G} \\\
+\text{AND} \\\
+\text{tangent position on right half part of G}
+\end{cases}
+$$
+
+{{< math.inline >}}
+<p>
+Then we can conclude, if \(G\) is concave:
+</p>
+{{</ math.inline >}}
+
+$$
+p^{\ast} > d^{\ast}
+$$
+
+{{< math.inline >}}
+<p>
+If \(G\) is convex:
+</p>
+{{</ math.inline >}}
+
+$$
+p^{\ast} = d^{\ast}
+$$
 
 ## Reference
 
