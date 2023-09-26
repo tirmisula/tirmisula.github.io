@@ -340,156 +340,157 @@ In conclusion, since \( w^* \), \( b^* \) is the linear combination of all data 
 
 
 ## Soft-margin SVM
-### PPCA model definition
-
-Probabilistic principal component analysis (PPCA) is a probalistic generation model like gaussian discriminant analysis, it has following assumptions:<cite>[^1]</cite>
-
-$$
-\begin{align*}
-\text{observed data } x &\in \mathbb{R}^p \\\
-\text{latent variable } z &\in \mathbb{R}^q, q<p \\\
-x &= Wz+b+\epsilon \\\
-z &\sim \mathcal{N}(0_q, I_q) \\\
-\epsilon &\sim \mathcal{N}(0_p, \sigma^2I_p) \\\
-z,\epsilon &\text{ are isotropic gaussian variables} \\\
-z &\perp \epsilon
-\end{align*}
-$$
-
-It represents a linear gaussian model, and the object is to solve:
-
-$$
-\text{PPCA}
-\begin{cases}
-\text{probability: } p(z|x) \\\
-\text{parameters: } W, b, \sigma^2
-\end{cases}
-$$
-
-### Inference conditional probabilty
+### Definition of soft-margin SVM
 
 {{< math.inline >}}
 <p>
-\(p(z)\) is known, \(p(x|z)\) is solvable, so we can compute joint probability \(p(x,z)\) first then conditional probability \(p(z|x)\).
+Soft-margin SVM tolerates minor error that some points surpass dual boundaries \( w^Tx+b=\pm 1 \) : 
 </p>
 {{</ math.inline >}}
 
-Deduction process of thhis part is mentioned in [previous article](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/):
+$$
+\min_{w,b} \frac{1}{2}w^Tw+loss \\\
+\text{subject to } y_i(w^Tx_i+b) \geq 1, i=1,2,\cdots,N
+$$
+
+#### inidicator loss function
+
+The first choice of loss function is counting the number of surpassing points, which is:
+
+$$
+\min_{w,b} \frac{1}{2}w^Tw+\sum_{i=1}^NI\lbrace y_i(w^Tx_i+b)<1 \rbrace
+$$
+
+{{< math.inline >}}
+<p>
+But \(I(\cdot)\) is not continous, so we consider let the surpassing distance be the loss.
+</p>
+{{</ math.inline >}}
+
+#### hinge loss function
+
+Loss function is designed as:
+
+$$
+\begin{cases}
+\text{If } y_i(w^Tx_i+b) \geq 1, loss=0 \\\
+\text{If } y_i(w^Tx_i+b) < 1, loss=1-y_I(w^Tx_i+b)
+\end{cases}
+$$
+
+Combine together we get:
+
+$$
+\min_{w,b} \frac{1}{2}w^Tw+\sum_{i=1}^N \max(0, 1-y_i(w^Tx_i+b))
+$$
+
+{{< math.inline >}}
+<p>
+Let \( \xi_i \) be the surpass distance, and add weight for the loss, we have:
+</p>
+{{</ math.inline >}}
+
+$$
+\text{Let } \xi_i = 1-y_i(w^Tx_i+b), \xi_i \geq 0 \\\
+\dArr \\\
+\min_{w,b} \frac{1}{2}w^Tw+C\sum_{i=1}^N \max(0,\xi_i) \\\
+\text{subject to } y_i(w^Tx_i+b) \geq 1-\xi_i, i=1,2,\cdots,N \\\
+\dArr \\\
+\min_{w,b} \frac{1}{2}w^Tw+C\sum_{i=1}^N\xi_i \\\
+\text{subject to } y_i(w^Tx_i+b) \geq 1-\xi_i, i=1,2,\cdots,N
+$$
+
+### Dual problem of soft-margin SVM
+
+## Supplementation
+
+### Constrained problem to non-constrained
+
+Given a primal problem:
+
+$$
+\min_{x\in\mathbb{R}^p} f(x) \\\
+\text{subject to } m_i(x) \leq 0, i=1,\cdots,M  \\\
+\text{subject to } n_j(x) = 0, j=1,\cdots,N
+$$
+
+It's equivalent non-constrained problem is :
+
+$$
+\min_{x}\max_{\lambda,\eta} f(x)+\sum_{i=1}^M\lambda_im_i(x)+\sum_{j=1}^N\eta_jn_j(x) \\\
+\text{subject to } \lambda_i \geq 0, i=1,\cdots,M
+$$
+
+{{< math.inline >}}
+<p>
+It is because if \( m_i(x)>0 \) given a \( x \), it reaches infinite:
+</p>
+{{</ math.inline >}}
+
+$$
+\max_{\lambda,\eta} f(x)+\underset{\rarr\infty}{\sum_{i=1}^M\lambda_im_i(x)}+\sum_{j=1}^N\eta_jn_j(x) = \infty
+$$
+
+{{< math.inline >}}
+<p>
+if \( m_i(x) \leq 0 \), it has normal value, then we can conclude:
+</p>
+{{</ math.inline >}}
 
 $$
 \begin{align*}
-E[x|z] &= E[Wz+b+\epsilon] \\\
-&=Wz+b+E[\epsilon] \\\
-&= Wz+b
+\min_{x}\max_{\lambda,\eta} f(x)+\sum_{i=1}^M\lambda_im_i(x)+\sum_{j=1}^N\eta_jn_j(x)
+&=
+\min_{x}\lbrace \max_{\lambda,\eta} f(x)+\sum_{i=1}^M\lambda_im_i(x)+\sum_{j=1}^N\eta_jn_j(x),\infty \rbrace \\\
+&= \min_{x,m(x)\leq0}\max_{\lambda,\eta} f(x)+\sum_{i=1}^M\lambda_im_i(x)+\sum_{j=1}^N\eta_jn_j(x)
 \end{align*}
+$$
+
+It is the same thing primal problem described.
+
+### proof of weak duality
+
+The dual problem is :
+
+$$
+\max_{\lambda,\eta}\min_{x} f(x)+\sum_{i=1}^M\lambda_im_i(x)+\sum_{j=1}^N\eta_jn_j(x) \\\
+\text{subject to } \lambda_i \geq 0, i=1,\cdots,M
+$$
+
+We want to prove:
+
+$$
+\min_{x}\max_{\lambda,\eta} f(x)+\sum_{i=1}^M\lambda_im_i(x)+\sum_{j=1}^N\eta_jn_j(x) \geq \max_{\lambda,\eta}\min_{x} f(x)+\sum_{i=1}^M\lambda_im_i(x)+\sum_{j=1}^N\eta_jn_j(x)
+$$
+
+it is because:
+
+$$
+\text{Let } L(x,\lambda,\eta) = f(x)+\sum_{i=1}^M\lambda_im_i(x)+\sum_{j=1}^N\eta_jn_j(x) \\\
+\max_{\lambda,\eta} L(x,\lambda,\eta) \geq L(x,\lambda,\eta) \geq \min_{x} L(x,\lambda,\eta) \\\
+\therefore \max_{\lambda,\eta} L(x,\lambda,\eta) \geq \min_{x} L(x,\lambda,\eta)
 $$
 
 $$
 \begin{align*}
-Var[x|z] &= Var[Wz+b+\epsilon] \\\
-&= Var[\epsilon] \\\
-&= \sigma^2I
+\text{Let }A(x)&=\max_{\lambda,\eta}L(x,\lambda,\eta)\\\
+B(\lambda,\eta) &= \min_{x}L(x,\lambda,\eta)
 \end{align*}
 $$
 
-$$
-x|z \sim \mathcal{N}(Wz+b,\sigma^2I)
-$$
+{{< math.inline >}}
+<p>
+The largest value of \(B(\lambda,\eta)\) is still smaller than the smallest value of \(A(x)\):
+</p>
+{{</ math.inline >}}
 
 $$
-\begin{align*}
-E[x] &= E[Wz+b+\epsilon] \\\
-&= WE[z]+b+E[\epsilon] \\\
-&= b
-\end{align*}
+\min_x A(x) \geq \max_{\lambda,\eta} B(\lambda,\eta) \\\
+\therefore \min_x \max_{\lambda,\eta}L(x,\lambda,\eta) \geq \max_{\lambda,\eta}\min_{x}L(x,\lambda,\eta)
 $$
 
-$$
-\begin{align*}
-Var[x] &= Var[Wz+b+\epsilon] \\\
-&= Var[Wz] + Var[\epsilon] \\\
-&= WIW^T + \sigma^2I \\\
-&= WW^T +\sigma^2I
-\end{align*}
-$$
+### Geometric explanation of duality
 
-$$
-x \sim \mathcal{N}(b,WW^T+\sigma^2I)
-$$
-
-$$
-\begin{align*}
-E\left[\begin{bmatrix}
-x \\\
-z
-\end{bmatrix}\right] &= \begin{bmatrix}
-E[x] \\\
-E[z]
-\end{bmatrix} \\\
-&= \begin{bmatrix}
-b \\\
-0
-\end{bmatrix}
-\end{align*}
-$$
-
-$$
-\begin{align*}
-Var\left[\begin{bmatrix}
-x \\\
-z
-\end{bmatrix}\right] &= \begin{bmatrix}
-Cov[x,x] & Cov[x,z] \\\
-Cov[z,x] & Cov[z,z]
-\end{bmatrix} \\\
-&= \begin{bmatrix}
-WW^T+\sigma^2I & Cov[x,z] \\\
-Cov[z,x] & I
-\end{bmatrix} \\\
-\because Cov[x,z] &= E\left[ (x-b) (z-0)^T \right] \\\
-&= E\left[ (Wz+\epsilon) z^T \right] \\\
-&= E\left[Wzz^T\right] + E\left[\epsilon z^T\right] \\\
-&= WE\left[(z-0)(z-0)^T\right] + E[\epsilon]E[z^T] \\\
-&= WI \\\
-&= W \\\
-\therefore Var\left[\begin{bmatrix}
-x \\\
-z
-\end{bmatrix}\right] &= \begin{bmatrix}
-WW^T+\sigma^2I & W \\\
-W^T & I
-\end{bmatrix}
-\end{align*}
-$$
-
-$$
-\begin{bmatrix}
-x \\\
-z
-\end{bmatrix} \sim \mathcal{N}(\begin{bmatrix}
-b \\\
-0
-\end{bmatrix}, \begin{bmatrix}
-WW^T+\sigma^2I & W \\\
-W^T & I
-\end{bmatrix})
-$$
-
-Just use conclusion from [previous article](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/):
-
-$$
-\begin{align*}
-E[z|x] &= \Sigma_{zx}\Sigma_{xx}^{-1}(x-E[x])+E[z] \\\
-&= W^T(WW^T+\sigma^2I)^{-1}(x-b)
-\end{align*}
-$$
-
-$$
-\begin{align*}
-Var[z|x] &= -\Sigma_{zx}\Sigma_{xx}^{-1}\Sigma_{xz}+\Sigma_{zz} \\\
-&= -W^T(WW^T+\sigma^2I)^{-1}W + I
-\end{align*}
-$$
 
 
 ## Reference
