@@ -569,6 +569,16 @@ $$
 
 {{< math.inline >}}
 <p>
+Recall that the geometric meaning of \(d^*\) happened only when \(\lambda \geq 0\). If maximize intercept by tangent to both sides requires \(\lambda > 0\), it reduced to \(\lambda=0\), which means \(p^*\) and \(d^*\) have the same geometric definition:
+</p>
+{{</ math.inline >}}
+
+$$
+\text{intercept of tangent line with 0 slope}  \iff \text{lowest point's projection coordinate on axis t}
+$$
+
+{{< math.inline >}}
+<p>
 Then we can conclude, if \(G\) is concave:
 </p>
 {{</ math.inline >}}
