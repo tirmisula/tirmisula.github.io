@@ -213,7 +213,7 @@ $$
 \min_{w,b} \max_{\lambda} L(w,b,\lambda) \geq \max_{\lambda} \min_{w,b} L(w,b,\lambda)
 $$
 
-Because primal problem has a convex function and linear constraints it satisfies [KKT condition](https://tirmisula.github.io/posts/support-vector-machine/#kkt-conditions), which means a strong duality exsits in between primal and dual problem<cite>[^3]</cite>:
+Because primal problem has a convex function and linear constraintsa and it satisfies slater condition, we can check whether it satisfies [KKT condition](https://tirmisula.github.io/posts/support-vector-machine/#kkt-conditions) to prove a strong duality exsits in between primal and dual problem<cite>[^3]</cite>:
 
 $$
 \min_{w,b} \max_{\lambda} L(w,b,\lambda) = \max_{\lambda} \min_{w,b} L(w,b,\lambda)
@@ -569,7 +569,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Recall that the geometric meaning of \(d^*\) happened only when \(\lambda \geq 0\). If maximize intercept by tangent to both sides requires \(\lambda > 0\), it reduced to \(\lambda=0\), which means \(p^*\) and \(d^*\) have the same geometric definition:
+Recall that the geometric meaning of \(d^*\) happened only when \(\lambda \geq 0\). If maximize intercept by tangent to both sides requires \(\lambda < 0\), it reduced to \(\lambda=0\), which means \(p^*\) and \(d^*\) have the same geometric definition:
 </p>
 {{</ math.inline >}}
 
@@ -596,6 +596,48 @@ If \(G\) is convex:
 $$
 p^{\ast} = d^{\ast}
 $$
+
+### Slater condition
+
+Given a primal problem:
+
+$$
+\min_{x\in\mathbb{R}^p} f(x) \\\
+\text{subject to } m_i(x) \leq 0, i=1,\cdots,M  \\\
+\text{subject to } n_j(x) = 0, j=1,\cdots,N
+$$
+
+{{< math.inline >}}
+<p>
+Define the domain \(D\) and set \(G\):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+D &= f(\cdot) \cap \lbrace m_i(\cdot)\rbrace_{i=1,\cdots,M} \cap \lbrace n_j(\cdot)\rbrace_{j=1,\cdots,N} \\\
+G &= \lbrace (u_1,\cdots,u_{M+N},t|x\in D) \rbrace
+\end{align*}
+$$
+
+Slater condition is described as:
+
+$$
+\exist \hat{x}\in relint(D), (relint\rarr \text{relative interior})\\\
+\text{subject to } \forall i=1,\cdots,M, m_i(\hat{x})<0
+$$
+
+{{< math.inline >}}
+<p>
+Slater condition determined the leftmost point of \(G\) is not on axis \(t\) so that tangent line is restricted to be non-vertical. In this way slater condition becomes unnecessary but sufficient condition for strong duality.
+</p>
+{{</ math.inline >}}
+
+There are two attributes for slater condition:
+1. Most of the convex optimization problem satisfy slater condition.
+2. Relaxed slater: if M constrained functions contain K affine functions, only the rest of M-K functions are ensured to be less than zero.
+
+Because SVM is a quadratic convex optimization problem, it natrually satisfies slater condition and thus has strong duality problem. Because SVM has strong duality problem and belongs to convex optimization problem, it can be solvec by KKT condition.
 
 ## Reference
 
