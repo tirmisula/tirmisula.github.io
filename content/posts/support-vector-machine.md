@@ -637,7 +637,67 @@ There are two attributes for slater condition:
 1. Most of the convex optimization problem satisfy slater condition.
 2. Relaxed slater: if M constrained functions contain K affine functions, only the rest of M-K functions are ensured to be less than zero.
 
-Because SVM is a quadratic convex optimization problem, it natrually satisfies slater condition and thus has strong duality problem. Because SVM has strong duality problem and belongs to convex optimization problem, it can be solvec by KKT condition.
+Because SVM is a quadratic convex optimization problem, it natrually satisfies slater condition and thus has strong duality problem. Because SVM has strong duality problem and belongs to convex optimization problem, it can be solved by KKT condition.
+
+### Karush-Kuhn-Tucker Conditions
+
+Given a primal problem and it's dual problem:
+
+$$
+p^{\ast} = \min_{x\in\mathbb{R}^p} f(x) \\\
+\text{subject to } m_i(x) \leq 0, i=1,\cdots,M  \\\
+\text{subject to } n_j(x) = 0, j=1,\cdots,N
+$$
+
+<br/>
+
+$$
+d^{\ast} = \max_{\lambda,\eta}g(\lambda,\eta) \\\
+L(x,\lambda,\eta) = f(x)+\sum_{i=1}^M\lambda_{i}m_i(x)+\sum_{j=1}^N\eta_{j}n_j(x) \\\
+g(\lambda,\eta) = \min_{x} L(x,\lambda,\eta) \\\
+\text{subject to } \lambda_i \geq 0
+$$
+
+{{< math.inline >}}
+<p>
+\(p^*\) corresponds to \(x^*\), \(d^*\) corredponds to \(\lambda^*\) and \(\eta^*\):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+p^{\ast} &\rarr x^{\ast} \\\
+d^{\ast} &\rarr (\lambda^{\ast}, \eta^{\ast})
+\end{align*}
+$$
+
+The relationships among slater condition, KKT conditions and strong duality are listed as follows:
+
+$$
+\text{convex} + \text{slater} \implies \text{strong duality} \iff \text{KKT conditions}
+$$
+
+KKT conditions for this problem are listed as follows:
+
+$$
+\text{KKT: }
+\begin{cases}
+\text{restrictions: }
+    \begin{cases}
+    m_i(x) \leq 0 & (1)\\\
+    n_j(x) = 0 & (2)\\\
+    \lambda^{\ast} = 0 & (3)
+    \end{cases} \\\
+\text{complementary slackness: } 
+    \begin{cases}
+    \lambda_i^{\ast}m_i(x^{\ast}) = 0, i=1,\cdots,N & (4)
+    \end{cases}\\\
+\text{zero gradient: }
+    \begin{cases}
+    \frac{\partial}{\partial x}L(x,\lambda^{\ast},\eta^{\ast}) = 0 & (5)
+    \end{cases}
+\end{cases}
+$$
 
 ## Reference
 
