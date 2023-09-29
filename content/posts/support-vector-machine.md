@@ -677,16 +677,16 @@ $$
 \text{convex} + \text{slater} \implies \text{strong duality} \iff \text{KKT conditions}
 $$
 
-KKT conditions for this problem are listed as follows:
+KKT conditions for this problem are:
 
 $$
 \text{KKT: }
 \begin{cases}
 \text{restrictions: }
     \begin{cases}
-    m_i(x) \leq 0 & (1)\\\
-    n_j(x) = 0 & (2)\\\
-    \lambda^{\ast} = 0 & (3)
+    m_i(x^{\ast}) \leq 0 & (1)\\\
+    n_j(x^{\ast}) = 0 & (2)\\\
+    \lambda^{\ast} \geq 0 & (3)
     \end{cases} \\\
 \text{complementary slackness: } 
     \begin{cases}
@@ -697,6 +697,22 @@ $$
     \frac{\partial}{\partial x}L(x,\lambda^{\ast},\eta^{\ast}) = 0 & (5)
     \end{cases}
 \end{cases}
+$$
+
+Conditions (1),(2),(3) natrually satisfy because they exist in problem clarifications. Next we demonstrate conditions (4) and (5) are necessary and sufficient for strong duality:
+
+$$
+\begin{align*}
+\because d^{\ast} &= \max_{\lambda,\eta}g(\lambda,\eta) \\\
+&= g(\lambda^{\ast}, \eta^{\ast}) \\\
+&= \min_{x} L(x,\lambda^{\ast},\eta^{\ast}) \\\
+&\leq L(x^{\ast},\lambda^{\ast},\eta^{\ast}) \\\
+&\leq f(x^{\ast}) + \sum_{i=1}^M\lambda_{i}^{\ast}m_i(x^{\ast})+\underset{\color{red}{=0}}{\sum_{j=1}^N\eta_{j}^{\ast}n_j(x^{\ast})} \\\
+&\leq  f(x^{\ast}) + \underset{\color{red}{\leq 0}}{\sum_{i=1}^M\lambda_{i}^{\ast}m_i(x^{\ast})} \\\
+&\leq f(x^{\ast}) \\\
+&\leq p^{\ast} \\\
+\therefore d^{\ast} = p^{\ast} &\iff \sum_{i=1}^M\lambda_{i}^{\ast}m_i(x^{\ast}) = 0
+\end{align*}
 $$
 
 ## Reference
