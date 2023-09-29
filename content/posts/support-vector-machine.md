@@ -666,8 +666,8 @@ $$
 
 $$
 \begin{align*}
-p^{\ast} &\rarr x^{\ast} \\\
-d^{\ast} &\rarr (\lambda^{\ast}, \eta^{\ast})
+p^{\ast} &= f(x^{\ast}) \\\
+d^{\ast} &= g(\lambda^{\ast}, \eta^{\ast})
 \end{align*}
 $$
 
@@ -711,9 +711,15 @@ $$
 &\leq  f(x^{\ast}) + \underset{\color{red}{\leq 0}}{\sum_{i=1}^M\lambda_{i}^{\ast}m_i(x^{\ast})} \\\
 &\leq f(x^{\ast}) \\\
 &\leq p^{\ast} \\\
-\therefore d^{\ast} = p^{\ast} &\iff \sum_{i=1}^M\lambda_{i}^{\ast}m_i(x^{\ast}) = 0
+\therefore d^{\ast} = p^{\ast} &\iff \sum_{i=1}^M\lambda_{i}^{\ast}m_i(x^{\ast}) = 0 \\\
+&\iff \lambda_{i}^{\ast}m_i(x^{\ast}) = 0 \space, i =1,\cdots,M \\\
+\therefore d^{\ast} = p^{\ast} &\iff d^{\ast} = f(x^{\ast}) + \underset{\color{red}{}}{\sum_{i=1}^M\lambda_{i}^{\ast}m_i(x^{\ast})} \\\
+&\iff d^{\ast} = L(x^{\ast},\lambda^{\ast},\eta^{\ast}) \\\
+&\iff \min_{x} L(x,\lambda^{\ast},\eta^{\ast}) = L(x^{\ast},\lambda^{\ast},\eta^{\ast}) \\\
+&\iff \exist x=x^{\ast}, \nabla_{x}L(x,\lambda^{\ast}, \eta^{\ast}) = 0
 \end{align*}
 $$
+
 
 ## Reference
 
