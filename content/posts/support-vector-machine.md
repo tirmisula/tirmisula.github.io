@@ -287,7 +287,7 @@ $$
 \dArr \\\
 \min_{\lambda} \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j - \sum_{i=1}^N\lambda_i \\\
 \text{subject to } \lambda_i \geq 0 , i=1,2,\cdots,N \\\
-\text{subject to } \sum_{i=1}^N \lambda_iy_i=0 , i=1,2,\cdots,N \\\
+\text{subject to } \sum_{i=1}^N \lambda_iy_i=0 , i=1,2,\cdots,N
 $$
 
 #### property of strong duality
@@ -422,6 +422,92 @@ $$
 
 ### Dual problem of soft-margin SVM
 
+## Kernel SVM
+
+### Background of kernel method
+
+kernel method is introduced when solving nonlinear separable data samples:
+
+| Linear separable   | Separable but minor error     | nonlinear separable   |
+| --------- | -------- | ------ |
+| perceptron(PLA) | pocket algorithm | multilayer perceptron |
+| hard-margin SVM | soft-margin SVM | kernel SVM |
+
+The thought of kernel method is transforming data to higher dimension which based on the following truth:
+
+$$
+\text{Cover Theoreom: high dimentional data are easier to separate than low dimentional data}
+$$
+
+For example given a XOR problem:
+
+$$
+a,b,c,d \in \mathbb{R}^2 \\\
+a,d \in \text{Class 1} \\\
+b,c \in \text{Class 2} \\\
+a=(0,0) \\\
+b=(1,0) \\\
+c=(0,1) \\\
+d=(1,1)
+$$
+
+{{< math.inline >}}
+<p>
+It is obvious \(a,b,c,d\) are nonlinear separable, but we can design a kernel function to transform samples to higher dimension to make it separable:
+</p>
+{{</ math.inline >}}
+
+$$
+(x_1,x_2) \underset{\phi(x)}{\rarr} \left(x_1,x_2,(x_1-x_2)^2)\right) \\\
+a \underset{\phi(x)}{\rarr} (0,0,0) \\\
+b \underset{\phi(x)}{\rarr} (1,0,1) \\\
+c \underset{\phi(x)}{\rarr} (0,1,1) \\\
+d \underset{\phi(x)}{\rarr} (1,1,0) \\\
+a,b,c,d \text{ are now linear separable by panel } (*,*,0.5), *\in\mathbb{R}
+$$
+
+Given SVM and it's lagrange dual problem:
+
+$$
+\min_{w,b} \frac{1}{2}w^Tw \\\
+\text{subject to } y_i(w^Tx_i+b) \geq 1, i=1,2,\cdots,N
+$$
+
+<br/>
+
+$$
+\min_{\lambda} \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j - \sum_{i=1}^N\lambda_i \\\
+\text{subject to } \lambda_i \geq 0 , i=1,2,\cdots,N \\\
+\text{subject to } \sum_{i=1}^N \lambda_iy_i=0 , i=1,2,\cdots,N
+$$
+
+{{< math.inline >}}
+<p>
+We can replace \(x_i,x_j\) in dual problem with kernel function:
+</p>
+{{</ math.inline >}}
+
+$$
+\min_{\lambda} \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_j\phi(x_i)^T\phi(x_j) - \sum_{i=1}^N\lambda_i \\\
+\text{subject to } \lambda_i \geq 0 , i=1,2,\cdots,N \\\
+\text{subject to } \sum_{i=1}^N \lambda_iy_i=0 , i=1,2,\cdots,N
+$$
+
+It draw forth the definiton of kernel function:
+
+$$
+\forall x_i,x_j \in \mathcal{D}, \exist\space\phi(x):x\rarr z \\\
+K(x_i,x_j) = \phi(x_i)^T\phi(x_j) = \left< \phi(x_i),\phi(x_j) \right> \\\
+K(x_i,x_j) \text{ is a kernel function} \\\
+\text{e.g. } K(x_i,x_j) = \mathrm{e}^{-\frac{(x_i-x_j)^2}{2\sigma^2}}
+$$
+
+{{< math.inline >}}
+<p>
+Finding kernel function rather than finding \( \phi(x) \) and calculating inner product reduces the amount of computation, which is called <mark>kernel tricks</mark>.
+</p>
+{{</ math.inline >}}
+
 ## Supplementation
 
 ### Constrained problem to non-constrained
@@ -468,7 +554,7 @@ $$
 
 It is the same thing primal problem described.
 
-### proof of weak duality
+### Proof of weak duality
 
 The dual problem is :
 
