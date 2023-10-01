@@ -463,7 +463,7 @@ a \underset{\phi(x)}{\rarr} (0,0,0) \\\
 b \underset{\phi(x)}{\rarr} (1,0,1) \\\
 c \underset{\phi(x)}{\rarr} (0,1,1) \\\
 d \underset{\phi(x)}{\rarr} (1,1,0) \\\
-a,b,c,d \text{ are now linear separable by panel } (*,*,0.5), *\in\mathbb{R}
+a,b,c,d \text{ are now linear separable by panel } (\ast,\ast,0.5), \ast\in\mathbb{R}
 $$
 
 Given SVM and it's lagrange dual problem:
@@ -520,10 +520,15 @@ $$
 K \text{ is a positive definite kernel function}
 $$
 
-Positive definite kernel has two properties: symmetric, positive definitive. It can be proved:
+Positive definite kernel has two properties: symmetric, positive definitive. These 2 properties are illustrated and proved as follows:
 
 $$
+\text{symmetric} \iff K(a,b)=K(b,a) \\\
+\because \left< a,b \right> = \left< b,a \right>, \text{inner product is symmetric}
+$$
 
+$$
+\text{positive definitive} \iff \forall x_1,\cdots,x_N \in \mathcal{X}, \text{It's Gram matrix is semipositive definite}
 $$
 
 ## Supplementation
