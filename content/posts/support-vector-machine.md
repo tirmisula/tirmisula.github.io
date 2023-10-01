@@ -290,14 +290,14 @@ $$
 \text{subject to } \sum_{i=1}^N \lambda_iy_i=0 , i=1,2,\cdots,N \\\
 $$
 
-#### KKT conditions
+#### property of strong duality
 
-Karush-Kuhn-Tucker Conditions(KKT) for the primal problem with constraints are listed as follows:
+From previous subsection we know SVM has strong dual problem, then it must satisfies [Karush-Kuhn-Tucker Conditions](https://tirmisula.github.io/posts/support-vector-machine/#karush-kuhn-tucker-conditions)(KKT). The KKT conditions are listed as follows:
 
 $$
 \begin{cases}
 \frac{\partial L(w,b,\lambda)}{\partial w} = 0,\frac{\partial L(w,b,\lambda)}{\partial b} = 0 \implies \text{satisfies because }w^{\ast},b^{\ast} \text{ solvable} \\\
-\lambda_i(1-y_i(w^Tx_i+b)) = 0  \implies \text{complementary slackness}\\\
+\lambda_i(1-y_i(w^Tx_i+b)) = 0  \implies \text{satisfies complementary slackness}\\\
 \lambda_i \geq 0, i=1,2,\cdots,N \implies \text{satisfies because mentioned in no constraints primal problem} \\\
 1-y_i(w^Tx_i+b) \leq 0 \implies \text{satisfies because mentioned in constraints primal problem}
 \end{cases}
@@ -311,7 +311,18 @@ $$
 
 $$
 \begin{align*}
-w^{\ast} &= \sum_{i=1}^N\lambda_iy_ix_i \\\
+w^{\ast} &= \sum_{i=1}^N\lambda_iy_ix_i
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Then we can solve \(b^*\):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
 \exist (x_k,y_k), 1-y_k((w^{\ast})^Tx_k+b^{\ast}) &= 0 \\\
 y_k^2((w^{\ast})^Tx_k+b^{\ast}) &= y_k \\\
 \sum_{i=1}^N\lambda_iy_ix_i^Tx_k+b^{\ast} &= y_k \\\
@@ -319,7 +330,13 @@ b^{\ast} &= y_k - \sum_{i=1}^N\lambda_iy_ix_i^Tx_k
 \end{align*}
 $$
 
-<mark>complementary slackness</mark> can be divided into 2 situations:
+{{< math.inline >}}
+<p>
+\( w^* \), \( b^* \) are the linear combinations of all data samples.
+</p>
+{{</ math.inline >}}
+
+The second equation called <mark>complementary slackness</mark> can be divided into 2 situations:
 
 $$
 \lambda_i = 0 , y_i(w^Tx_i+b) > 1 \\\
@@ -328,13 +345,16 @@ $$
 
 {{< math.inline >}}
 <p>
-Because primal problem maximize distance between closest point to decision boundary \( w^Tx+b=0 \), it must have 2 dual boundaries \( w^Tx+b=1 \), \( w^Tx+b=-1 \) where the closest points for each class locate at.
+Because primal problem maximize distance between closest point to decision boundary \( w^Tx+b=0 \), it must have 2 dual boundaries \( w^Tx+b=1 \), \( w^Tx+b=-1 \) for the closest point for each class.
+<br/>
 <br/>
 So the first situation of satifying complementary slackness indicates other data samples that is far away from dual boundaries and have their weight \(\lambda_i\) determined to be zero, they play no rule in optimization.
 <br/>
+<br/>
 And the second situation indicates only the closest points from 2 class have effective weight \(\lambda_i\). 
 <br/>
-In conclusion, since \( w^* \), \( b^* \) is the linear combination of all data samples, complementary slackness contrained most of \(\lambda_i\) to zero, thus only a few points closest to class border determined the decision boundary.
+<br/>
+In conclusion, <b>strong duality</b> implies complementary slackness which indicates dual decision borders, <mark>only those points on dual decision borders are support vectors</mark> which determined the final decision boundary for SVM.
 </p>
 {{</ math.inline >}}
 
@@ -699,7 +719,7 @@ $$
 \end{cases}
 $$
 
-Conditions (1),(2),(3) natrually satisfy because they exist in problem clarifications. Next we demonstrate conditions (4) and (5) are necessary and sufficient for strong duality:
+Conditions (1),(2),(3) natrually satisfy because they exist in problem clarifications. Next we demonstrate conditions (4) and (5) are necessary and sufficient for strong duality<cite>[^4]</cite>:
 
 $$
 \begin{align*}
@@ -726,3 +746,4 @@ $$
 [^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=27).
 [^2]: From [Weak duality](https://en.wikipedia.org/wiki/Weak_duality).
 [^3]: From [Strong duality](https://en.wikipedia.org/wiki/Strong_duality).
+[^4]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=35).
