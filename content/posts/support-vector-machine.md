@@ -458,7 +458,7 @@ It is obvious \(a,b,c,d\) are nonlinear separable, but we can design a kernel fu
 {{</ math.inline >}}
 
 $$
-(x_1,x_2) \underset{\phi(x)}{\rarr} \left(x_1,x_2,(x_1-x_2)^2)\right) \\\
+(x_1,x_2) \underset{\phi(x)}{\rarr} \left(x_1,x_2,(x_1-x_2)^2\right) \\\
 a \underset{\phi(x)}{\rarr} (0,0,0) \\\
 b \underset{\phi(x)}{\rarr} (1,0,1) \\\
 c \underset{\phi(x)}{\rarr} (0,1,1) \\\
@@ -507,6 +507,24 @@ $$
 Finding kernel function rather than finding \( \phi(x) \) and calculating inner product reduces the amount of computation, which is called <mark>kernel tricks</mark>.
 </p>
 {{</ math.inline >}}
+
+### Definition of positive definite kernel function
+
+$$
+\text{If } K \text{ satisfies}: 
+\begin{cases}\mathcal{X}\times \mathcal{X} \underset{K}{\mapsto} \mathbb{R} \\\
+\forall x_i,x_j \in \mathcal{X}, K(x_i,x_j) \text{ exists} \\\
+\exist \phi\in\mathcal{H}, K(x_i,x_j) = \left< \phi(x_i),\phi(x_j) \right>, \phi : \mathcal{X}\mapsto \mathbb{R}, \mathcal{H}: \text{Hilbert space}
+\end{cases} \\\
+\dArr \\\
+K \text{ is a positive definite kernel function}
+$$
+
+Positive definite kernel has two properties: symmetric, positive definitive. It can be proved:
+
+$$
+
+$$
 
 ## Supplementation
 
