@@ -509,6 +509,7 @@ Finding kernel function rather than finding \( \phi(x) \) and calculating inner 
 {{</ math.inline >}}
 
 ### Definition of positive definite kernel function
+#### first definition of positive definite kernel
 
 $$
 \text{If } K \text{ satisfies}: 
@@ -520,15 +521,64 @@ $$
 K \text{ is a positive definite kernel function}
 $$
 
-Positive definite kernel has two properties: symmetric, positive definitive. These 2 properties are illustrated and proved as follows:
+Hilbert space has following attributes:
 
 $$
-\text{symmetric} \iff K(a,b)=K(b,a) \\\
+\forall\space f,g,k \in \mathcal{H} \\\
+\begin{align}
+&\lim_{n\rarr\infty} k_n \in \mathcal{H}, &\text{(completeness)} \\\
+&\left<f,g\right> = \left<g,f\right>, &\text{(symmetry)} \\\
+&\left<f,f\right> \geq 0, \left<f,f\right> = 0 \text{ when } f=0 ,&\text{(positive definite)} \\\
+&\left< \alpha f_1+\beta f_2,g \right> = \alpha\left< f_1,g \right>+\beta\left< f_2,g \right>, &\text{(linearity)} \\\
+&\forall\space a\in\mathbb{R},af\in\mathcal{H},f+g\in\mathcal{H},&\text{(closeness)}
+\end{align}
+$$
+
+#### second definition of positive definite kernel
+
+$$
+\text{If } K \text{ satisfies}: 
+\begin{cases}\mathcal{X}\times \mathcal{X} \underset{K}{\mapsto} \mathbb{R} \\\
+\forall x_i,x_j \in \mathcal{X}, K(x_i,x_j) \text{ exists} \\\
+K \text{is symmetric and positive definitive}
+\end{cases} \\\
+\dArr \\\
+K \text{ is a positive definite kernel function}
+$$
+
+Symmetry and positive definite are illustrated and proved as follows:
+
+$$
+\text{$K$ is symmetric} \iff K(a,b)=K(b,a) \\\
 \because \left< a,b \right> = \left< b,a \right>, \text{inner product is symmetric}
 $$
 
+<br/>
+
 $$
-\text{positive definitive} \iff \forall x_1,\cdots,x_N \in \mathcal{X}, \text{It's Gram matrix is semipositive definite}
+\text{$K$ is positive definitive} \iff \forall x_1,\cdots,x_N \in \mathcal{X}, \text{$K$'s Gram matrix $G$ is semipositive definitive} \\\
+\forall a\in\mathbb{R}^N, \\\
+\begin{align*}
+a^TGa &= \begin{bmatrix}a_1 & a_2 & \cdots & a_N\end{bmatrix}
+\begin{bmatrix}
+K_{11} & K_{12} & \cdots & K_{1N} \\\
+K_{21} & K_{22} & \cdots & K_{2N} \\\
+\vdots & \vdots & \ddots & \vdots \\\
+K_{N1} & K_{N2} & \cdots & K_{NN}
+\end{bmatrix}
+\begin{bmatrix}
+a_1 \\\
+\vdots \\\
+a_N
+\end{bmatrix}\\\
+&= \sum_{i=1}^N\sum_{j=1}^N a_ia_jK_{ij} \\\
+&= \sum_{i=1}^N\sum_{j=1}^N a_ia_j\left< \phi(x_i),\phi(x_j) \right> \\\
+&= \sum_{i=1}^N\sum_{j=1}^N a_ia_j \phi(x_i)^T\phi(x_j) \\\
+&= \left[\sum_{i=1}^N a_i\phi(x_i)\right]^T\sum_{j=1}^N a_j\phi(x_j) \\\
+&= \left< \sum_{i=1}^N a_i\phi(x_i),\sum_{j=1}^N a_j\phi(x_j) \right> \\\
+&\geq 0
+\end{align*} \\\
+\therefore G \text{ is semi-positive definitive}
 $$
 
 ## Supplementation
