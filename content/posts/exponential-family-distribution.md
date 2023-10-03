@@ -69,7 +69,7 @@ $$
 \end{cases}
 $$
 
-## Exponentail family distribution
+## Exponentail family distribution introduction
 ### Definition of exponential family distribution
 
 Exponential family distribution has the following form:
@@ -138,40 +138,64 @@ $$
 In this case, likelihood is Binomial distribution and prior is Beta distribution so that we can directly conclude posterier is Beta distribution, posterier and prior are conjugate distributions.
 
 
-### Introduce non-constraint and dual problem
+## Exponential form for Gaussian dsitribution
 
-#### non-constraint problem
-{{< math.inline >}}
-<p>
-The original problem can be transformed into a non-constraint problem with lagrange multiplier:
-</p>
-{{</ math.inline >}}
+The common form of Gaussian distribution is:
 
 $$
-L(w,b,\lambda) = \frac{1}{2}w^Tw+\sum_{i=1}^N\lambda_i(1-y_i(w^Tx_i+b)) \\\
-\begin{cases}
-\min_{w,b} \frac{1}{2}w^Tw \\\
-\text{subject to } y_i(w^Tx_i+b) \geq 1, i=1,2,\cdots,N
-\end{cases}
-\iff
-\begin{cases}
-\min_{w,b} \max_{\lambda} L(w,b,\lambda) \\\
-\text{subject to } \lambda_i \geq 0, i=1,2,\cdots,N
-\end{cases}
+p(x|\mu,\sigma) = \frac{1}{\sqrt{2\pi}\sigma} \mathrm{e}^{-\frac{(x-\mu)^2}{2\sigma^2}}
 $$
 
-{{< math.inline >}}
-<p>
-This can be proved:
-</p>
-{{</ math.inline >}}
+We can transform it into a exponential family form:
 
 $$
+\begin{align*}
+p(x|\mu,\sigma) &= \frac{1}{\sqrt{2\pi\sigma^2}} \mathrm{e}^{-\frac{(x-\mu)^2}{2\sigma^2}} \\\
+&= \frac{1}{\sqrt{2\pi\sigma^2}} \exp(-\frac{1}{2\sigma^2}(x^2-2x\mu+\mu^2)) \\\
+&= \frac{1}{\sqrt{2\pi\sigma^2}} \exp(-\frac{1}{2\sigma^2}(x^2-2x\mu)-\frac{1}{2\sigma^2}\mu^2) \\\
+&= \exp(\log\left((2\pi\sigma^2)^{-\frac{1}{2}}\right)) \exp(-\frac{1}{2\sigma^2}
+    \begin{bmatrix}-2\mu&1\end{bmatrix}
+    \begin{bmatrix}
+        x \\\
+        x^2
+    \end{bmatrix}
+    -\frac{1}{2\sigma^2}\mu^2) \\\
+&= \exp\left( -\frac{1}{2\sigma^2}
+    \begin{bmatrix}-2\mu&1\end{bmatrix}
+    \begin{bmatrix}
+        x \\\
+        x^2
+    \end{bmatrix}
+    -\frac{1}{2\sigma^2}\mu^2+\log\left((2\pi\sigma^2)^{-\frac{1}{2}}\right) \right) \\\
+&= \exp\left( 
+    \underset{\color{red}{\theta^T}}{\begin{bmatrix}\frac{\mu}{\sigma^2}&-\frac{1}{2\sigma^2}\end{bmatrix}}
+    \underset{\color{red}{\phi(x)}}{
+    \begin{bmatrix}
+        x \\\
+        x^2
+    \end{bmatrix}}
+    -\underset{\color{red}{A(\theta)}}{\left(\frac{\mu^2}{2\sigma^2}+\frac{1}{2}\log\left(2\pi\sigma^2\right)\right)}
+    \right)
+\end{align*}
+$$
+
+$$
+\text{Let } \theta=\begin{bmatrix}
+    \theta_1 \\\
+    \theta_2
+\end{bmatrix}, \text{We have }
 \begin{cases}
-\text{If } 1-y_i(w^Tx_i+b)>0, \max_{\lambda}L=\frac{1}{2}w^Tw+\infty=\infty \\\
-\text{if } 1-y_i(w^Tx_i+b)\leq 0, \max_{\lambda}L=\frac{1}{2}w^Tw+0=\frac{1}{2}w^Tw
+    \theta_1=\frac{\mu}{\sigma^2} \\\
+    \theta_2=-\frac{1}{2\sigma^2}
+\end{cases} \implies 
+\begin{cases}
+    \mu=-\frac{\theta_1}{2\theta_2}  \\\
+    \sigma^2=-\frac{1}{2\theta_2}
 \end{cases} \\\
-\therefore \min_{w,b} \max_{\lambda} L(w,b,\lambda) = \min_{w,b} (\infty, \frac{1}{2}w^Tw)= \min_{w,b} \frac{1}{2}w^Tw
+\begin{align*}
+\text{Thus } A(\theta) &= \frac{(\frac{\theta_1}{2\theta_2})^2}{-\frac{1}{\theta_2}}+\frac{1}{2}\log(-\frac{\pi}{\theta_2}) \\\
+&= -\frac{(\theta_1)^2}{4\theta_2}+\frac{1}{2}\log(-\frac{\pi}{\theta_2})
+\end{align*}
 $$
 
 #### solve dual problem
