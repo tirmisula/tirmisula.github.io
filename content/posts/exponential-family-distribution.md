@@ -72,7 +72,7 @@ $$
 ## Exponentail family distribution
 ### Definition of exponential family distribution
 
-Exponential family distribution has following form:
+Exponential family distribution has the following form:
 
 $$
 p(x|\theta) = h(x)\exp(\theta^T\phi(x)-A(\theta)) \\\
@@ -83,98 +83,49 @@ A(\theta): \text{log-partition funciton} \\\
 h(x)=1, \text{ if not important}
 $$
 
-Similar to [perceptron model](https://tirmisula.github.io/posts/perceptron/), hard-margin SVM tries to find a decision hyperplane that 100% correctly classifies each data sample and the <mark>closest</mark> point to decision hyperplane should have it's distance as long as possible:
-
-$$
-\max_{w,b}\min_{\forall x_i, i=1,\cdots,N} dist(x_i, w^Tx+b) \\\
-\text{subject to } y_i(w^Tx_i+b) > 0
-$$
-
-{{< math.inline >}}
-<p>
-\(w\) is the normal vector of hyperplane \(w^Tx+b\), because given 2 points \(a_1,a_2\) on hyperplane, it has:
-</p>
-{{</ math.inline >}}
+### Source of log partition function
 
 $$
 \begin{align*}
-(w^Ta_1+b) - (w^Ta_2+b) &= 0 \\\
-w^T(a_1-a_2) &= 0 \\\
-w &\perp a_1-a_2
+p(x|\theta) &= h(x)\exp(\theta^T\phi(x)-A(\theta)) \\\
+&=\frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x))
+\end{align*}
+$$
+
+$$
+\because \int p(x|\theta) \, dx = \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \, dx = 1 \\\
+\begin{align*}
+\therefore \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \, dx &= 1 \\\
+\frac{1}{\exp(A(\theta))} \int h(x)\exp(\theta^T\phi(x)) \, dx &= 1 \\\
+\exp(A(\theta)) &= \int h(x)\exp(\theta^T\phi(x)) \, dx
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-Assuming we have \(x\)'s projection point \(h\), then \(x-h\) must be perpendicular to normal vector \(w\), then we can define distance function:
+\( \exp(A(\theta)) \) is called partition function because it normalize integration to 1, thus \( A(\theta) \) is called log partition function.
 </p>
 {{</ math.inline >}}
 
-$$
-\begin{align*}
-(x-h) &= kw \\\
-h &= x-kw \\\
-&\dArr \\\
-w^T(x-kw)+b &= 0 \\\
-w^Tx - k\lVert w\rVert^2 +b &= 0 \\\
-k &= \frac{w^Tx+b}{\lVert w\rVert^2} \\\
-&\dArr \\\
-dist(x,h) = \lvert x-h \rvert &= \frac{\lvert w^Tx+b \rvert}{\lVert w\rVert^2} \lVert w \rVert \\\
-&= \frac{\lvert w^Tx+b \rvert}{\lVert w\rVert}
-\end{align*}
-$$
+### Conjugate distribution
 
-The original problem becomes:
+In bayesian statistics, it is difficult to find posterier distribution because the integration part is difficult to solve:
 
 $$
 \begin{align*}
-\max_{w,b}\min_{\forall x_i, i=1,\cdots,N} dist(x_i, w^Tx+b) &= \max_{w,b}\min_{\forall x_i, i=1,\cdots,N} \frac{\lvert w^Tx_i+b \rvert}{\lVert w\rVert} \\\
-&= \max_{w,b}\frac{1}{\lVert w\rVert}\min_{\forall x_i, i=1,\cdots,N} \lvert w^Tx_i+b \rvert \\\
-&= \max_{w,b}\frac{1}{\lVert w\rVert}\min_{\forall x_i, i=1,\cdots,N} y_i(w^Tx_i+b)
+p(\theta|x) &= \frac{p(x|\theta)p(\theta)}{\int p(x|\theta)p(\theta) \, d\theta} \\\
+p(\theta|x) &\propto p(x|\theta)p(\theta)
 \end{align*}
 $$
 
-{{< math.inline >}}
-<p>
-Since hyperplane \(w^Tx+b \implies 2w^Tx+2b \) is scalable which doesn't affect which one is the closest point, we can normalize \( \min y_i(w^Tx_i+b) \) to a certain scale:
-</p>
-{{</ math.inline >}}
+The advantage of exponential family distribution is that exponential-likelihood's <mark>conjugate prior</mark> is often also in exponential family which brings posterier an easy solution, e.g. 
 
 $$
-\min_{\forall x_i, i=1,\cdots,N} y_i(w^Tx_i+b) = \gamma
+\underset{\text{Beta}}{p(\theta|x)} \propto \underset{\text{Binomial}}{p(x|\theta)}\underset{\text{Beta}}{p(\theta)}
 $$
 
-Then above max-min problem becomes:
+In this case, likelihood is Binomial distribution and prior is Beta distribution so that we can directly conclude posterier is Beta distribution, posterier and prior are conjugate distributions.
 
-$$
-\begin{align*}
-\max_{w,b}\frac{1}{\lVert w\rVert }\gamma &= \max_{w,b}\frac{1}{\lVert w\rVert } \\\
-&= \min_{w,b}\lVert w\rVert \\\
-&= \min_{w,b} \frac{1}{2}w^Tw
-\end{align*}
-$$
-
-And the constriant part becomes:
-
-$$
-\begin{align*}
-y_i(w^Tx_i+b) > 0 &\implies \exist \gamma>0, \min_i y_i(w^Tx_i+b) = \gamma \\\
-&\implies \exist \gamma>0, y_i(w^Tx_i+b) \geq \gamma
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-Let \( \gamma=1 \), we have:
-</p>
-{{</ math.inline >}}
-
-$$
-\min_{w,b} \frac{1}{2}w^Tw \\\
-\text{subject to } y_i(w^Tx_i+b) \geq 1, i=1,2,\cdots,N
-$$
-
-SVM is transformed to a convex optimization problem which can be solved like quadratic programming.
 
 ### Introduce non-constraint and dual problem
 
