@@ -83,7 +83,7 @@ A(\theta): \text{log-partition funciton} \\\
 h(x)=1, \text{ if not important}
 $$
 
-### Source of log partition function
+The source of log partition function comes from:
 
 $$
 \begin{align*}
@@ -93,11 +93,11 @@ p(x|\theta) &= h(x)\exp(\theta^T\phi(x)-A(\theta)) \\\
 $$
 
 $$
-\because \int p(x|\theta) \, dx = \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \, dx = 1 \\\
+\because \int p(x|\theta) \space dx = \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \space dx = 1 \\\
 \begin{align*}
-\therefore \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \, dx &= 1 \\\
-\frac{1}{\exp(A(\theta))} \int h(x)\exp(\theta^T\phi(x)) \, dx &= 1 \\\
-\exp(A(\theta)) &= \int h(x)\exp(\theta^T\phi(x)) \, dx
+\therefore \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \space dx &= 1 \\\
+\frac{1}{\exp(A(\theta))} \int h(x)\exp(\theta^T\phi(x)) \space dx &= 1 \\\
+\exp(A(\theta)) &= \int h(x)\exp(\theta^T\phi(x)) \space dx
 \end{align*}
 $$
 
@@ -107,13 +107,24 @@ $$
 </p>
 {{</ math.inline >}}
 
-### Conjugate distribution
+### Feature of exponential family distribution
+
+$$
+\text{Features: }
+\begin{cases}
+\phi(x) \text{ compress data} \implies \text{online learning} \\\
+\text{exponential likelihood} \implies \text{conjugate prior and posterier} \\\
+\text{maximize entropy} \implies \text{zero knowledge of prior}
+\end{cases}
+$$
+
+#### Conjugate distribution
 
 In bayesian statistics, it is difficult to find posterier distribution because the integration part is difficult to solve:
 
 $$
 \begin{align*}
-p(\theta|x) &= \frac{p(x|\theta)p(\theta)}{\int p(x|\theta)p(\theta) \, d\theta} \\\
+p(\theta|x) &= \frac{p(x|\theta)p(\theta)}{\int p(x|\theta)p(\theta) \space d\theta} \\\
 p(\theta|x) &\propto p(x|\theta)p(\theta)
 \end{align*}
 $$
@@ -162,39 +173,6 @@ $$
 \end{cases} \\\
 \therefore \min_{w,b} \max_{\lambda} L(w,b,\lambda) = \min_{w,b} (\infty, \frac{1}{2}w^Tw)= \min_{w,b} \frac{1}{2}w^Tw
 $$
-
-#### dual problem
-{{< math.inline >}}
-<p>
-The dual problem is:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{cases}
-\min_{w,b} \max_{\lambda} L(w,b,\lambda) \\\
-\text{subject to } \lambda_i \geq 0, i=1,2,\cdots,N
-\end{cases}
-\iff
-\begin{cases}
-\max_{\lambda} \min_{w,b} L(w,b,\lambda) \\\
-\text{subject to } \lambda_i \geq 0, i=1,2,\cdots,N
-\end{cases}
-$$
-
-By weak duality theorem<cite>[^2]</cite>:
-
-$$
-\min_{w,b} \max_{\lambda} L(w,b,\lambda) \geq \max_{\lambda} \min_{w,b} L(w,b,\lambda)
-$$
-
-Because primal problem has a convex function and linear constraintsa and it satisfies slater condition, we can check whether it satisfies [KKT condition](https://tirmisula.github.io/posts/support-vector-machine/#kkt-conditions) to prove a strong duality exsits in between primal and dual problem<cite>[^3]</cite>:
-
-$$
-\min_{w,b} \max_{\lambda} L(w,b,\lambda) = \max_{\lambda} \min_{w,b} L(w,b,\lambda)
-$$
-
-Solve primal problem is equivalent to solve it's dual problem.
 
 #### solve dual problem
 
