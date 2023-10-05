@@ -146,7 +146,7 @@ $$
 p(x|\mu,\sigma) = \frac{1}{\sqrt{2\pi}\sigma} \mathrm{e}^{-\frac{(x-\mu)^2}{2\sigma^2}}
 $$
 
-We can transform it into a exponential family form:
+We can transform it into a exponential family distribution form:
 
 $$
 \begin{align*}
@@ -198,73 +198,24 @@ $$
 \end{align*}
 $$
 
-#### solve dual problem
+## Relationship between log-partition function and sufficient statistic
 
-{{< math.inline >}}
-<p>
-We take the partial derivatives of \(L(w,b,\lambda)\):
-</p>
-{{</ math.inline >}}
+Given a exponential family distribution, we have:
 
 $$
 \begin{align*}
-\frac{\partial}{\partial b}L(w,b,\lambda) &= 0 \\\
-\sum_{i=1}^N \lambda_iy_i &= 0
+p(x|\theta) &= h(x)\exp(\theta^T\phi(x)-A(\theta)) \\\
+&= \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \\\
+\int p(x|\theta) \space dx &= \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \space dx \\\
+1 &= \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \space dx \\\
+\exp(A(\theta)) &= \int h(x)\exp(\theta^T\phi(x)) \space dx \\\
+\frac{\partial}{\partial \theta}\exp(A(\theta)) &= \frac{\partial}{\partial \theta}\int h(x)\exp(\theta^T\phi(x)) \space dx \\\
+\exp(A(\theta))A^{'}(\theta) &= \int \frac{\partial}{\partial \theta}h(x)\exp(\theta^T\phi(x)) \space dx \\\
+A^{'}(\theta) &= \frac{1}{\exp(A(\theta))} \int h(x)\exp(\theta^T\phi(x))\phi(x) \space dx \\\
+&= \int h(x)\exp(\theta^T\phi(x)-A(\theta))\phi(x) \space dx \\\
+&= \int p(x|\theta)\phi(x) \space dx \\\
+&= E_{x\sim p(x|\theta)} \left[\phi(x)\right]
 \end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-We put this condition \(\sum_{i=1}^N \lambda_iy_i = 0\) back to \(L(w,b,\lambda)\):
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-L(w,b,\lambda) &= \frac{1}{2}w^Tw+\sum_{i=1}^N\lambda_i(1-y_i(w^Tx_i+b)) \\\
-&= \frac{1}{2}w^Tw+\sum_{i=1}^N\lambda_i-\sum_{i=1}^N\lambda_iy_iw^Tx_i-\sum_{i=1}^N\lambda_iy_ib \\\
-&= \frac{1}{2}w^Tw+\sum_{i=1}^N\lambda_i-\sum_{i=1}^N\lambda_iy_iw^Tx_i
-\end{align*}
-$$
-
-Next:
-
-$$
-\begin{align*}
-\frac{\partial}{\partial w}L(w,b,\lambda) &= 0 \\\
-w-\sum_{i=1}^N\lambda_iy_ix_i &= 0 \\\
-w &= \sum_{i=1}^N\lambda_iy_ix_i
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-We put this condition \(w = \sum_{i=1}^N\lambda_iy_ix_i\) back to \(L(w,b,\lambda)\):
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-\min_{w,b}L(w,b,\lambda) &= \frac{1}{2}w^Tw+\sum_{i=1}^N\lambda_i-\sum_{i=1}^N\lambda_iy_iw^Tx_i \\\
-&= \frac{1}{2}\left(\sum_{i=1}^N\lambda_iy_ix_i\right)^T\sum_{j=1}^N\lambda_jy_jx_j + \sum_{i-1}^N\lambda_i - \sum_{i=1}^N\lambda_iy_i\left(\sum_{j=1}^N\lambda_jy_jx_j\right)^Tx_i \\\
-&= \frac{1}{2}\sum_{i=1}^N\lambda_iy_ix_i^T\sum_{j=1}^N\lambda_jy_jx_j + \sum_{i-1}^N\lambda_i- \sum_{i=1}^N\lambda_iy_i\left(\sum_{j=1}^N\lambda_jy_jx_j^T\right)x_i \\\
-&= \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j + \sum_{i-1}^N\lambda_i - \sum_{i=1}^N\left(\sum_{j=1}^N\lambda_iy_i\lambda_jy_jx_j^T\right)x_i \\\
-&= \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j + \sum_{i-1}^N\lambda_i - \sum_{i=1}^N\sum_{j=1}^N\lambda_iy_i\lambda_jy_jx_j^Tx_i \\\
-&= \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j + \sum_{i-1}^N\lambda_i - \sum_{i=1}^N\sum_{j=1}^N\lambda_iy_i\lambda_jy_jx_i^Tx_j \\\
-&= -\frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j + \sum_{i=1}^N\lambda_i
-\end{align*}
-$$
-
-Finally the dual optimization problem becomes:
-
-$$
-\max_{\lambda} -\frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j + \sum_{i=1}^N\lambda_i \\\
-\text{subject to } \lambda_i \geq 0 , i=1,2,\cdots,N \\\
-\text{subject to } \sum_{i=1}^N \lambda_iy_i=0 , i=1,2,\cdots,N \\\
-\dArr \\\
-\min_{\lambda} \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j - \sum_{i=1}^N\lambda_i \\\
-\text{subject to } \lambda_i \geq 0 , i=1,2,\cdots,N \\\
-\text{subject to } \sum_{i=1}^N \lambda_iy_i=0 , i=1,2,\cdots,N
 $$
 
 #### property of strong duality
