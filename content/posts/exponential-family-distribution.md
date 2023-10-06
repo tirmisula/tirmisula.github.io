@@ -206,16 +206,78 @@ $$
 \begin{align*}
 p(x|\theta) &= h(x)\exp(\theta^T\phi(x)-A(\theta)) \\\
 &= \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \\\
+&\dArr \\\
 \int p(x|\theta) \space dx &= \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \space dx \\\
 1 &= \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \space dx \\\
 \exp(A(\theta)) &= \int h(x)\exp(\theta^T\phi(x)) \space dx \\\
+&\dArr \\\
 \frac{\partial}{\partial \theta}\exp(A(\theta)) &= \frac{\partial}{\partial \theta}\int h(x)\exp(\theta^T\phi(x)) \space dx \\\
 \exp(A(\theta))A^{'}(\theta) &= \int \frac{\partial}{\partial \theta}h(x)\exp(\theta^T\phi(x)) \space dx \\\
+&\dArr \\\
 A^{'}(\theta) &= \frac{1}{\exp(A(\theta))} \int h(x)\exp(\theta^T\phi(x))\phi(x) \space dx \\\
 &= \int h(x)\exp(\theta^T\phi(x)-A(\theta))\phi(x) \space dx \\\
 &= \int p(x|\theta)\phi(x) \space dx \\\
 &= E_{x\sim p(x|\theta)} \left[\phi(x)\right]
 \end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+The first derivative of log-partition function \(A(\theta)\) equals to the expectation of sufficient statistic, for the second derivative of \(A(\theta)\), we have:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+A^{''}(\theta) &= \frac{\partial}{\partial \theta}\int h(x)\exp(\theta^T\phi(x)-A(\theta))\phi(x) \space dx \\\
+&= \int h(x)\frac{\partial}{\partial \theta}\exp(\theta^T\phi(x)-A(\theta))\phi(x) \space dx \\\
+&= \int h(x) \exp(\theta^T\phi(x)-A(\theta)) (\phi(x)-A^{'}(\theta)) \phi(x) \space dx \\\
+&= \int p(x|\theta) \left(\phi(x)-E[\phi(x)]\right) \phi(x) \space dx \\\
+&= \int p(x|\theta) \phi(x)^2 \space dx - E[\phi(x)]\int p(x|\theta)\phi(x)\space dx \\\
+&= E\left[\phi(x)^2\right] - E^2\left[ \phi(x) \right] \\\
+&= Var\left[ \phi(x) \right]
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+The second derivative of log-partition function is the variance of sufficient staticitic and is greater than zero, which means log-partition function \( A(\theta) \) is <mark>convex</mark>.
+</p>
+{{</ math.inline >}}
+
+We can verify this conclusion on Gaussian distribution:
+
+$$
+\text{For Gaussian distribution } \mathcal{N}(\mu,\sigma^2)\\\
+\begin{align*}
+\frac{\partial}{\partial \theta_1}A(\theta) &= \frac{\partial}{\partial \theta_1} -\frac{(\theta_1)^2}{4\theta_2}+\frac{1}{2}\log(-\frac{\pi}{\theta_2}) \\\
+&= -\frac{\theta_1}{2\theta_2} \\\
+&= - \frac{\frac{\mu}{\sigma^2}}{2\frac{-1}{2\sigma^2}} \\\
+&= \mu
+\end{align*}
+$$
+
+$$
+\begin{align*}
+\frac{\partial}{\partial \theta_2}A(\theta) &= \frac{\partial}{\partial \theta_2} -\frac{(\theta_1)^2}{4\theta_2}+\frac{1}{2}\log(-\frac{\pi}{\theta_2}) \\\
+&= \frac{\theta_1^2}{4}\theta_2^{-2} - \frac{1}{2}\frac{\theta_2}{\pi}\pi\theta_2^{-2} \\\
+&= \frac{\theta_1^2}{4}\theta_2^{-2} - \frac{1}{2\theta_2} \\\
+&= \frac{\frac{\mu^2}{\sigma^4}}{4}4\sigma^4 + \sigma^2 \\\
+&= \mu^2+\sigma^2
+\end{align*}
+$$
+
+$$
+E\left[\phi(x)\right] = \begin{bmatrix}
+E[x] \\\
+E[x^2]
+\end{bmatrix} = \begin{bmatrix}
+\mu \\\
+\sigma^2+\mu^2
+\end{bmatrix} = \begin{bmatrix}
+\frac{\partial}{\partial \theta_1}A(\theta) \\\
+\frac{\partial}{\partial \theta_2}A(\theta)
+\end{bmatrix}
 $$
 
 #### property of strong duality
