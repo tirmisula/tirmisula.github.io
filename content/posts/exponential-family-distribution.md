@@ -367,9 +367,49 @@ $$
 
 {{< math.inline >}}
 <p>
-Given a dataset \( \mathcal{D}=\lbrace x_1,x_2,\cdots,x_N \rbrace \), we want to find \(p(x)\) from empirical distribution \(\hat{p(x)}\).
+Given a dataset \( \mathcal{D}=\lbrace x_1,x_2,\cdots,x_N \rbrace \), we want to find \(p(x)\) from empirical distribution \(\hat{p(x)}\). Empirical distribution can be directly acquired by counting occurrences of each \(x_i\), and \(p(x)\) can be acquired by max entropy problem:
 </p>
 {{</ math.inline >}}
+
+$$
+\hat{p}(x) = \frac{count(x)}{N}
+$$
+
+We want the expectation of any function of x to be the same regardless of whether x is subject to the empirical distribution or the actual distribution, so the max entropy problem becomes:
+
+$$
+\begin{align*}
+&\min \sum_{i=1}^N p(x_i)\log p(x_i) \\\
+&\text{subject to } \sum_{i=1}^N p_i =1 \\\
+&\text{subject to } E_{p}[f(x)] = E_{\hat{p}}[f(x)], f(x) = \begin{bmatrix}
+f_1(x) \\\
+\vdots \\\
+f_k(x)
+\end{bmatrix}
+\end{align*}
+$$
+
+Solve it by lagrange multiplier:
+
+$$
+\text{Let } E_{\hat{p}}[f(x)]=\Delta=\begin{bmatrix}
+\Delta_1 \\\
+\vdots \\\
+\Delta_k
+\end{bmatrix}\\\
+\text{Let } p(x_i) = p_i \\\
+L(p1,\cdots,p_N,\lambda_0,\lambda) = \sum_{i=1}^N p(x_i)\log p(x_i) + \lambda_0(1-\sum_{i=1}^Np_i)+\lambda^T(\Delta-E_{p}[f(x)]) \\\
+\begin{align*}
+\frac{\partial}{\partial p_i} \sum_{i=1}^N p(x_i)\log p(x_i) + \lambda_0(1-\sum_{i=1}^Np_i)+\lambda^T(\Delta-E_{p}[f(x)]) &= 0 \\\
+\log p_i +1-\lambda_0-\lambda^T\frac{\partial}{\partial p_i}\sum_{i=1}^Np(x_i)f(x_i) &= 0 \\\
+\log p_i +1-\lambda_0-\lambda^Tf(x_i) &= 0 \\\
+\log p_i &= \lambda^Tf(x_i)+\lambda_0-1 \\\
+p_i &= \exp(\lambda^Tf(x_i)+\lambda_0-1)
+\end{align*} \\\
+\therefore p(x=x_i) = \exp(\underset{\color{red}{\theta^T}}{\lambda^T}\underset{\color{red}{\phi(x)}}{f(x_i)}-\underset{\color{red}{A(\theta)}}{(\lambda_0+1)})
+$$
+
+By max entropy problem, we can conclude that for unknown distribution it's assumption distribution is exponential family distribution.
 
 ## Conclusion
 
