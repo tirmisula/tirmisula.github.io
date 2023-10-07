@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
-title: "Exponential Family Distribution"
-date: "2023-09-07"
+title: "EM Algorithm"
+date: "2023-09-08"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -36,76 +36,16 @@ TocOpen: true
     }
 </style>
 
-## Background
-### Examples of exponential family distributions
-Some of the well-known exponential family distributions are:
+## Definition of EM algorithm
 
-$$
-\text{Exponential family: }
-\begin{cases}
-\text{Gaussian} \\\
-\text{Bernoulli} \\\
-\text{Binomial} \\\
-\text{Poisson} \\\
-\text{Beta} \\\
-\text{Dirichlet} \\\
-\text{Gamma}
-\end{cases}
-$$
-
-### Application areas of exponential famlily distributions
-
-$$
-\text{Application areas: }
-\begin{cases}
-\text{Generalize linear model}\begin{cases}
-\text{linear combination: } w^Tx \\\
-\text{link funciton: } (\text{ReLU})^{-1} \\\
-\text{linear regression: } y|x\sim \mathcal{N}(\mu,\Sigma) \\\
-\text{calssification: } y|x\sim \mathcal{Bernoulli(\phi)}
-\end{cases}\\\
-\text{Graph model: undirected graph} \rarr \text{restricted boltzman machine(RBM)} \\\
-\text{Variational inference} \rarr \text{simplification}
-\end{cases}
-$$
-
-## Exponentail family distribution introduction
-### Definition of exponential family distribution
-
-Exponential family distribution has the following form:
-
-$$
-p(x|\theta) = h(x)\exp(\theta^T\phi(x)-A(\theta)) \\\
-x\in\mathbb{R}^p \\\
-\theta: \text{parameters} \\\
-A(\theta): \text{log-partition funciton} \\\
-\phi(x): \text{sufficient statistic} \\\
-h(x)=1, \text{ if not important}
-$$
-
-The source of log partition function comes from:
+Expectation maximization(EM) algorithm is used to estimate parameters of model with latent variables. It is different from MLE which can directly find analytic expressions of parameters. Thus EM algorithm is an undirect iterate algorithm which is defined as follows:
 
 $$
 \begin{align*}
-p(x|\theta) &= h(x)\exp(\theta^T\phi(x)-A(\theta)) \\\
-&=\frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x))
+\theta^{(t+1)} &= \argmax_{\theta}\int_z \log p(x,z|\theta)p(z|x,\theta^{(t)})\space dz \\\
+&= \argmax_{\theta} E_{z|x,\theta^{(t)} \sim p(z|x,\theta^{(t)})}\left[ \log p(x,z|\theta) \right]
 \end{align*}
 $$
-
-$$
-\begin{align*}
-\because \int p(x|\theta) \space dx &= \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \space dx = 1 \\\
-\therefore \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \space dx &= 1 \\\
-\frac{1}{\exp(A(\theta))} \int h(x)\exp(\theta^T\phi(x)) \space dx &= 1 \\\
-\exp(A(\theta)) &= \int h(x)\exp(\theta^T\phi(x)) \space dx
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-\( \exp(A(\theta)) \) is called partition function because it normalize integration to 1, thus \( A(\theta) \) is called log partition function.
-</p>
-{{</ math.inline >}}
 
 ### Feature of exponential family distribution
 
