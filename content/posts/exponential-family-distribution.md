@@ -93,8 +93,8 @@ p(x|\theta) &= h(x)\exp(\theta^T\phi(x)-A(\theta)) \\\
 $$
 
 $$
-\because \int p(x|\theta) \space dx = \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \space dx = 1 \\\
 \begin{align*}
+\because \int p(x|\theta) \space dx &= \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \space dx = 1 \\\
 \therefore \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \space dx &= 1 \\\
 \frac{1}{\exp(A(\theta))} \int h(x)\exp(\theta^T\phi(x)) \space dx &= 1 \\\
 \exp(A(\theta)) &= \int h(x)\exp(\theta^T\phi(x)) \space dx
@@ -198,7 +198,7 @@ $$
 \end{align*}
 $$
 
-## Relationship between log-partition function and sufficient statistic
+## Log-partition function and sufficient statistic
 
 Given a exponential family distribution, we have:
 
@@ -280,615 +280,104 @@ E[x^2]
 \end{bmatrix}
 $$
 
-#### property of strong duality
-
-From previous subsection we know SVM has strong dual problem, then it must satisfies [Karush-Kuhn-Tucker Conditions](https://tirmisula.github.io/posts/support-vector-machine/#karush-kuhn-tucker-conditions)(KKT). The KKT conditions are listed as follows:
-
-$$
-\begin{cases}
-\frac{\partial L(w,b,\lambda)}{\partial w} = 0,\frac{\partial L(w,b,\lambda)}{\partial b} = 0 \implies \text{satisfies because }w^{\ast},b^{\ast} \text{ solvable} \\\
-\lambda_i(1-y_i(w^Tx_i+b)) = 0  \implies \text{satisfies complementary slackness}\\\
-\lambda_i \geq 0, i=1,2,\cdots,N \implies \text{satisfies because mentioned in no constraints primal problem} \\\
-1-y_i(w^Tx_i+b) \leq 0 \implies \text{satisfies because mentioned in constraints primal problem}
-\end{cases}
-$$
+## MLE and sufficient statistic
 
 {{< math.inline >}}
 <p>
-\(w^*\) is solved in last section:
+Given a dataset \( \mathcal{D}=\lbrace x_1,x_2,\cdots,x_N \rbrace \), maximum likelihood estimation on \(\mathcal{D}\) is:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-w^{\ast} &= \sum_{i=1}^N\lambda_iy_ix_i
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-Then we can solve \(b^*\):
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-\exist (x_k,y_k), 1-y_k((w^{\ast})^Tx_k+b^{\ast}) &= 0 \\\
-y_k^2((w^{\ast})^Tx_k+b^{\ast}) &= y_k \\\
-\sum_{i=1}^N\lambda_iy_ix_i^Tx_k+b^{\ast} &= y_k \\\
-b^{\ast} &= y_k - \sum_{i=1}^N\lambda_iy_ix_i^Tx_k
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-\( w^* \), \( b^* \) are the linear combinations of all data samples.
-</p>
-{{</ math.inline >}}
-
-The second equation called <mark>complementary slackness</mark> can be divided into 2 situations:
-
-$$
-\lambda_i = 0 , y_i(w^Tx_i+b) > 1 \\\
-\lambda_i \not= 0 , y_i(w^Tx_i+b) = 1 \\\
-$$
-
-{{< math.inline >}}
-<p>
-Because primal problem maximize distance between closest point to decision boundary \( w^Tx+b=0 \), it must have 2 dual boundaries \( w^Tx+b=1 \), \( w^Tx+b=-1 \) for the closest point for each class.
-<br/>
-<br/>
-So the first situation of satifying complementary slackness indicates other data samples that is far away from dual boundaries and have their weight \(\lambda_i\) determined to be zero, they play no rule in optimization.
-<br/>
-<br/>
-And the second situation indicates only the closest points from 2 class have effective weight \(\lambda_i\). 
-<br/>
-<br/>
-In conclusion, <b>strong duality</b> implies complementary slackness which indicates dual decision borders, <mark>only those points on dual decision borders are support vectors</mark> which determined the final decision boundary for SVM.
-</p>
-{{</ math.inline >}}
-
-
-## Soft-margin SVM
-### Definition of soft-margin SVM
-
-{{< math.inline >}}
-<p>
-Soft-margin SVM tolerates minor error that some points surpass dual boundaries \( w^Tx+b=\pm 1 \) : 
-</p>
-{{</ math.inline >}}
-
-$$
-\min_{w,b} \frac{1}{2}w^Tw+loss \\\
-\text{subject to } y_i(w^Tx_i+b) \geq 1, i=1,2,\cdots,N
-$$
-
-#### inidicator loss function
-
-The first choice of loss function is counting the number of surpassing points, which is:
-
-$$
-\min_{w,b} \frac{1}{2}w^Tw+\sum_{i=1}^NI\lbrace y_i(w^Tx_i+b)<1 \rbrace
-$$
-
-{{< math.inline >}}
-<p>
-But \(I(\cdot)\) is not continous, so we consider let the surpassing distance be the loss.
-</p>
-{{</ math.inline >}}
-
-#### hinge loss function
-
-Loss function is designed as:
-
-$$
-\begin{cases}
-\text{If } y_i(w^Tx_i+b) \geq 1, loss=0 \\\
-\text{If } y_i(w^Tx_i+b) < 1, loss=1-y_I(w^Tx_i+b)
-\end{cases}
-$$
-
-Combine together we get:
-
-$$
-\min_{w,b} \frac{1}{2}w^Tw+\sum_{i=1}^N \max(0, 1-y_i(w^Tx_i+b))
-$$
-
-{{< math.inline >}}
-<p>
-Let \( \xi_i \) be the surpass distance, and add weight for the loss, we have:
-</p>
-{{</ math.inline >}}
-
-$$
-\text{Let } \xi_i = 1-y_i(w^Tx_i+b), \xi_i \geq 0 \\\
-\dArr \\\
-\min_{w,b} \frac{1}{2}w^Tw+C\sum_{i=1}^N \max(0,\xi_i) \\\
-\text{subject to } y_i(w^Tx_i+b) \geq 1-\xi_i, i=1,2,\cdots,N \\\
-\dArr \\\
-\min_{w,b} \frac{1}{2}w^Tw+C\sum_{i=1}^N\xi_i \\\
-\text{subject to } y_i(w^Tx_i+b) \geq 1-\xi_i, i=1,2,\cdots,N
-$$
-
-### Dual problem of soft-margin SVM
-
-## Kernel SVM
-
-### Background of kernel method
-
-kernel method is introduced when solving nonlinear separable data samples:
-
-| Linear separable   | Separable but minor error     | nonlinear separable   |
-| --------- | -------- | ------ |
-| perceptron(PLA) | pocket algorithm | multilayer perceptron |
-| hard-margin SVM | soft-margin SVM | kernel SVM |
-
-The thought of kernel method is transforming data to higher dimension which based on the following truth:
-
-$$
-\text{Cover Theoreom: high dimentional data are easier to separate than low dimentional data}
-$$
-
-For example given a XOR problem:
-
-$$
-a,b,c,d \in \mathbb{R}^2 \\\
-a,d \in \text{Class 1} \\\
-b,c \in \text{Class 2} \\\
-a=(0,0) \\\
-b=(1,0) \\\
-c=(0,1) \\\
-d=(1,1)
-$$
-
-{{< math.inline >}}
-<p>
-It is obvious \(a,b,c,d\) are nonlinear separable, but we can design a kernel function to transform samples to higher dimension to make it separable:
-</p>
-{{</ math.inline >}}
-
-$$
-(x_1,x_2) \underset{\phi(x)}{\rarr} \left(x_1,x_2,(x_1-x_2)^2\right) \\\
-a \underset{\phi(x)}{\rarr} (0,0,0) \\\
-b \underset{\phi(x)}{\rarr} (1,0,1) \\\
-c \underset{\phi(x)}{\rarr} (0,1,1) \\\
-d \underset{\phi(x)}{\rarr} (1,1,0) \\\
-a,b,c,d \text{ are now linear separable by panel } (\ast,\ast,0.5), \ast\in\mathbb{R}
-$$
-
-Given SVM and it's lagrange dual problem:
-
-$$
-\min_{w,b} \frac{1}{2}w^Tw \\\
-\text{subject to } y_i(w^Tx_i+b) \geq 1, i=1,2,\cdots,N
-$$
-
-<br/>
-
-$$
-\min_{\lambda} \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_jx_i^Tx_j - \sum_{i=1}^N\lambda_i \\\
-\text{subject to } \lambda_i \geq 0 , i=1,2,\cdots,N \\\
-\text{subject to } \sum_{i=1}^N \lambda_iy_i=0 , i=1,2,\cdots,N
-$$
-
-{{< math.inline >}}
-<p>
-We can replace \(x_i,x_j\) in dual problem with kernel function:
-</p>
-{{</ math.inline >}}
-
-$$
-\min_{\lambda} \frac{1}{2}\sum_{i=1}^N\sum_{j=1}^N\lambda_i\lambda_jy_iy_j\phi(x_i)^T\phi(x_j) - \sum_{i=1}^N\lambda_i \\\
-\text{subject to } \lambda_i \geq 0 , i=1,2,\cdots,N \\\
-\text{subject to } \sum_{i=1}^N \lambda_iy_i=0 , i=1,2,\cdots,N
-$$
-
-It draw forth the definiton of kernel function:
-
-$$
-\forall x_i,x_j \in \mathcal{D}, \exist\space\phi(x):x\rarr z \\\
-K(x_i,x_j) = \phi(x_i)^T\phi(x_j) = \left< \phi(x_i),\phi(x_j) \right> \\\
-K(x_i,x_j) \text{ is a kernel function} \\\
-\text{e.g. } K(x_i,x_j) = \mathrm{e}^{-\frac{(x_i-x_j)^2}{2\sigma^2}}
-$$
-
-{{< math.inline >}}
-<p>
-Finding kernel function rather than finding \( \phi(x) \) and calculating inner product reduces the amount of computation, which is called <mark>kernel tricks</mark>.
-</p>
-{{</ math.inline >}}
-
-### Definition of positive definite kernel function
-#### first definition of positive definite kernel
-
-$$
-\text{If } K \text{ satisfies}: 
-\begin{cases}\mathcal{X}\times \mathcal{X} \underset{K}{\mapsto} \mathbb{R} \\\
-\forall x_i,x_j \in \mathcal{X}, K(x_i,x_j) \text{ exists} \\\
-\exist \phi\in\mathcal{H}, K(x_i,x_j) = \left< \phi(x_i),\phi(x_j) \right>, \phi : \mathcal{X}\mapsto \mathbb{R}, \mathcal{H}: \text{Hilbert space}
-\end{cases} \\\
-\dArr \\\
-K \text{ is a positive definite kernel function}
-$$
-
-Hilbert space has following attributes:
-
-$$
-\forall\space f,g,k \in \mathcal{H} \\\
-\begin{align}
-&\lim_{n\rarr\infty} k_n \in \mathcal{H}, &\text{(completeness)} \\\
-&\left<f,g\right> = \left<g,f\right>, &\text{(symmetry)} \\\
-&\left<f,f\right> \geq 0, \left<f,f\right> = 0 \text{ when } f=0 ,&\text{(positive definite)} \\\
-&\left< \alpha f_1+\beta f_2,g \right> = \alpha\left< f_1,g \right>+\beta\left< f_2,g \right>, &\text{(linearity)} \\\
-&\forall\space a\in\mathbb{R},af\in\mathcal{H},f+g\in\mathcal{H},&\text{(closeness)}
-\end{align}
-$$
-
-#### second definition of positive definite kernel
-
-$$
-\text{If } K \text{ satisfies}: 
-\begin{cases}\mathcal{X}\times \mathcal{X} \underset{K}{\mapsto} \mathbb{R} \\\
-\forall x_i,x_j \in \mathcal{X}, K(x_i,x_j) \text{ exists} \\\
-K \text{is symmetric and positive definitive}
-\end{cases} \\\
-\dArr \\\
-K \text{ is a positive definite kernel function}
-$$
-
-Symmetry and positive definite are illustrated and proved as follows:
-
-$$
-\text{$K$ is symmetric} \iff K(a,b)=K(b,a) \\\
-\because \left< a,b \right> = \left< b,a \right>, \text{inner product is symmetric}
-$$
-
-<br/>
-
-$$
-\text{$K$ is positive definitive} \iff \forall x_1,\cdots,x_N \in \mathcal{X}, \text{$K$'s Gram matrix $G$ is semipositive definitive} \\\
-\forall a\in\mathbb{R}^N, \\\
-\begin{align*}
-a^TGa &= \begin{bmatrix}a_1 & a_2 & \cdots & a_N\end{bmatrix}
-\begin{bmatrix}
-K_{11} & K_{12} & \cdots & K_{1N} \\\
-K_{21} & K_{22} & \cdots & K_{2N} \\\
-\vdots & \vdots & \ddots & \vdots \\\
-K_{N1} & K_{N2} & \cdots & K_{NN}
-\end{bmatrix}
-\begin{bmatrix}
-a_1 \\\
-\vdots \\\
-a_N
-\end{bmatrix}\\\
-&= \sum_{i=1}^N\sum_{j=1}^N a_ia_jK_{ij} \\\
-&= \sum_{i=1}^N\sum_{j=1}^N a_ia_j\left< \phi(x_i),\phi(x_j) \right> \\\
-&= \sum_{i=1}^N\sum_{j=1}^N a_ia_j \phi(x_i)^T\phi(x_j) \\\
-&= \left[\sum_{i=1}^N a_i\phi(x_i)\right]^T\sum_{j=1}^N a_j\phi(x_j) \\\
-&= \left< \sum_{i=1}^N a_i\phi(x_i),\sum_{j=1}^N a_j\phi(x_j) \right> \\\
-&\geq 0
+\theta_{MLE} &= \argmax \log \prod_{i=1}^N p(x_i|\theta) \\\
+&= \argmax \sum_{i=1}^N \log \left(h(x_i)\exp(\theta^T\phi(x_i)-A(\theta)) \right) \\\
+&= \argmax \sum_{i=1}^N \log \left(h(x_i)\right) + \theta^T\phi(x_i)-A(\theta)
 \end{align*} \\\
-\therefore G \text{ is semi-positive definitive}
-$$
-
-## Supplementation
-
-### Constrained problem to non-constrained
-
-Given a primal problem:
-
-$$
-\min_{x\in\mathbb{R}^p} f(x) \\\
-\text{subject to } m_i(x) \leq 0, i=1,\cdots,M  \\\
-\text{subject to } n_j(x) = 0, j=1,\cdots,N
-$$
-
-It's equivalent non-constrained problem is :
-
-$$
-\min_{x}\max_{\lambda,\eta} f(x)+\sum_{i=1}^M\lambda_im_i(x)+\sum_{j=1}^N\eta_jn_j(x) \\\
-\text{subject to } \lambda_i \geq 0, i=1,\cdots,M
-$$
-
-{{< math.inline >}}
-<p>
-It is because if \( m_i(x)>0 \) given a \( x \), it reaches infinite:
-</p>
-{{</ math.inline >}}
-
-$$
-\max_{\lambda,\eta} f(x)+\underset{\rarr\infty}{\sum_{i=1}^M\lambda_im_i(x)}+\sum_{j=1}^N\eta_jn_j(x) = \infty
-$$
-
-{{< math.inline >}}
-<p>
-if \( m_i(x) \leq 0 \), it has normal value, then we can conclude:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-\min_{x}\max_{\lambda,\eta} f(x)+\sum_{i=1}^M\lambda_im_i(x)+\sum_{j=1}^N\eta_jn_j(x)
-&=
-\min_{x}\lbrace \max_{\lambda,\eta} f(x)+\sum_{i=1}^M\lambda_im_i(x)+\sum_{j=1}^N\eta_jn_j(x),\infty \rbrace \\\
-&= \min_{x,m(x)\leq0}\max_{\lambda,\eta} f(x)+\sum_{i=1}^M\lambda_im_i(x)+\sum_{j=1}^N\eta_jn_j(x)
-\end{align*}
-$$
-
-It is the same thing primal problem described.
-
-### Proof of weak duality
-
-The dual problem is :
-
-$$
-\max_{\lambda,\eta}\min_{x} f(x)+\sum_{i=1}^M\lambda_im_i(x)+\sum_{j=1}^N\eta_jn_j(x) \\\
-\text{subject to } \lambda_i \geq 0, i=1,\cdots,M
-$$
-
-We want to prove:
-
-$$
-\min_{x}\max_{\lambda,\eta} f(x)+\sum_{i=1}^M\lambda_im_i(x)+\sum_{j=1}^N\eta_jn_j(x) \geq \max_{\lambda,\eta}\min_{x} f(x)+\sum_{i=1}^M\lambda_im_i(x)+\sum_{j=1}^N\eta_jn_j(x)
-$$
-
-it is because:
-
-$$
-\text{Let } L(x,\lambda,\eta) = f(x)+\sum_{i=1}^M\lambda_im_i(x)+\sum_{j=1}^N\eta_jn_j(x) \\\
-\max_{\lambda,\eta} L(x,\lambda,\eta) \geq L(x,\lambda,\eta) \geq \min_{x} L(x,\lambda,\eta) \\\
-\therefore \max_{\lambda,\eta} L(x,\lambda,\eta) \geq \min_{x} L(x,\lambda,\eta)
+\dArr
 $$
 
 $$
 \begin{align*}
-\text{Let }A(x)&=\max_{\lambda,\eta}L(x,\lambda,\eta)\\\
-B(\lambda,\eta) &= \min_{x}L(x,\lambda,\eta)
+\frac{\partial}{\partial \theta} \sum_{i=1}^N \log \left(h(x_i)\right) + \theta^T\phi(x_i)-A(\theta) &= 0 \\\
+\sum_{i=1}^N  \phi(x_i)-A^{'}(\theta) &= 0 \\\
+\frac{1}{N}\sum_{i=1}^N \phi(x_i) &= A^{'}(\theta_{MLE}) \\\
+\text{Define } A^{'(-1)}(\cdot) \text{ the inverse function of } A^{'}(\cdot) \\\
+\theta_{MLE} &= A^{'(-1)}\left(\frac{1}{N}\sum_{i=1}^N \phi(x_i)\right)
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-The largest value of \(B(\lambda,\eta)\) is still smaller than the smallest value of \(A(x)\):
+The conclusion is when calculating MLE, we only need to compute <mark>sufficient statistic</mark> \(\phi(x_I)\) ignoring the original data samples.
 </p>
 {{</ math.inline >}}
 
-$$
-\min_x A(x) \geq \max_{\lambda,\eta} B(\lambda,\eta) \\\
-\therefore \min_x \max_{\lambda,\eta}L(x,\lambda,\eta) \geq \max_{\lambda,\eta}\min_{x}L(x,\lambda,\eta)
-$$
+## Max entropy
 
-### Geometric explanation of duality
-
-Given a primal problem and it's dual problem:
+Quantities of information is defined as:
 
 $$
-\min_{x\in\mathbb{R}^p} f(x) \\\
-\text{subject to } m_1(x) \leq 0
+-\log p \\\
+p\text{ is the probability}
 $$
 
-$$
-\max_{\lambda}\min_{x} f(x)+\lambda m_1(x) \\\
-\text{subject to }\lambda \geq 0
-$$
-
-{{< math.inline >}}
-<p>
-Let \(p^*\) and \(d^*\) be the optimization result of primal problem and dual problem:
-</p>
-{{</ math.inline >}}
+Information entropy is defined as the expectation of information quantities:
 
 $$
-p^{\ast} = \min_{x}f(x), m_1(x)\leq 0 \\\
-d^{\ast} = \max_{\lambda}\min_{x} f(x)+\lambda m_1(x), \lambda\geq 0
-$$
-
-{{< math.inline >}}
-<p>
-Define domain \(D\) which represents the intersection of domain \(f(\cdot)\) and domain \(m_1(\cdot)\), and assuming it locates in a 2D cartesian axis, each domain represents horizontal axis \(u\) or vertical axis \(v\) and restricted area is defined as set \(G\): 
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-D &= f(\cdot) \cap m_1(\cdot) \\\
-t &= f(x) \\\
-u &= m_1(x) \\\
-G &= \lbrace (u,t)|x\in D \rbrace
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-Then we can define \(p^*\) and \(d^*\) in this \(D\) space by inifimum of set:
-</p>
-{{</ math.inline >}}
-
-$$
-p^{\ast} = inf\lbrace t|(u,t)\in G,u\leq 0 \rbrace \\\
-d^{\ast} = \max_{\lambda} inf\lbrace t+\lambda u|(u,t)\in G,\lambda\geq 0 \rbrace
-$$
-
-{{< math.inline >}}
-<p>
-The geometry meaning of \(p^*\) is the smallest projection point on axis t of left half part of \(G\).
-</p>
-{{</ math.inline >}}
-
-{{< math.inline >}}
-<p>
-Let \(t+\lambda u = \gamma \) , it represents the line with slope equals \(-lambda\) has intercept on axis t equals \(\gamma\). Then we can rewrite \(d^*\):
-</p>
-{{</ math.inline >}}
-
-$$
-d^{\ast} = \max_{\lambda} inf\lbrace \gamma |(u,t)\in G,\lambda\geq 0 \rbrace \\\
-inf\lbrace \gamma |(u,t)\in G,\lambda\geq 0 \rbrace \implies 
-\begin{cases}
-\text{intercept of the line} \\\
-\text{it's a tangent line below G with negetive slope}
-\end{cases} \\\
-d^{\ast} = \max_{\lambda} \text{intercept} \implies 
-\text{line has }\begin{cases}
-\text{tangent position on left half part of G} \\\
-\text{AND} \\\
-\text{tangent position on right half part of G}
+H[p] = E_{p(x)}\left[ -\log p \right] = \begin{cases}
+\int -p(x)\log p(x)\space dx,\text{continous} \\\
+\sum_{x} -p(x)\log p(x), \text{discrete}
 \end{cases}
 $$
 
-{{< math.inline >}}
-<p>
-Recall that the geometric meaning of \(d^*\) happened only when \(\lambda \geq 0\). If maximize intercept by tangent to both sides requires \(\lambda < 0\), it reduced to \(\lambda=0\), which means \(p^*\) and \(d^*\) have the same geometric definition:
-</p>
-{{</ math.inline >}}
+Assuming x is discrete and we have the probability table:
+
+| x   | 1     | 2   | ...   | N   |
+| --------- | -------- | ------ | ------ | ------ |
+| p | $$p_1$$ | $$p_2$$ | ... | $$p_N$$ |
+
+Then the max entropy problem is defined as follows:
 
 $$
-\text{intercept of tangent line with 0 slope}  \iff \text{lowest point's projection coordinate on axis t}
+\max \sum_{i=1}^N -p_i\log p_i \\\
+\text{subject to } \sum_{i=1}^N p_i = 1 \\\
+\dArr \\\
+\min \sum_{i=1}^N p_i\log p_i \\\
+\text{subject to } \sum_{i=1}^N p_1 = 1
 $$
 
-{{< math.inline >}}
-<p>
-Then we can conclude, if \(G\) is concave:
-</p>
-{{</ math.inline >}}
+This can be solved by lagrange multiplier:
 
 $$
-p^{\ast} > d^{\ast}
-$$
-
-{{< math.inline >}}
-<p>
-If \(G\) is convex:
-</p>
-{{</ math.inline >}}
-
-$$
-p^{\ast} = d^{\ast}
-$$
-
-### Slater condition
-
-Given a primal problem:
-
-$$
-\min_{x\in\mathbb{R}^p} f(x) \\\
-\text{subject to } m_i(x) \leq 0, i=1,\cdots,M  \\\
-\text{subject to } n_j(x) = 0, j=1,\cdots,N
-$$
-
-{{< math.inline >}}
-<p>
-Define the domain \(D\) and set \(G\):
-</p>
-{{</ math.inline >}}
-
-$$
+L(p_1,\cdots,p_N,\lambda) = \sum_{i=1}^N p_i\log p_i +\lambda(1-\sum_{i=1}^N p_i) \\\
 \begin{align*}
-D &= f(\cdot) \cap \lbrace m_i(\cdot)\rbrace_{i=1,\cdots,M} \cap \lbrace n_j(\cdot)\rbrace_{j=1,\cdots,N} \\\
-G &= \lbrace (u_1,\cdots,u_{M+N},t|x\in D) \rbrace
-\end{align*}
+\frac{\partial}{\partial p_i} \sum_{i=1}^N p_i\log p_i +\lambda(1-\sum_{i=1}^N p_i) &= 0 \\\
+\log p_i+p_i\frac{1}{p_i} -\lambda &= 0 \\\
+\hat{p_i} &= \mathrm{e}^{\lambda -1}
+\end{align*} \\\
+\therefore \hat{p_1}=\hat{p_2}=\cdots=\hat{p_N}=\frac{1}{N}
 $$
 
-Slater condition is described as:
+So we can conclude that:
 
 $$
-\exist \hat{x}\in relint(D), (relint\rarr \text{relative interior})\\\
-\text{subject to } \forall i=1,\cdots,M, m_i(\hat{x})<0
-$$
-
-{{< math.inline >}}
-<p>
-Slater condition determined the leftmost point of \(G\) is not on axis \(t\) so that tangent line is restricted to be non-vertical. In this way slater condition becomes unnecessary but sufficient condition for strong duality.
-</p>
-{{</ math.inline >}}
-
-There are two attributes for slater condition:
-1. Most of the convex optimization problem satisfy slater condition.
-2. Relaxed slater: if M constrained functions contain K affine functions, only the rest of M-K functions are ensured to be less than zero.
-
-Because SVM is a quadratic convex optimization problem, it natrually satisfies slater condition and thus has strong duality problem. Because SVM has strong duality problem and belongs to convex optimization problem, it can be solved by KKT condition.
-
-### Karush-Kuhn-Tucker Conditions
-
-Given a primal problem and it's dual problem:
-
-$$
-p^{\ast} = \min_{x\in\mathbb{R}^p} f(x) \\\
-\text{subject to } m_i(x) \leq 0, i=1,\cdots,M  \\\
-\text{subject to } n_j(x) = 0, j=1,\cdots,N
-$$
-
-<br/>
-
-$$
-d^{\ast} = \max_{\lambda,\eta}g(\lambda,\eta) \\\
-L(x,\lambda,\eta) = f(x)+\sum_{i=1}^M\lambda_{i}m_i(x)+\sum_{j=1}^N\eta_{j}n_j(x) \\\
-g(\lambda,\eta) = \min_{x} L(x,\lambda,\eta) \\\
-\text{subject to } \lambda_i \geq 0
+\text{max entropy} \iff \text{same probability for all events} \iff \text{zero prior knowledge of events}
 $$
 
 {{< math.inline >}}
 <p>
-\(p^*\) corresponds to \(x^*\), \(d^*\) corredponds to \(\lambda^*\) and \(\eta^*\):
+Given a dataset \( \mathcal{D}=\lbrace x_1,x_2,\cdots,x_N \rbrace \), we want to find \(p(x)\) from empirical distribution \(\hat{p(x)}\).
 </p>
 {{</ math.inline >}}
 
-$$
-\begin{align*}
-p^{\ast} &= f(x^{\ast}) \\\
-d^{\ast} &= g(\lambda^{\ast}, \eta^{\ast})
-\end{align*}
-$$
+## Conclusion
 
-The relationships among slater condition, KKT conditions and strong duality are listed as follows:
+In this chapter, we find some useful features for exponential family distribution, which makes it an important distribution in machine learning, these features are:
 
-$$
-\text{convex} + \text{slater} \implies \text{strong duality} \iff \text{KKT conditions}
-$$
-
-KKT conditions for this problem are:
-
-$$
-\text{KKT: }
-\begin{cases}
-\text{restrictions: }
-    \begin{cases}
-    m_i(x^{\ast}) \leq 0 & (1)\\\
-    n_j(x^{\ast}) = 0 & (2)\\\
-    \lambda^{\ast} \geq 0 & (3)
-    \end{cases} \\\
-\text{complementary slackness: } 
-    \begin{cases}
-    \lambda_i^{\ast}m_i(x^{\ast}) = 0, i=1,\cdots,N & (4)
-    \end{cases}\\\
-\text{zero gradient: }
-    \begin{cases}
-    \frac{\partial}{\partial x}L(x,\lambda^{\ast},\eta^{\ast}) = 0 & (5)
-    \end{cases}
-\end{cases}
-$$
-
-Conditions (1),(2),(3) natrually satisfy because they exist in problem clarifications. Next we demonstrate conditions (4) and (5) are necessary and sufficient for strong duality<cite>[^4]</cite>:
-
-$$
-\begin{align*}
-\because d^{\ast} &= \max_{\lambda,\eta}g(\lambda,\eta) \\\
-&= g(\lambda^{\ast}, \eta^{\ast}) \\\
-&= \min_{x} L(x,\lambda^{\ast},\eta^{\ast}) \\\
-&\leq L(x^{\ast},\lambda^{\ast},\eta^{\ast}) \\\
-&\leq f(x^{\ast}) + \sum_{i=1}^M\lambda_{i}^{\ast}m_i(x^{\ast})+\underset{\color{red}{=0}}{\sum_{j=1}^N\eta_{j}^{\ast}n_j(x^{\ast})} \\\
-&\leq  f(x^{\ast}) + \underset{\color{red}{\leq 0}}{\sum_{i=1}^M\lambda_{i}^{\ast}m_i(x^{\ast})} \\\
-&\leq f(x^{\ast}) \\\
-&\leq p^{\ast} \\\
-\therefore d^{\ast} = p^{\ast} &\iff \sum_{i=1}^M\lambda_{i}^{\ast}m_i(x^{\ast}) = 0 \\\
-&\iff \lambda_{i}^{\ast}m_i(x^{\ast}) = 0 \space, i =1,\cdots,M \\\
-\therefore d^{\ast} = p^{\ast} &\iff d^{\ast} = f(x^{\ast}) + \underset{\color{red}{}}{\sum_{i=1}^M\lambda_{i}^{\ast}m_i(x^{\ast})} \\\
-&\iff d^{\ast} = L(x^{\ast},\lambda^{\ast},\eta^{\ast}) \\\
-&\iff \min_{x} L(x,\lambda^{\ast},\eta^{\ast}) = L(x^{\ast},\lambda^{\ast},\eta^{\ast}) \\\
-&\iff \exist x=x^{\ast}, \nabla_{x}L(x,\lambda^{\ast}, \eta^{\ast}) = 0
-\end{align*}
-$$
-
+1. Sufficient statistic compress data and can replace original data samples when calculating MLE.
+2. When we don't know anything about dataset, max entropy thought tells us to assume data samples subject to exponential family distribution.
+3. If likelihood function is exponential family distribution, it is very likely prior and posterier are conjugate distributions.
 
 ## Reference
 
