@@ -38,7 +38,7 @@ TocOpen: true
 
 ## Definition of EM algorithm
 
-Expectation maximization(EM) algorithm is used to estimate parameters of model with latent variables. It is different from MLE which can directly find analytic expressions of parameters. Thus EM algorithm is an undirect iterate algorithm which is defined as follows:
+Expectation maximization(EM) algorithm is used to estimate parameters of model with latent variables. It is different from MLE which can directly find analytic expressions of parameters, EM algorithm is an undirect iterate algorithm which is defined as follows:
 
 $$
 \begin{align*}
@@ -47,36 +47,89 @@ $$
 \end{align*}
 $$
 
-### Feature of exponential family distribution
+## Proof of convergence of EM algorithm
+
+{{< math.inline >}}
+<p>
+For each iterate step, we want:
+</p>
+{{</ math.inline >}}
 
 $$
-\text{Features: }
-\begin{cases}
-\phi(x) \text{ compress data} \implies \text{online learning} \\\
-\text{exponential likelihood} \implies \text{conjugate prior and posterier} \\\
-\text{maximize entropy} \implies \text{zero knowledge of prior}
-\end{cases}
+\theta^{(t)} \rarr \theta^{(t+1)} \\\
+\log p(x|\theta^{(t)}) \leq \log p(x|\theta^{(t+1)})
 $$
 
-#### Conjugate distribution
-
-In bayesian statistics, it is difficult to find posterier distribution because the integration part is difficult to solve:
+{{< math.inline >}}
+<p>
+To prove algorithm's convergence, we rewrite \(p(x|\theta)\) with latent variable first:
+</p>
+{{</ math.inline >}}
 
 $$
 \begin{align*}
-p(\theta|x) &= \frac{p(x|\theta)p(\theta)}{\int p(x|\theta)p(\theta) \space d\theta} \\\
-p(\theta|x) &\propto p(x|\theta)p(\theta)
+p(x,z|\theta) &= p(x|\theta)p(z|x,\theta) \\\
+p(x|\theta) &= \frac{p(x,z|\theta)}{p(z|x,\theta)} \\\
+\log p(x|\theta) &= \log \frac{p(x,z|\theta)}{p(z|x,\theta)} \\\
+\log p(x|\theta) &= \log p(x,z|\theta) -\log p(z|x,\theta) \\\
+E_{z \sim p(z|x,\theta^{(t)})}\left[ \log p(x|\theta) \right] &= E_{z \sim p(z|x,\theta^{(t)})}\left[ \log p(x,z|\theta) -\log p(z|x,\theta) \right] \\\
+\int_{z}p(z|x,\theta^{(t)})\log p(x|\theta)\space dz &= \int_{z}p(z|x,\theta^{(t)})\left(\log p(x,z|\theta) -\log p(z|x,\theta)\right)\space dz \\\
+\log p(x|\theta)\int_{z}p(z|x,\theta^{(t)})\space dz &= \int_{z}p(z|x,\theta^{(t)})\left(\log p(x,z|\theta) -\log p(z|x,\theta)\right)\space dz \\\
+\log p(x|\theta) &= \int_{z}p(z|x,\theta^{(t)})\left(\log p(x,z|\theta) -\log p(z|x,\theta)\right)\space dz \\\
+\log p(x|\theta) &= \int_{z}p(z|x,\theta^{(t)})\log p(x,z|\theta)\space dz - \int_{z}p(z|x,\theta^{(t)})\log p(z|x,\theta)\space dz \\\
+\log p(x|\theta) &= \int_{z}p(z|x,\theta^{(t)})\log p(x,z|\theta)\space dz - \int_{z}p(z|x,\theta^{(t)})\log p(z|x,\theta)\space dz \\\
 \end{align*}
 $$
 
-The advantage of exponential family distribution is that exponential-likelihood's <mark>conjugate prior</mark> is often also in exponential family which brings posterier an easy solution, e.g. 
+{{< math.inline >}}
+<p>
+Next we set auxilary function \(Q\) and \(H\) to simplify the righter part:
+</p>
+{{</ math.inline >}}
 
 $$
-\underset{\text{Beta}}{p(\theta|x)} \propto \underset{\text{Binomial}}{p(x|\theta)}\underset{\text{Beta}}{p(\theta)}
+Q(\theta,\theta^{(t)}) = \int_{z}p(z|x,\theta^{(t)})\log p(x,z|\theta)\space dz \\\
+H(\theta,\theta^{(t)}) = \int_{z}p(z|x,\theta^{(t)})\log p(z|x,\theta)\space dz \\\
+\log p(x|\theta) = Q(\theta,\theta^{(t)}) - H(\theta,\theta^{(t)})
 $$
 
-In this case, likelihood is Binomial distribution and prior is Beta distribution so that we can directly conclude posterier is Beta distribution, posterier and prior are conjugate distributions.
+{{< math.inline >}}
+<p>
+\(Q\) and \(H\) have the following features:
+</p>
+{{</ math.inline >}}
 
+$$
+\text{By definition} \\\
+\theta^{(t+1)} = \argmax_{\theta} Q(\theta,\theta^{(t)}) \\\
+Q(\theta^{(t+1)},\theta^{(t)}) \geq Q(\theta,\theta^{(t)}) \\\
+Q(\theta^{(t+1)},\theta^{(t)}) \geq Q(\theta^{(t)},\theta^{(t)})
+$$
+
+$$
+\begin{align*}
+H(\theta^{(t+1)},\theta^{(t)}) - H(\theta^{(t)},\theta^{(t)}) &= \int_{z}p(z|x,\theta^{(t)})\left[\log p(z|x,\theta^{(t+1)})-\log p(z|x,\theta^{(t)})\right]\space dz \\\
+&= \int_{z}p(z|x,\theta^{(t)})\frac{\log p(z|x,\theta^{(t+1)})}{\log p(z|x,\theta^{(t)})}\space dz \\\
+&= \underset{Kullback-Leibler Divergence}{-KL(p(z|x,\theta^{(t)}) || p(z|x,\theta^{(t+1)}))} \\\
+&\leq 0 \\\
+\text{alternatively, by Jenson inequality: } &E[f(x)] \geq f(E(x)) \\\
+\int_{z}p(z|x,\theta^{(t)})\frac{\log p(z|x,\theta^{(t+1)})}{\log p(z|x,\theta^{(t)})}\space dz &\leq \log\int_{z}p(z|x,\theta^{(t)})\frac{p(z|x,\theta^{(t+1)})}{p(z|x,\theta^{(t)})}\space dz \\\
+\int_{z}p(z|x,\theta^{(t)})\frac{\log p(z|x,\theta^{(t+1)})}{\log p(z|x,\theta^{(t)})}\space dz &\leq \log 1 \\\
+\int_{z}p(z|x,\theta^{(t)})\frac{\log p(z|x,\theta^{(t+1)})}{\log p(z|x,\theta^{(t)})}\space dz &\leq 0 \iff H(\theta^{(t+1)},\theta^{(t)}) \leq H(\theta^{(t)},\theta^{(t)}) \\\
+\end{align*}
+$$
+
+We put these 2 features back to original equation, we proved the convergence:
+
+$$
+\log p(x|\theta^{(t+1)}) = Q(\theta^{(t+1)},\theta^{(t)}) - H(\theta^{(t+1)},\theta^{(t)}) \\\
+\log p(x|\theta^{(t)}) = Q(\theta^{(t)},\theta^{(t)}) - H(\theta^{(t)},\theta^{(t)}) \\\
+\begin{align*}
+\therefore \log p(x|\theta^{(t+1)})-\log p(x|\theta^{(t)}) &= \underset{\color{red}{\geq 0}}{Q(\theta^{(t+1)},\theta^{(t)})-Q(\theta^{(t)},\theta^{(t)})} + \underset{\color{red}{\geq 0}}{H(\theta^{(t)},\theta^{(t)})-H(\theta^{(t+1)},\theta^{(t)})} \\\
+&\geq 0 \\\
+\log p(x|\theta^{(t+1)}) &\geq \log p(x|\theta^{(t)})
+\end{align*}
+$$
 
 ## Exponential form for Gaussian dsitribution
 
