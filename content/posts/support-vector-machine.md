@@ -581,7 +581,7 @@ a_N
 \therefore G \text{ is semi-positive definitive}
 $$
 
-## Supplementation
+## Supplemental proof
 
 ### Constrained problem to non-constrained
 

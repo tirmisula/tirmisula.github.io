@@ -134,9 +134,9 @@ $$
 \end{align*}
 $$
 
-## ELBO+KL Divergence
+## Derive EM from ELBO+KL Divergence
 
-From previous subsection we know the likelihood function is:
+From bayesian equation we know the likelihood function is:
 
 $$
 \log p(x|\theta) = \log p(x,z|\theta) -\log p(z|x,\theta)
@@ -144,7 +144,7 @@ $$
 
 {{< math.inline >}}
 <p>
-We introduce a new function \( q(z) \):
+We introduce an unknown posterier \( q(z) \):
 </p>
 {{</ math.inline >}}
 
@@ -157,7 +157,7 @@ $$
 E_{z\sim q(z)}\left[ \log p(x|\theta) \right] &= E_{z\sim q(z)}\left[ \log\frac{p(x,z|\theta)}{q(z)} - \log\frac{p(z|x,\theta)}{q(z)} \right] \\\
 \int_{z}q(z)\log p(x|\theta)\space dz &= \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz - \int_{z}q(z)\log\frac{p(z|x,\theta)}{q(z)}\space dz \\\
 \log p(x|\theta) &= \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz + KL(q||p) \\\
-\because \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz &= \text{ELBO (evidence lower bound)} \\\
+\text{Let } \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz &= \text{ELBO (evidence lower bound)} \\\
 \therefore \log p(x|\theta) &= \text{ELBO} + KL(q(z)||p(z|x,\theta)) \\\
 &\geq \text{ELBO}
 \end{align*}
@@ -165,7 +165,7 @@ $$
 
 {{< math.inline >}}
 <p>
-KL divergence equals to zero when posterier \(p\) is the same as the real distribution \(q\). Assuming KL divergence is zero and we want to maximize likelihood, it becomes:
+Log-likelihood's lower bound is ELBO(evidence lower bound). KL divergence equals to zero when posterier \(p\) is the same as the real distribution \(q\). Assuming KL divergence is zero and we want to maximize likelihood, it becomes:
 </p>
 {{</ math.inline >}}
 
@@ -174,7 +174,7 @@ $$
 \hat{\theta} &= \argmax_{\theta} \log p(x|\theta) \\\
 &= \argmax_{\theta} \text{ELBO} \\\
 &= \argmax_{\theta} \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz \\\
-&\text{Let } q(z) = p(z|x,\theta^{(t)}) \\\
+&\text{Let } q(z) = p(z|x,\theta^{(t)}), \text{let posterier be the last iteration result}\\\
 &= \argmax_{\theta} \int_{z}p(z|x,\theta^{(t)})\log\frac{p(x,z|\theta)}{p(z|x,\theta^{(t)})}\space dz \\\
 &= \argmax_{\theta} \int_{z}p(z|x,\theta^{(t)})\left[\log p(x,z|\theta) - \log p(z|x,\theta^{(t)}\right]\space dz \\\
 &=\argmax_{\theta} \int_{z}p(z|x,\theta^{(t)})\log p(x,z|\theta)\space dz
@@ -187,87 +187,95 @@ In this subsection we derived the same form of EM algorithm by maximizing log-li
 </p>
 {{</ math.inline >}}
 
-## Log-partition function and sufficient statistic
-
-Given a exponential family distribution, we have:
+## Derive EM from ELBO+Jenson inequlity
+### Jenson inequality in brief
 
 $$
 \begin{align*}
-p(x|\theta) &= h(x)\exp(\theta^T\phi(x)-A(\theta)) \\\
-&= \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \\\
+\text{Given } &f(x):\text{concave funciton} \\\
+&a,b \in \mathbb{R} \\\
+&t\in [0,1] \\\
+&c = ta+(1-t)b \\\
+\text{We have } &f(c) \text{ is above line } ab: \\\
+f(ta+(1-t)b) &\geq tf(a)+(1-t)f(b) \\\
+f(\frac{a}{2}+\frac{b}{2}) &\geq tf(\frac{a}{2})+(1-t)f(\frac{b}{2}), t=\frac{1}{2} \\\
 &\dArr \\\
-\int p(x|\theta) \space dx &= \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \space dx \\\
-1 &= \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \space dx \\\
-\exp(A(\theta)) &= \int h(x)\exp(\theta^T\phi(x)) \space dx \\\
-&\dArr \\\
-\frac{\partial}{\partial \theta}\exp(A(\theta)) &= \frac{\partial}{\partial \theta}\int h(x)\exp(\theta^T\phi(x)) \space dx \\\
-\exp(A(\theta))A^{'}(\theta) &= \int \frac{\partial}{\partial \theta}h(x)\exp(\theta^T\phi(x)) \space dx \\\
-&\dArr \\\
-A^{'}(\theta) &= \frac{1}{\exp(A(\theta))} \int h(x)\exp(\theta^T\phi(x))\phi(x) \space dx \\\
-&= \int h(x)\exp(\theta^T\phi(x)-A(\theta))\phi(x) \space dx \\\
-&= \int p(x|\theta)\phi(x) \space dx \\\
-&= E_{x\sim p(x|\theta)} \left[\phi(x)\right]
+f(E[x]) &\geq E[f(x)]
 \end{align*}
 $$
 
+### Derivation
+
 {{< math.inline >}}
 <p>
-The first derivative of log-partition function \(A(\theta)\) equals to the expectation of sufficient statistic, for the second derivative of \(A(\theta)\), we have:
+Log-likelihood can be written as integration of joint probability \(p(x,z|\theta)\):
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-A^{''}(\theta) &= \frac{\partial}{\partial \theta}\int h(x)\exp(\theta^T\phi(x)-A(\theta))\phi(x) \space dx \\\
-&= \int h(x)\frac{\partial}{\partial \theta}\exp(\theta^T\phi(x)-A(\theta))\phi(x) \space dx \\\
-&= \int h(x) \exp(\theta^T\phi(x)-A(\theta)) (\phi(x)-A^{'}(\theta)) \phi(x) \space dx \\\
-&= \int p(x|\theta) \left(\phi(x)-E[\phi(x)]\right) \phi(x) \space dx \\\
-&= \int p(x|\theta) \phi(x)^2 \space dx - E[\phi(x)]\int p(x|\theta)\phi(x)\space dx \\\
-&= E\left[\phi(x)^2\right] - E^2\left[ \phi(x) \right] \\\
-&= Var\left[ \phi(x) \right]
+\log p(x|\theta) &= \log\int_{z}p(x,z|\theta)\space dz
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-The second derivative of log-partition function is the variance of sufficient staticitic and is greater than zero, which means log-partition function \( A(\theta) \) is <mark>convex</mark>.
+Then we introduce unknown distribution \(q(z)\):
 </p>
 {{</ math.inline >}}
 
-We can verify this conclusion on Gaussian distribution:
-
 $$
-\text{For Gaussian distribution } \mathcal{N}(\mu,\sigma^2)\\\
 \begin{align*}
-\frac{\partial}{\partial \theta_1}A(\theta) &= \frac{\partial}{\partial \theta_1} -\frac{(\theta_1)^2}{4\theta_2}+\frac{1}{2}\log(-\frac{\pi}{\theta_2}) \\\
-&= -\frac{\theta_1}{2\theta_2} \\\
-&= - \frac{\frac{\mu}{\sigma^2}}{2\frac{-1}{2\sigma^2}} \\\
-&= \mu
+\log p(x|\theta) &= \log\int_{z}\frac{p(x,z|\theta)}{q(z)}q(z)\space dz \\\
+&= \log E_{z\sim q(z)}\left[ \frac{p(x,z|\theta)}{q(z)} \right] \\\
+\because (\log x)^{''} &= -\frac{1}{x^2} \leq 0 \\\
+\therefore \log p(x|\theta) &\geq E_{z\sim q(z)}\left[ \log\frac{p(x,z|\theta)}{q(z)} \right] \\\
+&\geq \int_{z} \log\frac{p(x,z|\theta)}{q(z)}q(z)\space dz \\\
+&\geq \text{ELBO}
 \end{align*}
 $$
 
+{{< math.inline >}}
+<p>
+We want log-likelihood equals to ELBO(evidence lower bound) so:
+</p>
+{{</ math.inline >}}
+
 $$
 \begin{align*}
-\frac{\partial}{\partial \theta_2}A(\theta) &= \frac{\partial}{\partial \theta_2} -\frac{(\theta_1)^2}{4\theta_2}+\frac{1}{2}\log(-\frac{\pi}{\theta_2}) \\\
-&= \frac{\theta_1^2}{4}\theta_2^{-2} - \frac{1}{2}\frac{\theta_2}{\pi}\pi\theta_2^{-2} \\\
-&= \frac{\theta_1^2}{4}\theta_2^{-2} - \frac{1}{2\theta_2} \\\
-&= \frac{\frac{\mu^2}{\sigma^4}}{4}4\sigma^4 + \sigma^2 \\\
-&= \mu^2+\sigma^2
+\frac{p(x,z|\theta)}{q(z)} &= C \\\
+p(x,z|\theta) &= Cq(z) \\\
+\int_{z}p(x,z|\theta)\space dz &= C\int_{z}q(z)\space dz \\\
+p(x|\theta) &= C \\\
+&\dArr \\\
+q(z) &= \frac{p(x,z|\theta)}{C} \\\
+&= \frac{p(x,z|\theta)}{p(x|\theta)} \\\
+&= p(z|x,\theta)
 \end{align*}
 $$
 
+{{< math.inline >}}
+<p>
+\(q(z)\) must be posterier, then maxmizing log-likelihood becomes:
+</p>
+{{</ math.inline >}}
+
 $$
-E\left[\phi(x)\right] = \begin{bmatrix}
-E[x] \\\
-E[x^2]
-\end{bmatrix} = \begin{bmatrix}
-\mu \\\
-\sigma^2+\mu^2
-\end{bmatrix} = \begin{bmatrix}
-\frac{\partial}{\partial \theta_1}A(\theta) \\\
-\frac{\partial}{\partial \theta_2}A(\theta)
-\end{bmatrix}
+\begin{align*}
+\hat{\theta} &=  \argmax_{\theta} \log p(x|\theta) \\\
+&= \argmax_{\theta} \text{ELBO} \\\
+&\text{Let } q(z) = p(z|x,\theta^{(t)}), \text{let posterier be the last iteration result}\\\
+&= \argmax_{\theta} \int_{z}p(z|x,\theta^{(t)})\log\frac{p(x,z|\theta)}{p(z|x,\theta^{(t)})}\space dz \\\
+&= \argmax_{\theta} \int_{z}p(z|x,\theta^{(t)})\left[\log p(x,z|\theta) - \log p(z|x,\theta^{(t)}\right]\space dz \\\
+&=\argmax_{\theta} \int_{z}p(z|x,\theta^{(t)})\log p(x,z|\theta)\space dz
+\end{align*}
 $$
+
+{{< math.inline >}}
+<p>
+We derived the same form of EM algorithm when Jenson inequality satisfies indentically equal.
+</p>
+{{</ math.inline >}}
 
 ## MLE and sufficient statistic
 
