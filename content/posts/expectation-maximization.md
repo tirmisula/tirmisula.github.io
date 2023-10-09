@@ -42,8 +42,12 @@ Expectation maximization(EM) algorithm is used to estimate parameters of model w
 
 $$
 \begin{align*}
+&x:\text{observed data} \\\
+&z:\text{latent variable} \\\
+&\theta:\text{parameters} \\\
 \theta^{(t+1)} &= \argmax_{\theta}\int_z \log p(x,z|\theta)p(z|x,\theta^{(t)})\space dz \\\
-&= \argmax_{\theta} E_{z|x,\theta^{(t)} \sim p(z|x,\theta^{(t)})}\left[ \log p(x,z|\theta) \right]
+\text{E-step} &: E_{z|x,\theta^{(t)} \sim p(z|x,\theta^{(t)})}\left[ \log p(x,z|\theta) \right] = \int_{z}\log p(x,z|\theta)p(z|x,\theta^{(t)})\space dz \\\
+\text{M-step} &: \argmax_{\theta} E_{z|x,\theta^{(t)} \sim p(z|x,\theta^{(t)})}\left[ \log p(x,z|\theta) \right]
 \end{align*}
 $$
 
@@ -51,7 +55,7 @@ $$
 
 {{< math.inline >}}
 <p>
-For each iterate step, we want:
+For each iterate step, we want likelihood larger:
 </p>
 {{</ math.inline >}}
 
@@ -76,8 +80,7 @@ E_{z \sim p(z|x,\theta^{(t)})}\left[ \log p(x|\theta) \right] &= E_{z \sim p(z|x
 \int_{z}p(z|x,\theta^{(t)})\log p(x|\theta)\space dz &= \int_{z}p(z|x,\theta^{(t)})\left(\log p(x,z|\theta) -\log p(z|x,\theta)\right)\space dz \\\
 \log p(x|\theta)\int_{z}p(z|x,\theta^{(t)})\space dz &= \int_{z}p(z|x,\theta^{(t)})\left(\log p(x,z|\theta) -\log p(z|x,\theta)\right)\space dz \\\
 \log p(x|\theta) &= \int_{z}p(z|x,\theta^{(t)})\left(\log p(x,z|\theta) -\log p(z|x,\theta)\right)\space dz \\\
-\log p(x|\theta) &= \int_{z}p(z|x,\theta^{(t)})\log p(x,z|\theta)\space dz - \int_{z}p(z|x,\theta^{(t)})\log p(z|x,\theta)\space dz \\\
-\log p(x|\theta) &= \int_{z}p(z|x,\theta^{(t)})\log p(x,z|\theta)\space dz - \int_{z}p(z|x,\theta^{(t)})\log p(z|x,\theta)\space dz \\\
+\log p(x|\theta) &= \int_{z}p(z|x,\theta^{(t)})\log p(x,z|\theta)\space dz - \int_{z}p(z|x,\theta^{(t)})\log p(z|x,\theta)\space dz
 \end{align*}
 $$
 
@@ -131,65 +134,58 @@ $$
 \end{align*}
 $$
 
-## Exponential form for Gaussian dsitribution
+## ELBO+KL Divergence
 
-The common form of Gaussian distribution is:
+From previous subsection we know the likelihood function is:
 
 $$
-p(x|\mu,\sigma) = \frac{1}{\sqrt{2\pi}\sigma} \mathrm{e}^{-\frac{(x-\mu)^2}{2\sigma^2}}
+\log p(x|\theta) = \log p(x,z|\theta) -\log p(z|x,\theta)
 $$
 
-We can transform it into a exponential family distribution form:
+{{< math.inline >}}
+<p>
+We introduce a new function \( q(z) \):
+</p>
+{{</ math.inline >}}
 
 $$
 \begin{align*}
-p(x|\mu,\sigma) &= \frac{1}{\sqrt{2\pi\sigma^2}} \mathrm{e}^{-\frac{(x-\mu)^2}{2\sigma^2}} \\\
-&= \frac{1}{\sqrt{2\pi\sigma^2}} \exp(-\frac{1}{2\sigma^2}(x^2-2x\mu+\mu^2)) \\\
-&= \frac{1}{\sqrt{2\pi\sigma^2}} \exp(-\frac{1}{2\sigma^2}(x^2-2x\mu)-\frac{1}{2\sigma^2}\mu^2) \\\
-&= \exp(\log\left((2\pi\sigma^2)^{-\frac{1}{2}}\right)) \exp(-\frac{1}{2\sigma^2}
-    \begin{bmatrix}-2\mu&1\end{bmatrix}
-    \begin{bmatrix}
-        x \\\
-        x^2
-    \end{bmatrix}
-    -\frac{1}{2\sigma^2}\mu^2) \\\
-&= \exp\left( -\frac{1}{2\sigma^2}
-    \begin{bmatrix}-2\mu&1\end{bmatrix}
-    \begin{bmatrix}
-        x \\\
-        x^2
-    \end{bmatrix}
-    -\frac{1}{2\sigma^2}\mu^2+\log\left((2\pi\sigma^2)^{-\frac{1}{2}}\right) \right) \\\
-&= \exp\left( 
-    \underset{\color{red}{\theta^T}}{\begin{bmatrix}\frac{\mu}{\sigma^2}&-\frac{1}{2\sigma^2}\end{bmatrix}}
-    \underset{\color{red}{\phi(x)}}{
-    \begin{bmatrix}
-        x \\\
-        x^2
-    \end{bmatrix}}
-    -\underset{\color{red}{A(\theta)}}{\left(\frac{\mu^2}{2\sigma^2}+\frac{1}{2}\log\left(2\pi\sigma^2\right)\right)}
-    \right)
+\log p(x|\theta) &= \log p(x,z|\theta) -\log p(z|x,\theta) \\\
+&= \log p(x,z|\theta)-\log q(z) - \log p(z|x,\theta)+\log q(z) \\\
+&= \log\frac{p(x,z|\theta)}{q(z)} - \log\frac{p(z|x,\theta)}{q(z)} \\\
+&\dArr \\\
+E_{z\sim q(z)}\left[ \log p(x|\theta) \right] &= E_{z\sim q(z)}\left[ \log\frac{p(x,z|\theta)}{q(z)} - \log\frac{p(z|x,\theta)}{q(z)} \right] \\\
+\int_{z}q(z)\log p(x|\theta)\space dz &= \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz - \int_{z}q(z)\log\frac{p(z|x,\theta)}{q(z)}\space dz \\\
+\log p(x|\theta) &= \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz + KL(q||p) \\\
+\because \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz &= \text{ELBO (evidence lower bound)} \\\
+\therefore \log p(x|\theta) &= \text{ELBO} + KL(q(z)||p(z|x,\theta)) \\\
+&\geq \text{ELBO}
 \end{align*}
 $$
 
+{{< math.inline >}}
+<p>
+KL divergence equals to zero when posterier \(p\) is the same as the real distribution \(q\). Assuming KL divergence is zero and we want to maximize likelihood, it becomes:
+</p>
+{{</ math.inline >}}
+
 $$
-\text{Let } \theta=\begin{bmatrix}
-    \theta_1 \\\
-    \theta_2
-\end{bmatrix}, \text{We have }
-\begin{cases}
-    \theta_1=\frac{\mu}{\sigma^2} \\\
-    \theta_2=-\frac{1}{2\sigma^2}
-\end{cases} \implies 
-\begin{cases}
-    \mu=-\frac{\theta_1}{2\theta_2}  \\\
-    \sigma^2=-\frac{1}{2\theta_2}
-\end{cases} \\\
 \begin{align*}
-\text{Thus } A(\theta) &= \frac{(\frac{\theta_1}{2\theta_2})^2}{-\frac{1}{\theta_2}}+\frac{1}{2}\log(-\frac{\pi}{\theta_2}) \\\
-&= -\frac{(\theta_1)^2}{4\theta_2}+\frac{1}{2}\log(-\frac{\pi}{\theta_2})
+\hat{\theta} &= \argmax_{\theta} \log p(x|\theta) \\\
+&= \argmax_{\theta} \text{ELBO} \\\
+&= \argmax_{\theta} \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz \\\
+&\text{Let } q(z) = p(z|x,\theta^{(t)}) \\\
+&= \argmax_{\theta} \int_{z}p(z|x,\theta^{(t)})\log\frac{p(x,z|\theta)}{p(z|x,\theta^{(t)})}\space dz \\\
+&= \argmax_{\theta} \int_{z}p(z|x,\theta^{(t)})\left[\log p(x,z|\theta) - \log p(z|x,\theta^{(t)}\right]\space dz \\\
+&=\argmax_{\theta} \int_{z}p(z|x,\theta^{(t)})\log p(x,z|\theta)\space dz
 \end{align*}
 $$
+
+{{< math.inline >}}
+<p>
+In this subsection we derived the same form of EM algorithm by maximizing log-likelihood function or maximizing ELBO when KL divergence of \(p(z|x,\theta^{*})\) is zero.
+</p>
+{{</ math.inline >}}
 
 ## Log-partition function and sufficient statistic
 
