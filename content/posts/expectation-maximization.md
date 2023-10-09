@@ -172,7 +172,7 @@ Log-likelihood's lower bound is ELBO(evidence lower bound). KL divergence equals
 $$
 \begin{align*}
 \hat{\theta} &= \argmax_{\theta} \log p(x|\theta) \\\
-&= \argmax_{\theta} \text{ELBO} \\\
+&= \argmax_{\theta} \text{ELBO}, (q(z)=p(z|x,\theta)) \\\
 &= \argmax_{\theta} \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz \\\
 &\text{Let } q(z) = p(z|x,\theta^{(t)}), \text{let posterier be the last iteration result}\\\
 &= \argmax_{\theta} \int_{z}p(z|x,\theta^{(t)})\log\frac{p(x,z|\theta)}{p(z|x,\theta^{(t)})}\space dz \\\
@@ -277,38 +277,64 @@ We derived the same form of EM algorithm when Jenson inequality satisfies indent
 </p>
 {{</ math.inline >}}
 
-## MLE and sufficient statistic
+## Generalized EM algorithm
 
 {{< math.inline >}}
 <p>
-Given a dataset \( \mathcal{D}=\lbrace x_1,x_2,\cdots,x_N \rbrace \), maximum likelihood estimation on \(\mathcal{D}\) is:
+From previous section we know that log-likelihood can be written as ELBO+KL-divergence:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-\theta_{MLE} &= \argmax \log \prod_{i=1}^N p(x_i|\theta) \\\
-&= \argmax \sum_{i=1}^N \log \left(h(x_i)\exp(\theta^T\phi(x_i)-A(\theta)) \right) \\\
-&= \argmax \sum_{i=1}^N \log \left(h(x_i)\right) + \theta^T\phi(x_i)-A(\theta)
-\end{align*} \\\
-\dArr
-$$
-
-$$
-\begin{align*}
-\frac{\partial}{\partial \theta} \sum_{i=1}^N \log \left(h(x_i)\right) + \theta^T\phi(x_i)-A(\theta) &= 0 \\\
-\sum_{i=1}^N  \phi(x_i)-A^{'}(\theta) &= 0 \\\
-\frac{1}{N}\sum_{i=1}^N \phi(x_i) &= A^{'}(\theta_{MLE}) \\\
-\text{Define } A^{'(-1)}(\cdot) \text{ the inverse function of } A^{'}(\cdot) \\\
-\theta_{MLE} &= A^{'(-1)}\left(\frac{1}{N}\sum_{i=1}^N \phi(x_i)\right)
+\log p(x|\theta) &= \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz - \int_{z}q(z)\log\frac{p(z|x,\theta)}{q(z)}\space dz \\\
+&= \text{ELBO} + KL(q||p) \\\
+&\text{Let ELBO}=L(q,\theta) \\\
+&= L(q,\theta) + KL(q||p)
 \end{align*}
 $$
 
+
 {{< math.inline >}}
 <p>
-The conclusion is when calculating MLE, we only need to compute <mark>sufficient statistic</mark> \(\phi(x_I)\) ignoring the original data samples.
+The original EM assumes KL divergence equals to zero:
 </p>
 {{</ math.inline >}}
+
+$$
+KL(q||p) = 0 \iff q(z) = p(z|x,\theta)
+$$
+
+Generalized EM tries to minimize KL divergence:
+
+$$
+\argmin_{q} KL(q||p)
+$$
+
+The whole algorithm is listed as follows:
+
+$$
+\begin{align*}
+\text{E-step} &: \text{Fix } \theta, q^{(t+1)}=\argmin_{q}KL(q||p)=\argmax_{q}L(q,\theta^{(t)}) \\\
+\text{M-step} &: \text{Fix } q, \theta^{(t+1)}=\argmax_{\theta} L(q^{(t+1)},\theta)
+\end{align*}
+$$
+
+Paramerter's update order is:
+
+$$
+\theta^{(1)}\rArr q^{(2)}\rArr \theta^{(2)}\rArr q^{(3)}\rArr\cdots\rArr \theta^{(t)}
+$$
+
+Details for ELBO:
+
+$$
+\begin{align*}
+L(q,\theta) &= \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz \\\
+&= E_{z\sim q(z)}[\log p(x,z)] - E_{z\sim q(z)}[q(z)] \\\
+&= E_{z\sim q(z)}[\log p(x,z)] + \underset{\color{red}{entropy}}{H_{q(z)}[q(z)]}
+\end{align*}
+$$
 
 ## Max entropy
 
