@@ -294,10 +294,16 @@ $$
 \end{align*}
 $$
 
+$$
+\begin{cases}
+\text{ELBO} &= \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz \\\
+KL(q||p) &= \int_{z}q(z)\log\frac{q(z)}{p(z|x,\theta)}\space dz
+\end{cases}
+$$
 
 {{< math.inline >}}
 <p>
-The original EM assumes KL divergence equals to zero:
+The original EM assumes KL divergence equals to zero that is to say posterier \(p(z|x,\theta)\) is <mark>tractable</mark>:
 </p>
 {{</ math.inline >}}
 
@@ -305,7 +311,12 @@ $$
 KL(q||p) = 0 \iff q(z) = p(z|x,\theta)
 $$
 
-Generalized EM tries to minimize KL divergence:
+{{< math.inline >}}
+<p>
+Generalized EM tries to minimize KL divergence because posterier \( p(z|x,\theta) \) is <mark>intractable</mark>:
+</p>
+{{</ math.inline >}}
+
 
 $$
 \argmin_{q} KL(q||p)
@@ -320,128 +331,47 @@ $$
 \end{align*}
 $$
 
-Paramerter's update order is:
+Paramerter's update order indicates the <mark>coordinate ascent</mark> thought:
 
 $$
-\theta^{(1)}\rArr q^{(2)}\rArr \theta^{(2)}\rArr q^{(3)}\rArr\cdots\rArr \theta^{(t)}
+\theta^{(1)}\rArr q^{(2)}\rArr \theta^{(2)}\rArr q^{(3)}\rArr\cdots\rArr \theta^{(t)} \\\
+\dArr \\\
+L(q,\theta) \text{ is solved by SMO(Sequential Minimal Optimization)}
 $$
 
-Details for ELBO:
+For ELBO:
 
 $$
 \begin{align*}
 L(q,\theta) &= \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz \\\
-&= E_{z\sim q(z)}[\log p(x,z)] - E_{z\sim q(z)}[q(z)] \\\
-&= E_{z\sim q(z)}[\log p(x,z)] + \underset{\color{red}{entropy}}{H_{q(z)}[q(z)]}
+&= E_{z\sim q(z)}[\log p(x,z|\theta)] - E_{z\sim q(z)}[\log q(z)] \\\
+&= E_{z\sim q(z)}[\log p(x,z|\theta)] + \underset{\color{red}{entropy}}{H_{q(z)}[q(z)]}
 \end{align*}
 $$
 
-## Max entropy
+## Extensions of EM
 
-Quantities of information is defined as:
-
-$$
--\log p \\\
-p\text{ is the probability}
-$$
-
-Information entropy is defined as the expectation of information quantities:
+<cite>[^1]</cite>:
 
 $$
-H[p] = E_{p(x)}\left[ -\log p \right] = \begin{cases}
-\int -p(x)\log p(x)\space dx,\text{continous} \\\
-\sum_{x} -p(x)\log p(x), \text{discrete}
+\begin{cases}
+\text{VEM(Variational EM)} \implies \text{use variational inference to find }p(z|x,\theta) \\\
+\text{MCEM(Monte Carlo EM)} \implies \text{use monte carlo method to find }p(z|x,\theta)
 \end{cases}
 $$
 
-Assuming x is discrete and we have the probability table:
-
-| x   | 1     | 2   | ...   | N   |
-| --------- | -------- | ------ | ------ | ------ |
-| p | $$p_1$$ | $$p_2$$ | ... | $$p_N$$ |
-
-Then the max entropy problem is defined as follows:
-
-$$
-\max \sum_{i=1}^N -p_i\log p_i \\\
-\text{subject to } \sum_{i=1}^N p_i = 1 \\\
-\dArr \\\
-\min \sum_{i=1}^N p_i\log p_i \\\
-\text{subject to } \sum_{i=1}^N p_1 = 1
-$$
-
-This can be solved by lagrange multiplier:
-
-$$
-L(p_1,\cdots,p_N,\lambda) = \sum_{i=1}^N p_i\log p_i +\lambda(1-\sum_{i=1}^N p_i) \\\
-\begin{align*}
-\frac{\partial}{\partial p_i} \sum_{i=1}^N p_i\log p_i +\lambda(1-\sum_{i=1}^N p_i) &= 0 \\\
-\log p_i+p_i\frac{1}{p_i} -\lambda &= 0 \\\
-\hat{p_i} &= \mathrm{e}^{\lambda -1}
-\end{align*} \\\
-\therefore \hat{p_1}=\hat{p_2}=\cdots=\hat{p_N}=\frac{1}{N}
-$$
-
-So we can conclude that:
-
-$$
-\text{max entropy} \iff \text{same probability for all events} \iff \text{zero prior knowledge of events}
-$$
-
-{{< math.inline >}}
-<p>
-Given a dataset \( \mathcal{D}=\lbrace x_1,x_2,\cdots,x_N \rbrace \), we want to find \(p(x)\) from empirical distribution \(\hat{p(x)}\). Empirical distribution can be directly acquired by counting occurrences of each \(x_i\), and \(p(x)\) can be acquired by max entropy problem:
-</p>
-{{</ math.inline >}}
-
-$$
-\hat{p}(x) = \frac{count(x)}{N}
-$$
-
-We want the expectation of any function of x to be the same regardless of whether x is subject to the empirical distribution or the actual distribution, so the max entropy problem becomes:
-
-$$
-\begin{align*}
-&\min \sum_{i=1}^N p(x_i)\log p(x_i) \\\
-&\text{subject to } \sum_{i=1}^N p_i =1 \\\
-&\text{subject to } E_{p}[f(x)] = E_{\hat{p}}[f(x)], f(x) = \begin{bmatrix}
-f_1(x) \\\
-\vdots \\\
-f_k(x)
-\end{bmatrix}
-\end{align*}
-$$
-
-Solve it by lagrange multiplier:
-
-$$
-\text{Let } E_{\hat{p}}[f(x)]=\Delta=\begin{bmatrix}
-\Delta_1 \\\
-\vdots \\\
-\Delta_k
-\end{bmatrix}\\\
-\text{Let } p(x_i) = p_i \\\
-L(p1,\cdots,p_N,\lambda_0,\lambda) = \sum_{i=1}^N p(x_i)\log p(x_i) + \lambda_0(1-\sum_{i=1}^Np_i)+\lambda^T(\Delta-E_{p}[f(x)]) \\\
-\begin{align*}
-\frac{\partial}{\partial p_i} \sum_{i=1}^N p(x_i)\log p(x_i) + \lambda_0(1-\sum_{i=1}^Np_i)+\lambda^T(\Delta-E_{p}[f(x)]) &= 0 \\\
-\log p_i +1-\lambda_0-\lambda^T\frac{\partial}{\partial p_i}\sum_{i=1}^Np(x_i)f(x_i) &= 0 \\\
-\log p_i +1-\lambda_0-\lambda^Tf(x_i) &= 0 \\\
-\log p_i &= \lambda^Tf(x_i)+\lambda_0-1 \\\
-p_i &= \exp(\lambda^Tf(x_i)+\lambda_0-1)
-\end{align*} \\\
-\therefore p(x=x_i) = \exp(\underset{\color{red}{\theta^T}}{\lambda^T}\underset{\color{red}{\phi(x)}}{f(x_i)}-\underset{\color{red}{A(\theta)}}{(\lambda_0+1)})
-$$
-
-By max entropy problem, we can conclude that for unknown distribution it's assumption distribution is exponential family distribution.
-
 ## Conclusion
 
-In this chapter, we find some useful features for exponential family distribution, which makes it an important distribution in machine learning, these features are<cite>[^1]</cite>:
+1. For traditional EM, log-likelihood is expressed as:
+$$
+\log p(x|\theta) = \begin{cases}
+\text{ELBO}+KL(q||p) \implies \text{We want }KL(q||p)=0 \text{ or } q=p \iff q(z) \text{ is the posterier} \\\
+\text{ELBO}+\Delta \implies \text{We want } \Delta=0 \iff q(z) \text{ is the posterier}
+\end{cases}
+$$
+2. For generalized EM, q(z) is intractable so coordinate ascending method is used.
 
-1. Sufficient statistic compress data and can replace original data samples when calculating MLE.
-2. When we don't know anything about dataset, max entropy thought tells us to assume data samples subject to exponential family distribution.
-3. If likelihood function is exponential family distribution, it is very likely prior and posterier are conjugate distributions.
 
 ## Reference
 
-[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=45).
+[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=65).
