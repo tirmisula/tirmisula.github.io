@@ -49,9 +49,13 @@ $$
 \end{align*}
 $$
 
+<center>
+
 | z   | c1     | c2   | ...   | cK   |
 | --------- | -------- | ------ | ------ | ------ |  
 | prob | $$p_1$$ | $$p_2$$ | ... | $$p_K$$ |
+
+</center>
 
 $$
 \sum_{k=1}^K p_k = 1
@@ -147,15 +151,51 @@ $$
 \text{So original equation becomes: } \\\
 \begin{align*}
 Q(\theta,\theta^{(t)}) &= \sum_{i=1}^N\sum_{z_i}\log p(x_i,z_i|\theta)p(z_i|x_i,\theta^{(t)}) \\\
-&= \sum_{i=1}^N\sum_{z_i}\log p(x_i,z_i|\theta)\frac{\mathcal{N}(x|\mu_i^{(t)},\Sigma_i^{(t)})p_i^{(t)}}{\sum_{k=1}^K \mathcal{N}(x|\mu_k^{(t)},\Sigma_k^{(t)})p_k^{(t)}}
+&= \sum_{i=1}^N\sum_{z_i}\log p(x_i,z_i|\theta)\frac{p(x_i,z_i)}{\sum_{z}p(x,z|\theta^{(t)})} \\\
+&= \sum_{i=1}^N\sum_{z_i}\log p(x_i,z_i|\theta)\frac{p(x_i|z_i,\theta^{(t)})p(z_i)}{\sum_{z}p(x,z|\theta^{(t)})} \\\
+&= \sum_{i=1}^N\sum_{z_i}\log \left(\mathcal{N}(x_i|\mu_{z_i},\Sigma_{z_i})p_{z_i}\right) \frac{\mathcal{N}(x_i|\mu_{z_i}^{(t)},\Sigma_{z_i}^{(t)})p_{z_i}}{\sum_{k=1}^K \mathcal{N}(x|\mu_k^{(t)},\Sigma_k^{(t)})p_k^{(t)}} \\\
 \end{align*}
 $$
 
+{{< math.inline >}}
+<p>
+Note that \( \mu_k^{(t)},\Sigma_k^{(t)},p_k^{(t)} \) are known constants.
+</p>
+{{</ math.inline >}}
+
 ### M-step
 
+For simplification, For M-step we have:
 
+$$
+\begin{align*}
+\theta^{(t+1)} &= \argmax_{\theta} Q(\theta,\theta^{(t)}) \\\
+&= \argmax_{\theta} \sum_{i=1}^N\sum_{z_i}\log \left(\mathcal{N}(x_i|\mu_{z_i},\Sigma_{z_i})p_{z_i}\right) \frac{\mathcal{N}(x_i|\mu_{z_i}^{(t)},\Sigma_{z_i}^{(t)})p_{z_i}}{\sum_{k=1}^K \mathcal{N}(x|\mu_k^{(t)},\Sigma_k^{(t)})p_k^{(t)}} \\\
+&= \argmax_{\theta} \sum_{z_i}\sum_{i=1}^N\log \left(\mathcal{N}(x_i|\mu_{z_i},\Sigma_{z_i})p_{z_i}\right) \frac{\mathcal{N}(x_i|\mu_{z_i}^{(t)},\Sigma_{z_i}^{(t)})p_{z_i}}{\sum_{k=1}^K \mathcal{N}(x|\mu_k^{(t)},\Sigma_k^{(t)})p_k^{(t)}} \\\
+&\because \forall\space z_i=c_K \implies z_i\mapsto(p_k,\mu_k,\Sigma_k)\mapsto(p_{z_i},\mu_{z_i},\Sigma_{z_i}) \\\
+&= \argmax_{\theta} \sum_{k=1}^K\sum_{i=1}^N\log \left(\mathcal{N}(x_i|\mu_{k},\Sigma_{k})p_{k}\right) \frac{\mathcal{N}(x_i|\mu_{z_i}^{(t)},\Sigma_{z_i}^{(t)})p_{z_i}}{\sum_{k=1}^K \mathcal{N}(x|\mu_k^{(t)},\Sigma_k^{(t)})p_k^{(t)}} \\\
+\end{align*}
+$$
 
+It becomes a optimization problem to solve:
 
+$$
+\argmax_{\theta} Q(\theta,\theta^{(t)}) \\\
+\text{subject to } \sum_{k=1}^K p_k=1
+$$
+
+$$
+\text{Let } L(p_1,\cdots,p_K,\mu_1,\cdots,\mu_K,\Sigma_1,\cdots,\Sigma_K,\lambda) = Q(\theta,\theta^{(t)})+\lambda(\sum_{k=1}^Kp_k-1)
+$$
+
+$$
+\frac{\partial L}{\partial p_k} = 0 \\\
+\dArr \\\
+\begin{align*}
+\frac{\partial}{\partial p_k}\left[\sum_{k=1}^K\sum_{i=1}^N\log \left(\mathcal{N}(x_i|\mu_{k},\Sigma_{k})p_{k}\right) \frac{\mathcal{N}(x_i|\mu_{z_i}^{(t)},\Sigma_{z_i}^{(t)})p_{z_i}}{\sum_{k=1}^K \mathcal{N}(x|\mu_k^{(t)},\Sigma_k^{(t)})p_k^{(t)}}\right]+\lambda(\sum_{k=1}^Kp_k-1) &= 0 \\\
+&= 
+\end{align*}
+$$
 
 ## Conclusion
 
