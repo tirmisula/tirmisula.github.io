@@ -151,15 +151,17 @@ $$
 \text{So original equation becomes: } \\\
 \begin{align*}
 Q(\theta,\theta^{(t)}) &= \sum_{i=1}^N\sum_{z_i}\log p(x_i,z_i|\theta)p(z_i|x_i,\theta^{(t)}) \\\
-&= \sum_{i=1}^N\sum_{z_i}\log p(x_i,z_i|\theta)\frac{p(x_i,z_i|\theta^{(t)})}{\sum_{z}p(x,z|\theta^{(t)})} \\\
-&= \sum_{i=1}^N\sum_{z_i}\log p(x_i,z_i|\theta)\frac{p(x_i|z_i,\theta^{(t)})p(z_i|\theta^{(t)})}{\sum_{z}p(x,z|\theta^{(t)})} \\\
-&= \sum_{i=1}^N\sum_{z_i}\log \left(\mathcal{N}(x_i|\mu_{z_i},\Sigma_{z_i})p_{z_i}\right) \frac{\mathcal{N}(x_i|\mu_{z_i}^{(t)},\Sigma_{z_i}^{(t)})p_{z_i}^{(t)}}{\sum_{k=1}^K \mathcal{N}(x|\mu_k^{(t)},\Sigma_k^{(t)})p_k^{(t)}} \\\
+&= \sum_{i=1}^N\sum_{z_i}\log p(x_i,z_i|\theta)\frac{p(x_i,z_i|\theta^{(t)})}{\sum_{z}p(x_i,z|\theta^{(t)})} \\\
+&= \sum_{i=1}^N\sum_{z_i}\log p(x_i,z_i|\theta)\frac{p(x_i|z_i,\theta^{(t)})p(z_i|\theta^{(t)})}{\sum_{z}p(x_i,z|\theta^{(t)})} \\\
+&= \sum_{i=1}^N\sum_{k=1}^K\log p(x_i,z_i=c_k|\theta)\frac{p(x_i|z_i=c_k,\theta^{(t)})p(z_i=c_k|\theta^{(t)})}{\sum_{z}p(x_i,z|\theta^{(t)})} \\\
+&\because \forall\space z_i=c_k \implies z_i\mapsto(p_k,\mu_k,\Sigma_k)\mapsto(p_{z_i},\mu_{z_i},\Sigma_{z_i}) \\\
+&= \sum_{i=1}^N\sum_{k=1}^K\log \left(\mathcal{N}(x_i|\mu_{k},\Sigma_{k})p_{k}\right) \frac{\mathcal{N}(x_i|\mu_{k}^{(t)},\Sigma_{k}^{(t)})p_{k}^{(t)}}{\sum_{j=1}^K \mathcal{N}(x_i|\mu_j^{(t)},\Sigma_j^{(t)})p_j^{(t)}}
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-Note that \( \mu_k^{(t)},\Sigma_k^{(t)},p_k^{(t)} \) are known constants.
+Note that \( \mu_j^{(t)},\Sigma_j^{(t)},p_j^{(t)} \) and  \( \mu_k^{(t)},\Sigma_k^{(t)},p_k^{(t)} \) are known constants from last iteration.
 </p>
 {{</ math.inline >}}
 
@@ -170,10 +172,7 @@ For simplification, For M-step we have:
 $$
 \begin{align*}
 \theta^{(t+1)} &= \argmax_{\theta} Q(\theta,\theta^{(t)}) \\\
-&= \argmax_{\theta} \sum_{i=1}^N\sum_{z_i}\log \left(\mathcal{N}(x_i|\mu_{z_i},\Sigma_{z_i})p_{z_i}\right) \frac{\mathcal{N}(x_i|\mu_{z_i}^{(t)},\Sigma_{z_i}^{(t)})p_{z_i}^{(t)}}{\sum_{k=1}^K \mathcal{N}(x|\mu_k^{(t)},\Sigma_k^{(t)})p_k^{(t)}} \\\
-&= \argmax_{\theta} \sum_{z_i}\sum_{i=1}^N\log \left(\mathcal{N}(x_i|\mu_{z_i},\Sigma_{z_i})p_{z_i}\right) \frac{\mathcal{N}(x_i|\mu_{z_i}^{(t)},\Sigma_{z_i}^{(t)})p_{z_i}^{(t)}}{\sum_{k=1}^K \mathcal{N}(x|\mu_k^{(t)},\Sigma_k^{(t)})p_k^{(t)}} \\\
-&\because \forall\space z_i=c_k \implies z_i\mapsto(p_k,\mu_k,\Sigma_k)\mapsto(p_{z_i},\mu_{z_i},\Sigma_{z_i}) \\\
-&= \argmax_{\theta} \sum_{k=1}^K\sum_{i=1}^N\log \left(\mathcal{N}(x_i|\mu_{k},\Sigma_{k})p_{k}\right) \frac{\mathcal{N}(x_i|\mu_{z_i}^{(t)},\Sigma_{z_i}^{(t)})p_{z_i}^{(t)}}{\sum_{j=1}^K \mathcal{N}(x|\mu_j^{(t)},\Sigma_j^{(t)})p_j^{(t)}} \\\
+&= \argmax_{\theta} \sum_{i=1}^N\sum_{k=1}^K\log \left(\mathcal{N}(x_i|\mu_{k},\Sigma_{k})p_{k}\right) \frac{\mathcal{N}(x_i|\mu_{k}^{(t)},\Sigma_{k}^{(t)})p_{k}^{(t)}}{\sum_{j=1}^K \mathcal{N}(x_i|\mu_j^{(t)},\Sigma_j^{(t)})p_j^{(t)}}
 \end{align*}
 $$
 
@@ -198,9 +197,9 @@ $$
 \frac{\partial L}{\partial p_k} = 0 \\\
 \dArr \\\
 \begin{align*}
-\frac{\partial}{\partial p_k}\left[\sum_{k=1}^K\sum_{i=1}^N\log \left(\mathcal{N}(x_i|\mu_{k},\Sigma_{k})p_{k}\right) \frac{\mathcal{N}(x_i|\mu_{z_i}^{(t)},\Sigma_{z_i}^{(t)})p_{z_i}^{(t)}}{\sum_{j=1}^K \mathcal{N}(x|\mu_j^{(t)},\Sigma_j^{(t)})p_j^{(t)}}\right]+\lambda(\sum_{k=1}^Kp_k-1) &= 0 \\\
-\frac{\partial}{\partial p_k}\left[\sum_{k=1}^K\sum_{i=1}^N\log \left(p_{k}\right) \frac{\mathcal{N}(x_i|\mu_{z_i}^{(t)},\Sigma_{z_i}^{(t)})p_{z_i}^{(t)}}{\sum_{j=1}^K \mathcal{N}(x|\mu_j^{(t)},\Sigma_j^{(t)})p_j^{(t)}}\right]+\lambda(\sum_{k=1}^Kp_k-1) &= 0 \\\
-\frac{\partial}{\partial p_k}\left[\sum_{i=1}^N\log \left(p_{k}\right) \frac{\mathcal{N}(x_i|\mu_{z_i}^{(t)},\Sigma_{z_i}^{(t)})p_{z_i}^{(t)}}{\sum_{j=1}^K \mathcal{N}(x|\mu_j^{(t)},\Sigma_j^{(t)})p_j^{(t)}}\right]+\lambda(\sum_{k=1}^Kp_k-1) &= 0 \\\
+\frac{\partial}{\partial p_k}\left[\sum_{i=1}^N\sum_{k=1}^K\log \left(\mathcal{N}(x_i|\mu_{k},\Sigma_{k})p_{k}\right) \frac{\mathcal{N}(x_i|\mu_{k}^{(t)},\Sigma_{k}^{(t)})p_{k}^{(t)}}{\sum_{j=1}^K \mathcal{N}(x_i|\mu_j^{(t)},\Sigma_j^{(t)})p_j^{(t)}}\right]+\lambda(\sum_{k=1}^Kp_k-1) &= 0 \\\
+\frac{\partial}{\partial p_k}\left[\sum_{i=1}^N\sum_{k=1}^K\log \left(p_{k}\right) \frac{\mathcal{N}(x_i|\mu_{k}^{(t)},\Sigma_{k}^{(t)})p_{k}^{(t)}}{\sum_{j=1}^K \mathcal{N}(x|\mu_j^{(t)},\Sigma_j^{(t)})p_j^{(t)}}\right]+\lambda(\sum_{k=1}^Kp_k-1) &= 0 \\\
+\frac{\partial}{\partial p_k}\left[\sum_{i=1}^N\log \left(p_{k}\right) \frac{\mathcal{N}(x_i|\mu_{k}^{(t)},\Sigma_{k}^{(t)})p_{k}^{(t)}}{\sum_{j=1}^K \mathcal{N}(x|\mu_j^{(t)},\Sigma_j^{(t)})p_j^{(t)}}\right]+\lambda(\sum_{k=1}^Kp_k-1) &= 0 \\\
 \sum_{i=1}^N \frac{1}{p_k} p(z_i=c_k|x_i,\theta^{(t)}) + \lambda &= 0 \\\
 \frac{1}{p_k}\sum_{i=1}^N  p(z_i=c_k|x_i,\theta^{(t)}) + \lambda &= 0 \\\
 \sum_{i=1}^N  p(z_i=c_k|x_i,\theta^{(t)}) + p_k\lambda &= 0 \\\
@@ -214,7 +213,13 @@ $$
 \sum_{k=1}^K \left(\sum_{i=1}^N  p(z_i=c_k|x_i,\theta^{(t)}) + p_k\lambda\right) &= 0 \\\
 \sum_{k=1}^K \sum_{i=1}^N  p(z_i=c_k|x_i,\theta^{(t)}) &= -\sum_{k=1}^Kp_k\lambda \\\
 \sum_{i=1}^N\sum_{k=1}^K  p(z_i=c_k|x_i,\theta^{(t)}) &= -\lambda \\\
-N &= -\lambda \\\
+N &= -\lambda
+\end{align*}
+$$
+
+$$
+\dArr \\\
+\begin{align*}
 \therefore p_k^{(t+1)} &= \frac{\sum_{i=1}^Np(z_i=c_k|x_i,\theta^{(t)})}{N}\\\
 &=\frac{\text{sum of sample space's posteriers from last turn}}{\text{samples num}} \\\
 &= \text{average posterier $p(z)$ of sample space from last turn}
