@@ -112,7 +112,7 @@ $$
 
 ### E-step
 
-<cite>[^2]</cite>For E-step we have:
+<cite>[^1]</cite>For E-step we have:
 
 $$
 \begin{align*}
