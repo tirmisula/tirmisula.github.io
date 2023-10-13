@@ -112,7 +112,7 @@ $$
 
 ### E-step
 
-For E-step we have:
+<cite>[^2]</cite>For E-step we have:
 
 $$
 \begin{align*}
@@ -185,7 +185,7 @@ $$
 
 {{< math.inline >}}
 <p>
-We take the derivative of \(p_k\) first:
+We take the partial derivative w.r.t. \(p_k\) first:
 </p>
 {{</ math.inline >}}
 
@@ -226,18 +226,75 @@ $$
 \end{align*}
 $$
 
+{{< math.inline >}}
+<p>
+Then we take the partial derivative w.r.t. \(\mu_k\):
+</p>
+{{</ math.inline >}}
+
+<cite>[^2]</cite>
+
+$$
+\begin{align*}
+\frac{\partial}{\partial \mu_k}\left[\sum_{i=1}^N\sum_{k=1}^K\log \left(\mathcal{N}(x_i|\mu_{k},\Sigma_{k})p_{k}\right) p(z_i|x_i,\theta^{(t)})\right]+\lambda(\sum_{k=1}^Kp_k-1) &= 0 \\\
+\frac{\partial}{\partial \mu_k}\left[\sum_{i=1}^N\sum_{k=1}^K\log \left(\mathcal{N}(x_i|\mu_k,\Sigma_k)\right) p(z_i|x_i,\theta^{(t)})\right] &= 0 \\\
+\frac{\partial}{\partial \mu_k}\left[\sum_{i=1}^N\log \left(\frac{1}{(2\pi)^{\frac{p}{2}}|\Sigma_k|^{\frac{1}{2}}} \exp\left( -\frac{1}{2}(x_i-\mu_k)^T \Sigma_k^{-1} (x_i-\mu_k) \right)\right) p(z_i|x_i,\theta^{(t)})\right] &= 0 \\\
+\frac{\partial}{\partial \mu_k}\left[\sum_{i=1}^N \left( -\frac{1}{2}(x_i-\mu_k)^T \Sigma_k^{-1} (x_i-\mu_k) \right) p(z_i|x_i,\theta^{(t)}) \right] &= 0 \\\
+\sum_{i=1}^N p(z_i|x_i,\theta^{(t)}) \left( \frac{1}{2}2\Sigma_k^{-1}(x_i-\mu_k) \right) &= 0 \\\
+\sum_{i=1}^N p(z_i|x_i,\theta^{(t)}) \left( \Sigma_k^{-1}(x_i-\mu_k) \right) &= 0 \\\
+\Sigma_k^{-1}\sum_{i=1}^N p(z_i|x_i,\theta^{(t)}) \left( x_i-\mu_k \right) &= 0 \\\
+\sum_{i=1}^N p(z_i|x_i,\theta^{(t)}) x_i &= \sum_{i=1}^N p(z_i|x_i,\theta^{(t)}) \mu_k
+\end{align*}
+$$
+
+$$
+\dArr \\\
+\begin{align*}
+\therefore \mu_k^{(t+1)} &= \frac{\sum_{i=1}^N p(z_i=c_k|x_i,\theta^{(t)})x_i}{\sum_{i=1}^N p(z_i=c_k|x_i,\theta^{(t)})}
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Then we take the partial derivative w.r.t. \(\Sigma_k\):
+</p>
+{{</ math.inline >}}
+
+<cite>[^2]</cite>
+
+$$
+\begin{align*}
+\frac{\partial}{\partial \Sigma_k}\left[\sum_{i=1}^N\sum_{k=1}^K\log \left(\mathcal{N}(x_i|\mu_{k},\Sigma_{k})p_{k}\right) p(z_i|x_i,\theta^{(t)})\right]+\lambda(\sum_{k=1}^Kp_k-1) &= 0 \\\
+\frac{\partial}{\partial \Sigma_k}\left[\sum_{i=1}^N\log \left(\frac{1}{(2\pi)^{\frac{p}{2}}|\Sigma_k|^{\frac{1}{2}}} \exp\left( -\frac{1}{2}(x_i-\mu_k)^T \Sigma_k^{-1} (x_i-\mu_k) \right)\right) p(z_i|x_i,\theta^{(t)})\right] &= 0 \\\
+\sum_{i=1}^N p(z_i|x_i,\theta^{(t)}) \left((2\pi)^{\frac{p}{2}}|\Sigma_k|^{\frac{1}{2}}(-\frac{1}{(2\pi)^p|\Sigma_k|})(2\pi)^{\frac{p}{2}}\frac{1}{2}|\Sigma_k|^{-\frac{1}{2}}|\Sigma_k|\Sigma_k^{-T} + \frac{1}{2}\Sigma_k^{-T}(x_i-\mu_k)(x_i-\mu_k)^T\Sigma_k^{-T} \right) &= 0 \\\
+\sum_{i=1}^N p(z_i|x_i,\theta^{(t)}) \left(-\frac{1}{2}\Sigma_k^{-T} + \frac{1}{2}\Sigma_k^{-T}(x_i-\mu_k)(x_i-\mu_k)^T\Sigma_k^{-T} \right) &= 0 \\\
+\sum_{i=1}^N p(z_i|x_i,\theta^{(t)}) \left(-\Sigma_k^{-1} + \Sigma_k^{-1}(x_i-\mu_k)(x_i-\mu_k)^T\Sigma_k^{-1} \right) &= 0 \\\
+\Sigma_k\left[\sum_{i=1}^N p(z_i|x_i,\theta^{(t)}) \left(-\Sigma_k^{-1} + \Sigma_k^{-1}(x_i-\mu_k)(x_i-\mu_k)^T\Sigma_k^{-1} \right)\right]\Sigma_k &= 0 \\\
+\sum_{i=1}^N p(z_i|x_i,\theta^{(t)}) \left(-\Sigma_k + (x_i-\mu_k)(x_i-\mu_k)^T \right) &= 0 \\\
+\sum_{i=1}^N p(z_i|x_i,\theta^{(t)}) (x_i-\mu_k)(x_i-\mu_k)^T &= \sum_{i=1}^N p(z_i|x_i,\theta^{(t)}) \Sigma_k \\\
+\end{align*}
+$$
+
+$$
+\dArr \\\
+\begin{align*}
+\therefore \Sigma_k^{(t+1)} &= \frac{\sum_{i=1}^N p(z_i=c_k|x_i,\theta^{(t)})(x_i-\mu_k)(x_i-\mu_k)^T}{\sum_{i=1}^N p(z_i=c_k|x_i,\theta^{(t)})}
+\end{align*}
+$$
+
 ## Conclusion
 
-1. For traditional EM, log-likelihood is expressed as:
-$$
-\log p(x|\theta) = \begin{cases}
-\text{ELBO}+KL(q||p) \implies \text{We want }KL(q||p)=0 \text{ or } q=p \iff q(z) \text{ is the posterier} \\\
-\text{ELBO}+\Delta \implies \text{We want } \Delta=0 \iff q(z) \text{ is the posterier}
-\end{cases}
-$$
-2. For generalized EM, q(z) is intractable so coordinate ascending method is used.
+For each iteration step of EM of Gaussian mixture model we have:
 
+$$
+\begin{align*}
+p_k^{(t+1)} &= \frac{\sum_{i=1}^Np(z_i=c_k|x_i,\theta^{(t)})}{N} \\\
+\mu_k^{(t+1)} &= \frac{\sum_{i=1}^N p(z_i=c_k|x_i,\theta^{(t)})x_i}{\sum_{i=1}^N p(z_i=c_k|x_i,\theta^{(t)})} \\\
+\Sigma_k^{(t+1)} &= \frac{\sum_{i=1}^N p(z_i=c_k|x_i,\theta^{(t)})(x_i-\mu_k)(x_i-\mu_k)^T}{\sum_{i=1}^N p(z_i=c_k|x_i,\theta^{(t)})}
+\end{align*}
+$$
 
 ## Reference
 
-[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=65).
+[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=69).
+[^2]: From [source](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
