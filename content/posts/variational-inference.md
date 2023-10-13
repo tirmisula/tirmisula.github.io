@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
-title: "Gaussian Mixture Model"
-date: "2023-09-09"
+title: "Varational Inference"
+date: "2023-09-10"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -36,47 +36,34 @@ TocOpen: true
     }
 </style>
 
-## Definition of GMM
+## Background
 
-GMM(Gaussian Mixture Model) in brief is the summation of several different weighted gaussian distributions:
+### Bayesian Inference
 
 $$
 \begin{align*}
-&x:\text{observed data} \\\
-&z:\text{latent variable} \\\
-&(x,z):\text{complete data} \\\
-&\theta=(p_k,\mu_k,\Sigma_k,...):\text{parameters}
+p(\theta|x) &= \frac{p(x|\theta)p(\theta)}{p(x)} \\\
+&= \frac{p(x|\theta)p(\theta)}{\int_{\theta}p(x|\theta)p(\theta)d\theta}
 \end{align*}
 $$
 
-<center>
+{{< math.inline >}}
+<p>
+Bayesian inference is the procedure to solve \(p(\theta|x)\) when posterior cannot be solved by Bayes formula from above.
+</p>
+{{</ math.inline >}}
 
-| z   | c1     | c2   | ...   | cK   |
-| --------- | -------- | ------ | ------ | ------ |  
-| prob | $$p_1$$ | $$p_2$$ | ... | $$p_K$$ |
-
-</center>
-
-$$
-\sum_{k=1}^K p_k = 1
-$$
-
-$$
-x|z=c_K \sim \mathcal{N}(\mu_k,\Sigma_k)
-$$
+### Bayesian Decision
 
 $$
 \begin{align*}
-p(x) &= \sum_{z}p(x,z) \\\
-&= \sum_{z}p(x|z)p(z) \\\
-&= \sum_{k=1}^K \mathcal{N}(x|\mu_k,\Sigma_k)p_k
-\end{align*}
-$$
-
-$$
-\begin{align*}
-p(z_i|x) &= \frac{p(x,z_i)}{p(x)} \\\
-&= \frac{\mathcal{N}(x|\mu_i,\Sigma_i)p_i}{\sum_{k=1}^K \mathcal{N}(x|\mu_k,\Sigma_k)p_k}
+X &: \text{observed data} \\\
+\tilde{x} &: \text{new coming data} \\\
+\text{Bayesian Decision} &: \text{find } p(\tilde{x}|X) \\\
+&\dArr \\\
+p(\tilde{x}|X) &= \int_{\theta}p(\tilde{x},\theta|X)d\theta \\\
+&= \int_{\theta}p(\tilde{x}|\theta)p(\theta|X)d\theta \because \text{$\tilde{x}\perp X$ when $\theta$ fixed}\\\
+&= E_{\theta\sim p(\theta|X)}[p(\tilde{x}|\theta)]
 \end{align*}
 $$
 
