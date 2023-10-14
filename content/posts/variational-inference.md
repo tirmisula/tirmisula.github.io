@@ -57,15 +57,18 @@ Bayesian inference is the procedure to solve \(p(\theta|x)\) when posterior cann
 
 $$
 \begin{align*}
-X &: \text{observed data} \\\
+x &: \text{observed data} \\\
 \tilde{x} &: \text{new coming data} \\\
-\text{Bayesian Decision} &: \text{find } p(\tilde{x}|X) \\\
+\text{Bayesian Decision} &: \text{find } p(\tilde{x}|x) \text{ by inference } x\rarr \theta\rarr \tilde{x} \\\
 &\dArr \\\
-p(\tilde{x}|X) &= \int_{\theta}p(\tilde{x},\theta|X)d\theta \\\
-&= \int_{\theta}p(\tilde{x}|\theta)p(\theta|X)d\theta \because \text{$\tilde{x}\perp X$ when $\theta$ fixed}\\\
-&= E_{\theta\sim p(\theta|X)}[p(\tilde{x}|\theta)]
+p(\tilde{x}|x) &= \int_{\theta}p(\tilde{x},\theta|x)d\theta \\\
+&= \int_{\theta}p(\tilde{x}|\theta,x)p(\theta|x)\space d\theta \\\
+\space&\text{$p(\theta|x)$ }\text{found by bayesian inference} \\\ 
+&= \int_{\theta}p(\tilde{x}|\theta)p(\theta|x)\space d\theta,\implies\text{$\tilde{x}\perp x$ when $\theta$ fixed}\\\
+&= E_{\theta\sim p(\theta|x)}[p(\tilde{x}|\theta)]
 \end{align*}
 $$
+
 
 ## MLE of GMM
 
