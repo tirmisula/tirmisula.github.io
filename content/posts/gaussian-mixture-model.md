@@ -141,8 +141,8 @@ $$
 \text{For each item: } \\\
 \begin{align*}
 \sum_{z_1}\cdots\sum_{z_N} \log p(x_1,z_{1}|\theta)\left(\prod_{i=1}^Np(z_{i}|x_i,\theta^{(t)})\right) &= \sum_{z_1}\cdots\sum_{z_N} \log p(x_1,z_{1}|\theta)p(z_1|x_1,\theta^{(t)})\left(\prod_{i=2}^Np(z_{i}|x_i,\theta^{(t)})\right) \\\
-&= \sum_{z_1}\log p(x_1,z_1|\theta)p(z_1|x_1,\theta^{(t)}) + \sum_{z2}\cdots\sum_{z_N}\prod_{i=2}^Np(z_i|x_i,\theta^{(t)}) \\\
-&= \sum_{z_1}\log p(x_1,z_1|\theta)p(z_1|x_1,\theta^{(t)}) + \sum_{z2}p(z_2|x_2,\theta^{(t)})+\cdots+\sum_{z_N}p(z_N|x_N,\theta^{(t)}) \\\
+&= \sum_{z_1}\log p(x_1,z_1|\theta)p(z_1|x_1,\theta^{(t)}) \times \sum_{z2}\cdots\sum_{z_N}\prod_{i=2}^Np(z_i|x_i,\theta^{(t)}) \\\
+&= \sum_{z_1}\log p(x_1,z_1|\theta)p(z_1|x_1,\theta^{(t)}) \times \sum_{z2}p(z_2|x_2,\theta^{(t)})\times\cdots\times\sum_{z_N}p(z_N|x_N,\theta^{(t)}) \\\
 &= \sum_{z_1}\log p(x_1,z_1|\theta)p(z_1|x_1,\theta^{(t)})
 \end{align*}
 $$
