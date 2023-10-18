@@ -40,6 +40,8 @@ TocOpen: true
 
 ### Bayesian Inference
 
+<cite>[^1]</cite>
+
 $$
 \begin{align*}
 p(\theta|x) &= \frac{p(x|\theta)p(\theta)}{p(x)} \\\
@@ -82,7 +84,7 @@ z&: \text{latent variable $+$ parameters} \\\
 \end{align*}
 $$
 
-We mentioned in [EM algorithm](https://tirmisula.github.io/posts/expectation-maximization/#derive-em-from-elbokl-divergence) before, log-likelihood can be written as:
+We mentioned in [EM algorithm](https://tirmisula.github.io/posts/expectation-maximization/#derive-em-from-elbokl-divergence) before, Baed on the fact that log-likelihood can be written as ELBO+KL-Divergence:
 
 $$
 \begin{align*}
@@ -137,45 +139,60 @@ L(q) &= \underset{\text{Part1}}{\int_{z}q(z)\log p(x,z)\space dz} - \underset{\t
 &\dArr \\\
 \text{Part1} &= \int_{z1}\cdots\int_{z_N}\prod_{i=1}^Nq_i(z_i)\log p(x,z)\space dz_1\cdots dz_n \\\
 &= \int_{z_j}q_j(z_j) \int_{z_1,\cdots z_{j-1},z_{j+1},\cdots,z_N}\prod_{i=1,i\neq j}^Nq_i(z_i)\log p(x,z) dz_1\cdots d_{j-1}d_{j+1}\cdots d_N \space dz_j \\\
-&= \int_{z_j}q_j(z_j) E_{\prod_{i=1,i\neq j}^Nq_i(z_i)}\left[\log p(x,z)\right] dz_j \\\
-&\because E_{\prod_{i=1,i\neq j}^Nq_i(z_i)}\left[\log p(x,z)\right] = \log \tilde{p}(x,z_j), \text{other $z_i$ are eliminated in intergration} \\\
-&= \int_{z_j}q_j(z_j)\log\tilde{p}(x,z_j)\space dz_j \\\
+&= \int_{z_j}q_j(z_j) E_{z_{i\neq j}\sim q_{i\neq j}(z_{i\neq j})}\left[\log p(x,z)\right] dz_j \\\
+&\text{Define a new pdf function: } \tilde{p}(x,z_j) \\\
+&\text{Let } \log \tilde{p}(x,z_j)=E_{z_{i\neq j}\sim q_{i\neq j}(z_{i\neq j})}\left[\log p(x,z)\right]+K, \text{other $z_i$ are eliminated in intergration} \\\
+&\text{note that $K$ is a normailize constant controls integration of $\tilde{p}(x,z_j)$ equals to 1} \\\
+&= \int_{z_j}q_j(z_j)\left(\log\tilde{p}(x,z_j)-K\right)\space dz_j \\\
+&= \int_{z_j}q_j(z_j)\log\tilde{p}(x,z_j)\space dz_j - \int_{z_j}q_j(z_j)Kdz_j \\\
+&= \int_{z_j}q_j(z_j)\log\tilde{p}(x,z_j)\space dz_j + K^{'} \\\
 \text{Part2} &= \int_{z1}\cdots\int_{z_N}\prod_{i=1}^Nq_i(z_i) \sum_{i=1}^N\log q_i(z_i) \space dz_1\cdots dz_n \\\
 &= \sum_{i=1}^N \left[\int_{z1}\cdots\int_{z_N}\prod_{n=1}^Nq_n(z_n) \log q_i(z_i) \space dz_1\cdots dz_n\right] \\\
 &= \sum_{i=1}^N \left(\int_{z_i}q_i(z_i)\log q_i(z_i)dz_i\right)\prod_{n=1,n\neq i}^N\int_{z_n}q_n(z_n)dz_n \\\
 &= \sum_{i=1}^N\int_{z_i}q_i(z_i)\log q_i(z_i)dz_i \\\
-&= \int_{z_j}q_j(z_j)\log q_j(z_j) \space dz_j + const \\\
+&= \int_{z_j}q_j(z_j)\log q_j(z_j) \space dz_j + \sum_{i=1,i\neq j}^N\int_{z_i}q_i(z_i)\log q_i(z_i) \space dz_i \\\
+&= \int_{z_j}q_j(z_j)\log q_j(z_j) \space dz_j + C \\\
 &\dArr \\\
 L(q) &= \text{Part1}-\text{Part2} \\\
-&= \int_{z_j}q_j(z_j)\log\frac{\tilde{p}(x,z_j)}{q_j(z_j)}\space dz_j - const \\\
-&= -KL(q_j(z_j)||\tilde{p}(x,z_j)) - const
+&= \int_{z_j}q_j(z_j)\log\frac{\tilde{p}(x,z_j)}{q_j(z_j)}\space dz_j + K^{'}-C \\\
+&= -KL(q_j(z_j)||\tilde{p}(x,z_j)) + const
 \end{align*}
 $$
 
-So the maximize problem becomes:
+So the maximize problem becomes:<cite>[^2]</cite>
 
 $$
 \begin{align*}
-\argmax_{q(z)} L(q) &= \argmax_{q(z)} -KL(q_j(z_j)||\tilde{p}(x,z_j)) - const \\\
+\argmax_{q(z)} L(q) &= \argmax_{q(z)} -KL(q_j(z_j)||\tilde{p}(x,z_j)) + const \\\
 &= \argmax_{q(z)} -KL(q_j(z_j)||\tilde{p}(x,z_j)) \\\
 &\implies q_j(z_j) = \tilde{p}(x,z_j), \forall\space j=1,\cdots,N \\\
-&\implies q_j(z_j) = \tilde{p}(x,z_j), \forall\space j=1,\cdots,N
+&\implies \log q_j(z_j) =E_{z_{i\neq j}\sim q_{i\neq j}(z_{i\neq j})}\left[\log p(x,z)\right]-K \\\
+&\implies q_j(z_j) = \exp(E_{z_{i\neq j}\sim q_{i\neq j}(z_{i\neq j})}\left[\log p(x,z)\right])\exp(-K), \forall\space j=1,\cdots,N \\\
+&\implies q_j(z_j) = \frac{\exp(E_{z_{i\neq j}\sim q_{i\neq j}(z_{i\neq j})}\left[\log p(x,z_{i\neq j},z_j)\right])}{\int\exp(E_{z_{i\neq j}\sim q_{i\neq j}(z_{i\neq j})}\left[\log p(x,z_{i\neq j},z_j)\right])dz_j}, \forall\space j=1,\cdots,N
 \end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Finally we can conclude that solving posterior can be done by finding approximate function \(q(z)\) using coordinate-ascent-like method and iterates a number of times:
+</p>
+{{</ math.inline >}}
+
+$$
+\text{Parameter's update order is:} \\\
+q_1^{(1)} \rarr q_2^{(1)} \rarr \cdots \rarr q_N^{(1)} \rarr q_1^{(2)} \rarr \cdots q_N^{(2)} \rarr \cdots \rarr q_N^{(t)} \cdots \rarr q_N^{(t)} \\\
+\text{It satisfies: } \\\
+|L(q^{(t)})-L(q^{(t-1)})| < \epsilon \\\
+\text{The approximate posterior is :} \\\
+p(z|x) = \prod_{i=1}^N q_i^{(t)}(z_i)
 $$
 
 ## Conclusion
 
-For each iteration step of EM of Gaussian mixture model we have:
 
-$$
-\begin{align*}
-p_k^{(t+1)} &= \frac{\sum_{i=1}^Np(z_i=c_k|x_i,\theta^{(t)})}{N} \\\
-\mu_k^{(t+1)} &= \frac{\sum_{i=1}^N p(z_i=c_k|x_i,\theta^{(t)})x_i}{\sum_{i=1}^N p(z_i=c_k|x_i,\theta^{(t)})} \\\
-\Sigma_k^{(t+1)} &= \frac{\sum_{i=1}^N p(z_i=c_k|x_i,\theta^{(t)})(x_i-\mu_k)(x_i-\mu_k)^T}{\sum_{i=1}^N p(z_i=c_k|x_i,\theta^{(t)})}
-\end{align*}
-$$
 
 ## Reference
 
 [^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=69).
-[^2]: From [The Matrix Cookbook](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
+[^3]: From [The Matrix Cookbook](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
+[^2]: From [Mean field variational inference](https://mbernste.github.io/files/notes/MeanFieldVariationalInference.pdf).
