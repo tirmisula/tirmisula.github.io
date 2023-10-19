@@ -198,7 +198,10 @@ Given that \(q(z)\) is a function of \(\phi\) and \(p(x,z)\) is a function of \(
 $$
 q(z) = f(\phi) \\\
 p(x,z) = g(\theta), \phi\notin\theta \\\
-\dArr \\
+\dArr \\\
+z \sim q_{\phi}(z) \\\
+(x,z) \sim p_{\theta}(x,z) \\\
+\dArr \\\
 \argmax_{q(z)} L(q) = \argmax_{\phi} L(\phi) \\\
 L(\phi) = \int_{z}q_{\phi}(z)\log\frac{p_{\theta}(x,z)}{q_{\phi}(z)}\space dz \\\
 $$
@@ -211,7 +214,6 @@ Next, we compute the gradient of \(L(\phi)\):
 
 $$
 \begin{align*}
-
 \nabla_{\phi}L(\phi) &= \nabla_{\phi}\int_{z}q_{\phi}(z)\log\frac{p_{\theta}(x,z)}{q_{\phi}(z)}\space dz \\\
 &= \int_{z}\nabla_{\phi}\space \left(q_{\phi}(z)\left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right]\right)dz \\\
 &= \int_{z}\nabla_{\phi}q_{\phi}(z)\left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right]+q_{\phi}(z)\nabla_{\phi}\left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right] dz \\\
@@ -249,7 +251,23 @@ When sampling \(q(z)\) from \( [0,1] \), \( \log q(z) \) varies greatly from \( 
 
 ## Reparameterization trick for SGVI
 
+{{< math.inline >}}
+<p>
+Assuming that \(z\) is a function of random variable \(\epsilon\), we have:
+</p>
+{{</ math.inline >}}
 
+$$
+z = f(\epsilon) \\\
+\epsilon \sim p(\epsilon), p(\epsilon)\text{ is pdf} \\\
+z \sim q_{\phi}(z) \\\
+\dArr \\\
+\int q_{\phi}(z)dz=\int p(\epsilon)d\epsilon=1 \\\
+\dArr \\\
+\int q_{\phi}(f(\epsilon))df(\epsilon)=\int p(\epsilon)d\epsilon \\\
+\int q_{\phi}(z)f^{'}(\epsilon)d\epsilon=\int p(\epsilon)d\epsilon \\\
+q_{\phi}(z)dz = p(\epsilon)d\epsilon
+$$
 
 ## Conclusion
 
