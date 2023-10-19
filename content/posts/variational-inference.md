@@ -174,7 +174,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Finally we can conclude that solving posterior can be done by finding approximate function \(q(z)\) using coordinate-ascent-like method and iterates a number of times:
+Finally we can conclude that solving posterior can be done by finding approximate function \(q(z)\) using coordinate-ascend-like method and iterates a number of times:
 </p>
 {{</ math.inline >}}
 
@@ -183,9 +183,73 @@ $$
 q_1^{(1)} \rarr q_2^{(1)} \rarr \cdots \rarr q_N^{(1)} \rarr q_1^{(2)} \rarr \cdots q_N^{(2)} \rarr \cdots \rarr q_N^{(t)} \cdots \rarr q_N^{(t)} \\\
 \text{It satisfies: } \\\
 |L(q^{(t)})-L(q^{(t-1)})| < \epsilon \\\
-\text{The approximate posterior is :} \\\
+\text{The approximated posterior is :} \\\
 p(z|x) = \prod_{i=1}^N q_i^{(t)}(z_i)
 $$
+
+## Stochastic gradient VI
+
+{{< math.inline >}}
+<p>
+Given that \(q(z)\) is a function of \(\phi\) and \(p(x,z)\) is a function of \(\theta\), we have:
+</p>
+{{</ math.inline >}}
+
+$$
+q(z) = f(\phi) \\\
+p(x,z) = g(\theta), \phi\notin\theta \\\
+\dArr \\
+\argmax_{q(z)} L(q) = \argmax_{\phi} L(\phi) \\\
+L(\phi) = \int_{z}q_{\phi}(z)\log\frac{p_{\theta}(x,z)}{q_{\phi}(z)}\space dz \\\
+$$
+
+{{< math.inline >}}
+<p>
+Next, we compute the gradient of \(L(\phi)\):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+
+\nabla_{\phi}L(\phi) &= \nabla_{\phi}\int_{z}q_{\phi}(z)\log\frac{p_{\theta}(x,z)}{q_{\phi}(z)}\space dz \\\
+&= \int_{z}\nabla_{\phi}\space \left(q_{\phi}(z)\left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right]\right)dz \\\
+&= \int_{z}\nabla_{\phi}q_{\phi}(z)\left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right]+q_{\phi}(z)\nabla_{\phi}\left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right] dz \\\
+&= \underset{Part1}{\int_{z}\nabla_{\phi}q_{\phi}(z)\left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right]dz}+\underset{Part2}{\int_{z}q_{\phi}(z)\nabla_{\phi}\left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right] dz} \\\
+&\dArr \\\
+\text{Part1} &= \int_{z}\nabla_{\phi}q_{\phi}(z)\cdot\frac{1}{q_{\phi}(z)}q_{\phi}(z) \left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right]dz \\\
+&= \int_{z}\left(\nabla_{\phi}\log q_{\phi}(z)\right)\cdot q_{\phi}(z)\left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right]dz \\\
+&= E_{z\sim q_{\phi}(z)} \left[ \left(\nabla_{\phi}\log q_{\phi}(z)\right) \left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right] \right] \\\
+&\dArr \\\
+\text{Part2} &= -\int_{z}q_{\phi}(z)\nabla_{\phi} \log q_{\phi}(z) dz \\\
+&= -\int_{z}q_{\phi}(z)\frac{1}{ q_{\phi}(z)}\nabla q_{\phi}(z) dz \\\
+&= -\nabla_{\phi}\int_{z}q_{\phi}(z)dz \\\
+&= 0 \\\
+&\dArr \\\
+\nabla_{\phi}L(\phi) &= E_{z\sim q_{\phi}(z)} \left[ \left(\nabla_{\phi}\log q_{\phi}(z)\right) \left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right] \right]
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+\( \nabla_{\phi}L(\phi) \) has no analytic expression, thus we can use MC sampling to approximate the expectation:
+</p>
+{{</ math.inline >}}
+
+$$
+\text{for } i=1,2,\cdots,L \\\
+\nabla_{\phi}L(\phi) \approx \frac{1}{L}\sum_{i=1}^L \left(\nabla_{\phi}\log q_{\phi}(z_i)\right) \left[ \log p_{\theta}(x_i,z_i) - \log q_{\phi}(z_i) \right]
+$$
+
+{{< math.inline >}}
+<p>
+When sampling \(q(z)\) from \( [0,1] \), \( \log q(z) \) varies greatly from \( [-\infty,0] \), it would cause significant error in approximating gradient and cause even larger error in SGD. That is the drawback of SGVI we need to overcome.
+</p>
+{{</ math.inline >}}
+
+## Reparameterization trick for SGVI
+
+
 
 ## Conclusion
 
