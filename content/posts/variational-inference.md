@@ -72,7 +72,7 @@ p(\tilde{x}|x) &= \int_{\theta}p(\tilde{x},\theta|x)d\theta \\\
 $$
 
 
-## VI Derivation
+## Mean Field VI Derivation
 
 Given preset:
 
@@ -187,6 +187,12 @@ q_1^{(1)} \rarr q_2^{(1)} \rarr \cdots \rarr q_N^{(1)} \rarr q_1^{(2)} \rarr \cd
 p(z|x) = \prod_{i=1}^N q_i^{(t)}(z_i)
 $$
 
+The drawbacks are:
+
+1. Intergration part w.r.t all of q is still intractable.
+2. Meanfield assumption is not suitable for complicated z, e.g. z is a nerual network.
+
+
 ## Stochastic gradient VI
 
 {{< math.inline >}}
@@ -258,23 +264,84 @@ Assuming that \(z\) is a function of random variable \(\epsilon\), we have:
 {{</ math.inline >}}
 
 $$
-z = f(\epsilon) \\\
-\epsilon \sim p(\epsilon), p(\epsilon)\text{ is pdf} \\\
+z = g(\epsilon) \\\
+\epsilon \sim p(\epsilon) \\\
 z \sim q_{\phi}(z) \\\
 \dArr \\\
 \int q_{\phi}(z)dz=\int p(\epsilon)d\epsilon=1 \\\
-\dArr \\\
-\int q_{\phi}(f(\epsilon))df(\epsilon)=\int p(\epsilon)d\epsilon \\\
-\int q_{\phi}(z)f^{'}(\epsilon)d\epsilon=\int p(\epsilon)d\epsilon \\\
-q_{\phi}(z)dz = p(\epsilon)d\epsilon
 $$
 
-## Conclusion
+According to <mark>Law of the unconscious statistician</mark>(LOTUS)<cite>[^4]</cite>, we have:
 
+$$
+\begin{cases}
+E[g(\epsilon)] = \int g(\epsilon)p_{\epsilon}(\epsilon)d\epsilon \\\
+E[z] = \int zp_z(z)dz
+\end{cases} \overset{\forall\space f(\cdot)}{\implies}
+\begin{cases}
+E[f(g(\epsilon))] = \int f(g(\epsilon))p_{\epsilon}(\epsilon)d\epsilon \\\
+E[f(z)] = \int f(z)p_z(z)dz
+\end{cases} \\\
+\dArr \\\
+\int f(g(\epsilon))p_{\epsilon}(\epsilon)d\epsilon = \int f(z)p_z(z)dz \\\
+\dArr \\\
+\begin{align*}
+\nabla_{\phi}L(\phi) &= \nabla_{\phi}\int_{z}q_{\phi}(z)\underset{\color{red}{f(z)}}{\log\frac{p_{\theta}(x,z)}{q_{\phi}(z)}}\space dz \\\
+&= \nabla_{\phi}\int_{\epsilon}p(\epsilon) \left[\log p_{\theta}(x,z)-\log q_{\phi}(z)\right] \space d\epsilon \\\
+&= \int_{\epsilon}\nabla_{\phi}\left(p(\epsilon) \left[\log p_{\theta}(x,z)-\log q_{\phi}(z)\right]\right) \space d\epsilon \\\
+&= \int_{\epsilon}p(\epsilon) \nabla_{\phi}\left( \left[\log p_{\theta}(x,z)-\log q_{\phi}(z)\right]\right) \space d\epsilon, \space\because p(\epsilon)\perp \phi \\\
+&= \int_{\epsilon}p(\epsilon) \nabla_{g(\epsilon)}\left( \left[\log p_{\theta}(x,g(\epsilon))-\log q_{\phi}(g(\epsilon))\right]\right)\cdot \nabla_{\phi}g(\epsilon) \space d\epsilon \\\
+&= E_{\epsilon\sim p(\epsilon)} \left[ \nabla_{g(\epsilon)}\left( \left[\log p_{\theta}(x,g(\epsilon))-\log q_{\phi}(g(\epsilon))\right]\right)\cdot \nabla_{\phi}g(\epsilon) \right]
+\end{align*}
+$$
 
+{{< math.inline >}}
+<p>
+Then we can conclude the whole method:
+</p>
+{{</ math.inline >}}
+
+MC sampling: 
+
+$$
+\text{for } i=1,2,\cdots,L \\\
+\nabla_{\phi}L(\phi) \approx \frac{1}{L}\sum_{i=1}^L \nabla_{g(\epsilon_i)}\left( \left[\log p_{\theta}(x,g(\epsilon_i))-\log q_{\phi}(g(\epsilon_i))\right]\right)\cdot \nabla_{\phi}g(\epsilon_i)
+$$
+
+SGVI:
+
+$$
+\phi^{(t+1)} \larr \phi^{(t)} + \lambda^{(t)}\nabla_{\phi}L(\phi^{(t)})
+$$
+
+## Supplementation
+
+Some common transformation in reparamerterization trick:
+
+![homeinfo](ReparamTrick.png)
 
 ## Reference
 
 [^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=69).
 [^3]: From [The Matrix Cookbook](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
 [^2]: From [Mean field variational inference](https://mbernste.github.io/files/notes/MeanFieldVariationalInference.pdf).
+[^4]: From [Ross, Sheldon M. (2019). Introduction to probability models](https://doi.org/10.1016%2FC2017-0-01324-1).
+
+<!-- $$
+\mathbb{E}{q(z|\theta)}[f(z)] = \mathbb{E}{\epsilon}[f(g(\theta, \epsilon))] \\\
+\mathbb{E}_{q(z|\theta)}[f(z)] = \int q(z|\theta) f(z) , dz. \\\
+\mathbb{E}_{q(z|\theta)}[f(z)] = \int q(z|\theta) f(z) , dz = \int q(z|\theta) f(g(\theta, \epsilon)) , dz. \\\
+dz = \left|\frac{\partial g(\theta, \epsilon)}{\partial \epsilon}\right| , d\epsilon. \\\
+\mathbb{E}_{q(z|\theta)}[f(z)] = \int q(z|\theta) f(g(\theta, \epsilon)) , dz = \int q(z|\theta) f(g(\theta, \epsilon)) , |J(\theta, \epsilon)| , d\epsilon. \\\
+q(z|\theta) = q(g(\theta, \epsilon)|\theta) = q(g(\theta, \epsilon)) \\\
+\mathbb{E}_{q(z|\theta)}[f(z)] = \int q(g(\theta, \epsilon)) f(g(\theta, \epsilon)) , |J(\theta, \epsilon)| , d\epsilon. \\\
+\int q(g(\theta, \epsilon)) f(g(\theta, \epsilon)) , |J(\theta, \epsilon)| , d\epsilon = \int p(\epsilon) f(g(\theta, \epsilon)) , d\epsilon, \\\
+\mathbb{E}{q(z|\theta)}[f(z)] = \int q(g(\theta, \epsilon)) f(g(\theta, \epsilon)) , |J(\theta, \epsilon)| , d\epsilon = \mathbb{E}{\epsilon}[f(g(\theta, \epsilon))]. \\\
+\int q(z|\theta) f(z) , dz = \int q(g(\theta, \epsilon)) f(g(\theta, \epsilon)) , |J(\theta, \epsilon)| , d\epsilon. \\\
+\int q(g(\theta, \epsilon)) f(g(\theta, \epsilon)) , |J(\theta, \epsilon)| , d\epsilon = \int p(\epsilon) f(g(\theta, \epsilon)) , d\epsilon. \\\
+q(z|\theta) = p(g^{-1}(\theta, z)) \cdot \left|\frac{\partial g^{-1}(\theta, z)}{\partial z}\right|, \\
+\mathbb{E}[Y] = \int g^{-1}(y) \cdot f_X(g^{-1}(y)) \cdot \frac{dx}{dy} , dy. \\\
+f_Y(y) = f_X(x) \cdot \left|\frac{dx}{dy}\right|, \\\
+\mathbb{E}[Y] = \int y \cdot f_X(x) \cdot \left|\frac{dx}{dy}\right| , dy. \\\
+\mathbb{E}[Y] = \int g^{-1}(y) \cdot f_X(g^{-1}(y)) \cdot \frac{dx}{dy} , dy.
+$$ -->
