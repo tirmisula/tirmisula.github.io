@@ -296,7 +296,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Then we can write down the whole Metropolis-Hastings algorithm:
+Then we can write down the whole <b>Metropolis-Hastings algorithm</b>:
 </p>
 {{</ math.inline >}}
 
@@ -304,12 +304,7 @@ $$
 \begin{align}
 &\text{sample }u_1,\cdots,u_N\sim \mathcal{U}(0,1) \\\
 &\text{For $t=1\cdots N$} \\\
-&\hspace{1em}z_{\ast} \sim Q_{z_{t-1}z_{\ast}} \space,\space \text{sampled candidate state for $z_t$} : \begin{cases}
-z_{\ast} \sim p(z|z_{t-1}) \\\
-p(z|z_{t-1}) = p(z_{t-1})Q_{z_{t-1}z_t}\alpha_{z_{t-1}z_{\ast}} \\\
-=\min(Q_{z_{t-1}z_{\ast}},Q_{z_{t-1}z_{\ast}}Q_{z_{\ast}z_{t-1}}) \\\
-=Q_{z_{t-1}z_{\ast}}Q_{z_{\ast}z_{t-1}}
-\end{cases} \\\
+&\hspace{1em}z_{\ast} \sim Q_{z_{t-1}z_{\ast}} \space,\space \text{sampled candidate state for $z_t$} \\\
 &\hspace{1em}\alpha_{z_{t-1}z_{\ast}} = \min (1, \frac{p({z_{\ast}})Q_{z_{\ast}z_{t-1}}}{p({z_{t-1}})Q_{z_{t-1}z_{\ast}}}) \\\
 &\hspace{1em}\begin{cases}
 \text{if } u_t \leq  \alpha_{z_{t-1}z_{\ast}} \space , \text{accept $z_t=z_{\ast}$} & \text{the higher probability of $p(z_{\ast})Q_{z_{\ast}z_{t-1}}$, the more likely $z_{\ast}$ is accepted}\\\
@@ -318,6 +313,22 @@ p(z|z_{t-1}) = p(z_{t-1})Q_{z_{t-1}z_t}\alpha_{z_{t-1}z_{\ast}} \\\
 &\text{EndFor} \\\
 &\text{Return $z_1,\cdots,z_N$ after N loops}
 \end{align}
+$$
+
+The demonstration is as follows:
+
+$$
+\begin{align*}
+&\because z_{\ast} \sim p(z|z_{t-1}), \space p(z=z_{\ast}|z_{t-1}) = p(z_{t-1})Q_{z_{t-1}z_{\ast}}\alpha_{z_{t-1}z_{\ast}}=Q_{z_{t-1}z_{\ast}}\alpha_{z_{t-1}z_{\ast}} \\\
+&\therefore z_{\ast}\sim Q_{z_{t-1}z_{\ast}} \alpha_{z_{t-1}z_{\ast}} \\\
+&\text{we want } Q_{z_{t-1}z_{\ast}} \approx Q_{z_{t-1}z_{\ast}}\alpha_{z_{t-1}z_{\ast}} \iff 1 \approx \alpha_{z_{t-1}z_{\ast}} \\\
+&\dArr \\\
+&\because \alpha_{z_{t-1}z_{\ast}} \in [0,1] \text{ and } \alpha_{z_{t-1}z_{\ast}}= 1 \text{ means acceptance} \\\
+&\therefore \text{given }\forall z_{\ast},  \begin{cases}
+\text{Pr}(z_{\ast}\text{ is accepted}) = \alpha_{z_{t-1}z_{\ast}} \\\
+\text{Pr}(z_{\ast}\text{ is rejected}) = 1-\alpha_{z_{t-1}z_{\ast}}
+\end{cases}
+\end{align*}
 $$
 
 {{< math.inline >}}
