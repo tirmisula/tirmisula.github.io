@@ -38,7 +38,7 @@ TocOpen: true
 
 ## Background
 
-### Monte Carlo in brief
+### The object of Monte Carlo
 
 <cite>[^1]</cite>
 
@@ -232,7 +232,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Next we can prove that detailed balance is sufficient uneccessary condition for stationary distribution:
+Next we can prove that detailed balance is sufficient but not necessary condition for stationary distribution:
 </p>
 {{</ math.inline >}}
 
@@ -250,67 +250,89 @@ $$
 \end{align*}
 $$
 
-## Stochastic gradient VI
+## Metropolis-Hastings algorithm
 
-{{< math.inline >}}
-<p>
-Given that \(q(z)\) is a function of \(\phi\) and \(p(x,z)\) is a function of \(\theta\), we have:
-</p>
-{{</ math.inline >}}
-
-$$
-q(z) = f(\phi) \\\
-p(x,z) = g(\theta), \phi\notin\theta \\\
-\dArr \\\
-z \sim q_{\phi}(z) \\\
-(x,z) \sim p_{\theta}(x,z) \\\
-\dArr \\\
-\argmax_{q(z)} L(q) = \argmax_{\phi} L(\phi) \\\
-L(\phi) = \int_{z}q_{\phi}(z)\log\frac{p_{\theta}(x,z)}{q_{\phi}(z)}\space dz \\\
-$$
-
-{{< math.inline >}}
-<p>
-Next, we compute the gradient of \(L(\phi)\):
-</p>
-{{</ math.inline >}}
+Based on the introduction from previous sections, our ideas of how to sample are listed as follows:
 
 $$
 \begin{align*}
-\nabla_{\phi}L(\phi) &= \nabla_{\phi}\int_{z}q_{\phi}(z)\log\frac{p_{\theta}(x,z)}{q_{\phi}(z)}\space dz \\\
-&= \int_{z}\nabla_{\phi}\space \left(q_{\phi}(z)\left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right]\right)dz \\\
-&= \int_{z}\nabla_{\phi}q_{\phi}(z)\left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right]+q_{\phi}(z)\nabla_{\phi}\left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right] dz \\\
-&= \underset{Part1}{\int_{z}\nabla_{\phi}q_{\phi}(z)\left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right]dz}+\underset{Part2}{\int_{z}q_{\phi}(z)\nabla_{\phi}\left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right] dz} \\\
+&E_{z|x\sim p(z|x)}\left[ f(z) \right] \approx \frac{1}{N} \sum_{i=1}^N f(z_i) \\\
+&z_1,\cdots,z_N\text{ cannot sample from } p(z|x) \\\
 &\dArr \\\
-\text{Part1} &= \int_{z}\nabla_{\phi}q_{\phi}(z)\cdot\frac{1}{q_{\phi}(z)}q_{\phi}(z) \left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right]dz \\\
-&= \int_{z}\left(\nabla_{\phi}\log q_{\phi}(z)\right)\cdot q_{\phi}(z)\left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right]dz \\\
-&= E_{z\sim q_{\phi}(z)} \left[ \left(\nabla_{\phi}\log q_{\phi}(z)\right) \left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right] \right] \\\
+&\text{construct markov chain, let } \pi(z)=p(z|x) \\\
+&\text{sample by: } z_1 \sim \pi(z_1),z_2\sim \pi(z_2|z_1),\cdots,x_N\sim \pi(z_N|z_{N-1}) \\\
 &\dArr \\\
-\text{Part2} &= -\int_{z}q_{\phi}(z)\nabla_{\phi} \log q_{\phi}(z) dz \\\
-&= -\int_{z}q_{\phi}(z)\frac{1}{ q_{\phi}(z)}\nabla q_{\phi}(z) dz \\\
-&= -\nabla_{\phi}\int_{z}q_{\phi}(z)dz \\\
-&= 0 \\\
+&\text{requires $\pi(z)$ is stationary distribution} \\\
 &\dArr \\\
-\nabla_{\phi}L(\phi) &= E_{z\sim q_{\phi}(z)} \left[ \left(\nabla_{\phi}\log q_{\phi}(z)\right) \left[ \log p_{\theta}(x,z) - \log q_{\phi}(z) \right] \right]
+&\text{requires detailed balance: } \pi(z=S_i)P_{ij} = \pi(z=S_j)P_{ji} \\\
+&\dArr \\\
+&\text{find satisfied transition matrix $P$}
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-\( \nabla_{\phi}L(\phi) \) has no analytic expression, thus we can use MC sampling to approximate the expectation:
+Suppose we have a unsatisfied transition matrix \(Q_{ij}\), we can multiply \(Q\) by an acceptance factor \(\alpha(\cdot)\) for balancing the equation.
 </p>
 {{</ math.inline >}}
 
 $$
-\text{for } i=1,2,\cdots,L \\\
-\nabla_{\phi}L(\phi) \approx \frac{1}{L}\sum_{i=1}^L \left(\nabla_{\phi}\log q_{\phi}(z_i)\right) \left[ \log p_{\theta}(x_i,z_i) - \log q_{\phi}(z_i) \right]
+\begin{align*}
+p_z(S_i) Q_{ij} &\neq p_z(S_j)Q_{ji} \\\
+p_z(S_i) Q_{ij}\alpha_{ij} &= p_z(S_j)Q_{ji}\alpha_{ji}
+\end{align*}
+$$
+
+$$
+\begin{align*}
+\text{Let }\alpha_{ij} &= \min (1, \frac{p_z(S_j)Q_{ji}}{p_z(S_i)Q_{ij}}), \text{we have:} \\\
+p_z(S_i) Q_{ij}\alpha_{ij} &= p_z(S_i) Q_{ij}\min (1, \frac{p_z(S_j)Q_{ji}}{p_z(S_i)Q_{ij}}) \\\
+&= \min( p_z(S_i) Q_{ij}, p_z(S_j) Q_{ji} ) \\\
+&= p_z(S_j) Q_{ji}\min (\frac{p_z(S_i)Q_{ij}}{p_z(S_j)Q_{ji}}, 1) \\\
+&= p_z(S_j) Q_{ji} \alpha_{ji} \\\
+\therefore P_{ij}&=Q_{ij}\alpha_{ij} \text{ is the satisfied transition matrix}
+\end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-When sampling \(q(z)\) from \( [0,1] \), \( \log q(z) \) varies greatly from \( [-\infty,0] \), it would cause significant error in approximating gradient and cause even larger error in SGD. That is the drawback of SGVI we need to overcome.
+Then we can write down the whole Metropolis-Hastings algorithm:
 </p>
 {{</ math.inline >}}
+
+$$
+\begin{align}
+&\text{sample }u_1,\cdots,u_N\sim \mathcal{U}(0,1) \\\
+&\text{For $t=1\cdots N$} \\\
+&\hspace{1em}z_{\ast} \sim Q_{z_{t-1}z_{\ast}} \space,\space \text{sample a candidate state for $z_t$} \implies \begin{cases}
+z_t \sim p(z|z_{t-1}) \\\
+p(z|z_{t-1}) = p(z_{t-1})Q_{z_{t-1}z_t}=Q_{z_{t-1}z_t}
+\end{cases} \\\
+&\hspace{1em}\alpha_{z_{t-1}z_{\ast}} = \min (1, \frac{p({z_{\ast}})Q_{z_{\ast}z_{t-1}}}{p({z_{t-1}})Q_{z_{t-1}z_{\ast}}}) \\\
+&\hspace{1em}\begin{cases}
+\text{if } u_t \leq  \alpha_{z_{t-1}z_{\ast}} \space , \text{accept $z_t=z_{\ast}$} & \text{the higher probability of $p(z_{\ast})Q_{z_{\ast}z_{t-1}}$, the more likely $z_{\ast}$ is accepted}\\\
+\text{else} \space, z_t=z_{t-1}
+\end{cases} \\\
+&\text{EndFor} \\\
+&\text{Return $z_1,\cdots,z_N$ after N loops}
+\end{align}
+$$
+
+{{< math.inline >}}
+<p>
+Notice that we sampled from \(p(z)\)'s likelihood which is propotional to \(p(z)\):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\alpha_{z_{t-1}z_{\ast}} &= \min (1, \frac{p({z_{\ast}})Q_{z_{\ast}z_{t-1}}}{p({z_{t-1}})Q_{z_{t-1}z_{\ast}}}) \\\
+&= \min (1, \frac{ \frac{\hat{p}({z_{\ast}})}{\int\hat{p}({z_{\ast}})dz} Q_{z_{\ast}z_{t-1}}}{ \frac{\hat{p}({z_{t-1}})}{\int\hat{p}({z_{t-1}})dz} Q_{z_{t-1}z_{\ast}}}) \\\
+&= \min (1, \frac{\hat{p}({z_{\ast}})Q_{z_{\ast}z_{t-1}}}{\hat{p}({z_{t-1}})Q_{z_{t-1}z_{\ast}}}) \\\
+&\dArr \\\
+z_{\ast}\sim p(z) &\equiv z_{\ast}\sim \hat{p}(z)
+\end{align*}
+$$
 
 ## Reparameterization trick for SGVI
 
