@@ -304,9 +304,11 @@ $$
 \begin{align}
 &\text{sample }u_1,\cdots,u_N\sim \mathcal{U}(0,1) \\\
 &\text{For $t=1\cdots N$} \\\
-&\hspace{1em}z_{\ast} \sim Q_{z_{t-1}z_{\ast}} \space,\space \text{sample a candidate state for $z_t$} \implies \begin{cases}
-z_t \sim p(z|z_{t-1}) \\\
-p(z|z_{t-1}) = p(z_{t-1})Q_{z_{t-1}z_t}=Q_{z_{t-1}z_t}
+&\hspace{1em}z_{\ast} \sim Q_{z_{t-1}z_{\ast}} \space,\space \text{sampled candidate state for $z_t$} : \begin{cases}
+z_{\ast} \sim p(z|z_{t-1}) \\\
+p(z|z_{t-1}) = p(z_{t-1})Q_{z_{t-1}z_t}\alpha_{z_{t-1}z_{\ast}} \\\
+=\min(Q_{z_{t-1}z_{\ast}},Q_{z_{t-1}z_{\ast}}Q_{z_{\ast}z_{t-1}}) \\\
+=Q_{z_{t-1}z_{\ast}}Q_{z_{\ast}z_{t-1}}
 \end{cases} \\\
 &\hspace{1em}\alpha_{z_{t-1}z_{\ast}} = \min (1, \frac{p({z_{\ast}})Q_{z_{\ast}z_{t-1}}}{p({z_{t-1}})Q_{z_{t-1}z_{\ast}}}) \\\
 &\hspace{1em}\begin{cases}
