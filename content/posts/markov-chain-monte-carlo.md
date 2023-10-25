@@ -1,6 +1,6 @@
 ---
 author: "X. Wang"
-title: "Markov chain and Monte Carlo"
+title: "Markov chain Monte Carlo"
 date: "2023-09-11"
 description: "A brief introduction."
 tags: ["machine learning"]
@@ -260,7 +260,7 @@ $$
 &z_1,\cdots,z_N\text{ cannot sample from } p(z|x) \\\
 &\dArr \\\
 &\text{construct markov chain, let } \pi(z)=p(z|x) \\\
-&\text{sample by: } z_1 \sim \pi(z_1),z_2\sim \pi(z_2|z_1),\cdots,x_N\sim \pi(z_N|z_{N-1}) \\\
+&\text{$z_i$ sampled by: } z_1 \sim \pi(z_1),z_2\sim \pi(z_2|z_1),\cdots,z_N\sim \pi(z_N|z_{N-1}) \\\
 &\dArr \\\
 &\text{requires $\pi(z)$ is stationary distribution} \\\
 &\dArr \\\
@@ -278,6 +278,7 @@ Suppose we have a unsatisfied transition matrix \(Q_{ij}\), we can multiply \(Q\
 
 $$
 \begin{align*}
+\text{Let } p_z(S_i)&=\pi(z=S_i) \\\
 p_z(S_i) Q_{ij} &\neq p_z(S_j)Q_{ji} \\\
 p_z(S_i) Q_{ij}\alpha_{ij} &= p_z(S_j)Q_{ji}\alpha_{ji}
 \end{align*}
@@ -302,7 +303,7 @@ Then we can write down the whole <b>Metropolis-Hastings algorithm</b>:
 
 $$
 \begin{align}
-&\text{sample }u_1,\cdots,u_N\sim \mathcal{U}(0,1) \\\
+&\text{Sample }u_1,\cdots,u_N\sim \mathcal{U}(0,1) \\\
 &\text{For $t=1\cdots N$} \\\
 &\hspace{1em}z_{\ast} \sim Q_{z_{t-1}z_{\ast}} \space,\space \text{sampled candidate state for $z_t$} \\\
 &\hspace{1em}\alpha_{z_{t-1}z_{\ast}} = \min (1, \frac{p({z_{\ast}})Q_{z_{\ast}z_{t-1}}}{p({z_{t-1}})Q_{z_{t-1}z_{\ast}}}) \\\
@@ -347,63 +348,66 @@ z_{\ast}\sim p(z) &\equiv z_{\ast}\sim \hat{p}(z)
 \end{align*}
 $$
 
-## Reparameterization trick for SGVI
+## Gibbs algorithm
 
 {{< math.inline >}}
 <p>
-Assuming that \(z\) is a function of random variable \(\epsilon\), we have:
+Gibbs algorithm is a special Metropolis-Hastings algorithm that considers \(p(z)\) the joint probability of different dimensions \( p(z)=p(z_1,\cdots,z_p) \), and we sample each dimension by fixing other dimensions, here are some prerequisite notations:
 </p>
 {{</ math.inline >}}
 
 $$
-z = g(\epsilon) \\\
-\epsilon \sim p(\epsilon) \\\
-z \sim q_{\phi}(z) \\\
-\dArr \\\
-\int q_{\phi}(z)dz=\int p(\epsilon)d\epsilon=1 \\\
-$$
-
-According to <mark>Law of the unconscious statistician</mark>(LOTUS)<cite>[^4]</cite>, we have:
-
-$$
-\begin{cases}
-E[g(\epsilon)] = \int g(\epsilon)p_{\epsilon}(\epsilon)d\epsilon \\\
-E[z] = \int zp_z(z)dz
-\end{cases} \overset{\forall\space f(\cdot)}{\implies}
-\begin{cases}
-E[f(g(\epsilon))] = \int f(g(\epsilon))p_{\epsilon}(\epsilon)d\epsilon \\\
-E[f(z)] = \int f(z)p_z(z)dz
-\end{cases} \\\
-\dArr \\\
-\int f(g(\epsilon))p_{\epsilon}(\epsilon)d\epsilon = \int f(z)p_z(z)dz \\\
-\dArr \\\
 \begin{align*}
-\nabla_{\phi}L(\phi) &= \nabla_{\phi}\int_{z}q_{\phi}(z)\underset{\color{red}{f(z)}}{\log\frac{p_{\theta}(x,z)}{q_{\phi}(z)}}\space dz \\\
-&= \nabla_{\phi}\int_{\epsilon}p(\epsilon) \left[\log p_{\theta}(x,z)-\log q_{\phi}(z)\right] \space d\epsilon \\\
-&= \int_{\epsilon}\nabla_{\phi}\left(p(\epsilon) \left[\log p_{\theta}(x,z)-\log q_{\phi}(z)\right]\right) \space d\epsilon \\\
-&= \int_{\epsilon}p(\epsilon) \nabla_{\phi}\left( \left[\log p_{\theta}(x,z)-\log q_{\phi}(z)\right]\right) \space d\epsilon, \space\because p(\epsilon)\perp \phi \\\
-&= \int_{\epsilon}p(\epsilon) \nabla_{g(\epsilon)}\left( \left[\log p_{\theta}(x,g(\epsilon))-\log q_{\phi}(g(\epsilon))\right]\right)\cdot \nabla_{\phi}g(\epsilon) \space d\epsilon \\\
-&= E_{\epsilon\sim p(\epsilon)} \left[ \nabla_{g(\epsilon)}\left( \left[\log p_{\theta}(x,g(\epsilon))-\log q_{\phi}(g(\epsilon))\right]\right)\cdot \nabla_{\phi}g(\epsilon) \right]
+z_{ij} &: \text{i-th sample, j-th dimension of $z$} \\\
+i&=1,\cdots,N \\\
+j&=1,\cdots,p \\\
+z_{i\xcancel{j}} &: \text{i-th sample, dimensions of $z$ without j-th} \\\
+z_{i<j} &: \text{i-th sample, dimensions of $z$ lower than j-th} \\\
+z_{i>j} &: \text{i-th sample, dimensions of $z$ higher than j-th}
+% p(z_i) &= \prod_{j=1}^p p(z_{ij})
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-Then we can conclude the whole method:
+<b>Gibbs algorithm</b>:
 </p>
 {{</ math.inline >}}
 
-MC sampling: 
+$$
+\begin{align*}
+&\text{Sample }u_1,\cdots,u_N\sim \mathcal{U}(0,1) \\\
+&\text{Initialize }z_1=(z_{11},z_{12},\cdots,z_{1p}) \\\
+&\text{For $t=2\cdots N$} \\\
+    &\hspace{1em}\text{For $j=1\cdots p$} \\\
+        &\hspace{2em}z_{tj}\sim p(z|z_{t-1 >j},z_{t<j})  \\\
+        &\hspace{2em}\text{accept $z_{ij}$} \\\
+    &\hspace{1em}\text{EndFor} \\\
+    &\hspace{1em}z_t = (z_{t1},z_{t2},\cdots,z_{tp})  \\\
+&\text{EndFor} \\\
+&\text{Return $z_1,\cdots,z_N$}
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Next, we prove the accept ratio is always 1 in Gibbs algorithm:
+</p>
+{{</ math.inline >}}
 
 $$
-\text{for } i=1,2,\cdots,L \\\
-\nabla_{\phi}L(\phi) \approx \frac{1}{L}\sum_{i=1}^L \nabla_{g(\epsilon_i)}\left( \left[\log p_{\theta}(x,g(\epsilon_i))-\log q_{\phi}(g(\epsilon_i))\right]\right)\cdot \nabla_{\phi}g(\epsilon_i)
-$$
-
-SGVI:
-
-$$
-\phi^{(t+1)} \larr \phi^{(t)} + \lambda^{(t)}\nabla_{\phi}L(\phi^{(t)})
+\begin{align*}
+\alpha &= \frac{ p(z_{tj}|z_{t\xcancel{j}})p(z_{t\xcancel{j}})p(z_{t-1}|z_{t}) }{ p(z_{t-1j}|z_{t-1\xcancel{j}})p(z_{t-1\xcancel{j}})p(z_t|z_{t-1}) } \\\
+&\because \xcancel{j}\text{ is fixed, transition probability becomes transition probability to specific dimension $j$} \\\
+&\therefore p(z_{t-1}|z_{t})=p(z_{t-1j}|z_t)=p(z_{t-1j}|z_{t\xcancel{j}}) \\\
+&= \frac{ p(z_{tj}|z_{t\xcancel{j}})p(z_{t\xcancel{j}})p(z_{t-1j}|z_{t\xcancel{j}}) }{ p(z_{t-1j}|z_{t-1\xcancel{j}})p(z_{t-1\xcancel{j}})p(z_{tj}|z_{t-1\xcancel{j}}) } \\\
+&\because p(z_{t\xcancel{j}}) = p(z_{t-1\xcancel{j}}) \text{ when fix $\xcancel{j}$} \\\
+&= \frac{ p(z_{tj}|z_{t\xcancel{j}})p(z_{t-1j}|z_{t\xcancel{j}}) }{ p(z_{t-1j}|z_{t-1\xcancel{j}})p(z_{tj}|z_{t-1\xcancel{j}}) } \\\
+&= \frac{ p(z_{tj}|z_{t\xcancel{j}})p(z_{t-1j}|z_{t\xcancel{j}}) }{ p(z_{t-1j}|z_{t-1\xcancel{j}})p(z_{tj}|z_{t\xcancel{j}}) } \\\
+&= \frac{ p(z_{t-1j}|z_{t\xcancel{j}}) }{ p(z_{t-1j}|z_{t-1\xcancel{j}}) } \\\
+&= \frac{ p(z_{t-1j}|z_{t\xcancel{j}}) }{ p(z_{t-1j}|z_{t\xcancel{j}}) } \\\
+&= 1
+\end{align*}
 $$
 
 ## Supplementation
@@ -419,3 +423,4 @@ Some common transformation in reparamerterization trick:
 [^3]: From [The Matrix Cookbook](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
 [^2]: From [Mean field variational inference](https://mbernste.github.io/files/notes/MeanFieldVariationalInference.pdf).
 [^4]: From [Ross, Sheldon M. (2019). Introduction to probability models](https://doi.org/10.1016%2FC2017-0-01324-1).
+[^5]: From [Ross, Sheldon M. (2019). Introduction to probability models](https://www.cnblogs.com/RyanXing/p/M-H.html).
