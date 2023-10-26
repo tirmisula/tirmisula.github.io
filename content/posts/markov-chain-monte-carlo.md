@@ -259,20 +259,20 @@ $$
 &E_{z|x\sim p(z|x)}\left[ f(z) \right] \approx \frac{1}{N} \sum_{i=1}^N f(z_i) \\\
 &z_1,\cdots,z_N\text{ cannot sample from } p(z|x) \\\
 &\dArr \\\
-&\text{construct markov chain, let } \pi(z)=p(z|x) \\\
+&\text{construct markov chain, with stationary dsitribution } \pi(z) \\\
 &\text{$z_i$ sampled by: } z_1 \sim \pi(z_1),z_2\sim \pi(z_2|z_1),\cdots,z_N\sim \pi(z_N|z_{N-1}) \\\
 &\dArr \\\
 &\text{requires $\pi(z)$ is stationary distribution} \\\
 &\dArr \\\
 &\text{requires detailed balance: } \pi(z=S_i)P_{ij} = \pi(z=S_j)P_{ji} \\\
 &\dArr \\\
-&\text{find satisfied transition matrix $P$}
+&\text{find satisfied transition matrix $P$ so that $\pi(z)=p(z)$}
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-Suppose we have a unsatisfied transition matrix \(Q_{ij}\), we can multiply \(Q\) by an acceptance factor \(\alpha(\cdot)\) for balancing the equation.
+Suppose we have a unsatisfied transition matrix \(Q_{ij}\), we can multiply \(Q\) by an acceptance ratio \(\alpha(\cdot)\) for balancing the equation.
 </p>
 {{</ math.inline >}}
 
@@ -305,10 +305,10 @@ $$
 \begin{align}
 &\text{Sample }u_1,\cdots,u_N\sim \mathcal{U}(0,1) \\\
 &\text{For $t=1\cdots N$} \\\
-&\hspace{1em}z_{\ast} \sim Q_{z_{t-1}z_{\ast}} \space,\space \text{sampled candidate state for $z_t$} \\\
-&\hspace{1em}\alpha_{z_{t-1}z_{\ast}} = \min (1, \frac{p({z_{\ast}})Q_{z_{\ast}z_{t-1}}}{p({z_{t-1}})Q_{z_{t-1}z_{\ast}}}) \\\
+&\hspace{1em}z_{\ast} \sim Q_{z_{t-1}z_{\ast}} \space,\space \text{candidate state sampled from \colorbox{brown}{simple distribution} } Q \\\
+&\hspace{1em}\alpha_{z_{t-1}z_{\ast}} = \min (1, \frac{p({z_{\ast}})Q_{z_{\ast}z_{t-1}}}{p({z_{t-1}})Q_{z_{t-1}z_{\ast}}}), Q \text{ is also the state transition distribution} \\\ \\\
 &\hspace{1em}\begin{cases}
-\text{if } u_t \leq  \alpha_{z_{t-1}z_{\ast}} \space , \text{accept $z_t=z_{\ast}$} & \text{the higher probability of $p(z_{\ast})Q_{z_{\ast}z_{t-1}}$, the more likely $z_{\ast}$ is accepted}\\\
+\text{if } u_t \leq  \alpha_{z_{t-1}z_{\ast}} \space , \text{accept $z_t=z_{\ast}$} & \text{the larger $p(z_{\ast})Q_{z_{\ast}z_{t-1}}$, the more likely $z_{\ast}$ is accepted}\\\
 \text{else} \space, z_t=z_{t-1}
 \end{cases} \\\
 &\text{EndFor} \\\
@@ -322,7 +322,7 @@ $$
 \begin{align*}
 &\because z_{\ast} \sim p(z|z_{t-1}), \space p(z=z_{\ast}|z_{t-1}) = p(z_{t-1})Q_{z_{t-1}z_{\ast}}\alpha_{z_{t-1}z_{\ast}}=Q_{z_{t-1}z_{\ast}}\alpha_{z_{t-1}z_{\ast}} \\\
 &\therefore z_{\ast}\sim Q_{z_{t-1}z_{\ast}} \alpha_{z_{t-1}z_{\ast}} \\\
-&\text{we want } Q_{z_{t-1}z_{\ast}} \approx Q_{z_{t-1}z_{\ast}}\alpha_{z_{t-1}z_{\ast}} \iff 1 \approx \alpha_{z_{t-1}z_{\ast}} \\\
+&\text{we want } Q_{z_{t-1}z_{\ast}} \approx P_{z_{t-1}z_{\ast}} \approx Q_{z_{t-1}z_{\ast}}\alpha_{z_{t-1}z_{\ast}} \iff 1 \approx \alpha_{z_{t-1}z_{\ast}} \\\
 &\dArr \\\
 &\because \alpha_{z_{t-1}z_{\ast}} \in [0,1] \text{ and } \alpha_{z_{t-1}z_{\ast}}= 1 \text{ means acceptance} \\\
 &\therefore \text{given }\forall z_{\ast},  \begin{cases}
@@ -396,6 +396,8 @@ Next, we prove the accept ratio is always 1 in Gibbs algorithm:
 {{</ math.inline >}}
 
 $$
+\text{like M-H algorithm, conditional distribution $p(z_i|z_j)$ is the same as state transition distribution $Q$} \\\
+\dArr \\\
 \begin{align*}
 \alpha &= \frac{ p(z_{tj}|z_{t\xcancel{j}})p(z_{t\xcancel{j}})p(z_{t-1}|z_{t}) }{ p(z_{t-1j}|z_{t-1\xcancel{j}})p(z_{t-1\xcancel{j}})p(z_t|z_{t-1}) } \\\
 &\because \xcancel{j}\text{ is fixed, transition probability becomes transition probability to specific dimension $j$} \\\
@@ -409,6 +411,7 @@ $$
 &= 1
 \end{align*}
 $$
+
 
 ## Supplementation
 
