@@ -192,21 +192,29 @@ $$
 
 {{< math.inline >}}
 <p>
-Then we can easily derive the distribution \(\pi_{t+1}\) from \(\pi_t\) by transition matrix:
+Then we can derive the distribution \(\pi_{t+1}\) from \(\pi_t\) by transition matrix:
 </p>
 {{</ math.inline >}}
 
 $$
 \pi_{t+1}(x=S_{j}) = \sum_i \pi_t(x=S_i)P_{ij} \\\
 \text{for any state $\ast$} \\\
-\pi_{t+1}(x=S_{\ast}) = \sum_i \pi_t(x=S_i)P_{i\ast}
+\pi_{t+1}(x=S_{\ast}) = \sum_i \pi_t(x=S_i)P_{i\ast} \\\
+\dArr \\\
+\begin{align*}
+\pi_{t+1}(x) &= \begin{bmatrix}
+\sum_i \pi_t(x=S_i)P_{iS_1} &\cdots& \sum_i \pi_t(x=S_i)P_{iS_K}
+\end{bmatrix} \\\
+&= \pi_t(x)\cdot P \\\
+&= \pi_1(x)\cdot P^t
+\end{align*}
 $$
 
-### Stationary distribution and detailed balance
+### Stationary distribution
 
 {{< math.inline >}}
 <p>
-We call \( \pi(x) \) a <mark>stationary distribution</mark> if \( \pi_t(x) \) and \( \pi_{t+1}(x) \) are indentically equal after transition:
+We call \( \pi(x) \) a <mark>stationary distribution</mark> if \( \pi_t(x) \) and \( \pi_{t+1}(x) \) are indentically equal after t steps of transition:
 </p>
 {{</ math.inline >}}
 
@@ -217,6 +225,51 @@ $$
 \pi(x=S_{\ast}) &= \sum_i \pi(x=S_i)P_{i\ast}
 \end{align*}
 $$
+
+This can be proved as follows:
+
+$$
+\begin{align*}
+&\because P = A \Lambda A^{-1}=A\begin{bmatrix}
+{\lambda_1} & \\\
+& \ddots & \\\
+& & {\lambda_K}
+\end{bmatrix}A^{-1}, \lambda_i \in \Lambda, |\lambda_i|\leq 1, \forall i=1,\cdots,K \\\
+&\therefore \pi_{t+1}(x) = \pi_{1}(x)(A \Lambda A^{-1} )^t = \pi_{1}(x)A\Lambda^t A^{-1}
+\end{align*}
+$$
+
+$$
+\dArr \\\
+\text{Let $\lambda_i=1$, $\lambda_{\neq i}<1$} \\\
+\dArr
+$$
+
+$$
+\begin{align*}
+\exist\space t, \lim_{t\rarr\infty} \Lambda^t = \begin{bmatrix}
+{\lambda_1}^t & \\\
+& \ddots & \\\
+& & {\lambda_K}^t
+\end{bmatrix} &= \begin{bmatrix}
+0 & & \\\
+& \ddots & \\\
+& & {\lambda_i}^t & \\\
+& & & \ddots \\\
+&&&& 0
+\end{bmatrix} = \lim_{t+1\rarr\infty}\Lambda^{t+1} \\\
+\therefore \Lambda^{t+1} &= \Lambda^t \\\
+\pi_1(x)A\Lambda^{t+1}A^{-=1} &= \pi_1(x)A\Lambda^t A^{-1} \\\
+\pi_{t+2}(x) &= \pi_{t+1}(x)
+\end{align*}
+$$
+
+$$
+\therefore \text{markov chain converges to stationary distribution after $t+1$ steps} \\\
+\text{where $\pi_{t+1}(x)=\pi_{t+1}(x)=\cdots$}
+$$
+
+### Detailed balance
 
 {{< math.inline >}}
 <p>
@@ -259,14 +312,14 @@ $$
 &E_{z|x\sim p(z|x)}\left[ f(z) \right] \approx \frac{1}{N} \sum_{i=1}^N f(z_i) \\\
 &z_1,\cdots,z_N\text{ cannot sample from } p(z|x) \\\
 &\dArr \\\
-&\text{construct markov chain, with stationary dsitribution } \pi(z) \\\
+&\text{construct markov chain, with stationary dsitribution } \pi(z) \text{ and }\pi(z)=p(z|x) \\\
 &\text{$z_i$ sampled by: } z_1 \sim \pi(z_1),z_2\sim \pi(z_2|z_1),\cdots,z_N\sim \pi(z_N|z_{N-1}) \\\
 &\dArr \\\
 &\text{requires $\pi(z)$ is stationary distribution} \\\
 &\dArr \\\
 &\text{requires detailed balance: } \pi(z=S_i)P_{ij} = \pi(z=S_j)P_{ji} \\\
 &\dArr \\\
-&\text{find satisfied transition matrix $P$ so that $\pi(z)=p(z)$}
+&\text{find satisfied transition matrix $P \iff $ find approximate $Q\approx P$ by rejection sampling}
 \end{align*}
 $$
 
