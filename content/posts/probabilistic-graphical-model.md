@@ -100,13 +100,26 @@ $$
 \text{It has: }
 $$
 
-```goat
+<!-- ```goat
  .-.            .-.           
 | 1 |<---  | 2 |
  '-'           '-'
-```
+``` -->
 
 ```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'red',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
 flowchart LR
     id1((b)) --> id2((a))
 ```
