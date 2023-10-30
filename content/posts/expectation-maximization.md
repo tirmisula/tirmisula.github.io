@@ -1,6 +1,6 @@
 ---
 author: "X. Wang"
-title: "EM Algorithm"
+title: "Expectation Maximization Algorithm"
 date: "2023-09-08"
 description: "A brief introduction."
 tags: ["machine learning"]

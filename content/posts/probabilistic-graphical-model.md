@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
-title: "Markov Chain Monte Carlo Method"
-date: "2023-09-11"
+title: "Probabilistic Graphical Model"
+date: "2023-09-12"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -38,115 +38,57 @@ TocOpen: true
 
 ## Background
 
-### The object of Monte Carlo
+### Overview of GPM
 
 <cite>[^1]</cite>
 
 $$
-\begin{align*}
-p(z|x) \rarr E_{z|x\sim p(z|x)}\left[ f(z) \right] &= \int_{z}f(z)p(z|x)dz \\\
-&\approx \frac{1}{N} \sum_{i=1}^N f(z_i) \\\
-z_1,\cdots,z_N&\text{ are randomly sampled from } p(z|x)
-\end{align*}
-$$
-
-There are serveral ways to do sampling.
-
-### Sampling from cdf
-
-{{< math.inline >}}
-<p>
-Suppose we have cumulative density function of \(p(z|x)\), CDF:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-\text{CDF}(t) &= \int_{-\infty}^{t}p(z|x)dz \\\
-&t\in [-\infty,\infty] \\\
-&\text{CDF}(t)\in [0,1]
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-And we have \( u_1,\cdots,u_N \) sampled from uniform distribution \( \mathcal{U}(0,1) \):
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-u_1,\cdots,u_N\sim \mathcal{U}(0,1)
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-\(z_i\) is given by the inverse of cdf:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-&\forall 1,\cdots,N \\\
-&z_i = \text{CDF}^{-1}(u_i) \\\
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-Apparently CDF may not be solvable for most of complex \(p(z|x)\).
-</p>
-{{</ math.inline >}}
-
-### Rejection sampling
-
-{{< math.inline >}}
-<p>
-We purpose a pdf \(q(z)\) to approximate \(p(z|x)\), define acceptance rate \(\alpha\):
-</p>
-{{</ math.inline >}}
-
-$$
-\alpha = \frac{p(z|x)}{Mq(z)}
-$$
-
-Then the sampling procedures are:
-
-$$
-\begin{align*}
-&\forall i=1,\cdots,N \\\
-&z_i \sim q(z) \\\
-&u_i \sim \mathcal{U}(0,1) \\\
-&\begin{cases}
-\text{If } u\leq \alpha, \text{accept $z_i$} \\\
-\text{Else }, \text{reject $z_i$} 
+\text{GPM}: \begin{cases}
+    \text{Representation} \begin{cases}
+        \text{directed graph}\rarr  \text{bayesian network} \\\
+        \text{undirected graph}\rarr \text{Markov network} \\\
+        \text{Gaussian graph for continous variable}
+    \end{cases} \\\
+    \text{Inference} \begin{cases}
+        \text{exact inference} \\\
+        \text{approximate inference} \begin{cases}
+            \text{variational inference} \\\
+            \text{MCMC}
+        \end{cases} 
+    \end{cases} \\\
+    \text{Learning} \begin{cases}
+        \text{parameter learning} \begin{cases}
+            \text{complete data: $(x,z)$} \\\
+            \text{hidden variable: $z$}
+        \end{cases} \\\
+        \text{structure learning}
+    \end{cases}
 \end{cases}
-\end{align*}
 $$
 
-{{< math.inline >}}
-<p>
-The core idea is the larger difference between \(p(z_i|x)\) and \(q(z_i)\) the more likely \(z_i\) will be rejected. The problem is finding such \(q(z)\) is difficult.
-</p>
-{{</ math.inline >}}
+### Operations for high dimensional data
 
-### Importance sampling
+$$
+\begin{cases}
+\text{sum rule: } p(x_1)=\int p(x_1,x_2)dx_2 \\\
+\text{product rule: } p(x_1,x_2)=p(x_1)P(x_2|x_1) \\\
+\text{chain rule: } p(x_1,\cdots,x_p)=p(x_1|x_2,...,x_p) \cdots p(x_{p-2}|x_{p-1},x_p)p(x_{p-1}|x_p)p(x_p) \\\
+\text{bayesian rule: } p(x_2|x_1)=\frac{p(x_1,x_2)}{p(x_1)}=\frac{p(x_1,x_2)}{\int p(x_1,x_2)dx_2}=\frac{p(x_1,x_2)}{\int p(x_2)p(x_1|x_2)dx_2}
+\end{cases}
+$$
+
+### Simplifications for high dimensional data
+
+Considering high computation cost, high dimensional data can be simplified at different level:
 
 $$
 \begin{align*}
-E_{z|x\sim p(z|x)}\left[ f(z) \right] &= \int_{z}f(z)p(z|x)dz \\\
-&= \int_{z}f(z)\frac{p(z|x)}{q(z)}q(z)dz \\\
-&\approx \frac{1}{N} \sum_{i=1}^N f(z_i)\frac{p(z_i|x)}{q(z_i)}, \frac{p(z_i|x)}{q(z_i)}\text{ is weight} \\\
-z_1,\cdots,z_N&\text{ are randomly sampled from } q(z)
+&1. \text{ Each dimension is independent} \rarr p(x|y)=\prod_{i=1}^p p(x_i|y) \text{ (Naive Bayes)} \\\
+&2. \text{ Related to previous state} \rarr x_j\perp x_{i+1}|x_i, j<i \text{(Hidden Markov)} \\\
+&3. \text{ Related to previous states}\rarr x_A\perp x_{B}|x_C \text{( $x_A,x_B,x_C$ are dimensions set)} \\\
+&\text{e.g. }x_j\perp x_{i}|x_{i-1},x_{i-3}
 \end{align*}
 $$
-
-{{< math.inline >}}
-<p>
-It works when \( p(z|x) \) and \( q(z) \) are close, if the weight is not close to 1 we need to do resampling based on the importance sampling result by weights which is called Importance-Sampling-Resampling.
-</p>
-{{</ math.inline >}}
 
 ## Markov chain
 ### Description
