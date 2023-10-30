@@ -108,7 +108,7 @@ $$
 
 ```mermaid
 flowchart LR
-    id1((b)) --> id1((a))
+    id1((b)) --> id2((a))
 ```
 
 Bayesian network satisfies conditionally independent and factorization:
