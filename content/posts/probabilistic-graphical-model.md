@@ -107,6 +107,7 @@ $$
 ``` -->
 
 <div style="background-color: white; text-align: center;">
+
 ```mermaid
 %%{
   init: {
@@ -124,6 +125,7 @@ $$
 flowchart LR
     id1((b)) --> id2((a))
 ```
+
 </div>
 
 Bayesian network satisfies conditionally independent and factorization:
