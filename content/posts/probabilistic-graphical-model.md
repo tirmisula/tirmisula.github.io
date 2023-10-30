@@ -101,14 +101,14 @@ $$
 $$
 
 ```goat
- .-.           
-| 1 |<---  
- '-'
+ .-.            .-.           
+| 1 |<---  | 2 |
+ '-'           '-'
 ```
 
 ```mermaid
 flowchart LR
-   ((b)) --> ((a))
+    id1((b)) --> id1((a))
 ```
 
 Bayesian network satisfies conditionally independent and factorization:
@@ -584,7 +584,7 @@ plt.show()
 
 ## Reference
 
-[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=76).
+[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=46).
 [^3]: From [The Matrix Cookbook](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
 [^5]: From [Mean field variational inference](https://mbernste.github.io/files/notes/MeanFieldVariationalInference.pdf).
 [^4]: From [Ross, Sheldon M. (2019). Introduction to probability models](https://doi.org/10.1016%2FC2017-0-01324-1).
