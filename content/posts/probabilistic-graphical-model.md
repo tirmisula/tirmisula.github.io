@@ -120,6 +120,8 @@ $$
  '-'           '-'
 ``` -->
 
+```html
+
 <div class="graph" style="text-align: center;">
 
 ```mermaid
@@ -141,6 +143,7 @@ flowchart LR
 ```
 
 </div>
+```
 
 Bayesian network satisfies conditionally independent and factorization:
 
@@ -201,13 +204,13 @@ $$
 \begin{align*}
 p(a)p(b|a)p(c|a) &= p(a)p(b|a)p(c|a,b) \\\
 p(c|a) &= p(c|a,b) \\\
-c\perp b | a, &\text{c is not affected whether $a$ is observed}
+c\perp b | a, &\text{c is not affected whether $b$ is observed}
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-So we can conclude that while \(a\) is observed, the path from \(b\) to \(c\) is blocked so \(b\) and \(c\) are mutual independent.
+So we can conclude that while \(a\) is observed, the path from \(b\) to \(c\) is blocked so \(b\) and \(c\) are mutually independent.
 </p>
 {{</ math.inline >}}
 
@@ -236,32 +239,37 @@ flowchart LR
 
 </div>
 
+Based on factorization, we have:
+
 $$
 \begin{align*}
-P_{ij} &= p(x_{t+1}=S_j|x_t=S_i) \\\
-\sum_j P_{ij} &= 1
+p(a,b,c) = p(a)p(b|a)p(c|b)
+\end{align*}
+$$
+
+Based on chain rule, we have:
+
+$$
+\begin{align*}
+p(a,b,c) = p(a)p(b|a)p(c|a,b)
+\end{align*}
+$$
+
+So,
+
+$$
+\begin{align*}
+p(a)p(b|a)p(c|b) &= p(a)p(b|a)p(c|a,b) \\\
+p(c|b) &= p(c|a,b) \\\
+c\perp a | b, &\text{c is not affected whether $a$ is observed}
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-Then we can derive the distribution \(\pi_{t+1}\) from \(\pi_t\) by transition matrix:
+So we can conclude that while \(b\) is observed, the path from \(a\) to \(c\) is blocked so \(a\) and \(c\) are mutually independent.
 </p>
 {{</ math.inline >}}
-
-$$
-\pi_{t+1}(x=S_{j}) = \sum_i \pi_t(x=S_i)P_{ij} \\\
-\text{for any state $\ast$} \\\
-\pi_{t+1}(x=S_{\ast}) = \sum_i \pi_t(x=S_i)P_{i\ast} \\\
-\dArr \\\
-\begin{align*}
-\pi_{t+1}(x) &= \begin{bmatrix}
-\sum_i \pi_t(x=S_i)P_{iS_1} &\cdots& \sum_i \pi_t(x=S_i)P_{iS_K}
-\end{bmatrix} \\\
-&= \pi_t(x)\cdot P \\\
-&= \pi_1(x)\cdot P^t
-\end{align*}
-$$
 
 ### Stationary distribution
 
