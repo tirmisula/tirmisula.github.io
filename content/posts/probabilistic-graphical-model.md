@@ -120,7 +120,8 @@ $$
  '-'           '-'
 ``` -->
 
-```html
+<!-- add html template to change bg color -->
+<!-- ```html
 
 <div class="graph" style="text-align: center;">
 
@@ -131,7 +132,7 @@ flowchart LR
 
 </div>
 
-```
+``` -->
 
 <div class="graph" style="text-align: center;">
 
@@ -355,7 +356,7 @@ b&\perp a
 $$
 
 ### D-separation
-
+#### the rules of d-separation
 {{< math.inline >}}
 <p>
 D-separation is a method to check whether a Bayesian network satisfies conditional independent, so that:
@@ -383,6 +384,34 @@ $$
 $$
 
 The rule of D-separation is also called <b>global markov property</b>.
+
+#### markov blanket
+
+Given a conditinal probability:
+
+$$
+\begin{align*}
+p(x_i|x_{\neq i}) &= \frac{p(x_i,x_{\neq i})}{p(x_{\neq i})} \\\
+&= \frac{p(x)}{\int p(x)dx_i} \\\
+&\because p(x) = \prod_{j=1}^p p(x_j|x_{pa(j)}) = f(x_i)g(x_{\neq i}) \\\
+&\text{$p(x)$ can be separated to 2 parts: $f(x_i)$ part related to $x_i$, $g(x_{\neq i})$ not related to $x_i$} \\\
+&= \frac{f(x_i)g(x_{\neq i})}{g(x_{\neq i})\int f(x_i)dx_i} \\\
+&= \frac{f(x_i)}{\int f(x_i)dx_i}
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+It gives us information: conditional probability of \(x_i\) is affected only by the local area of node \(x_i\), not all of the nodes from global, This area is called Markov blanket which includes:
+</p>
+{{</ math.inline >}}
+
+$$
+f(x_i):\begin{cases}
+p(x_i|x_{pa(i)}) & \text{$x_i$'s parent nodes} \\\
+p(x_{child(i)}|x_i, x_{pa(x_{child(i)})}) & \text{$x_i$'s child nodes and $x_i$'s spouse nodes}
+\end{cases}
+$$
 
 ## Metropolis-Hastings algorithm
 ### Introduction
