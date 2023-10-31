@@ -39,15 +39,16 @@ TocOpen: true
 <style>
 /* Custom CSS styles */
 .graph {
-  background-color: white;
+    background-color: white;
   /* padding: 10px; */
   /* border-radius: 5px; */
 }
-/* .my-code-snippet pre {
-  font-family: 'Courier New', monospace;
+.graph pre {
+    background-color: white;
+  /* font-family: 'Courier New', monospace;
   font-size: 14px;
-  line-height: 1.5;
-} */
+  line-height: 1.5; */
+}
 </style>
 
 ## Background
@@ -200,24 +201,40 @@ $$
 \begin{align*}
 p(a)p(b|a)p(c|a) &= p(a)p(b|a)p(c|a,b) \\\
 p(c|a) &= p(c|a,b) \\\
-c\perp b | a, &\text{c is not affected whether $b$ is observed}
+c\perp b | a, &\text{c is not affected whether $a$ is observed}
 \end{align*}
 $$
 
-
 {{< math.inline >}}
 <p>
-The state of \(x_{t+1}\) is only relevant to the state of last time \(x_t\)
+So we can conclude that while \(a\) is observed, the path from \(b\) to \(c\) is blocked so \(b\) and \(c\) are mutual independent.
 </p>
 {{</ math.inline >}}
 
-### State transition matrix
+#### head to tail
 
-{{< math.inline >}}
-<p>
-The state transition probability can be described as a transition matrix \(P_{ij}\) and has following attribute:
-</p>
-{{</ math.inline >}}
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'red',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id1((a)) --> id2((b))
+    id2((b)) --> id3((c))
+```
+
+</div>
 
 $$
 \begin{align*}
