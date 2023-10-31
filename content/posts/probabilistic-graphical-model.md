@@ -120,6 +120,19 @@ $$
  '-'           '-'
 ``` -->
 
+```html
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+flowchart LR
+
+```
+
+</div>
+
+```
+
 <div class="graph" style="text-align: center;">
 
 ```mermaid
@@ -153,7 +166,7 @@ $$
 
 There are three partial graph structures:
 
-### Common structures
+### Local features of BN
 #### tail to tail
 
 <div class="graph" style="text-align: center;">
@@ -325,39 +338,51 @@ So we can conclude that \(a\) and \(b\) are mutually independent if \(c\) is not
 </p>
 {{</ math.inline >}}
 
+{{< math.inline >}}
+<p>
+<mark>It also applies</mark> when \( c \) has child node \( d \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+p(a)p(b)p(c|a,b)p(d|c) &= p(a)p(b|a)p(c|a,b)p(d|a,b,c) \\\
+p(a)p(b)p(c,d|a,b) &= p(a,b,c,d) \\\
+p(a)p(b)p(c,d|a,b) &= p(a,b)p(c,d|a,b) \\\
+p(a)p(b) &= p(a,b) \\\
+b&\perp a
+\end{align*}
+$$
+
 ### D-separation
 
 {{< math.inline >}}
 <p>
-If the chain is reversible w.r.t. \(\pi(x)\), we call it <mark>detailed balance</mark> equation:
+D-separation is a method to check whether a Bayesian network satisfies conditional independent, so that:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-\pi(x=S_i)P_{ij} = \pi(x=S_j)P_{ji}, \forall i,j
+x_A \perp x_C | x_B
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-Next we can prove that detailed balance is sufficient but not necessary condition for stationary distribution:
+The rules are:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-\text{detailed balance} &\implies \text{stationary distribution} \\\
-&\dArr\\\
-\text{Let } j&=\ast, \text{we sum all over $j$} \\\
-\sum_j \pi(x=S_i)P_{ij} &= \sum_j \pi(x=S_{j})P_{ji} \\\
-\pi(x=S_i)\sum_j P_{ij} &= \sum_j \pi(x=S_{j})P_{ji} \\\
-\pi(x=S_i) &= \sum_j \pi(x=S_{j})P_{ji} \\\
-\text{Let } i&=\ast \\\
-\pi(x=S_{\ast}) &= \sum_{j}\pi(x=S_j)P_{j\ast} \\\
-\text{Q.E.D.}
+&1. \text{If node $\alpha \in $tail to tail(parent node), $\alpha \in x_B$}\\\
+&2. \text{If node $\alpha \in $head to tail(intermediate node), $\alpha \in x_B$}\\\
+&3. \text{If node $\alpha \in $head to head(child node OR descendant of child node), $\alpha \notin x_B$}\\\
 \end{align*}
 $$
+
+The rule of D-separation is also called <b>global markov property</b>.
 
 ## Metropolis-Hastings algorithm
 ### Introduction
