@@ -120,8 +120,6 @@ $$
  '-'           '-'
 ``` -->
 
-```html
-
 <div class="graph" style="text-align: center;">
 
 ```mermaid
@@ -143,7 +141,6 @@ flowchart LR
 ```
 
 </div>
-```
 
 Bayesian network satisfies conditionally independent and factorization:
 
@@ -271,66 +268,64 @@ So we can conclude that while \(b\) is observed, the path from \(a\) to \(c\) is
 </p>
 {{</ math.inline >}}
 
-### Stationary distribution
+#### head to head
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'red',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id1((a)) --> id3((c))
+    id2((b)) --> id3((c))
+```
+
+</div>
+
+Based on factorization, we have:
+
+$$
+\begin{align*}
+p(a,b,c) = p(a)p(b)p(c|a,b)
+\end{align*}
+$$
+
+Based on chain rule, we have:
+
+$$
+\begin{align*}
+p(a,b,c) = p(a)p(b|a)p(c|a,b)
+\end{align*}
+$$
+
+So,
+
+$$
+\begin{align*}
+p(a)p(b)p(c|a,b) &= p(a)p(b|a)p(c|a,b) \\\
+p(b) &= p(b|a) \\\
+b\perp a , &\text{$b$ does not affect $a$'s happening}
+\end{align*}
+$$
 
 {{< math.inline >}}
 <p>
-We call \( \pi(x) \) a <mark>stationary distribution</mark> if \( \pi_t(x) \) and \( \pi_{t+1}(x) \) are indentically equal after t steps of transition:
+So we can conclude that \(a\) and \(b\) are mutually independent if \(c\) is not observed, if \(c\) is observed \(a\) and \(b\) are related.
 </p>
 {{</ math.inline >}}
 
-$$
-\begin{align*}
-\pi_{t+1}(x=S_{\ast}) = \pi_{t}(x=S_{\ast}) &= \sum_i \pi_t(x=S_i)P_{i\ast} \\\
-&\dArr \\\
-\pi(x=S_{\ast}) &= \sum_i \pi(x=S_i)P_{i\ast}
-\end{align*}
-$$
-
-This can be proved as follows:
-
-$$
-\begin{align*}
-&\because P = A \Lambda A^{-1}=A\begin{bmatrix}
-{\lambda_1} & \\\
-& \ddots & \\\
-& & {\lambda_K}
-\end{bmatrix}A^{-1}, \lambda_i \in \Lambda, |\lambda_i|\leq 1, \forall i=1,\cdots,K \\\
-&\therefore \pi_{t+1}(x) = \pi_{1}(x)(A \Lambda A^{-1} )^t = \pi_{1}(x)A\Lambda^t A^{-1}
-\end{align*}
-$$
-
-$$
-\dArr \\\
-\text{Let $\lambda_i=1$, $\lambda_{\neq i}<1$} \\\
-\dArr
-$$
-
-$$
-\begin{align*}
-\exist\space t, \lim_{t\rarr\infty} \Lambda^t = \begin{bmatrix}
-{\lambda_1}^t & \\\
-& \ddots & \\\
-& & {\lambda_K}^t
-\end{bmatrix} &= \begin{bmatrix}
-0 & & \\\
-& \ddots & \\\
-& & {\lambda_i}^t & \\\
-& & & \ddots \\\
-&&&& 0
-\end{bmatrix} = \lim_{t+1\rarr\infty}\Lambda^{t+1} \\\
-\therefore \Lambda^{t+1} &= \Lambda^t \\\
-\pi_1(x)A\Lambda^{t+1}A^{-=1} &= \pi_1(x)A\Lambda^t A^{-1} \\\
-\pi_{t+2}(x) &= \pi_{t+1}(x)
-\end{align*}
-$$
-
-$$
-\therefore \text{markov chain converges to stationary distribution after $t+1$ steps} \\\
-\text{where $\pi_{t+1}(x)=\pi_{t+1}(x)=\cdots$}
-$$
-
-### Detailed balance
+### D-separation
 
 {{< math.inline >}}
 <p>
