@@ -394,7 +394,7 @@ $$
 p(x_i|x_{\neq i}) &= \frac{p(x_i,x_{\neq i})}{p(x_{\neq i})} \\\
 &= \frac{p(x)}{\int p(x)dx_i} \\\
 &\because p(x) = \prod_{j=1}^p p(x_j|x_{pa(j)}) = f(x_i)g(x_{\neq i}) \\\
-&\text{$p(x)$ can be separated to 2 parts: $f(x_i)$ part related to $x_i$, $g(x_{\neq i})$ not related to $x_i$} \\\
+&\text{$p(x)$ can be separated to 2 parts: $f(x_i)$ related to $x_i$, $g(x_{\neq i})$ not related to $x_i$} \\\
 &= \frac{f(x_i)g(x_{\neq i})}{g(x_{\neq i})\int f(x_i)dx_i} \\\
 &= \frac{f(x_i)}{\int f(x_i)dx_i}
 \end{align*}
@@ -402,7 +402,7 @@ $$
 
 {{< math.inline >}}
 <p>
-It gives us information: conditional probability of \(x_i\) is affected only by the local area of node \(x_i\), not all of the nodes from global, This area is called Markov blanket which includes:
+It gives us information: conditional probability of \(x_i\) is affected only by the local area of node \(x_i\), not all nodes from global, This covered area is called Markov blanket which includes:
 </p>
 {{</ math.inline >}}
 
@@ -410,6 +410,47 @@ $$
 f(x_i):\begin{cases}
 p(x_i|x_{pa(i)}) & \text{$x_i$'s parent nodes} \\\
 p(x_{child(i)}|x_i, x_{pa(x_{child(i)})}) & \text{$x_i$'s child nodes and $x_i$'s spouse nodes}
+\end{cases}
+$$
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'red',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart TB
+    id1((pa)) --> id3((x))
+    id2((pa)) --> id3((x))
+    id3((x)) --> id4((child))
+    id3((x)) --> id5((child))
+    id6((sp)) --> id4((child))
+    id7((sp)) --> id5((child))
+```
+
+</div>
+
+### BN models
+
+$$
+\text{BN models}: \begin{cases}
+    \text{Singular: Naive Bayes} \\\
+    \text{Mixture: Gaussian Mixture Model} \\\
+    \text{Stochastic process: } \begin{cases}
+        \text{Markov chain} \\\
+        \text{Gaussian process}
+    \end{cases} \\\
+    \text{Continous: Gaussian Bayesian Network}
 \end{cases}
 $$
 
@@ -739,9 +780,9 @@ plt.show()
 [^4]: From [Ross, Sheldon M. (2019). Introduction to probability models](https://doi.org/10.1016%2FC2017-0-01324-1).
 [^2]: From [Metropolis-Hastings algorithm](https://www.cnblogs.com/RyanXing/p/M-H.html).
 
-{{ if .Page.Store.Get "hasMermaid" }}
+<!-- {{ if .Page.Store.Get "hasMermaid" }} -->
   <script type="module">
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
     mermaid.initialize({ startOnLoad: true });
   </script>
-{{ end }}
+<!-- {{ end }} -->
