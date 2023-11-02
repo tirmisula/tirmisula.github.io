@@ -27,6 +27,13 @@ TocOpen: true
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
     onload="renderMathInElement(document.body);"></script>
 {{ end }}
+
+{{ if .Page.Store.Get "hasMermaid" }}
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true });
+  </script>
+{{ end }}
 {{</ math.inline >}}
 
 <style>
@@ -53,12 +60,12 @@ TocOpen: true
 
 ## Background
 
-### Overview of GPM
+### Overview of PGM
 
 <cite>[^1]</cite>
 
 $$
-\text{GPM}: \begin{cases}
+\text{PGM}: \begin{cases}
     \text{Representation} \begin{cases}
         \text{directed graph}\rarr  \text{bayesian network} \\\
         \text{undirected graph}\rarr \text{Markov network} \\\
@@ -156,7 +163,7 @@ flowchart LR
 
 </div>
 
-Bayesian network satisfies conditionally independent and factorization:
+Bayesian network has 2 attributes: **conditionally independent** and **factorization**:
 
 $$
 \begin{align*}
@@ -165,9 +172,10 @@ $$
 \end{align*}
 $$
 
+### Local features of BN
+
 There are three partial graph structures:
 
-### Local features of BN
 #### tail to tail
 
 <div class="graph" style="text-align: center;">
@@ -518,7 +526,7 @@ $$
 
 {{< math.inline >}}
 <p>
-From pairwise markov, we know that if \(x_i \perp x_j\), other nodes are blocked. It means \(x_i\) and \(x_j\) are not connected, \(x_i\) and \(x_j\) belongs to different <b>max-clique</b>.
+From pairwise markov, we know that if \(x_i \perp x_j\), other nodes are blocked. It means \(x_i\) and \(x_j\) are not connected, \(x_i\) and \(x_j\) destinedly belongs to different <b>max-clique</b>.
 </p>
 {{</ math.inline >}}
 
@@ -531,7 +539,7 @@ $$
 
 ### Factorization of MRF
 
-According to **Hammersley–Clifford theorem**<cite>[^2]</cite>, factorization of MRF can be expressed as potential function on maximum clique:
+According to **Hammersley–Clifford theorem**<cite>[^2]</cite>, factorization of MRF can be expressed as production of potential function on maximum clique:
 
 $$
 \begin{align*}
@@ -543,12 +551,35 @@ z &: \text{nomalize factor, $z=\sum_{x_1\cdots x_p}\prod_{i=1}^K \psi(x_{C_i})$}
 \end{align*}
 $$
 
-To make it greater than zero, potential function has exponential form:
+To be greater than zero, potential function has exponential form:
 
 $$
 \begin{align*}
 \psi(x_{C_i}) &= \exp(-E(x_{C_i})) \\\
 E(x) &: \text{energy function}
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+For such pdf \( p(x) \) made up of potential functions, we call it <b>Gibbs distribution</b> or <b>Boltzman distribution</b>, Gibbs distirbution is also exponential family distribution:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+p(x) &= \frac{1}{z}\prod_{i=1}^K\exp(-E(x_{C_i})) \\\
+&= \frac{1}{z} \exp( -\sum_{i=1}^K E(x_{C_i})) \\\
+&= \frac{1}{z(\eta)}h(x)\exp( \eta^T\phi(x) )
+\end{align*}
+$$
+
+Because Gibbs distribution belongs to exponential family distribution, it maximize entropy naturally, thus we can conclude:
+
+$$
+\begin{align*}
+\text{MRF distribution}\iff \text{Gibbs distribution}&\iff \text{Distribution that maximize entropy} \\\ 
+&\iff \text{most likely to be observed}
 \end{align*}
 $$
 
@@ -717,10 +748,3 @@ plt.show()
 [^5]: From [Mean field variational inference](https://mbernste.github.io/files/notes/MeanFieldVariationalInference.pdf).
 [^4]: From [Ross, Sheldon M. (2019). Introduction to probability models](https://doi.org/10.1016%2FC2017-0-01324-1).
 [^2]: From [Hammersley–Clifford theorem](http://www.statslab.cam.ac.uk/~grg/books/hammfest/hamm-cliff.pdf).
-
-<!-- {{ if .Page.Store.Get "hasMermaid" }} -->
-  <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
-    mermaid.initialize({ startOnLoad: true });
-  </script>
-<!-- {{ end }} -->
