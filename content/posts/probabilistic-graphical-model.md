@@ -806,11 +806,11 @@ Visualizing the general form:
   }
 }%%
 flowchart LR
-    id1((p(i))) ---|f<sub>j→i</sub>| id2((j))
+    id1((p(i))) ---|f_j→i| id2((j))
     id1((p(i))) ---|f_j→i| id3((j))
     id1((p(i))) ---|f_j→i| id4((...))
     id1((p(i))) ---|f_j→i| id5((j))
-    id1((p(i))) ---|aaa| id1((p(i)))
+    id1((p(i))) --- id6(("&psi;(i)"))
 ```
 
 </div>
