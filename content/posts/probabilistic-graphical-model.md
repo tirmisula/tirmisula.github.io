@@ -761,6 +761,60 @@ $$
 p(a,b,c,d,e) = \frac{1}{z}\psi(a)\psi(b)\psi(c)\psi(d)\psi(e)\psi(a,b)\psi(b,c)\psi(b,d)\psi(a,e)
 $$
 
+{{< math.inline >}}
+<p>
+The marginal probability \(p(a)\) is:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{cases}
+p(a) = \psi(a)f_{b\rarr a}(x_a)f_{e\rarr a}(x_a) \\\
+f_{b\rarr a}(x_a) = \sum_b \psi(a,b)\psi(b)f_{c\rarr b}(x_b)f_{d\rarr b}(x_b) \\\
+f_{e\rarr a}(x_a) = \sum_e \psi(a,e)\psi(e)
+\end{cases}
+$$
+
+A more <b>general form</b>:
+
+$$
+\forall i \in \text{vertices in $G(V,E)$} \\\
+\begin{cases}
+p(i) = \psi(i)\prod_{j\in neighbor(i)} f_{j\rarr i}(x_i) \\\
+f_{j\rarr i}(x_i) = \sum_{j} \psi(i,j)\psi(j) \prod_{k\in neighbor(j)} f_{k\rarr j}(x_j)
+\end{cases}
+$$
+
+Visualizing the general form:
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    "htmlLabels": true,
+    "securityLevel": "loose",
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'red',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id1((p(i))) ---|f<sub>j→i</sub>| id2((j))
+    id1((p(i))) ---|f_j→i| id3((j))
+    id1((p(i))) ---|f_j→i| id4((...))
+    id1((p(i))) ---|f_j→i| id5((j))
+    id1((p(i))) ---|aaa| id1((p(i)))
+```
+
+</div>
+
 ## Conclusion
 
 {{< math.inline >}}
