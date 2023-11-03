@@ -67,15 +67,21 @@ TocOpen: true
 $$
 \text{PGM}: \begin{cases}
     \text{Representation} \begin{cases}
-        \text{directed graph}\rarr  \text{bayesian network} \\\
-        \text{undirected graph}\rarr \text{Markov network} \\\
-        \text{Gaussian graph for continous variable}
+        \text{directed graph}\rarr  \text{Bayesian network} \\\
+        \text{undirected graph}\rarr \text{Markov network(MRF)} \\\
+        \text{continous variable}\rarr \text{Gaussian BN/Gaussian MRF}
     \end{cases} \\\
     \text{Inference} \begin{cases}
-        \text{exact inference} \\\
+        \text{MAP inference$\rarr \hat{x_A}=\argmax_{x_A}p(x_A|x_B)\propto\argmax p(x_A,x_B)$} \\\
+        \text{exact inference} \begin{cases}
+          \text{Variable elimination(VE)} \\\
+          \text{Belief propagation(BP)$\rarr$sum-product algorithm(Tree structure)} \\\
+          \text{Junction tree algorithm(Normal graph)}
+        \end{cases} \\\
         \text{approximate inference} \begin{cases}
-            \text{variational inference} \\\
-            \text{MCMC}
+            \text{Loop belief propagation(Cyclic graph)} \\\
+            \text{Variational inference} \\\
+            \text{MCMC: importance sampling}
         \end{cases} 
     \end{cases} \\\
     \text{Learning} \begin{cases}
@@ -539,7 +545,7 @@ $$
 
 ### Factorization of MRF
 
-According to **Hammersley–Clifford theorem**<cite>[^2]</cite>, factorization of MRF can be expressed as production of potential function on maximum clique:
+According to **Hammersley–Clifford theorem**<cite>[^2]</cite>, factorization of undirected graph MRF can be expressed as production of potential function on maximum clique:
 
 $$
 \begin{align*}
@@ -583,70 +589,85 @@ $$
 \end{align*}
 $$
 
-## Gibbs algorithm
-### Introduction
+## Inference in PGM
+### Variable elimination
 
-{{< math.inline >}}
-<p>
-Gibbs algorithm is a special Metropolis-Hastings algorithm that considers \(p(z)\) the joint probability of different dimensions \( p(z)=p(z_1,\cdots,z_p) \), and we sample each dimension by fixing other dimensions, here are some prerequisite notations:
-</p>
-{{</ math.inline >}}
+VE thought is based on distirbutive law:
+
+$$
+a(b+c) \text{ is better than } ab+ac \\\
+\text{summation is better than multiplication}
+$$
+
+Suppose we have directed graph:
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'red',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id1((a)) --> id2((b))
+    id2((b)) --> id3((c))
+    id3((c)) --> id4((d))
+```
+
+</div>
+
+We can compute marginal probability by:
 
 $$
 \begin{align*}
-z_{ij} &: \text{i-th sample, j-th dimension of $z$} \\\
-i&=1,\cdots,N \\\
-j&=1,\cdots,p \\\
-z_{i\xcancel{j}} &: \text{i-th sample, dimensions of $z$ without j-th} \\\
-z_{i<j} &: \text{i-th sample, dimensions of $z$ lower than j-th} \\\
-z_{i>j} &: \text{i-th sample, dimensions of $z$ higher than j-th}
-% p(z_i) &= \prod_{j=1}^p p(z_{ij})
+p(d) &= \sum_{a,b,c} p(a,b,c,d) \\\
+&= \sum_{a,b,c} p(a)p(b|a)p(c|b)p(d|c) \\\
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-<b>Gibbs algorithm</b> solves joint distribution by known conditional distribution:
+The computation complexity is \(O(4^k)\). we can turn it to:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-&\text{Sample }u_1,\cdots,u_N\sim \mathcal{U}(0,1) \\\
-&\text{Initialize }z_1=(z_{11},z_{12},\cdots,z_{1p}) \\\
-&\text{For $t=2\cdots N$} \\\
-    &\hspace{1em}\text{For $j=1\cdots p$} \\\
-        &\hspace{2em}z_{tj}\sim p(z|z_{t-1 >j},z_{t<j})  \\\
-        &\hspace{2em}\text{accept $z_{ij}$} \\\
-    &\hspace{1em}\text{EndFor} \\\
-    &\hspace{1em}z_t = (z_{t1},z_{t2},\cdots,z_{tp})  \\\
-&\text{EndFor} \\\
-&\text{Return $z_1,\cdots,z_N$}
+p(d) &= \sum_{a,b,c} p(a)p(b|a)p(c|b)p(d|c) \\\
+&= \sum_{b,c}p(c|b)p(d|c)\sum_{a}\underset{f(a,b)}{p(a)p(b|a)} \\\
+&= \sum_{c}p(d|c)\sum_{b}p(c|b)f(b) \\\
+&= \sum_{c}p(d|c)f(c) \\\
+&= f(d)
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-Next, we prove the accept ratio is always 1 in Gibbs algorithm:
+It is the same for undirected graph:
 </p>
 {{</ math.inline >}}
 
 $$
-\text{like M-H algorithm, conditional distribution $p(z_i|z_j)$ is the same as state transition distribution $Q$} \\\
-\dArr \\\
 \begin{align*}
-\alpha &= \frac{ p(z_{tj}|z_{t\xcancel{j}})p(z_{t\xcancel{j}})p(z_{t-1}|z_{t}) }{ p(z_{t-1j}|z_{t-1\xcancel{j}})p(z_{t-1\xcancel{j}})p(z_t|z_{t-1}) } \\\
-&\because \xcancel{j}\text{ is fixed, transition probability becomes transition probability to specific dimension $j$} \\\
-&\therefore p(z_{t-1}|z_{t})=p(z_{t-1j}|z_t)=p(z_{t-1j}|z_{t\xcancel{j}}) \\\
-&= \frac{ p(z_{tj}|z_{t\xcancel{j}})p(z_{t\xcancel{j}})p(z_{t-1j}|z_{t\xcancel{j}}) }{ p(z_{t-1j}|z_{t-1\xcancel{j}})p(z_{t-1\xcancel{j}})p(z_{tj}|z_{t-1\xcancel{j}}) } \\\
-&\because p(z_{t\xcancel{j}}) = p(z_{t-1\xcancel{j}}) \text{ when fix $\xcancel{j}$} \\\
-&= \frac{ p(z_{tj}|z_{t\xcancel{j}})p(z_{t-1j}|z_{t\xcancel{j}}) }{ p(z_{t-1j}|z_{t-1\xcancel{j}})p(z_{tj}|z_{t-1\xcancel{j}}) } \\\
-&= \frac{ p(z_{tj}|z_{t\xcancel{j}})p(z_{t-1j}|z_{t\xcancel{j}}) }{ p(z_{t-1j}|z_{t-1\xcancel{j}})p(z_{tj}|z_{t\xcancel{j}}) } \\\
-&= \frac{ p(z_{t-1j}|z_{t\xcancel{j}}) }{ p(z_{t-1j}|z_{t-1\xcancel{j}}) } \\\
-&= \frac{ p(z_{t-1j}|z_{t\xcancel{j}}) }{ p(z_{t-1j}|z_{t\xcancel{j}}) } \\\
-&= 1
+p(d) &= \sum_{a,b,c} p(a,b,c,d) \\\
+&= \sum_{a,b,c} \frac{1}{z}\prod_{i=1}^k \psi(x_{C_i}) \\\
+&\text{the worst case is $a\in\forall x_{C}$}
 \end{align*}
 $$
+
+The <b>drawbacks</b> are:
+
+1. Only one be calculated at a time, the intermediate results are not in storage which will be calculated repeatedly.
+2. Eliminate order affects computation comlexity, finding optimal eliminate order is NP-hard.
 
 ### Gibbs implementation
 
