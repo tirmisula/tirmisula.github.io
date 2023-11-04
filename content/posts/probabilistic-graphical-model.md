@@ -669,7 +669,7 @@ The <b>drawbacks</b> are:
 1. Only one be calculated at a time, the intermediate results are not in storage which will be calculated repeatedly.
 2. Eliminate order affects computation comlexity, finding optimal eliminate order is NP-hard.
 
-### Repeat computation in VE
+### Belief propagation
 #### Example of repeat computation
 Repeat computation, for example:
 
@@ -800,20 +800,94 @@ Visualizing the general form:
       'primaryTextColor': '#000',
       'primaryBorderColor': '#7C0200',
       'lineColor': '#F8B229',
-      'secondaryColor': 'red',
+      'secondaryColor': 'grey',
       'tertiaryColor': '#fff'
     }
   }
 }%%
-flowchart LR
-    id1(("p(i)")) ---|f_j→i| id2((j))
-    id1(("p(i)")) ---|f_j→i| id3((j))
-    id1(("p(i)")) ---|f_j→i| id4((...))
-    id1(("p(i)")) ---|f_j→i| id5((j))
-    id1(("p(i)")) --- id6(("&psi;(i)"))
+flowchart TB
+    subgraph marginal probability
+      id1(("p(i)")) ---|f_j→i| id2((j))
+      id1(("p(i)")) ---|f_j→i| id3((j))
+      id1(("p(i)")) ---|f_j→i| id4((...))
+      id1(("p(i)")) ---|f_j→i| id5((j))
+      id1(("p(i)")) ---|"&psi;(i)"| id6(("i"))
+    end
+    subgraph stage cache
+      id8((k)) ---|f_k→j| id7(f_j→i)
+      id9((...)) ---|f_k→j| id7(f_j→i)
+      id10((k)) ---|f_k→j| id7(f_j→i)
+      id11(("i")) ---|"&psi;(i,j)"| id7(f_j→i)
+      id12(("j")) ---|"&psi;(i,j)"| id7(f_j→i)
+      id12(("j")) ---|"&psi;(j)"| id7(f_j→i)
+    end
 ```
 
 </div>
+
+#### The BP algorithm
+
+From previous section we can define **belief(j)** is information collected by node j:
+
+$$
+\text{belief}(j) = \psi(j)\prod_{k\in neighbor(j)} f_{k\rarr j}(x_j)
+$$
+
+Then node j sending information to node i is given by:
+
+$$
+f_{j\rarr i}(x_i) = \sum_j \psi(i,j)\text{belief}(j)
+$$
+
+{{< math.inline >}}
+<p>
+The BP algorithm calculates all edges \( f_{i\rarr j} \) by traversing the graph:
+</p>
+{{</ math.inline >}}
+
+$$
+\textbf{Sequential BP algorithm} \\\
+\begin{align*}
+& \text{1. Initialize the messages} \\\
+& \quad f_{i \to j} = 1, \quad \forall i, j \\\
+& \text{2. Find a root node, $root$} \\\
+& \text{3. Define recursive function CollectMsg(j,i)} \\\
+& \quad \text{Function CollectMsg(j,i):} \\\
+& \quad\quad \text{belief}(j) = \psi(j)\prod_{k\in neighbor(j)} \text{CollectMsg(k,j)} \\\
+& \quad\quad f_{j\rarr i} = \sum_j \psi(i,j)\text{belief}(j) \\\
+& \quad\quad \text{Return $f_{j\rarr i}$} \\\
+& \text{4. Collect message to $root$ recursively} \\\
+& \quad \text{For $j$ in neighbor($root$):} \\\
+& \quad\quad \text{$f_{src=j,dst=root}=$CollectMsg($j,root$)} \\\
+& \quad \text{End} \\\
+& \text{5. Distribute message from $root$ recursively} \\\
+& \quad \text{For $j$ in neighbor($root$):} \\\
+& \quad\quad \text{$f_{src=root,dst=j}=$CollectMsg($root,j$)} \\\
+& \quad \text{End} \\\
+& \text{6. Calculate each node's marginal probability} \\\
+& \quad \text{For $v$ in vertices:} \\\
+& \quad\quad \text{$p(v) = \psi(v)\prod_{k\in neighbor(v)} f_{src=k,dst=v}$} \\\
+& \quad \text{End}
+\end{align*}
+$$
+
+Another variant called parallel BP which is similar to BFS:
+
+$$
+\textbf{Parallel BP algorithm} \\\
+\begin{align*}
+& \text{1. Randomly select a start node, $i$} \\\
+& \text{2. Send message $\psi(i)$ to all it's neighbor $j$ in parallel} \\\
+& \text{3. Recursively $j$ send message $\psi(j)$ to all neighbors except $i$ in parallel} \\\
+& \text{, until $j$ is leaf node} \\\
+& \text{4. Collect $f_{j\rarr neighbor(j)}$ from leaf node $j$ recursively} \\\
+& \text{For each factor node } i \text{ adjacent to variable node } j: \\
+& \quad m_{i \to j}(x_j) = \sum_{x_i} f_i(x_i) \prod_{k \in \text{neighbors}(i) \setminus \{j\}} m_{k \to i}(x_i) \\
+& \text{For each variable node } j \text{ adjacent to factor node } i: \\
+& \quad m_{j \to i}(x_i) = \frac{1}{Z_{j \to i}} f_i(x_i) \prod_{l \in \text{neighbors}(j) \setminus \{i\}} m_{l \to j}(x_j) \\
+& \quad \text{where } Z_{j \to i} \text{ is the normalization constant}
+\end{align*}
+$$
 
 ## Conclusion
 
