@@ -917,7 +917,7 @@ $$
 \textbf{Parallel BP algorithm} \\\
 \begin{align*}
 & \text{1. Randomly select a start node, $i$} \\\
-& \text{2. For j in neighbor($i$)$\setminus\lbrace$}\text{upstream\_node($i$)$\rbrace$: } \\\
+& \text{2. For j in neighbor($i$)$\setminus$}\lbrace\text{upstream-node(i)}\rbrace \\\
 & \quad\quad\text{Send message $\psi(i)\rarr j$ in parallel} \\\
 & \quad\text{If $\forall j, f_{j\rarr i}$ is recieved:} \\\
 & \quad\quad\text{node $i$ is converged} \\\
@@ -992,27 +992,12 @@ m_{d\rarr b} &= \max_{x_d}\psi(d)\psi(b,d)m_{f_\rarr d} \\\
 m_{b\rarr a} &= \max_{x_b}\psi(b)\psi(a,b)m_{c\rarr b}m_{d\rarr b} \\\
 &= \max_{x_b}\psi(b)\psi(a,b) \left[\max_{x_c}\psi(c)\psi(b,c)\right] \left[\max_{x_d}\psi(d)\psi(b,d)\max_{x_f}\psi(f)\psi(d,f)\right] \\\
 &= \max_{x_b}\psi(b)\psi(a,b)\max\left[\psi(c)\psi(d)\psi(f)\psi(b,c)\psi(b,d)\psi(d,f)\right] \\\
-&= \max_{x_b}\psi(b)\psi(a,b)\max p(c,d,f) \\\
-
+&= \max_{x_b}\psi(b)\psi(a,b)\max p(c,d,f)
 \end{align*}
 $$
 
 ## Conclusion
 
-{{< math.inline >}}
-<p>
-<b>MCMC</b>: Based on the fact that Markov chain converges to stationary distribution after enough transitions. </br>
-1. Design transition matrix \(Q\) <br/>
-2. When Markov chain converges the stationary distribution \(q(x)\) \(\approx\) real distribution \(p(x)\) </br>
-3. Sample on \(q(x)\)
-</p>
-{{</ math.inline >}}
-
-<b>Challenge that MCMC facing</b>
-
-1. Though convergence of Markov chain is theoretically proved but we don't know how long it takes to converge.
-2. If data is high dimensional and dimension is related to other dimensions it may cause long mixing time or mixing failure. e.g. Gaussian mixture distribution, samples are tend to concentrate on one peak while ignoring other peaks, because transfer from one peak to another through the valley is low probable.
-3. Each sampled data is related to previous sampled data.
 
 ## Reference
 
