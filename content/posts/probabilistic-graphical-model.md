@@ -766,7 +766,7 @@ f_{b\rarr c} (x_c) &= \sum_b p(c|b)f_{a\rarr b} (x_b)
 \end{align*}
 $$
 
-#### Solve repeat computation
+#### Formula for nodes and edges
 
 Suppose we have undirected graph:
 
@@ -821,7 +821,7 @@ $$
 \forall i \in \text{V , $G(V,E)$} \\\
 \begin{cases}
 p(i) = \psi(i)\prod_{j\in neighbor(i)} f_{j\rarr i}(x_i) \\\
-f_{j\rarr i}(x_i) = \sum_{j} \psi(i,j)\psi(j) \prod_{k\in neighbor(j)} f_{k\rarr j}(x_j)
+f_{j\rarr i}(x_i) = \sum_{j} \psi(i,j)\psi(j) \prod_{k\in neighbor(j)\setminus\lbrace i \rbrace} f_{k\rarr j}(x_j)
 \end{cases}
 $$
 
@@ -917,16 +917,85 @@ $$
 \textbf{Parallel BP algorithm} \\\
 \begin{align*}
 & \text{1. Randomly select a start node, $i$} \\\
-& \text{2. For j in neighbor($i$)$\setminus\lbrace$\text{upstream\_node($i$)}$\rbrace$: } \\\
+& \text{2. For j in neighbor($i$)$\setminus\lbrace$}\text{upstream\_node($i$)$\rbrace$: } \\\
 & \quad\quad\text{Send message $\psi(i)\rarr j$ in parallel} \\\
 & \quad\text{If $\forall j, f_{j\rarr i}$ is recieved:} \\\
 & \quad\quad\text{node $i$ is converged} \\\
-& \text{3. Repeat \textbf{step 2} for all nodes, until all nodes converged}
+& \text{3. Repeat }\textbf{step 2}\text{ for all nodes, until all nodes converged}
 \end{align*}
 $$
 
 #### Max product algorithm
 
+Recall that for nodes and edges we have formula:
+
+$$
+\begin{cases}
+p(i) = \psi(i)\prod_{j\in neighbor(i)} f_{j\rarr i}(x_i) \\\
+f_{j\rarr i}(x_i) = \sum_{j} \psi(i,j)\psi(j) \prod_{k\in neighbor(j)\setminus\lbrace i \rbrace} f_{k\rarr j}(x_j)
+\end{cases}
+$$
+
+{{< math.inline >}}
+<p>
+Define \( m_{j\rarr i}(x_i) \) by replacing summation with max in second equation:
+</p>
+{{</ math.inline >}}
+
+$$
+m_{j\rarr i}(x_i) = \max_{x_j} \psi(i,j)\psi(j) \prod_{k\in neighbor(j)\setminus\lbrace i \rbrace} m_{k\rarr j}(x_j) \\\
+% \text{$m_{j\rarr i}(x_i)$ is the maximum $p(j\cup$neighbor($j$)$\setminus\lbrace i \rbrace)$}
+m_{j\rarr i} = \max p(j,\text{downstream}(j)\setminus i)
+$$
+
+Given an example graph:
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'red',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id1((a)) --- id2((b))
+    id2((b)) --- id3((c))
+    id2((b)) --- id4((d))
+    id1((a)) --- id5((e))
+    id3((c)) --- id6((f))
+```
+
+</div>
+
+{{< math.inline >}}
+<p>
+We can prove that \( m_{b\rarr a} \) is the maximum joint probability \( p(b,c,d,f) \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+&\text{Based on definition of $m_{i\rarr j}$, we have} \\\
+m_{c\rarr b} &= \max_{x_c}\psi(c)\psi(b,c) \\\
+m_{f\rarr d} &= \max_{x_f}\psi(f)\psi(d,f) \\\
+m_{d\rarr b} &= \max_{x_d}\psi(d)\psi(b,d)m_{f_\rarr d} \\\
+&\text{Then, } \\\
+m_{b\rarr a} &= \max_{x_b}\psi(b)\psi(a,b)m_{c\rarr b}m_{d\rarr b} \\\
+&= \max_{x_b}\psi(b)\psi(a,b) \left[\max_{x_c}\psi(c)\psi(b,c)\right] \left[\max_{x_d}\psi(d)\psi(b,d)\max_{x_f}\psi(f)\psi(d,f)\right] \\\
+&= \max_{x_b}\psi(b)\psi(a,b)\max\left[\psi(c)\psi(d)\psi(f)\psi(b,c)\psi(b,d)\psi(d,f)\right] \\\
+&= \max_{x_b}\psi(b)\psi(a,b)\max p(c,d,f) \\\
+
+\end{align*}
+$$
 
 ## Conclusion
 
