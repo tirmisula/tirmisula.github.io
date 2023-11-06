@@ -590,6 +590,46 @@ $$
 $$
 
 ## Inference in PGM
+### Inference object
+
+Usually we split nodes in graph into 2 parts:
+
+$$
+\begin{align*}
+&\lbrace X,E \rbrace \\\
+&X: \text{Unknown variable nodes} \\\
+&E: \text{Evidence nodes/observed data}  \\\
+&E=\lbrace e_1,e_2,\cdots,e_n \rbrace
+\end{align*}
+$$
+
+Inference objects include 3 parts:
+
+1. marginal probability(likelihood)
+$$
+\begin{cases}
+p(E) = p(e_1,\cdots,e_n) \\\
+p(e_i) = \sum_{j=1\cdots n, j\neq i} p(E) \\\
+p(e_A) = \sum_{j\in E\setminus{A}} p(E), \text{A is partial nodes set}
+\end{cases}
+$$
+
+2. conditional probability(posterior)
+$$
+\begin{cases}
+p(X|E) \\\
+p(Y|E)=\sum_Z p(X|E), \text{for $X=(Y,Z)$}
+\end{cases}
+$$
+
+3. maximum a posteriori(MAP)
+$$
+\begin{cases}
+\hat{X} = \argmax_X p(X|E) \\\
+\hat{Y} = \argmax_Y p(Y|E) = \argmax_Y \sum_Z p(X|E)
+\end{cases}
+$$
+
 ### Variable elimination
 
 VE thought is based on distirbutive law:
@@ -775,10 +815,10 @@ f_{e\rarr a}(x_a) = \sum_e \psi(a,e)\psi(e)
 \end{cases}
 $$
 
-A more <b>general form</b>:
+We can conclude a more <b>general form</b>:
 
 $$
-\forall i \in \text{vertices in $G(V,E)$} \\\
+\forall i \in \text{V , $G(V,E)$} \\\
 \begin{cases}
 p(i) = \psi(i)\prod_{j\in neighbor(i)} f_{j\rarr i}(x_i) \\\
 f_{j\rarr i}(x_i) = \sum_{j} \psi(i,j)\psi(j) \prod_{k\in neighbor(j)} f_{k\rarr j}(x_j)
@@ -825,9 +865,9 @@ flowchart TB
 
 </div>
 
-#### The BP algorithm
+#### BP algorithm(Sum product algorithm)
 
-From previous section we can define **belief(j)** is information collected by node j:
+Belief propagation algorithm is basically variable elimination without repeatedly computing edge's message. From previous section we can define **belief(j)** is information collected by node j:
 
 $$
 \text{belief}(j) = \psi(j)\prod_{k\in neighbor(j)} f_{k\rarr j}(x_j)
@@ -871,23 +911,22 @@ $$
 \end{align*}
 $$
 
-Another variant called parallel BP which is similar to BFS:
+There is a variant called parallel BP which is similar to BFS:
 
 $$
 \textbf{Parallel BP algorithm} \\\
 \begin{align*}
 & \text{1. Randomly select a start node, $i$} \\\
-& \text{2. Send message $\psi(i)$ to all it's neighbor $j$ in parallel} \\\
-& \text{3. Recursively $j$ send message $\psi(j)$ to all neighbors except $i$ in parallel} \\\
-& \text{, until $j$ is leaf node} \\\
-& \text{4. Collect $f_{j\rarr neighbor(j)}$ from leaf node $j$ recursively} \\\
-& \text{For each factor node } i \text{ adjacent to variable node } j: \\
-& \quad m_{i \to j}(x_j) = \sum_{x_i} f_i(x_i) \prod_{k \in \text{neighbors}(i) \setminus \{j\}} m_{k \to i}(x_i) \\
-& \text{For each variable node } j \text{ adjacent to factor node } i: \\
-& \quad m_{j \to i}(x_i) = \frac{1}{Z_{j \to i}} f_i(x_i) \prod_{l \in \text{neighbors}(j) \setminus \{i\}} m_{l \to j}(x_j) \\
-& \quad \text{where } Z_{j \to i} \text{ is the normalization constant}
+& \text{2. For j in neighbor($i$)$\setminus\lbrace$\text{upstream\_node($i$)}$\rbrace$: } \\\
+& \quad\quad\text{Send message $\psi(i)\rarr j$ in parallel} \\\
+& \quad\text{If $\forall j, f_{j\rarr i}$ is recieved:} \\\
+& \quad\quad\text{node $i$ is converged} \\\
+& \text{3. Repeat \textbf{step 2} for all nodes, until all nodes converged}
 \end{align*}
 $$
+
+#### Max product algorithm
+
 
 ## Conclusion
 
