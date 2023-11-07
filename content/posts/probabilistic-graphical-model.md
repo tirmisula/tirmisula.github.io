@@ -945,10 +945,26 @@ Define \( m_{j\rarr i}(x_i) \) by replacing summation with max in second equatio
 $$
 m_{j\rarr i}(x_i) = \max_{x_j} \psi(i,j)\psi(j) \prod_{k\in neighbor(j)\setminus\lbrace i \rbrace} m_{k\rarr j}(x_j) \\\
 % \text{$m_{j\rarr i}(x_i)$ is the maximum $p(j\cup$neighbor($j$)$\setminus\lbrace i \rbrace)$}
-m_{j\rarr i} = \max p(j,\text{downstream}(j)\setminus i)
 $$
 
-Given an example graph:
+{{< math.inline >}}
+<p>
+It is clear that \( f_{j\rarr i} \) is used for solving marginal probability, we can prove that \( m_{j\rarr i} \) is used for solving joint probability:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\psi(i) \prod_{j\in neighbor(i)} f_{j\rarr i}(x_i) &= p(i) \\\
+\psi(i)\prod_{j\in neighbor(i)}\sum_{j,\lbrace k \rbrace\in neighbor(j)} g(x_i,x_j,\lbrace x_k \rbrace) &= \sum_{\forall node \setminus \lbrace i \rbrace}p(x_1,x_2,\cdots,x_i,\cdots,x_N) \\\
+&\dArr \\\
+\max_{x_i}\psi(i) \prod_{j\in neighbor(i)} m_{j\rarr i}(x_i) &= \max_{x_i}\psi(i)\prod_{j\in neighbor(i)}\max_{x_j,\lbrace x_k \rbrace} g(x_i,x_j,\lbrace x_k \rbrace) \\\
+&=p(x_1=x_1^{\ast},x_2=x_2^{\ast},\cdots,x_i=x_i^{\ast},\cdots,x_N=x_N^{\ast}) \\\
+&= \max p(x_1,x_2,\cdots,x_i,\cdots,x_N)
+\end{align*}
+$$
+
+Let's go through an example graph:
 
 <div class="graph" style="text-align: center;">
 
@@ -976,24 +992,43 @@ flowchart LR
 
 </div>
 
+Evidence nodes are omitted here.
+
 {{< math.inline >}}
 <p>
-We can prove that \( m_{b\rarr a} \) is the maximum joint probability \( p(b,c,d,f) \):
+We can prove that \( \psi(a) \prod_{j\in neighbor(a)} m_{j\rarr a}(x_a) \) is the maximum joint probability \( p(a,b,c,d,e,f) \):
 </p>
 {{</ math.inline >}}
 
 $$
-\begin{align*}
-&\text{Based on definition of $m_{i\rarr j}$, we have} \\\
+\begin{cases}
+&\text{By definition, we compute $m_{i\rarr j}$ from bottom-up} \\\
 m_{c\rarr b} &= \max_{x_c}\psi(c)\psi(b,c) \\\
 m_{f\rarr d} &= \max_{x_f}\psi(f)\psi(d,f) \\\
 m_{d\rarr b} &= \max_{x_d}\psi(d)\psi(b,d)m_{f_\rarr d} \\\
-&\text{Then, } \\\
 m_{b\rarr a} &= \max_{x_b}\psi(b)\psi(a,b)m_{c\rarr b}m_{d\rarr b} \\\
-&= \max_{x_b}\psi(b)\psi(a,b) \left[\max_{x_c}\psi(c)\psi(b,c)\right] \left[\max_{x_d}\psi(d)\psi(b,d)\max_{x_f}\psi(f)\psi(d,f)\right] \\\
-&= \max_{x_b}\psi(b)\psi(a,b)\max\left[\psi(c)\psi(d)\psi(f)\psi(b,c)\psi(b,d)\psi(d,f)\right] \\\
-&= \max_{x_b}\psi(b)\psi(a,b)\max p(c,d,f)
+m_{e\rarr a} &= \max_{x_e}\psi(e)\psi(a,e)
+\end{cases}
+\text{Then, }
+$$
+
+$$
+\begin{align*}
+\max p(a,b,c,d,e,f|E) &= \psi(a) \prod_{j\in neighbor(a)} m_{j\rarr a}(x_a) \\\
+&= \psi(a)m_{b\rarr a}m_{e\rarr a} \\\
+&= \max_a \psi(a)\max \psi(b)\psi(a,b)\psi(c)\psi(b,c)\psi(d)\psi(b,d)\psi(f)\psi(d,f)\psi(e)\psi(a,e) \\\
+&= \max\psi(a) \psi(b)\psi(a,b)\psi(c)\psi(b,c)\psi(d)\psi(b,d)\psi(f)\psi(d,f)\psi(e)\psi(a,e)
 \end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Finally we get not only the maximum posterori but also the optimal path from each node:
+</p>
+{{</ math.inline >}}
+
+$$
+(x_a^{\ast},x_b^{\ast},x_c^{\ast},x_d^{\ast},x_e^{\ast},x_f^{\ast}) = \argmax_{x_a,x_b,x_c,x_d,x_e,x_f}p(a,b,c,d,e,f|E)
 $$
 
 ## Conclusion
