@@ -1014,22 +1014,81 @@ $$
 
 $$
 \begin{align*}
-\max p(a,b,c,d,e,f|E) &= \psi(a) \prod_{j\in neighbor(a)} m_{j\rarr a}(x_a) \\\
-&= \psi(a)m_{b\rarr a}m_{e\rarr a} \\\
-&= \max_a \psi(a)\max \psi(b)\psi(a,b)\psi(c)\psi(b,c)\psi(d)\psi(b,d)\psi(f)\psi(d,f)\psi(e)\psi(a,e) \\\
+\max p(a,b,c,d,e,f|E) &= \max_{x_a}\psi(a) \prod_{j\in neighbor(a)} m_{j\rarr a}(x_a) \\\
+&= \max_{x_a}\psi(a)m_{b\rarr a}m_{e\rarr a} \\\
+&= \max_{x_a} \psi(a)\max \psi(b)\psi(a,b)\psi(c)\psi(b,c)\psi(d)\psi(b,d)\psi(f)\psi(d,f)\psi(e)\psi(a,e) \\\
 &= \max\psi(a) \psi(b)\psi(a,b)\psi(c)\psi(b,c)\psi(d)\psi(b,d)\psi(f)\psi(d,f)\psi(e)\psi(a,e)
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-Finally we get not only the maximum posterori but also the optimal path from each node:
+Finally we get not only the maximum posteriori but also the optimal path from each node:
 </p>
 {{</ math.inline >}}
 
 $$
 (x_a^{\ast},x_b^{\ast},x_c^{\ast},x_d^{\ast},x_e^{\ast},x_f^{\ast}) = \argmax_{x_a,x_b,x_c,x_d,x_e,x_f}p(a,b,c,d,e,f|E)
 $$
+
+#### BP's restriction
+
+BP only works for tree-structure graph
+
+## Factor graph
+
+$$
+\begin{align*}
+p(x) &= \prod_{i=1}^k f_i(x_{C_i}) \\\
+f_i &: \text{factor function of i-th factor} \\\
+C_i &: \text{subset of nodes related to i-th factor} \\\
+\end{align*}
+$$
+
+Example:
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    "htmlLabels": true,
+    "securityLevel": "loose",
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'grey',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart TB
+    subgraph undirected cyclic graph
+      id1(("a")) --- id2((b))
+      id2(("b")) --- id3((c))
+      id3(("c")) --- id1((a))
+    end
+    subgraph factor graph 1
+      id4(("a")) --- id7(f_abc)
+      id5(("b")) --- id7(f_abc)
+      id6(("c")) --- id7(f_abc)
+    end
+    subgraph factor graph 2
+      id8(("a")) --- id9(f_ab)
+      id9(f_ab) --- id10((b))
+      id10((b)) --- id11(f_bc)
+      id11(f_bc) --- id12((c))
+      id12((c)) --- id13(f_ac)
+      id13(f_ac) --- id8((a))
+    end
+```
+
+</div>
+
+Factorization is a specail case of factor graph
 
 ## Conclusion
 
