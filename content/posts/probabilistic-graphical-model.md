@@ -1037,11 +1037,13 @@ BP only works for tree-structure graph
 
 ## Factor graph
 
+Factor graph has following form:
+
 $$
 \begin{align*}
 p(x) &= \prod_{i=1}^k f_i(x_{C_i}) \\\
-f_i &: \text{factor function of i-th factor} \\\
-C_i &: \text{subset of nodes related to i-th factor} \\\
+f_i &: \text{function of factor $i$} \\\
+C_i &: \text{subset of nodes correspond to factor $i$} \\\
 \end{align*}
 $$
 
@@ -1065,7 +1067,7 @@ Example:
     }
   }
 }%%
-flowchart TB
+flowchart LR
     subgraph undirected cyclic graph
       id1(("a")) --- id2((b))
       id2(("b")) --- id3((c))
@@ -1083,12 +1085,286 @@ flowchart TB
       id11(f_bc) --- id12((c))
       id12((c)) --- id13(f_ac)
       id13(f_ac) --- id8((a))
+      id8(("a")) --- id14(f_a)
     end
 ```
 
 </div>
 
-Factorization is a specail case of factor graph
+For original graph we have:
+
+$$
+p(x) = \frac{1}{z}\psi(a,b,c)
+$$
+
+For factor graph 1 we have:
+
+$$
+p(x) = f_{abc}(a,b,c)
+$$
+
+So factorization of undirected graph corresponds to a special case of factor graph.
+
+For factor graph 2 we have:
+
+$$
+p(x) = f_{ab}(a,b)f_{bc}(b,c)f_{ac}(a,c)f_{a}(a)
+$$
+
+We see nodes are always partitioned by factors, so factor graph is bipartite graph.
+
+## Moral graph
+
+Moral graph is used for converting directed graph to undirected graph, procedures are:
+
+1. $\forall x_i\in G$ , connect every 2 nodes in $parent(x_i)$.
+2. remove edges direction in $G$.
+
+It targets at <b>head to head structure</b>, examples are below:
+
+1. Tail to tail:
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    "htmlLabels": true,
+    "securityLevel": "loose",
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'grey',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id1((a)) --> id2((b))
+    id1((a)) --> id3((c))
+```
+
+</div>
+
+$$
+\begin{align*}
+p(a,b,c) &= \underset{\psi(a,b)}{p(a)p(b|a)} \underset{\psi(a,c)}{p(c|a)} \\\
+&= \psi(a,b)\psi(a,c)
+\end{align*}
+$$
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    "htmlLabels": true,
+    "securityLevel": "loose",
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'grey',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id1((a)) --- id2((b))
+    id1((a)) --- id3((c))
+```
+
+</div>
+
+2. head to tail 
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    "htmlLabels": true,
+    "securityLevel": "loose",
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'grey',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id1((a)) --> id2((b))
+    id2((b)) --> id3((c))
+```
+
+</div>
+
+$$
+\begin{align*}
+p(a,b,c) &= \underset{\psi(a,b)}{p(a)p(b|a)} \underset{\psi(b,c)}{p(c|b)} \\\
+&= \psi(a,b)\psi(b,c)
+\end{align*}
+$$
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    "htmlLabels": true,
+    "securityLevel": "loose",
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'grey',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id1((a)) --- id2((b))
+    id2((b)) --- id3((c))
+```
+
+</div>
+
+3. head to head
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    "htmlLabels": true,
+    "securityLevel": "loose",
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'grey',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id1((a)) --> id3((c))
+    id2((b)) --> id3((c))
+```
+
+</div>
+
+$$
+\begin{align*}
+p(a,b,c) &= \underset{\psi(a,b,c)}{p(a)p(b) p(c|a,b)} \\\
+&= \psi(a,b,c) \\\
+&\text{original graph $G(a,b,c)$ is not a max clique} \\\
+&\therefore \text{connect $(a,b)$}
+\end{align*}
+$$
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    "htmlLabels": true,
+    "securityLevel": "loose",
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'grey',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id1((a)) --- id2((b))
+    id2((b)) --- id3((c))
+    id1((a)) ---id3((c))
+```
+
+</div>
+
+4. a more generalized head to head
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    "htmlLabels": true,
+    "securityLevel": "loose",
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'grey',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id1((a)) --> id4((d))
+    id2((b)) --> id4((d))
+    id3((c)) --> id4((d))
+```
+
+</div>
+
+$$
+\begin{align*}
+p(a,b,c,d) &= \underset{\psi(a,b,c,d)}{p(a)p(b)p(c) p(d|a,b,c)} \\\
+&= \psi(a,b,c,d)
+\end{align*}
+$$
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    "htmlLabels": true,
+    "securityLevel": "loose",
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'grey',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id1((a)) --- id4((d))
+    id2((b)) --- id4((d))
+    id3((c)) ---id4((d))
+    id1((a)) --- id2((b))
+    id2((b)) --- id3((c))
+    id1((a)) --- id3((c))
+```
+
+</div>
 
 ## Conclusion
 
