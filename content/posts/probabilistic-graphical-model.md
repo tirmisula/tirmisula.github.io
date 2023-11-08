@@ -397,7 +397,7 @@ $$
 \end{align*}
 $$
 
-The rule of D-separation is also called <b>global markov property</b>.
+If there exists a D-separation for graph G, we say G has <b>global markov property</b>.
 
 #### markov blanket
 
@@ -1037,6 +1037,8 @@ BP only works for tree-structure graph
 
 ## Factor graph
 
+Since BP algorithm  does not work for cyclic graph, factor graph inserts factors to the graph so that a cyclic graph may be turned into a tree.
+
 Factor graph has following form:
 
 $$
@@ -1068,16 +1070,6 @@ Example:
   }
 }%%
 flowchart LR
-    subgraph undirected cyclic graph
-      id1(("a")) --- id2((b))
-      id2(("b")) --- id3((c))
-      id3(("c")) --- id1((a))
-    end
-    subgraph factor graph 1
-      id4(("a")) --- id7(f_abc)
-      id5(("b")) --- id7(f_abc)
-      id6(("c")) --- id7(f_abc)
-    end
     subgraph factor graph 2
       id8(("a")) --- id9(f_ab)
       id9(f_ab) --- id10((b))
@@ -1086,6 +1078,16 @@ flowchart LR
       id12((c)) --- id13(f_ac)
       id13(f_ac) --- id8((a))
       id8(("a")) --- id14(f_a)
+    end
+    subgraph factor graph 1
+      id4(("a")) --- id7(f_abc)
+      id5(("b")) --- id7(f_abc)
+      id6(("c")) --- id7(f_abc)
+    end
+    subgraph undirected cyclic graph
+      id1(("a")) --- id2((b))
+      id2(("b")) --- id3((c))
+      id3(("c")) --- id1((a))
     end
 ```
 
@@ -1117,8 +1119,14 @@ We see nodes are always partitioned by factors, so factor graph is bipartite gra
 
 Moral graph is used for converting directed graph to undirected graph, procedures are:
 
-1. $\forall x_i\in G$ , connect every 2 nodes in $parent(x_i)$.
-2. remove edges direction in $G$.
+{{< math.inline >}}
+<p>
+
+1. \( \forall x_i\in G \) , connect every 2 nodes in \( parent(x_i) \). 
+
+2. remove edges direction in \( G \).
+</p>
+{{</ math.inline >}}
 
 It targets at <b>head to head structure</b>, examples are below:
 
@@ -1302,7 +1310,7 @@ flowchart LR
 
 </div>
 
-4. a more generalized head to head
+4. generalized head to head
 
 <div class="graph" style="text-align: center;">
 
@@ -1368,11 +1376,66 @@ flowchart LR
 
 ## Conclusion
 
+1. Directed graph(Bayesian network)
+    1. Factorization
+    $$
+    p(x_1,\cdots,x_p)=\prod_{i=1}^p p(x_i|x_{pa(i)})
+    $$
+    2. D-separation
+    $$
+    x_A\perp x_C|x_B \\\ 
+    \begin{align*}
+    &1. \text{If node $\alpha \in $tail to tail(parent node), $\alpha \in x_B$}\\\
+    &2. \text{If node $\alpha \in $head to tail(intermediate node), $\alpha \in x_B$}\\\
+    &3. \text{If node $\alpha \in $head to head(child node OR descendant of child node), $\alpha \notin x_B$}\\\
+    \end{align*}
+    $$
+2. Undirected graph(Markov random network)
+    1. Factorization
+    $$
+    p(x) = \frac{1}{z} \prod_{i=1}^K \psi(x_{C_i})
+    $$
+    2. Conditional independence
+        1. global markov property
+        $$
+        x_A\perp x_C | x_B
+        $$
+        2. local markov property
+        $$
+        x\perp \lbrace V\setminus \lbrace x \rbrace\setminus\lbrace\text{neighbor of $x$}\rbrace \rbrace | \text{neighbor of $x$}
+        $$
+        3. pairwise markov property
+        $$
+        x_i\perp x_j | x_{\neq i, \neq j}
+        $$
+  3. Inference
+      1. Variable elimination
+      $$
+      \begin{align*}
+      p(d) &= \sum_{a,b,c} p(a)p(b|a)p(c|b)p(d|c) \\\
+      &= \sum_{c}p(d|c)\sum_{b}p(c|b)\sum_{a}\underset{f(a,b)}{p(a)p(b|a)}
+      \end{align*}
+      $$
+      2. Belief propagation
+      $$
+      \begin{cases}
+      p(i) = \psi(i)\prod_{j\in neighbor(i)} f_{j\rarr i}(x_i) \\\
+      f_{j\rarr i}(x_i) = \sum_{j} \psi(i,j)\psi(j) \prod_{k\in neighbor(j)\setminus\lbrace i \rbrace} f_{k\rarr j}(x_j) \\\
+      f_{j\rarr i}(x_i) = \sum_j \psi(i,j)\text{belief}(j)
+      \end{cases}
+      $$
+      3. Max product algorithm(Dynamic programming)
+      $$
+      \begin{cases}
+      m_{j\rarr i}(x_i) = \max_{x_j} \psi(i,j)\psi(j) \prod_{k\in neighbor(j)\setminus\lbrace i \rbrace} m_{k\rarr j}(x_j) \\\
+      \max p(x) = \max_{x_i}\psi(i) \prod_{j\in neighbor(i)} m_{j\rarr i}(x_i)
+      \end{cases}
+      $$
 
 ## Reference
 
-[^1]: From [video](https://www.bilibili.com/video/BV1aE411o7qd?p=46).
+[^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=46).
 [^3]: From [The Matrix Cookbook](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
 [^5]: From [Mean field variational inference](https://mbernste.github.io/files/notes/MeanFieldVariationalInference.pdf).
 [^4]: From [Ross, Sheldon M. (2019). Introduction to probability models](https://doi.org/10.1016%2FC2017-0-01324-1).
-[^2]: From [Hammersley–Clifford theorem](http://www.statslab.cam.ac.uk/~grg/books/hammfest/hamm-cliff.pdf).
+[^2]: - [Hammersley–Clifford theorem](http://www.statslab.cam.ac.uk/~grg/books/hammfest/hamm-cliff.pdf).
