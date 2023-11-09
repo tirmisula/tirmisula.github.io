@@ -103,7 +103,8 @@ $$
 
 
 ## HMM Intro
-### Definition
+
+### Basic definition
 
 <div class="graph" style="text-align: center;">
 
@@ -133,12 +134,20 @@ flowchart LR
 
 </div>
 
-Bayesian network has 2 attributes: **conditionally independent** and **factorization**:
+
 
 $$
 \begin{align*}
-&1. \text{ Conditionally independent: }x_A\perp x_{B}|x_C \\\
-&2. \text{ Factorization: }p(x_1,\cdots,x_p)=\prod_{i=1}^p p(x_i|x_{pa(i)}), \text{where }x_{pa(i)}\text{ is the set of $x_i$'s parents}
+& o_1,o_2,\cdots,o_t: \text{observed variable} \\\
+& o\in \lbrace v_1,\cdots,v_M \rbrace: \text{observed variable range} \\\
+& h_1,h_2,\cdots,h_t: \text{hidden variable} \\\
+& h_i \in \lbrace q_1,\cdots,q_N \rbrace: \text{hidden variable range} \\\
+&\theta = (\pi,A,B) \\\
+& \pi : \text{initial distribution} \\\
+&A : \text{state transit matrix} \\\
+&\quad A_{ij}=p(h_{t+1}=q_j|h_{t}=q_i) \\\
+&B: \text{emission matrix} \\\
+& \quad B_{jk}=p(o_{t}=v_k|h_{t}=q_j)
 \end{align*}
 $$
 
