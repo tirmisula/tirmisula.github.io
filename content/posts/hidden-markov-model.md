@@ -123,330 +123,101 @@ $$
   }
 }%%
 flowchart LR
-    id1((x_1)) --> id2((x_2))
-    id2((x_2)) --> id3((...))
-    id3((...)) --> id4((x_t))
-    id4((x_t)) --> id5((x_t+1))
-    id1((x_1)) --> id6(((...)))
-    id2((x_2)) --> id7(((...)))
-    id4((x_t)) --> id8(((...)))
+    id1((h_1)) --> id2((h_2))
+    id2((h_2)) --> id3((h_i))
+    id3((h_i)) --> id4((h_t))
+    id4((h_t)) --> id5((h_t+1))
+    id1((h_1)) --> id6(((o_1)))
+    id2((h_2)) --> id7(((o_2)))
+    id4((h_t)) --> id8(((o_3)))
 ```
 
 </div>
 
-
-
-$$
-\begin{align*}
-& o_1,o_2,\cdots,o_t: \text{observed variable} \\\
-& o\in \lbrace v_1,\cdots,v_M \rbrace: \text{observed variable range} \\\
-& h_1,h_2,\cdots,h_t: \text{hidden variable} \\\
-& h_i \in \lbrace q_1,\cdots,q_N \rbrace: \text{hidden variable range} \\\
-&\theta = (\pi,A,B) \\\
-& \pi : \text{initial distribution} \\\
-&A : \text{state transit matrix} \\\
-&\quad A_{ij}=p(h_{t+1}=q_j|h_{t}=q_i) \\\
-&B: \text{emission matrix} \\\
-& \quad B_{jk}=p(o_{t}=v_k|h_{t}=q_j)
-\end{align*}
-$$
-
-### Local features of BN
-
-There are three partial graph structures:
-
-#### tail to tail
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'red',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart LR
-    id1((a)) --> id2((b))
-    id1((a)) --> id3((c))
-```
-
-</div>
-
-Based on factorization, we have:
+HMM contains 2 layers: observations and states.
 
 $$
-\begin{align*}
-p(a,b,c) = p(a)p(b|a)p(c|a)
-\end{align*}
-$$
-
-Based on chain rule, we have:
-
-$$
-\begin{align*}
-p(a,b,c) = p(a)p(b|a)p(c|a,b)
-\end{align*}
-$$
-
-So,
-
-$$
-\begin{align*}
-p(a)p(b|a)p(c|a) &= p(a)p(b|a)p(c|a,b) \\\
-p(c|a) &= p(c|a,b) \\\
-c\perp b | a, &\text{c is not affected whether $b$ is observed}
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-So we can conclude that while \(a\) is observed, the path from \(b\) to \(c\) is blocked so \(b\) and \(c\) are mutually independent.
-</p>
-{{</ math.inline >}}
-
-#### head to tail
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'red',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart LR
-    id1((a)) --> id2((b))
-    id2((b)) --> id3((c))
-```
-
-</div>
-
-Based on factorization, we have:
-
-$$
-\begin{align*}
-p(a,b,c) = p(a)p(b|a)p(c|b)
-\end{align*}
-$$
-
-Based on chain rule, we have:
-
-$$
-\begin{align*}
-p(a,b,c) = p(a)p(b|a)p(c|a,b)
-\end{align*}
-$$
-
-So,
-
-$$
-\begin{align*}
-p(a)p(b|a)p(c|b) &= p(a)p(b|a)p(c|a,b) \\\
-p(c|b) &= p(c|a,b) \\\
-c\perp a | b, &\text{c is not affected whether $a$ is observed}
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-So we can conclude that while \(b\) is observed, the path from \(a\) to \(c\) is blocked so \(a\) and \(c\) are mutually independent.
-</p>
-{{</ math.inline >}}
-
-#### head to head
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'red',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart LR
-    id1((a)) --> id3((c))
-    id2((b)) --> id3((c))
-```
-
-</div>
-
-Based on factorization, we have:
-
-$$
-\begin{align*}
-p(a,b,c) = p(a)p(b)p(c|a,b)
-\end{align*}
-$$
-
-Based on chain rule, we have:
-
-$$
-\begin{align*}
-p(a,b,c) = p(a)p(b|a)p(c|a,b)
-\end{align*}
-$$
-
-So,
-
-$$
-\begin{align*}
-p(a)p(b)p(c|a,b) &= p(a)p(b|a)p(c|a,b) \\\
-p(b) &= p(b|a) \\\
-b\perp a , &\text{$b$ does not affect $a$'s happening}
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-So we can conclude that \(a\) and \(b\) are mutually independent if \(c\) is not observed, if \(c\) is observed \(a\) and \(b\) are related.
-</p>
-{{</ math.inline >}}
-
-{{< math.inline >}}
-<p>
-<mark>It also applies</mark> when \( c \) has child node \( d \):
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-p(a)p(b)p(c|a,b)p(d|c) &= p(a)p(b|a)p(c|a,b)p(d|a,b,c) \\\
-p(a)p(b)p(c,d|a,b) &= p(a,b,c,d) \\\
-p(a)p(b)p(c,d|a,b) &= p(a,b)p(c,d|a,b) \\\
-p(a)p(b) &= p(a,b) \\\
-b&\perp a
-\end{align*}
-$$
-
-### D-separation
-#### the rules of d-separation
-{{< math.inline >}}
-<p>
-D-separation is a method to check whether a Bayesian network satisfies conditional independent, so that:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-x_A \perp x_C | x_B
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-The rules are:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-&1. \text{If node $\alpha \in $tail to tail(parent node), $\alpha \in x_B$}\\\
-&2. \text{If node $\alpha \in $head to tail(intermediate node), $\alpha \in x_B$}\\\
-&3. \text{If node $\alpha \in $head to head(child node OR descendant of child node), $\alpha \notin x_B$}\\\
-\end{align*}
-$$
-
-If there exists a D-separation for graph G, we say G has <b>global markov property</b>.
-
-#### markov blanket
-
-Given a conditinal probability:
-
-$$
-\begin{align*}
-p(x_i|x_{\neq i}) &= \frac{p(x_i,x_{\neq i})}{p(x_{\neq i})} \\\
-&= \frac{p(x)}{\int p(x)dx_i} \\\
-&\because p(x) = \prod_{j=1}^p p(x_j|x_{pa(j)}) = f(x_i)g(x_{\neq i}) \\\
-&\text{$p(x)$ can be separated to 2 parts: $f(x_i)$ related to $x_i$, $g(x_{\neq i})$ not related to $x_i$} \\\
-&= \frac{f(x_i)g(x_{\neq i})}{g(x_{\neq i})\int f(x_i)dx_i} \\\
-&= \frac{f(x_i)}{\int f(x_i)dx_i}
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-It gives us information: conditional probability of \(x_i\) is affected only by the local area of node \(x_i\), not all nodes from global, This covered area is called Markov blanket which includes:
-</p>
-{{</ math.inline >}}
-
-$$
-f(x_i):\begin{cases}
-p(x_i|x_{pa(i)}) & \text{$x_i$'s parent nodes} \\\
-p(x_{child(i)}|x_i, x_{pa(x_{child(i)})}) & \text{$x_i$'s child nodes and $x_i$'s spouse nodes}
+\begin{cases}
+ o_1,o_2,\cdots,o_t: \text{observed variable} \\\
+ \quad O\in \lbrace v_1,\cdots,v_M \rbrace: \text{observed variable range} \\\
+ h_1,h_2,\cdots,h_t: \text{hidden variable} \\\
+ \quad H \in \lbrace q_1,\cdots,q_N \rbrace: \text{hidden variable range}
 \end{cases}
 $$
 
-<div style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'red',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart TB
-    subgraph Markov blanket
-      id1((pa)) --> id3((x))
-      id2((pa)) --> id3((x))
-      id3((x)) --> id4((child))
-      id3((x)) --> id5((child))
-      id6((sp)) --> id4((child))
-      id7((sp)) --> id5((child))
-    end
-    id1((pa)) -.-> id8((...))
-    id2((pa)) -.-> id9((...))
-    id10((...)) -.-> id6((sp))
-```
-
-</div>
-
-### BN models
+Parameters in HMM:
 
 $$
-\text{BN models}: \begin{cases}
-    \text{Singular: Naive Bayes} \\\
-    \text{Mixture: Gaussian Mixture Model} \\\
-    \text{Stochastic process: } \begin{cases}
-        \text{Markov chain} \\\
-        \text{Gaussian process}
-    \end{cases} \\\
-    \text{Continous: Gaussian Bayesian Network}
+\begin{cases}
+\lambda = (\pi,A,B):\text{parameters in HMM} \\\
+ \pi=\pi_1,\cdots,\pi_N : \text{initial distribution} \\\
+A : \text{state transition matrix} \\\
+\quad A_{ij}=p(h_{t+1}=q_j|h_{t}=q_i) \\\
+B: \text{emission matrix} \\\
+ \quad B_{j}(k)=p(o_{t}=v_k|h_{t}=q_j)
 \end{cases}
 $$
 
-## Markov random network
+### Two assumptions in HMM
+
+1. homogeneous markov assumption
+$$
+p(h_{t+1}|h_1,\cdots,h_t,o_1,\cdots,o_t) = p(h_{t+1}|h_t)
+$$
+
+2. observation independence assumption
+$$
+p(o_t|h_1,\cdots,,h_{t-1},h_{t},o_1,\cdots,o_{t-1}) = p(o_t|h_t)
+$$
+
+### Three problems to solve
+
+#### Evaluation
+
+{{< math.inline >}}
+<p>
+We know \( \lambda \) and want to solve probability of spesific observations:
+</p>
+{{</ math.inline >}}
+
+$$
+p(O=o_1,\cdots,o_t|\lambda) \rarr \text{forward/backward algorithm}
+$$
+
+#### Learning
+
+{{< math.inline >}}
+<p>
+How to solve \( \lambda \):
+</p>
+{{</ math.inline >}}
+
+$$
+\lambda = \argmax p(O|\lambda) \rarr \text{Baum-Welch(special EM algorithm)}
+$$
+
+#### Decoding
+
+Find maximum likelihood of hidden states given observations:
+
+$$
+H = \argmax_{h} p(H|O)
+$$
+
+{{< math.inline >}}
+<p>
+When \(H\) is found, we could solve Kalman filter and Particle filter:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{cases}
+\text{prediction}\rarr p(h_{t+1}|o_1,\cdots,o_t) \\\
+\text{filtering}\rarr p(h_t|o_1,\cdots,o_t)
+\end{cases}
+$$
+
+## Forward algorithm
 ### Conditional independence of MRF
 
 The conditional independence is shown in 3 ways:
