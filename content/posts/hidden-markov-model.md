@@ -129,7 +129,7 @@ flowchart LR
     id4((h_t)) --> id5((h_t+1))
     id1((h_1)) --> id6(((o_1)))
     id2((h_2)) --> id7(((o_2)))
-    id4((h_t)) --> id8(((o_3)))
+    id4((h_t)) --> id8(((o_t)))
 ```
 
 </div>
@@ -176,7 +176,7 @@ $$
 
 {{< math.inline >}}
 <p>
-We know \( \lambda \) and want to solve probability of spesific observations:
+Find probability of specific observations if we know \( \lambda \):
 </p>
 {{</ math.inline >}}
 
@@ -201,7 +201,7 @@ $$
 Find maximum likelihood of hidden states given observations:
 
 $$
-H = \argmax_{h} p(H|O)
+H = \argmax_{h} p(H|O,\lambda) \rarr \text{Viterbi}
 $$
 
 {{< math.inline >}}
@@ -217,74 +217,85 @@ $$
 \end{cases}
 $$
 
-## Forward algorithm
-### Conditional independence of MRF
-
-The conditional independence is shown in 3 ways:
-
-1. global markov property
+## Evaluation
+### General expression
 
 $$
-x_A\perp x_C | x_B
-$$
-
-2. local markov property
-
-$$
-x\perp \lbrace \mathbb{U}-x-\lbrace\text{neighbor of $x$}\rbrace \rbrace | \text{neighbor of $x$} \\\
-\text{e.g. $a\perp \lbrace d,f \rbrace | \lbrace b,c,e \rbrace$ for the following graph} \\\
-\dArr
-$$
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'red',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart TB
-    id1((a)) --- id2((b))
-    id1((a)) --- id3((c))
-    id2((b)) --- id4((d))
-    id1((a)) --- id5((e))
-    id5((e)) --- id6((f))
-```
-
-</div>
-
-3. pairwise markov property
-
-$$
-x_i\perp x_j | x_{\neq i, \neq j}
-$$
-
-Three properties are <b>equivalent</b>:
-
-$$
-\text{global markov $\iff$ local markov $\iff$ pairwise markov}
+\begin{align*}
+p(O|\lambda) &= \sum_{H}p(O,H|\lambda) \\\
+&= \sum_{H} p(O|H,\lambda)p(H|\lambda) \\\
+&= \sum_{H} p(o_1,\cdots,o_t|H,\lambda)p(H|\lambda) \\\
+&= \sum_{H} p(o_t|o_1,\cdots,o_{t-1},H,\lambda)p(o_1,\cdots,o_{t-1}|H,\lambda)p(H|\lambda) \\\
+&\text{By observation independence assumption} \\\
+&= \sum_{H} p(o_t|h_t)p(o_1,\cdots,o_{t-1}|H,\lambda)p(H|\lambda) \\\
+&= \sum_{H}\prod_{i=1}^t p(o_i|h_i)p(H|\lambda) \\\
+&= \sum_{H}\prod_{i=1}^t B_{h_i}(o_i)p(H|\lambda) \\\
+&= \sum_{H}\prod_{i=1}^t B_{h_i}(o_i)p(h_1,\cdots,h_t|\lambda) \\\
+&= \sum_{H}\prod_{i=1}^t B_{h_i}(o_i)p(h_t|h_1,\cdots,h_{t-1},\lambda)p(h_1,\cdots,h_{t-1}|\lambda) \\\
+&\text{By homogenous assumption} \\\
+&= \sum_{H}\prod_{i=1}^t B_{h_i}(o_i)p(h_t|h_{t-1},\lambda)p(h_1,\cdots,h_{t-1}|\lambda) \\\
+&= \sum_{H}\prod_{i=1}^t B_{h_i}(o_i)\prod_{j=2}^t p(h_j|h_{j-1},\lambda)\pi(h_1) \\\
+&= \sum_{H}\pi(h_1)\prod_{i=1}^t B_{h_i}(o_i)\prod_{j=2}^t A_{h_{j-1}h_{j}} \\\
+&= \sum_{\substack{h_1,h_2,\cdots,h_t \\\ h\in\lbrace q_1,\cdots,q_N \rbrace}}\pi(h_1)\prod_{i=1}^t B_{h_i}(o_i)\prod_{j=2}^t A_{h_{j-1}h_{j}}
+\end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-From pairwise markov, we know that if \(x_i \perp x_j\), other nodes are blocked. It means \(x_i\) and \(x_j\) are not connected, \(x_i\) and \(x_j\) destinedly belongs to different <b>max-clique</b>.
+We have N states and t variables, so the complexity of above integration is:
+</p>
+{{</ math.inline >}}
+
+$$
+O(N^t)
+$$
+
+### Forward algorithm
+
+{{< math.inline >}}
+<p>
+Consider separating \( \sum_{h_1,\cdots,h_t} \) in the original equation:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-\textbf{clique: }&\text{nodes in clique are fully connected} \\\
-\textbf{maximum clique: }&\text{the clique that can cover maximum number of nodes}
+p(O|\lambda) &= \sum_{q_i}p(o_1,\cdots,o_t,h_t=q_i|\lambda) \\\
+&= \sum_{i=1}^Np(o_1,\cdots,o_t,h_t=q_i|\lambda) \\\
+&Let \space\alpha_t(i) = p(o_1,\cdots,o_t,h_t=q_i|\lambda) \\\
+&= \sum_{i=1}^N \alpha_t(i)
 \end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+We may find a recurrence realtion between \( \alpha_t(i) \) and \( \alpha_{t-1}(i) \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\alpha_t(i) &= p(o_1,\cdots,o_t,h_t=q_i|\lambda) \\\
+&= \sum_{j=1}^N p(o_1,\cdots,o_t,h_t=q_i,h_{t-1}=q_j|\lambda) \\\
+&= \sum_{j=1}^N p(o_t|o_1,\cdots,o_{t-1},h_t=q_i,h_{t-1}=q_j,\lambda) p(o_1,\cdots,o_{t-1},h_t=q_i,h_{t-1}=q_j|\lambda) \\\
+&\text{By observation independence assumption} \\\
+&= \sum_{j=1}^N p(o_t|h_t=q_i,\lambda) p(o_1,\cdots,o_{t-1},h_t=q_i,h_{t-1}=q_j|\lambda) \\\
+&= \sum_{j=1}^N p(o_t|h_t=q_i,\lambda) p(h_t=q_i|o_1,\cdots,o_{t-1},h_{t-1}=q_j,\lambda)p(o_1,\cdots,o_{t-1},h_{t-1}=q_j|\lambda) \\\
+&\text{By homogenous markov assumption} \\\
+&= \sum_{j=1}^N p(o_t|h_t=q_i,\lambda) p(h_t=q_i|h_{t-1}=q_j,\lambda)p(o_1,\cdots,o_{t-1},h_{t-1}=q_j|\lambda) \\\
+&= \sum_{j=1}^N B_{i}(o_t) A_{ji} p(o_1,\cdots,o_{t-1},h_{t-1}=q_j|\lambda) \\\
+&= \sum_{j=1}^N B_{i}(o_t) A_{ji} \alpha_{t-1}(j) \\\
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+The comlexity is:
+</p>
+{{</ math.inline >}}
+
+$$
+O(N+tN)
 $$
 
 ### Factorization of MRF
