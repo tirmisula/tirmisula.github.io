@@ -125,7 +125,8 @@ $$
 flowchart LR
     id1((h_1)) --> id2((h_2))
     id2((h_2)) --> id3((h_i))
-    id3((h_i)) --> id4((h_t))
+    id3((h_...)) --> id9(((...)))
+    id3((h_...)) --> id4((h_t))
     id4((h_t)) --> id5((h_t+1))
     id1((h_1)) --> id6(((o_1)))
     id2((h_2)) --> id7(((o_2)))
@@ -269,7 +270,7 @@ $$
 
 {{< math.inline >}}
 <p>
-We may find a recurrence realtion between \( \alpha_t(i) \) and \( \alpha_{t-1}(i) \):
+If we solve \( \alpha_t(i) \). We may find a recurrence realtion between \( \alpha_t(i) \) and \( \alpha_{t-1}(i) \):
 </p>
 {{</ math.inline >}}
 
@@ -288,9 +289,15 @@ $$
 \end{align*}
 $$
 
+Solving order:
+
+$$
+\alpha_1(i) \rarr \alpha_2(j)\rarr \cdots\rarr \alpha_t(q_\ast)\rarr p(O|\lambda)
+$$
+
 {{< math.inline >}}
 <p>
-The comlexity is:
+The complexity is:
 </p>
 {{</ math.inline >}}
 
