@@ -151,7 +151,8 @@ Parameters in HMM:
 $$
 \begin{cases}
 \lambda = (\pi,A,B):\text{parameters in HMM} \\\
- \pi=\pi_1,\cdots,\pi_N : \text{initial distribution} \\\
+\pi=\pi_1,\cdots,\pi_N : \text{initial state distribution} \\\
+\quad \sum_{i=1}^N \pi_i = 1 \\\
 A : \text{state transition matrix} \\\
 \quad A_{ij}=p(h_{t+1}=q_j|h_{t}=q_i) \\\
 B: \text{emission matrix} \\\
@@ -359,45 +360,68 @@ $$
 O(N^2t)
 $$
 
-## Inference in PGM
-### Inference object
+## Learning
+### EM review
 
-Usually we split nodes in graph into 2 parts:
+$$
+\theta^{(t+1)} = \argmax_{\theta}\int_z \log p(x,z|\theta)p(z|x,\theta^{(t)})\space dz \\\
+$$
+
+### Baum Welch algorithm
+
+Baum-Welch algorithm is basically EM algorithm, so we can write:
 
 $$
 \begin{align*}
-&\lbrace X,E \rbrace \\\
-&X: \text{Unknown variable nodes} \\\
-&E: \text{Evidence nodes/observed data}  \\\
-&E=\lbrace e_1,e_2,\cdots,e_n \rbrace
+\lambda^{(t+1)} &= \argmax_{\lambda} \sum_{H}\log p(O,H|\lambda) p(H|O,\lambda^{(t)}) \\\
+&= \argmax_{\lambda} \sum_{H}\log p(O,H|\lambda) \frac{p(O,H|\lambda^{(t)})}{p(O|\lambda^{(t)})} \\\
+&= \argmax_{\lambda}\frac{1}{p(O|\lambda^{(t)})}\sum_{H}\log p(O,H|\lambda)p(O,H|\lambda^{(t)}) \\\
+&= \argmax_{\lambda} \sum_{H}\log p(O,H|\lambda)p(O,H|\lambda^{(t)}) \\\
+Q(\lambda,\lambda^{(t)}) &= \sum_{H}\log p(O,H|\lambda)p(O,H|\lambda^{(t)}) \\\
+&\because \sum_{H}p(O,H|\lambda)=\sum_{\substack{h_1,h_2,\cdots,h_t \\\ h\in\lbrace q_1,\cdots,q_N \rbrace}}\pi(h_1)\prod_{i=1}^t B_{h_i}(o_i)\prod_{j=2}^t A_{h_{j-1}h_{j}} \\\
+&= \sum_H \log \left[ \pi(h_1)\prod_{i=1}^t B_{h_i}(o_i)\prod_{j=2}^t A_{h_{j-1}h_{j}} \right] p(O,H|\lambda^{(t)}) \\\
+&= \sum_H \left[ \log \pi(h_1)+\log \prod_{i=1}^tB_{h_1}(o_i)+\log \prod_{j=2}^tA_{h_{j-1}h{j}} \right] p(O,H|\lambda^{(t)}) \\\
+&= \sum_H \left[ \log \pi(h_1)+ \sum_{i=1}^t\log B_{h_1}(o_i)+ \sum_{j=2}^t\log A_{h_{j-1}h{j}} \right] p(O,h_1,\cdots,h_t|\lambda^{(t)}) \\\
+&= \sum_{h_1}\cdots\sum_{h_t} \left[ \log \pi(h_1)+ \sum_{i=1}^t\log B_{h_1}(o_i)+ \sum_{j=2}^t\log A_{h_{j-1}h{j}} \right] p(O,h_1,\cdots,h_t|\lambda^{(t)}) \\\
 \end{align*}
 $$
 
-Inference objects include 3 parts:
+#### Update $\pi$
 
-1. marginal probability(likelihood)
 $$
-\begin{cases}
-p(E) = p(e_1,\cdots,e_n) \\\
-p(e_i) = \sum_{j=1\cdots n, j\neq i} p(E) \\\
-p(e_A) = \sum_{j\in E\setminus{A}} p(E), \text{A is partial nodes set}
-\end{cases}
+\pi^{(t+1)} = \argmax_{\pi} Q(\lambda,\lambda^{(t)}) \\\
+\text{subject to }\sum_{i=1}^N \pi(h=q_i)=1 \\\
+\dArr
 $$
 
-2. conditional probability(posterior)
 $$
-\begin{cases}
-p(X|E) \\\
-p(Y|E)=\sum_Z p(X|E), \text{for $X=(Y,Z)$}
-\end{cases}
+\begin{align*}
+L(\pi,\eta) &= \sum_{H} \left[\left[ \log \pi(h_1)+ \sum_{i=1}^t\log B_{h_1}(o_i)+ \sum_{j=2}^t\log A_{h_{j-1}h{j}} \right] p(O,H|\lambda^{(t)})\right]+\eta(\sum_{i=1}^N\pi(q_i)-1) \\\
+&= \sum_{h_1}\cdots\sum_{h_t} \left[ \log \pi(h_1) p(O,h_1,\cdots,h_t|\lambda^{(t)})\right] + \eta(\sum_{i=1}^N\pi(q_i)-1) \\\
+&= \sum_{h_1} \left[ \log\pi(h_1)p(O,h_1|\lambda^{(t)}) \right] + \eta(\sum_{i=1}^N\pi(q_i)-1) \\\
+&= \sum_{i=1}^N \left[ \log\pi(h_1=q_i)p(O,h_1=q_i|\lambda^{(t)}) \right] + \eta(\sum_{i=1}^N\pi(q_i)-1)
+\end{align*} \\\
+\dArr
 $$
 
-3. maximum a posteriori(MAP)
 $$
-\begin{cases}
-\hat{X} = \argmax_X p(X|E) \\\
-\hat{Y} = \argmax_Y p(Y|E) = \argmax_Y \sum_Z p(X|E)
-\end{cases}
+\begin{align*}
+\frac{\partial}{\partial \pi(q_i)}L(\pi,\eta) &= p(O,h_1=q_i|\lambda^{(t)})\frac{\partial}{\partial\pi(q_i)}\log\pi(q_i) + \log\pi(q_i)\frac{\partial}{\partial \pi(q_i)}p(O,h_1=q_i|\lambda^{(t)}) + \eta \\\
+&= p(O,h_1=q_i|\lambda^{(t)})\frac{1}{\pi(q_i)} + \eta
+\end{align*} \\\
+\dArr
+$$
+
+$$
+\begin{align*}
+p(O,h_1=q_i|\lambda^{(t)})\frac{1}{\pi(q_i)} + \eta &= 0 \\\
+p(O,h_1=q_i|\lambda^{(t)}) + \pi(q_i)\eta &= 0 \\\
+\sum_{i=1}^N p(O,h_1=q_i|\lambda^{(t)}) + \sum_{i=1}^N\pi(q_i)\eta &= 0 \\\
+p(O|\lambda^{(t)}) + \eta &= 0 \\\
+\eta &= -p(O|\lambda^{(t)}) \\\
+\end{align*} \\\
+\dArr \\\
+\pi^{(t+1)}(q_i) = \frac{p(O,h_1=q_i|\lambda^{(t)})}{p(O|\lambda^{(t)})}
 $$
 
 ### Variable elimination
