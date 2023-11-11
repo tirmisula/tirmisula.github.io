@@ -264,13 +264,14 @@ $$
 p(O|\lambda) &= \sum_{q_i}p(o_1,\cdots,o_t,h_t=q_i|\lambda) \\\
 &= \sum_{i=1}^Np(o_1,\cdots,o_t,h_t=q_i|\lambda) \\\
 &Let \space\alpha_t(i) = p(o_1,\cdots,o_t,h_t=q_i|\lambda) \\\
-&= \sum_{i=1}^N \alpha_t(i)
+&= \sum_{i=1}^N \alpha_t(i) \\\
+& \alpha_t \text{ is related to } o_1,\cdots,o_t,h_t
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-If we solve \( \alpha_t(i) \). We may find a recurrence realtion between \( \alpha_t(i) \) and \( \alpha_{t-1}(i) \):
+Hopefully if we can solve \( \alpha_t(i) \) by finding a recurrence realtion between \( \alpha_t(i) \) and \( \alpha_{t-1}(i) \):
 </p>
 {{</ math.inline >}}
 
@@ -292,7 +293,7 @@ $$
 Solving order:
 
 $$
-\alpha_1(i) \rarr \alpha_2(j)\rarr \cdots\rarr \alpha_t(q_\ast)\rarr p(O|\lambda)
+\alpha_1(i) \rarr \alpha_2(j)\rarr \cdots\rarr \begin{cases}\alpha_t(1)\\\ \vdots \\\ \alpha_t(N)\end{cases}\rarr p(O|\lambda)
 $$
 
 {{< math.inline >}}
@@ -302,53 +303,60 @@ The complexity is:
 {{</ math.inline >}}
 
 $$
-O(N+tN)
+O(N \times tN)=O(N^2t)
 $$
 
-### Factorization of MRF
-
-According to **Hammersley–Clifford theorem**<cite>[^2]</cite>, factorization of undirected graph MRF can be expressed as production of potential function on maximum clique:
+### Backward algorithm
 
 $$
 \begin{align*}
-p(x) &= \frac{1}{z} \prod_{i=1}^K \psi(x_{C_i}) \\\
-C_i &: \text{i-th maximum clique} \\\
-x_{C_i} &: \text{variable nodes in $C_i$} \\\
-\psi(x) &: \text{potential function, $>0$} \\\
-z &: \text{nomalize factor, $z=\sum_{x_1\cdots x_p}\prod_{i=1}^K \psi(x_{C_i})$}
-\end{align*}
-$$
-
-To be greater than zero, potential function has exponential form:
-
-$$
-\begin{align*}
-\psi(x_{C_i}) &= \exp(-E(x_{C_i})) \\\
-E(x) &: \text{energy function}
+p(O|\lambda) &= \sum_{q_i}p(o_1,\cdots,o_t,h_1=q_i|\lambda) \\\
+&= \sum_{i=1}^Np(o_1,\cdots,o_t,h_1=q_i|\lambda) \\\
+&= \sum_{i=1}^Np(o_1,\cdots,o_t|h_1=q_i,\lambda)p(h_1=q_i|\lambda) \\\
+&= \sum_{i=1}^Np(o_1,\cdots,o_t|h_1=q_i,\lambda)\pi(q_i) \\\
+&= \sum_{i=1}^Np(o_1|o_2,\cdots,o_t,h_1=q_i,\lambda)p(o_2,\cdots,o_t|h_1=q_i,\lambda)\pi(q_i) \\\
+&\text{By observation independence assumption} \\\
+&= \sum_{i=1}^Np(o_1|h_1=q_i,\lambda)p(o_2,\cdots,o_t|h_1=q_i,\lambda)\pi(q_i) \\\
+&= \sum_{i=1}^NB_{i}(o_1) p(o_2,\cdots,o_t|h_1=q_i,\lambda)\pi(q_i) \\\
+&Let \space\beta_1(i) = p(o_2,\cdots,o_t|h_1=q_i,\lambda) \\\
+&= \sum_{i=1}^NB_{i}(o_1) \beta_{1}(i) \pi(q_i) \\\
+& \beta_1 \text{ is related to } o_2,\cdots,o_t,h_1
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-For such pdf \( p(x) \) made up of potential functions, we call it <b>Gibbs distribution</b> or <b>Boltzman distribution</b>, Gibbs distirbution is also exponential family distribution:
+We can find a recurrence realtion between \( \beta_{\tau}(i) \) and \( \beta_{\tau+1}(i) \):
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-p(x) &= \frac{1}{z}\prod_{i=1}^K\exp(-E(x_{C_i})) \\\
-&= \frac{1}{z} \exp( -\sum_{i=1}^K E(x_{C_i})) \\\
-&= \frac{1}{z(\eta)}h(x)\exp( \eta^T\phi(x) )
+\beta_{\tau}(i) &= p(o_{\tau+1},\cdots,o_t|h_{\tau}=q_i,\lambda) \\\
+&= \sum_{j=1}^N p(o_{\tau+1},\cdots,o_t,h_{\tau+1}=q_j|h_{\tau}=q_i,\lambda) \\\
+&= \sum_{j=1}^N p(o_{\tau+1},\cdots,o_t|h_{\tau+1}=q_j,h_{\tau}=q_i,\lambda)p(h_{\tau+1}=q_j|h_{\tau}=q_i,\lambda) \\\
+&= \sum_{j=1}^N p(o_{\tau+1},\cdots,o_t|h_{\tau+1}=q_j,h_{\tau}=q_i,\lambda) A_{ij} \\\
+&\because h_{\tau+1}=q_j \text{ is observed, $\therefore h_{\tau}=q_i$ is $\perp$ to $o_{\tau+1},\cdots,o_{t}$} \\\
+&= \sum_{j=1}^N p(o_{\tau+1},\cdots,o_t|h_{\tau+1}=q_j,\lambda) A_{ij} \\\
+&= \sum_{j=1}^N p(o_{\tau+1}|o_{\tau+2},\cdots,o_{t},h_{\tau+1}=q_j,\lambda) p(o_{\tau+2},\cdots,o_{t}|h_{\tau+1}=q_j,\lambda) A_{ij} \\\
+&\text{By observation independence assumption} \\\
+&= \sum_{j=1}^N p(o_{\tau+1}|h_{\tau+1}=q_j,\lambda) p(o_{\tau+2},\cdots,o_{t}|h_{\tau+1}=q_j,\lambda) A_{ij} \\\
+&= \sum_{j=1}^N B_{j}(o_{\tau+1}) p(o_{\tau+2},\cdots,o_{t}|h_{\tau+1}=q_j,\lambda) A_{ij} \\\
+&= \sum_{j=1}^N B_{j}(o_{\tau+1}) \beta_{\tau+1}(j) A_{ij}
 \end{align*}
 $$
 
-Because Gibbs distribution belongs to exponential family distribution, it maximize entropy naturally, thus we can conclude:
+Solving order:
 
 $$
-\begin{align*}
-\text{MRF distribution}\iff \text{Gibbs distribution}&\iff \text{Distribution that maximize entropy} \\\ 
-&\iff \text{most likely to be observed}
-\end{align*}
+\beta_{t}\rarr \beta_{t-1}\rarr \cdots \rarr \begin{cases}\beta_{1}(1)\\\ \vdots \\\ \beta(N)
+\end{cases} \rarr p(O|\lambda)
+$$
+
+The complexity is:
+
+$$
+O(N^2t)
 $$
 
 ## Inference in PGM
