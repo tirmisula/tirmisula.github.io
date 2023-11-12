@@ -364,10 +364,16 @@ $$
 ### EM review
 
 $$
-\theta^{(t+1)} = \argmax_{\theta}\int_z \log p(x,z|\theta)p(z|x,\theta^{(t)})\space dz \\\
+\begin{align*}
+\theta^{(t+1)} &= \argmax_{\theta}\int_z \log p(x,z|\theta)p(z|x,\theta^{(t)})\space dz \\\
+x&:\text{observed data} \\\
+z&:\text{latent variable} \\\
+\theta&:\text{parameters} \\\
+\end{align*}
 $$
 
 ### Baum Welch algorithm
+#### Q function
 
 Baum-Welch algorithm is basically EM algorithm, so we can write:
 
@@ -386,7 +392,7 @@ Q(\lambda,\lambda^{(t)}) &= \sum_{H}\log p(O,H|\lambda)p(O,H|\lambda^{(t)}) \\\
 \end{align*}
 $$
 
-#### Update $\pi$
+#### Update PI
 
 $$
 \pi^{(t+1)} = \argmax_{\pi} Q(\lambda,\lambda^{(t)}) \\\
@@ -396,7 +402,7 @@ $$
 
 $$
 \begin{align*}
-L(\pi,\eta) &= \sum_{H} \left[\left[ \log \pi(h_1)+ \sum_{i=1}^t\log B_{h_1}(o_i)+ \sum_{j=2}^t\log A_{h_{j-1}h{j}} \right] p(O,H|\lambda^{(t)})\right]+\eta(\sum_{i=1}^N\pi(q_i)-1) \\\
+\mathcal{L}(\pi,\eta) &= \sum_{H} \left[\left[ \log \pi(h_1)+ \sum_{i=1}^t\log B_{h_1}(o_i)+ \sum_{j=2}^t\log A_{h_{j-1}h{j}} \right] p(O,H|\lambda^{(t)})\right]+\eta(\sum_{i=1}^N\pi(q_i)-1) \\\
 &= \sum_{h_1}\cdots\sum_{h_t} \left[ \log \pi(h_1) p(O,h_1,\cdots,h_t|\lambda^{(t)})\right] + \eta(\sum_{i=1}^N\pi(q_i)-1) \\\
 &= \sum_{h_1} \left[ \log\pi(h_1)p(O,h_1|\lambda^{(t)}) \right] + \eta(\sum_{i=1}^N\pi(q_i)-1) \\\
 &= \sum_{i=1}^N \left[ \log\pi(h_1=q_i)p(O,h_1=q_i|\lambda^{(t)}) \right] + \eta(\sum_{i=1}^N\pi(q_i)-1)
@@ -406,7 +412,50 @@ $$
 
 $$
 \begin{align*}
-\frac{\partial}{\partial \pi(q_i)}L(\pi,\eta) &= p(O,h_1=q_i|\lambda^{(t)})\frac{\partial}{\partial\pi(q_i)}\log\pi(q_i) + \log\pi(q_i)\frac{\partial}{\partial \pi(q_i)}p(O,h_1=q_i|\lambda^{(t)}) + \eta \\\
+\frac{\partial}{\partial \pi(q_i)}\mathcal{L}(\pi,\eta) &= p(O,h_1=q_i|\lambda^{(t)})\frac{\partial}{\partial\pi(q_i)}\log\pi(q_i) + \log\pi(q_i)\frac{\partial}{\partial \pi(q_i)}p(O,h_1=q_i|\lambda^{(t)}) + \eta \\\
+&= p(O,h_1=q_i|\lambda^{(t)})\frac{1}{\pi(q_i)} + \eta
+\end{align*} \\\
+\dArr
+$$
+
+$$
+\begin{align*}
+p(O,h_1=q_i|\lambda^{(t)})\frac{1}{\pi(q_i)} + \eta &= 0 \\\
+p(O,h_1=q_i|\lambda^{(t)}) + \pi(q_i)\eta &= 0 \\\
+\sum_{i=1}^N p(O,h_1=q_i|\lambda^{(t)}) + \sum_{i=1}^N\pi(q_i)\eta &= 0 \\\
+p(O|\lambda^{(t)}) + \eta &= 0 \\\
+\eta &= -p(O|\lambda^{(t)}) \\\
+\end{align*} \\\
+\dArr \\\
+\pi^{(t+1)}(q_i) = \frac{p(O,h_1=q_i|\lambda^{(t)})}{p(O|\lambda^{(t)})}=p(h_1=q_i|O,\lambda^{(t)})
+$$
+
+#### Update A
+
+$$
+A^{(t+1)} = \argmax_{\pi} Q(\lambda,\lambda^{(t)}) \\\
+\text{subject to } \sum_{j=1}^N A_{ij}=1 \\\
+\mathcal{L}(\theta) = \sum_{t=1}^{T-1} \sum_{i=1}^{N} \sum_{j=1}^{N} \gamma_t(i,j) \log(A_{ij}) \\\
+\frac{{\partial \mathcal{L}(\theta)}}{{\partial A_{ij}}} = \frac{{\sum_{t=1}^{T-1} \gamma_t(i,j)}}{{A_{ij}}} - \lambda = 0\\\
+\sum_{j=1}^{N} \sum_{t=1}^{T-1} \gamma_t(i,j) = \lambda \sum_{j=1}^{N} A_{ij}\\\
+A_{ij} = \frac{{\sum_{t=1}^{T-1} \gamma_t(i,j)}}{{\sum_{t=1}^{T-1} \sum_{k=1}^{N} \gamma_t(i,k)}}
+\dArr
+$$
+
+$$
+\begin{align*}
+\mathcal{L}(A,\eta) &= \sum_{H} \left[\left[ \log \pi(h_1)+ \sum_{i=1}^t\log B_{h_1}(o_i)+ \sum_{j=2}^t\log A_{h_{j-1}h{j}} \right] p(O,H|\lambda^{(t)})\right]+\eta(\sum_{i=1}^NA_{ij}-1) \\\
+&= \sum_{h_1}\cdots\sum_{h_t} \left[ \sum_{j=2}^t \left( \log A_{h_{j-1}h_j}p(O,h_1,\cdots,h_t|\lambda^{(t)}) \right) \right]+\eta(\sum_{i=1}^NA_{ij}-1) \\\
+&= \sum_{j=2}^t \sum_{h_1}\cdots\sum_{h_t} \left[ p(O,h_1,\cdots,h_t|\lambda^{(t)}) \log p(h_{j}|h_{j-1}) \right]+\eta(\sum_{i=1}^NA_{ij}-1) \\\
+&= \sum_{j=2}^t \sum_{h_{j-1}}\sum_{h_{j}} \log p(h_{j}|h_{j-1}) \sum_{h_1\cdots h_t\setminus h_{j-1}h_{j}} \left[ p(O,h_1,\cdots,h_t|\lambda^{(t)})  \right]+\eta(\sum_{i=1}^NA_{ij}-1) \\\
+&= \sum_{j=2}^t \sum_{h_{j-1}}\sum_{h_{j}} \log p(h_{j}|h_{j-1})p(O,h_{j-1},h_{j}|\lambda^{(t)})+\eta(\sum_{i=1}^NA_{ij}-1)
+\end{align*} \\\
+\dArr
+$$
+
+$$
+\begin{align*}
+\frac{\partial}{\partial A_{ij}}L(A,\eta) &= p(O,h_1=q_i|\lambda^{(t)})\frac{\partial}{\partial\pi(q_i)}\log\pi(q_i) + \log\pi(q_i)\frac{\partial}{\partial \pi(q_i)}p(O,h_1=q_i|\lambda^{(t)}) + \eta \\\
 &= p(O,h_1=q_i|\lambda^{(t)})\frac{1}{\pi(q_i)} + \eta
 \end{align*} \\\
 \dArr
@@ -424,807 +473,9 @@ p(O|\lambda^{(t)}) + \eta &= 0 \\\
 \pi^{(t+1)}(q_i) = \frac{p(O,h_1=q_i|\lambda^{(t)})}{p(O|\lambda^{(t)})}
 $$
 
-### Variable elimination
+#### Update B
 
-VE thought is based on distirbutive law:
 
-$$
-a(b+c) \text{ is better than } ab+ac \\\
-\text{summation is better than multiplication}
-$$
-
-Suppose we have directed graph:
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'red',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart LR
-    id1((a)) --> id2((b))
-    id2((b)) --> id3((c))
-    id3((c)) --> id4((d))
-```
-
-</div>
-
-We can compute marginal probability by:
-
-$$
-\begin{align*}
-p(d) &= \sum_{a,b,c} p(a,b,c,d) \\\
-&= \sum_{a,b,c} p(a)p(b|a)p(c|b)p(d|c) \\\
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-The computation complexity is \(O(4^k)\). we can turn it to:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-p(d) &= \sum_{a,b,c} p(a)p(b|a)p(c|b)p(d|c) \\\
-&= \sum_{b,c}p(c|b)p(d|c)\sum_{a}\underset{f(a,b)}{p(a)p(b|a)} \\\
-&= \sum_{c}p(d|c)\sum_{b}p(c|b)f(b) \\\
-&= \sum_{c}p(d|c)f(c) \\\
-&= f(d)
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-It is the same for undirected graph:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-p(d) &= \sum_{a,b,c} p(a,b,c,d) \\\
-&= \sum_{a,b,c} \frac{1}{z}\prod_{i=1}^k \psi(x_{C_i}) \\\
-&\text{the worst case is $a\in\forall x_{C}$}
-\end{align*}
-$$
-
-The <b>drawbacks</b> are:
-
-1. Only one be calculated at a time, the intermediate results are not in storage which will be calculated repeatedly.
-2. Eliminate order affects computation comlexity, finding optimal eliminate order is NP-hard.
-
-### Belief propagation
-#### Example of repeat computation
-Repeat computation, for example:
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'red',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart LR
-    id1((a)) --> id2((b))
-    id2((b)) --> id3((c))
-    id3((c)) --> id4((d))
-    id4((d)) --> id5((e))
-```
-
-</div>
-
-{{< math.inline >}}
-<p>
-We can compute \(p(e)\) and \(p(c)\);
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-p(e) &= \sum_d p(e|d) \sum_c p(d|c) \sum_b p(c|b) \sum_a p(b|a)p(a) \\\
-&\text{Elimination order is $a\rarr b\rarr c \rarr d\rarr e$} \\\
-p(c) &= \sum_b p(c|b) \sum_a p(b|a)p(a) \sum_d p(d|c) \sum_e p(e|d) \\\
-&\text{Elimination order is $a\rarr b\rarr c \larr d\larr e$} \\\
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-It is obvious that the repeated part is \( a\rarr b\rarr c \) which is \( \sum_b p(c|b) \sum_a p(b|a)p(a) \), we can denote this part as:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-f_{a\rarr b} (x_b) &= \sum_a p(b|a)p(a) \\\
-f_{b\rarr c} (x_c) &= \sum_b p(c|b)f_{a\rarr b} (x_b)
-\end{align*}
-$$
-
-#### Formula for nodes and edges
-
-Suppose we have undirected graph:
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'red',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart LR
-    id1((a)) --- id2((b))
-    id2((b)) --- id3((c))
-    id2((b)) --- id4((d))
-    id1((a)) --- id5((e))
-```
-
-</div>
-
-The joint probability is:
-
-$$
-p(a,b,c,d,e) = \frac{1}{z}\psi(a)\psi(b)\psi(c)\psi(d)\psi(e)\psi(a,b)\psi(b,c)\psi(b,d)\psi(a,e)
-$$
-
-{{< math.inline >}}
-<p>
-The marginal probability \(p(a)\) is:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{cases}
-p(a) = \psi(a)f_{b\rarr a}(x_a)f_{e\rarr a}(x_a) \\\
-f_{b\rarr a}(x_a) = \sum_b \psi(a,b)\psi(b)f_{c\rarr b}(x_b)f_{d\rarr b}(x_b) \\\
-f_{e\rarr a}(x_a) = \sum_e \psi(a,e)\psi(e)
-\end{cases}
-$$
-
-We can conclude a more <b>general form</b>:
-
-$$
-\forall i \in \text{V , $G(V,E)$} \\\
-\begin{cases}
-p(i) = \psi(i)\prod_{j\in neighbor(i)} f_{j\rarr i}(x_i) \\\
-f_{j\rarr i}(x_i) = \sum_{j} \psi(i,j)\psi(j) \prod_{k\in neighbor(j)\setminus\lbrace i \rbrace} f_{k\rarr j}(x_j)
-\end{cases}
-$$
-
-Visualizing the general form:
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    "htmlLabels": true,
-    "securityLevel": "loose",
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'grey',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart TB
-    subgraph marginal probability
-      id1(("p(i)")) ---|f_j→i| id2((j))
-      id1(("p(i)")) ---|f_j→i| id3((j))
-      id1(("p(i)")) ---|f_j→i| id4((...))
-      id1(("p(i)")) ---|f_j→i| id5((j))
-      id1(("p(i)")) ---|"&psi;(i)"| id6(("i"))
-    end
-    subgraph stage cache
-      id8((k)) ---|f_k→j| id7(f_j→i)
-      id9((...)) ---|f_k→j| id7(f_j→i)
-      id10((k)) ---|f_k→j| id7(f_j→i)
-      id11(("i")) ---|"&psi;(i,j)"| id7(f_j→i)
-      id12(("j")) ---|"&psi;(i,j)"| id7(f_j→i)
-      id12(("j")) ---|"&psi;(j)"| id7(f_j→i)
-    end
-```
-
-</div>
-
-#### BP algorithm(Sum product algorithm)
-
-Belief propagation algorithm is basically variable elimination without repeatedly computing edge's message. From previous section we can define **belief(j)** is information collected by node j:
-
-$$
-\text{belief}(j) = \psi(j)\prod_{k\in neighbor(j)} f_{k\rarr j}(x_j)
-$$
-
-Then node j sending information to node i is given by:
-
-$$
-f_{j\rarr i}(x_i) = \sum_j \psi(i,j)\text{belief}(j)
-$$
-
-{{< math.inline >}}
-<p>
-The BP algorithm calculates all edges \( f_{i\rarr j} \) by traversing the graph:
-</p>
-{{</ math.inline >}}
-
-$$
-\textbf{Sequential BP algorithm} \\\
-\begin{align*}
-& \text{1. Initialize the messages} \\\
-& \quad f_{i \to j} = 1, \quad \forall i, j \\\
-& \text{2. Find a root node, $root$} \\\
-& \text{3. Define recursive function CollectMsg(j,i)} \\\
-& \quad \text{Function CollectMsg(j,i):} \\\
-& \quad\quad \text{belief}(j) = \psi(j)\prod_{k\in neighbor(j)} \text{CollectMsg(k,j)} \\\
-& \quad\quad f_{j\rarr i} = \sum_j \psi(i,j)\text{belief}(j) \\\
-& \quad\quad \text{Return $f_{j\rarr i}$} \\\
-& \text{4. Collect message to $root$ recursively} \\\
-& \quad \text{For $j$ in neighbor($root$):} \\\
-& \quad\quad \text{$f_{src=j,dst=root}=$CollectMsg($j,root$)} \\\
-& \quad \text{End} \\\
-& \text{5. Distribute message from $root$ recursively} \\\
-& \quad \text{For $j$ in neighbor($root$):} \\\
-& \quad\quad \text{$f_{src=root,dst=j}=$CollectMsg($root,j$)} \\\
-& \quad \text{End} \\\
-& \text{6. Calculate each node's marginal probability} \\\
-& \quad \text{For $v$ in vertices:} \\\
-& \quad\quad \text{$p(v) = \psi(v)\prod_{k\in neighbor(v)} f_{src=k,dst=v}$} \\\
-& \quad \text{End}
-\end{align*}
-$$
-
-There is a variant called parallel BP which is similar to BFS:
-
-$$
-\textbf{Parallel BP algorithm} \\\
-\begin{align*}
-& \text{1. Randomly select a start node, $i$} \\\
-& \text{2. For j in neighbor($i$)$\setminus$}\lbrace\text{upstream-node(i)}\rbrace \\\
-& \quad\quad\text{Send message $\psi(i)\rarr j$ in parallel} \\\
-& \quad\text{If $\forall j, f_{j\rarr i}$ is recieved:} \\\
-& \quad\quad\text{node $i$ is converged} \\\
-& \text{3. Repeat }\textbf{step 2}\text{ for all nodes, until all nodes converged}
-\end{align*}
-$$
-
-#### Max product algorithm
-
-Recall that for nodes and edges we have formula:
-
-$$
-\begin{cases}
-p(i) = \psi(i)\prod_{j\in neighbor(i)} f_{j\rarr i}(x_i) \\\
-f_{j\rarr i}(x_i) = \sum_{j} \psi(i,j)\psi(j) \prod_{k\in neighbor(j)\setminus\lbrace i \rbrace} f_{k\rarr j}(x_j)
-\end{cases}
-$$
-
-{{< math.inline >}}
-<p>
-Define \( m_{j\rarr i}(x_i) \) by replacing summation with max in second equation:
-</p>
-{{</ math.inline >}}
-
-$$
-m_{j\rarr i}(x_i) = \max_{x_j} \psi(i,j)\psi(j) \prod_{k\in neighbor(j)\setminus\lbrace i \rbrace} m_{k\rarr j}(x_j) \\\
-% \text{$m_{j\rarr i}(x_i)$ is the maximum $p(j\cup$neighbor($j$)$\setminus\lbrace i \rbrace)$}
-$$
-
-{{< math.inline >}}
-<p>
-It is clear that \( f_{j\rarr i} \) is used for solving marginal probability, we can prove that \( m_{j\rarr i} \) is used for solving joint probability:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-\psi(i) \prod_{j\in neighbor(i)} f_{j\rarr i}(x_i) &= p(i) \\\
-\psi(i)\prod_{j\in neighbor(i)}\sum_{j,\lbrace k \rbrace\in neighbor(j)} g(x_i,x_j,\lbrace x_k \rbrace) &= \sum_{\forall node \setminus \lbrace i \rbrace}p(x_1,x_2,\cdots,x_i,\cdots,x_N) \\\
-&\dArr \\\
-\max_{x_i}\psi(i) \prod_{j\in neighbor(i)} m_{j\rarr i}(x_i) &= \max_{x_i}\psi(i)\prod_{j\in neighbor(i)}\max_{x_j,\lbrace x_k \rbrace} g(x_i,x_j,\lbrace x_k \rbrace) \\\
-&=p(x_1=x_1^{\ast},x_2=x_2^{\ast},\cdots,x_i=x_i^{\ast},\cdots,x_N=x_N^{\ast}) \\\
-&= \max p(x_1,x_2,\cdots,x_i,\cdots,x_N)
-\end{align*}
-$$
-
-Let's go through an example graph:
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'red',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart LR
-    id1((a)) --- id2((b))
-    id2((b)) --- id3((c))
-    id2((b)) --- id4((d))
-    id1((a)) --- id5((e))
-    id3((c)) --- id6((f))
-```
-
-</div>
-
-Evidence nodes are omitted here.
-
-{{< math.inline >}}
-<p>
-We can prove that \( \psi(a) \prod_{j\in neighbor(a)} m_{j\rarr a}(x_a) \) is the maximum joint probability \( p(a,b,c,d,e,f) \):
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{cases}
-&\text{By definition, we compute $m_{i\rarr j}$ from bottom-up} \\\
-m_{c\rarr b} &= \max_{x_c}\psi(c)\psi(b,c) \\\
-m_{f\rarr d} &= \max_{x_f}\psi(f)\psi(d,f) \\\
-m_{d\rarr b} &= \max_{x_d}\psi(d)\psi(b,d)m_{f_\rarr d} \\\
-m_{b\rarr a} &= \max_{x_b}\psi(b)\psi(a,b)m_{c\rarr b}m_{d\rarr b} \\\
-m_{e\rarr a} &= \max_{x_e}\psi(e)\psi(a,e)
-\end{cases}
-\text{Then, }
-$$
-
-$$
-\begin{align*}
-\max p(a,b,c,d,e,f|E) &= \max_{x_a}\psi(a) \prod_{j\in neighbor(a)} m_{j\rarr a}(x_a) \\\
-&= \max_{x_a}\psi(a)m_{b\rarr a}m_{e\rarr a} \\\
-&= \max_{x_a} \psi(a)\max \psi(b)\psi(a,b)\psi(c)\psi(b,c)\psi(d)\psi(b,d)\psi(f)\psi(d,f)\psi(e)\psi(a,e) \\\
-&= \max\psi(a) \psi(b)\psi(a,b)\psi(c)\psi(b,c)\psi(d)\psi(b,d)\psi(f)\psi(d,f)\psi(e)\psi(a,e)
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-Finally we get not only the maximum posteriori but also the optimal path from each node:
-</p>
-{{</ math.inline >}}
-
-$$
-(x_a^{\ast},x_b^{\ast},x_c^{\ast},x_d^{\ast},x_e^{\ast},x_f^{\ast}) = \argmax_{x_a,x_b,x_c,x_d,x_e,x_f}p(a,b,c,d,e,f|E)
-$$
-
-#### BP's restriction
-
-BP only works for tree-structure graph
-
-## Factor graph
-
-Since BP algorithm  does not work for cyclic graph, factor graph inserts factors to the graph so that a cyclic graph may be turned into a tree.
-
-Factor graph has following form:
-
-$$
-\begin{align*}
-p(x) &= \prod_{i=1}^k f_i(x_{C_i}) \\\
-f_i &: \text{function of factor $i$} \\\
-C_i &: \text{subset of nodes correspond to factor $i$} \\\
-\end{align*}
-$$
-
-Example:
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    "htmlLabels": true,
-    "securityLevel": "loose",
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'grey',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart LR
-    subgraph factor graph 2
-      id8(("a")) --- id9(f_ab)
-      id9(f_ab) --- id10((b))
-      id10((b)) --- id11(f_bc)
-      id11(f_bc) --- id12((c))
-      id12((c)) --- id13(f_ac)
-      id13(f_ac) --- id8((a))
-      id8(("a")) --- id14(f_a)
-    end
-    subgraph factor graph 1
-      id4(("a")) --- id7(f_abc)
-      id5(("b")) --- id7(f_abc)
-      id6(("c")) --- id7(f_abc)
-    end
-    subgraph undirected cyclic graph
-      id1(("a")) --- id2((b))
-      id2(("b")) --- id3((c))
-      id3(("c")) --- id1((a))
-    end
-```
-
-</div>
-
-For original graph we have:
-
-$$
-p(x) = \frac{1}{z}\psi(a,b,c)
-$$
-
-For factor graph 1 we have:
-
-$$
-p(x) = f_{abc}(a,b,c)
-$$
-
-So factorization of undirected graph corresponds to a special case of factor graph.
-
-For factor graph 2 we have:
-
-$$
-p(x) = f_{ab}(a,b)f_{bc}(b,c)f_{ac}(a,c)f_{a}(a)
-$$
-
-We see nodes are always partitioned by factors, so factor graph is bipartite graph.
-
-## Moral graph
-
-Moral graph is used for converting directed graph to undirected graph, procedures are:
-
-{{< math.inline >}}
-<p>
-
-1. \( \forall x_i\in G \) , connect every 2 nodes in \( parent(x_i) \). 
-
-2. remove edges direction in \( G \).
-</p>
-{{</ math.inline >}}
-
-It targets at <b>head to head structure</b>, examples are below:
-
-1. Tail to tail:
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    "htmlLabels": true,
-    "securityLevel": "loose",
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'grey',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart LR
-    id1((a)) --> id2((b))
-    id1((a)) --> id3((c))
-```
-
-</div>
-
-$$
-\begin{align*}
-p(a,b,c) &= \underset{\psi(a,b)}{p(a)p(b|a)} \underset{\psi(a,c)}{p(c|a)} \\\
-&= \psi(a,b)\psi(a,c)
-\end{align*}
-$$
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    "htmlLabels": true,
-    "securityLevel": "loose",
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'grey',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart LR
-    id1((a)) --- id2((b))
-    id1((a)) --- id3((c))
-```
-
-</div>
-
-2. head to tail 
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    "htmlLabels": true,
-    "securityLevel": "loose",
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'grey',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart LR
-    id1((a)) --> id2((b))
-    id2((b)) --> id3((c))
-```
-
-</div>
-
-$$
-\begin{align*}
-p(a,b,c) &= \underset{\psi(a,b)}{p(a)p(b|a)} \underset{\psi(b,c)}{p(c|b)} \\\
-&= \psi(a,b)\psi(b,c)
-\end{align*}
-$$
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    "htmlLabels": true,
-    "securityLevel": "loose",
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'grey',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart LR
-    id1((a)) --- id2((b))
-    id2((b)) --- id3((c))
-```
-
-</div>
-
-3. head to head
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    "htmlLabels": true,
-    "securityLevel": "loose",
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'grey',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart LR
-    id1((a)) --> id3((c))
-    id2((b)) --> id3((c))
-```
-
-</div>
-
-$$
-\begin{align*}
-p(a,b,c) &= \underset{\psi(a,b,c)}{p(a)p(b) p(c|a,b)} \\\
-&= \psi(a,b,c) \\\
-&\text{original graph $G(a,b,c)$ is not a max clique} \\\
-&\therefore \text{connect $(a,b)$}
-\end{align*}
-$$
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    "htmlLabels": true,
-    "securityLevel": "loose",
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'grey',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart LR
-    id1((a)) --- id2((b))
-    id2((b)) --- id3((c))
-    id1((a)) ---id3((c))
-```
-
-</div>
-
-4. generalized head to head
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    "htmlLabels": true,
-    "securityLevel": "loose",
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'grey',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart LR
-    id1((a)) --> id4((d))
-    id2((b)) --> id4((d))
-    id3((c)) --> id4((d))
-```
-
-</div>
-
-$$
-\begin{align*}
-p(a,b,c,d) &= \underset{\psi(a,b,c,d)}{p(a)p(b)p(c) p(d|a,b,c)} \\\
-&= \psi(a,b,c,d)
-\end{align*}
-$$
-
-<div class="graph" style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    "htmlLabels": true,
-    "securityLevel": "loose",
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'grey',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-flowchart LR
-    id1((a)) --- id4((d))
-    id2((b)) --- id4((d))
-    id3((c)) ---id4((d))
-    id1((a)) --- id2((b))
-    id2((b)) --- id3((c))
-    id1((a)) --- id3((c))
-```
-
-</div>
-
-## Conclusion
-
-1. Directed graph(Bayesian network)
-    1. Factorization
-    $$
-    p(x_1,\cdots,x_p)=\prod_{i=1}^p p(x_i|x_{pa(i)})
-    $$
-    2. D-separation
-    $$
-    x_A\perp x_C|x_B \\\ 
-    \begin{align*}
-    &1. \text{If node $\alpha \in $tail to tail(parent node), $\alpha \in x_B$}\\\
-    &2. \text{If node $\alpha \in $head to tail(intermediate node), $\alpha \in x_B$}\\\
-    &3. \text{If node $\alpha \in $head to head(child node OR descendant of child node), $\alpha \notin x_B$}\\\
-    \end{align*}
-    $$
-2. Undirected graph(Markov random network)
-    1. Factorization
-    $$
-    p(x) = \frac{1}{z} \prod_{i=1}^K \psi(x_{C_i})
-    $$
-    2. Conditional independence
-        1. global markov property
-        $$
-        x_A\perp x_C | x_B
-        $$
-        2. local markov property
-        $$
-        x\perp \lbrace V\setminus \lbrace x \rbrace\setminus\lbrace\text{neighbor of $x$}\rbrace \rbrace | \text{neighbor of $x$}
-        $$
-        3. pairwise markov property
-        $$
-        x_i\perp x_j | x_{\neq i, \neq j}
-        $$
-  3. Inference
-      1. Variable elimination
-      $$
-      \begin{align*}
-      p(d) &= \sum_{a,b,c} p(a)p(b|a)p(c|b)p(d|c) \\\
-      &= \sum_{c}p(d|c)\sum_{b}p(c|b)\sum_{a}\underset{f(a,b)}{p(a)p(b|a)}
-      \end{align*}
-      $$
-      2. Belief propagation
-      $$
-      \begin{cases}
-      p(i) = \psi(i)\prod_{j\in neighbor(i)} f_{j\rarr i}(x_i) \\\
-      f_{j\rarr i}(x_i) = \sum_{j} \psi(i,j)\psi(j) \prod_{k\in neighbor(j)\setminus\lbrace i \rbrace} f_{k\rarr j}(x_j) \\\
-      f_{j\rarr i}(x_i) = \sum_j \psi(i,j)\text{belief}(j)
-      \end{cases}
-      $$
-      3. Max product algorithm(Dynamic programming)
-      $$
-      \begin{cases}
-      m_{j\rarr i}(x_i) = \max_{x_j} \psi(i,j)\psi(j) \prod_{k\in neighbor(j)\setminus\lbrace i \rbrace} m_{k\rarr j}(x_j) \\\
-      \max p(x) = \max_{x_i}\psi(i) \prod_{j\in neighbor(i)} m_{j\rarr i}(x_i)
-      \end{cases}
-      $$
 
 ## Reference
 
