@@ -435,10 +435,6 @@ $$
 $$
 A^{(t+1)} = \argmax_{\pi} Q(\lambda,\lambda^{(t)}) \\\
 \text{subject to } \sum_{j=1}^N A_{ij}=1 \\\
-\mathcal{L}(\theta) = \sum_{t=1}^{T-1} \sum_{i=1}^{N} \sum_{j=1}^{N} \gamma_t(i,j) \log(A_{ij}) \\\
-\frac{{\partial \mathcal{L}(\theta)}}{{\partial A_{ij}}} = \frac{{\sum_{t=1}^{T-1} \gamma_t(i,j)}}{{A_{ij}}} - \lambda = 0\\\
-\sum_{j=1}^{N} \sum_{t=1}^{T-1} \gamma_t(i,j) = \lambda \sum_{j=1}^{N} A_{ij}\\\
-A_{ij} = \frac{{\sum_{t=1}^{T-1} \gamma_t(i,j)}}{{\sum_{t=1}^{T-1} \sum_{k=1}^{N} \gamma_t(i,k)}}
 \dArr
 $$
 
@@ -448,29 +444,29 @@ $$
 &= \sum_{h_1}\cdots\sum_{h_t} \left[ \sum_{j=2}^t \left( \log A_{h_{j-1}h_j}p(O,h_1,\cdots,h_t|\lambda^{(t)}) \right) \right]+\eta(\sum_{i=1}^NA_{ij}-1) \\\
 &= \sum_{j=2}^t \sum_{h_1}\cdots\sum_{h_t} \left[ p(O,h_1,\cdots,h_t|\lambda^{(t)}) \log p(h_{j}|h_{j-1}) \right]+\eta(\sum_{i=1}^NA_{ij}-1) \\\
 &= \sum_{j=2}^t \sum_{h_{j-1}}\sum_{h_{j}} \log p(h_{j}|h_{j-1}) \sum_{h_1\cdots h_t\setminus h_{j-1}h_{j}} \left[ p(O,h_1,\cdots,h_t|\lambda^{(t)})  \right]+\eta(\sum_{i=1}^NA_{ij}-1) \\\
-&= \sum_{j=2}^t \sum_{h_{j-1}}\sum_{h_{j}} \log p(h_{j}|h_{j-1})p(O,h_{j-1},h_{j}|\lambda^{(t)})+\eta(\sum_{i=1}^NA_{ij}-1)
+&= \sum_{j=2}^t \sum_{h_{j-1}}\sum_{h_{j}} \log p(h_{j}|h_{j-1})p(O,h_{j-1},h_{j}|\lambda^{(t)})+\eta(\sum_{i=1}^NA_{ij}-1) \\\
+&= \sum_{j=2}^t \sum_{a=1}^N\sum_{b=1}^N \log p(h_{j}=q_b|h_{j-1}=q_a)p(O,h_{j-1}=q_a,h_{j}=q_b|\lambda^{(t)})+\eta(\sum_{i=1}^NA_{ij}-1)
 \end{align*} \\\
 \dArr
 $$
 
 $$
 \begin{align*}
-\frac{\partial}{\partial A_{ij}}L(A,\eta) &= p(O,h_1=q_i|\lambda^{(t)})\frac{\partial}{\partial\pi(q_i)}\log\pi(q_i) + \log\pi(q_i)\frac{\partial}{\partial \pi(q_i)}p(O,h_1=q_i|\lambda^{(t)}) + \eta \\\
-&= p(O,h_1=q_i|\lambda^{(t)})\frac{1}{\pi(q_i)} + \eta
+\frac{\partial}{\partial A_{ab}}\mathcal{L}(A,\eta) &= \frac{\partial}{\partial A_{ab}}\sum_{j=2}^t \sum_{a=1}^N\sum_{b=1}^N p(O,h_{j-1}=q_a,h_{j}=q_b|\lambda^{(t)}) \log A_{ab} + \eta \\\
+&= \sum_{j=2}^t\frac{1}{A_{ab}}p(O,h_{j-1}=q_a,h_{j}=q_b|\lambda^{(t)}) + \eta
 \end{align*} \\\
 \dArr
 $$
 
 $$
 \begin{align*}
-p(O,h_1=q_i|\lambda^{(t)})\frac{1}{\pi(q_i)} + \eta &= 0 \\\
-p(O,h_1=q_i|\lambda^{(t)}) + \pi(q_i)\eta &= 0 \\\
-\sum_{i=1}^N p(O,h_1=q_i|\lambda^{(t)}) + \sum_{i=1}^N\pi(q_i)\eta &= 0 \\\
-p(O|\lambda^{(t)}) + \eta &= 0 \\\
-\eta &= -p(O|\lambda^{(t)}) \\\
+\frac{1}{A_{ab}}\sum_{j=2}^tp(O,h_{j-1}=q_a,h_{j}=q_b|\lambda^{(t)}) + \eta &= 0 \\\
+\sum_{j=2}^tp(O,h_{j-1}=q_a,h_{j}=q_b|\lambda^{(t)}) + A_{ab}\eta &= 0 \\\
+\sum_{b=1}^N\sum_{j=2}^tp(O,h_{j-1}=q_a,h_{j}=q_b|\lambda^{(t)}) + \sum_{b=1}^NA_{ab}\eta &= 0 \\\
+\eta &= -\sum_{j=2}^t p(O,h_{j-1}=q_a|\lambda^{(t)})
 \end{align*} \\\
 \dArr \\\
-\pi^{(t+1)}(q_i) = \frac{p(O,h_1=q_i|\lambda^{(t)})}{p(O|\lambda^{(t)})}
+A^{(t+1)}(ab) = \frac{ \sum_{j=2}^tp(O,h_{j-1}=q_a,h_{j}=q_b|\lambda^{(t)}) }{ \sum_{j=2}^t p(O,h_{j-1}=q_a|\lambda^{(t)}) }
 $$
 
 #### Update B
