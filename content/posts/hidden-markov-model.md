@@ -492,15 +492,14 @@ $$
 $$
 \begin{align*}
 \frac{\partial}{\partial B_{c}(k)}\mathcal{L}(B,\eta) &= \frac{\partial}{\partial B_{c}(k)}\sum_{i=1}^t \sum_{c=1}^N p(O,h_{i}=q_c|\lambda^{(t)}) \log B_{c}(o_i) + \eta_c \\\
-&= \sum_{i=1}^t\mathbf{1}_{o_i=k}\frac{1}{B_{c}(o_i)}p(O,h_{i}=q_c|\lambda^{(t)}) + \eta_c \\\
-&= \frac{1}{B_{c}(o_i=k)}p(O\setminus o_i,o_i=k,h_{i}=q_c|\lambda^{(t)}) + \eta_c
+&= \sum_{i=1}^t1_{o_i=k}\frac{1}{B_{c}(o_i)}p(O,h_{i}=q_c|\lambda^{(t)}) + \eta_c
 \end{align*} \\\
 \dArr
 $$
 
 $$
 \begin{align*}
-\sum_{i=1}^t \mathbf{1}_{o_i=k}\frac{1}{B_{c}(o_i)} p(O,h_{i}=q_c|\lambda^{(t)}) + \eta_c &= 0 \\\
+\sum_{i=1}^t 1_{o_i=k}\frac{1}{B_{c}(o_i)} p(O,h_{i}=q_c|\lambda^{(t)}) + \eta_c &= 0 \\\
 \sum_{i\in\lbrace 1\cdots t|o_i=k \rbrace} \frac{1}{B_{c}(k)} p(O,o_i=k,h_{i}=q_c|\lambda^{(t)}) + \eta_c &= 0 \\\
 \sum_{i\in\lbrace 1\cdots t|o_i=k \rbrace} p(O,o_i=k,h_{i}=q_c|\lambda^{(t)}) + B_c(k)\eta_c &= 0 \\\
 \sum_{k=1}^M\sum_{i\in\lbrace 1\cdots t|o_i=k \rbrace} p(O,o_i=k,h_{i}=q_c|\lambda^{(t)}) + \sum_{k=1}^M B_c(k)\eta_c &= 0 \\\
@@ -509,7 +508,7 @@ $$
 \eta_c &= -\sum_{i=1}^t p(O,h_{i}=q_c|\lambda^{(t)})
 \end{align*} \\\
 \dArr \\\
-B^{(t+1)}_c(k) = \frac{ \sum_{i=1}^t \mathbf{1}_{o_i=k}p(O,h_{i}=q_c|\lambda^{(t)}) }{ \sum_{i=1}^t p(O,h_{i}=q_c|\lambda^{(t)}) }
+B^{(t+1)}_c(k) = \frac{ \sum_{i=1}^t 1_{o_i=k}p(O,h_{i}=q_c|\lambda^{(t)}) }{ \sum_{i=1}^t p(O,h_{i}=q_c|\lambda^{(t)}) }
 $$
 
 ## Reference
