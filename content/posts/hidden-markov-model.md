@@ -508,7 +508,7 @@ $$
 \eta_c &= -\sum_{i=1}^t p(O,h_{i}=q_c|\lambda^{(t)})
 \end{align*} \\\
 \dArr \\\
-B^{(t+1)}_{c}(k) = \frac{ \sum_{i=1}^t 1_{o_i=k}p(O,h_{i}=q_c|\lambda^{(t)}) }{ \sum_{i=1}^t p(O,h_{i}=q_c|\lambda^{(t)}) }
+B_{c}(k)^{(t+1)} = \frac{ \sum_{i=1}^t 1_{o_i=k}p(O,h_{i}=q_c|\lambda^{(t)}) }{ \sum_{i=1}^t p(O,h_{i}=q_c|\lambda^{(t)}) }
 $$
 
 ## Reference
