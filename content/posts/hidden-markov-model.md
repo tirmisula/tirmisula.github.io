@@ -386,9 +386,9 @@ $$
 Q(\lambda,\lambda^{(t)}) &= \sum_{H}\log p(O,H|\lambda)p(O,H|\lambda^{(t)}) \\\
 &\because \sum_{H}p(O,H|\lambda)=\sum_{\substack{h_1,h_2,\cdots,h_t \\\ h\in\lbrace q_1,\cdots,q_N \rbrace}}\pi(h_1)\prod_{i=1}^t B_{h_i}(o_i)\prod_{j=2}^t A_{h_{j-1}h_{j}} \\\
 &= \sum_H \log \left[ \pi(h_1)\prod_{i=1}^t B_{h_i}(o_i)\prod_{j=2}^t A_{h_{j-1}h_{j}} \right] p(O,H|\lambda^{(t)}) \\\
-&= \sum_H \left[ \log \pi(h_1)+\log \prod_{i=1}^tB_{h_1}(o_i)+\log \prod_{j=2}^tA_{h_{j-1}h{j}} \right] p(O,H|\lambda^{(t)}) \\\
-&= \sum_H \left[ \log \pi(h_1)+ \sum_{i=1}^t\log B_{h_1}(o_i)+ \sum_{j=2}^t\log A_{h_{j-1}h{j}} \right] p(O,h_1,\cdots,h_t|\lambda^{(t)}) \\\
-&= \sum_{h_1}\cdots\sum_{h_t} \left[ \log \pi(h_1)+ \sum_{i=1}^t\log B_{h_1}(o_i)+ \sum_{j=2}^t\log A_{h_{j-1}h{j}} \right] p(O,h_1,\cdots,h_t|\lambda^{(t)}) \\\
+&= \sum_H \left[ \log \pi(h_1)+\log \prod_{i=1}^tB_{h_i}(o_i)+\log \prod_{j=2}^tA_{h_{j-1}h{j}} \right] p(O,H|\lambda^{(t)}) \\\
+&= \sum_H \left[ \log \pi(h_1)+ \sum_{i=1}^t\log B_{h_i}(o_i)+ \sum_{j=2}^t\log A_{h_{j-1}h{j}} \right] p(O,h_1,\cdots,h_t|\lambda^{(t)}) \\\
+&= \sum_{h_1}\cdots\sum_{h_t} \left[ \log \pi(h_1)+ \sum_{i=1}^t\log B_{h_i}(o_i)+ \sum_{j=2}^t\log A_{h_{j-1}h{j}} \right] p(O,h_1,\cdots,h_t|\lambda^{(t)}) \\\
 \end{align*}
 $$
 
@@ -402,7 +402,7 @@ $$
 
 $$
 \begin{align*}
-\mathcal{L}(\pi,\eta) &= \sum_{H} \left[\left[ \log \pi(h_1)+ \sum_{i=1}^t\log B_{h_1}(o_i)+ \sum_{j=2}^t\log A_{h_{j-1}h{j}} \right] p(O,H|\lambda^{(t)})\right]+\eta(\sum_{i=1}^N\pi(q_i)-1) \\\
+\mathcal{L}(\pi,\eta) &= \sum_{H} \left[\left[ \log \pi(h_1)+ \sum_{i=1}^t\log B_{h_i}(o_i)+ \sum_{j=2}^t\log A_{h_{j-1}h{j}} \right] p(O,H|\lambda^{(t)})\right]+\eta(\sum_{i=1}^N\pi(q_i)-1) \\\
 &= \sum_{h_1}\cdots\sum_{h_t} \left[ \log \pi(h_1) p(O,h_1,\cdots,h_t|\lambda^{(t)})\right] + \eta(\sum_{i=1}^N\pi(q_i)-1) \\\
 &= \sum_{h_1} \left[ \log\pi(h_1)p(O,h_1|\lambda^{(t)}) \right] + \eta(\sum_{i=1}^N\pi(q_i)-1) \\\
 &= \sum_{i=1}^N \left[ \log\pi(h_1=q_i)p(O,h_1=q_i|\lambda^{(t)}) \right] + \eta(\sum_{i=1}^N\pi(q_i)-1)
@@ -440,7 +440,7 @@ $$
 
 $$
 \begin{align*}
-\mathcal{L}(A,\eta) &= \sum_{H} \left[\left[ \log \pi(h_1)+ \sum_{i=1}^t\log B_{h_1}(o_i)+ \sum_{j=2}^t\log A_{h_{j-1}h{j}} \right] p(O,H|\lambda^{(t)})\right]+\eta(\sum_{i=1}^NA_{ij}-1) \\\
+\mathcal{L}(A,\eta) &= \sum_{H} \left[\left[ \log \pi(h_1)+ \sum_{i=1}^t\log B_{h_i}(o_i)+ \sum_{j=2}^t\log A_{h_{j-1}h{j}} \right] p(O,H|\lambda^{(t)})\right]+\eta(\sum_{i=1}^NA_{ij}-1) \\\
 &= \sum_{h_1}\cdots\sum_{h_t} \left[ \sum_{j=2}^t \left( \log A_{h_{j-1}h_j}p(O,h_1,\cdots,h_t|\lambda^{(t)}) \right) \right]+\eta(\sum_{i=1}^NA_{ij}-1) \\\
 &= \sum_{j=2}^t \sum_{h_1}\cdots\sum_{h_t} \left[ p(O,h_1,\cdots,h_t|\lambda^{(t)}) \log p(h_{j}|h_{j-1}) \right]+\eta(\sum_{i=1}^NA_{ij}-1) \\\
 &= \sum_{j=2}^t \sum_{h_{j-1}}\sum_{h_{j}} \log p(h_{j}|h_{j-1}) \sum_{h_1\cdots h_t\setminus h_{j-1}h_{j}} \left[ p(O,h_1,\cdots,h_t|\lambda^{(t)})  \right]+\eta(\sum_{i=1}^NA_{ij}-1) \\\
@@ -471,7 +471,46 @@ $$
 
 #### Update B
 
+$$
+B^{(t+1)} = \argmax_{\pi} Q(\lambda,\lambda^{(t)}) \\\
+\text{subject to } \sum_{k=1}^M B_{j}(k) = 1 ,\forall\space j=1,\cdots,N \\\
+\dArr
+$$
 
+$$
+\begin{align*}
+\mathcal{L}(B,\eta) &= \sum_{H} \left[\left[ \log \pi(h_1)+ \sum_{i=1}^t\log B_{h_i}(o_i)+ \sum_{j=2}^t\log A_{h_{j-1}h{j}} \right] p(O,H|\lambda^{(t)})\right]+\sum_{j=1}^N\eta_j(\sum_{k=1}^M B_{j}(k)-1) \\\
+&= \sum_{h_1}\cdots\sum_{h_t} \left[ \sum_{i=1}^t \left( \log B_{h_{i}}(o_i)p(O,h_1,\cdots,h_t|\lambda^{(t)}) \right) \right]+\sum_{j=1}^N\eta_j(\sum_{k=1}^M B_{j}(k)-1) \\\
+&= \sum_{i=1}^t \sum_{h_1}\cdots\sum_{h_t} \left[ p(O,h_1,\cdots,h_t|\lambda^{(t)}) \log p(o_{i}|h_{i}) \right]+\sum_{j=1}^N\eta_j(\sum_{k=1}^M B_{j}(k)-1) \\\
+&= \sum_{i=1}^t \sum_{h_{i}} \log p(o_i|h_{i}) \sum_{h_1\cdots h_t\setminus h_{i}} \left[ p(O,h_1,\cdots,h_t|\lambda^{(t)})  \right]+\sum_{j=1}^N\eta_j(\sum_{k=1}^M B_{j}(k)-1) \\\
+&= \sum_{i=1}^t \sum_{h_{i}} \log p(o_i|h_{i})p(O,h_{i}|\lambda^{(t)})+\sum_{j=1}^N\eta_j(\sum_{k=1}^M B_{j}(k)-1) \\\
+&= \sum_{i=1}^t \sum_{c=1}^N \log p(o_i|h_{i}=q_c)p(O,h_{i}=q_c|\lambda^{(t)})+\sum_{j=1}^N\eta_j(\sum_{k=1}^M B_{j}(k)-1)
+\end{align*} \\\
+\dArr
+$$
+
+$$
+\begin{align*}
+\frac{\partial}{\partial B_{c}(k)}\mathcal{L}(B,\eta) &= \frac{\partial}{\partial B_{c}(k)}\sum_{i=1}^t \sum_{c=1}^N p(O,h_{i}=q_c|\lambda^{(t)}) \log B_{c}(o_i) + \eta_c \\\
+&= \sum_{i=1}^t\mathbf{1}_{o_i=k}\frac{1}{B_{c}(o_i)}p(O,h_{i}=q_c|\lambda^{(t)}) + \eta_c \\\
+&= \frac{1}{B_{c}(o_i=k)}p(O\setminus o_i,o_i=k,h_{i}=q_c|\lambda^{(t)}) + \eta_c
+\end{align*} \\\
+\dArr
+$$
+
+$$
+\begin{align*}
+\sum_{i=1}^t \mathbf{1}_{o_i=k}\frac{1}{B_{c}(o_i)} p(O,h_{i}=q_c|\lambda^{(t)}) + \eta_c &= 0 \\\
+\sum_{i\in\lbrace 1\cdots t|o_i=k \rbrace} \frac{1}{B_{c}(k)} p(O,o_i=k,h_{i}=q_c|\lambda^{(t)}) + \eta_c &= 0 \\\
+\sum_{i\in\lbrace 1\cdots t|o_i=k \rbrace} p(O,o_i=k,h_{i}=q_c|\lambda^{(t)}) + B_c(k)\eta_c &= 0 \\\
+\sum_{k=1}^M\sum_{i\in\lbrace 1\cdots t|o_i=k \rbrace} p(O,o_i=k,h_{i}=q_c|\lambda^{(t)}) + \sum_{k=1}^M B_c(k)\eta_c &= 0 \\\
+\sum_{k=1}^M\sum_{i\in\lbrace 1\cdots t|o_i=k \rbrace} p(O,o_i=k,h_{i}=q_c|\lambda^{(t)}) + \eta_c &= 0 \\\
+\sum_{i=1}^t p(O,h_{i}=q_c|\lambda^{(t)}) + \eta_c &= 0 \\\
+\eta_c &= -\sum_{i=1}^t p(O,h_{i}=q_c|\lambda^{(t)})
+\end{align*} \\\
+\dArr \\\
+B^{(t+1)}_c(k) = \frac{ \sum_{i=1}^t \mathbf{1}_{o_i=k}p(O,h_{i}=q_c|\lambda^{(t)}) }{ \sum_{i=1}^t p(O,h_{i}=q_c|\lambda^{(t)}) }
+$$
 
 ## Reference
 
