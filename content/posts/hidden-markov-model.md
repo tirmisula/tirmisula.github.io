@@ -214,8 +214,11 @@ When \(H\) is found, we could solve Kalman filter and Particle filter:
 
 $$
 \begin{cases}
-\text{prediction}\rarr p(h_{t+1}|o_1,\cdots,o_t) \\\
-\text{filtering}\rarr p(h_t|o_1,\cdots,o_t)
+\text{prediction}\rarr \begin{cases} p(h_{t+1},h_{t+2}|o_1,\cdots,o_t) \\\ 
+p(o_{t+1},o_{t+2}|o_1,\cdots,o_t)
+\end{cases} \\\
+\text{filtering(online)}\rarr p(h_t|o_1,\cdots,o_t) \\\
+\text{smoothing(offline)}\rarr p(h_{\tau\in[1,t]}|o_1,\cdots,o_t)
 \end{cases}
 $$
 
@@ -512,6 +515,16 @@ B_{c}(k)^{(t+1)} = \frac{ \sum_{i=1}^t 1_{o_i=k}p(O,h_{i}=q_c|\lambda^{(t)}) }{ 
 $$
 
 ## Decoding
+### Problem transformation
+
+$$
+\begin{align*}
+H &= \argmax_{h} p(H|O,\lambda) \\\
+&= \argmax_{h} p(H|O,\lambda)p(O|\lambda) \\\
+&= \argmax_{h} p(H,O|\lambda) \\\
+\end{align*}
+$$
+
 ### Viterbi algorithm
 
 {{< math.inline >}}
@@ -542,7 +555,7 @@ $$
 \begin{align*}
 \gamma_{\tau+1}(j) = \hat{i} &= \argmax_{i=1,\cdots,N} \delta_{\tau}(i)A_{ij} B_{j}(o_{\tau+1}) \\\
 &= \argmax_{i=1,\cdots,N} \delta_{\tau}(i)A_{ij}
-\end{align*} \\\ \dArr \\\
+\end{align*} \\\
 \gamma_{\tau+1}(j) \text{ : optimal state for previous $h_{\tau}$ if $h_{\tau+1}=q_j$}
 $$
 
