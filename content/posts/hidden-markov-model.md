@@ -511,10 +511,51 @@ $$
 B_{c}(k)^{(t+1)} = \frac{ \sum_{i=1}^t 1_{o_i=k}p(O,h_{i}=q_c|\lambda^{(t)}) }{ \sum_{i=1}^t p(O,h_{i}=q_c|\lambda^{(t)}) }
 $$
 
+## Decoding
+### Viterbi algorithm
+
+{{< math.inline >}}
+<p>
+Decoding problem tries to find the optimal path \( h_1\cdots h_t \) among \( N^t \) combinations. Like dynamic programming, we can define local optimal solution as:
+</p>
+{{</ math.inline >}}
+
+$$
+\delta_{\tau}(i) = \max_{h_1\cdots h_{\tau-1}} p(o_1,\cdots,o_{\tau},h_1,\cdots,h_{\tau-1},h_{\tau}=q_i|\lambda) \\\
+\delta_{\tau}(i) \text{ : maximum probability if $h_{\tau}=q_i$}
+$$
+
+Then we can find a recurrence relation:
+
+$$
+\begin{align*}
+\delta_{\tau+1}(j) &= \max_{h_1\cdots h_{\tau}} p(o_1,\cdots,o_{\tau+1},h_1,\cdots,h_{\tau},h_{\tau+1}=q_j|\lambda) \\\
+&= \max_{i=1\cdots N} \delta_{\tau}(i) p(h_{\tau+1}=q_j|O_{1\cdots\tau},H_{1\cdots\tau-1},h_{\tau}=q_i)p(o_{\tau+1}|O_{1\cdots\tau},H_{1\cdots\tau-1},h_{\tau}=q_i,h_{\tau+1}=q_j) \\\
+&= \max_{i=1\cdots N} \delta_{\tau}(i)A_{ij} B_{j}(o_{\tau+1}) \\\
+\delta_1(j) &= \pi(q_i)B_i(o_1)
+\end{align*}
+$$
+
+We can record the optimal path at the same time:
+
+$$
+\begin{align*}
+\gamma_{\tau+1}(j) = \hat{i} &= \argmax_{i=1,\cdots,N} \delta_{\tau}(i)A_{ij} B_{j}(o_{\tau+1}) \\\
+&= \argmax_{i=1,\cdots,N} \delta_{\tau}(i)A_{ij}
+\end{align*} \\\ \dArr \\\
+\gamma_{\tau+1}(j) \text{ : optimal state for previous $h_{\tau}$ if $h_{\tau+1}=q_j$}
+$$
+
+The final result is:
+
+$$
+\hat{H} = \argmax_{h} p(H|O,\lambda)=\left( \gamma_{1},\cdots,\gamma_{t} \right)
+$$
+
 ## Reference
 
 [^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=82).
-[^3]: From [The Matrix Cookbook](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
+[^3]: From [The Matrix Cookbook](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).e
 [^5]: From [Mean field variational inference](https://mbernste.github.io/files/notes/MeanFieldVariationalInference.pdf).
 [^4]: From [Ross, Sheldon M. (2019). Introduction to probability models](https://doi.org/10.1016%2FC2017-0-01324-1).
 [^2]: - [Hammersley–Clifford theorem](http://www.statslab.cam.ac.uk/~grg/books/hammfest/hamm-cliff.pdf).
