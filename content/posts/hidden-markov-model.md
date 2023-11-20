@@ -514,8 +514,9 @@ $$
 B_{c}(k)^{(t+1)} = \frac{ \sum_{i=1}^t 1_{o_i=k}p(O,h_{i}=q_c|\lambda^{(t)}) }{ \sum_{i=1}^t p(O,h_{i}=q_c|\lambda^{(t)}) }
 $$
 
-## Decoding
-### Problem transformation
+## Inference
+### Decoding
+#### Problem transformation
 
 $$
 \begin{align*}
@@ -525,11 +526,11 @@ H &= \argmax_{h} p(H|O,\lambda) \\\
 \end{align*}
 $$
 
-### Viterbi algorithm
+#### Viterbi algorithm
 
 {{< math.inline >}}
 <p>
-Decoding problem tries to find the optimal path \( h_1\cdots h_t \) among \( N^t \) combinations. Like dynamic programming, we can define local optimal solution as:
+Decoding problem has \( N^t \) combinations of path \( h_1\cdots h_t \). Like dynamic programming, we can define local optimal solution as:
 </p>
 {{</ math.inline >}}
 
@@ -563,6 +564,90 @@ The final result is:
 
 $$
 \hat{H} = \argmax_{h} p(H|O,\lambda)=\left( \gamma_{1},\cdots,\gamma_{t} \right)
+$$
+
+### Filtering
+
+$$
+\begin{align*}
+p(h_t|o_1,\cdots,o_t) &= \frac{p(h_t,o_1,\cdots,o_t)}{p(o_1,\cdots,o_t)} \\\
+&= \frac{p(h_t,o_1,\cdots,o_t)}{\sum_{h_t} p(o_1,\cdots,o_t,h_t)} \\\
+&\propto p(h_t,o_1,\cdots,o_t) = \alpha_t(h_t)
+\end{align*} \\\
+p(h_t|o_1,\cdots,o_t) \text{ derived from forward algorithm}
+$$
+
+### Smoothing
+
+$$
+\begin{align*}
+p(h_{\tau}|o_1,\cdots,o_t) &= \frac{p(h_{\tau},o_1,\cdots,o_t)}{p(o_1,\cdots,o_t)} \\\
+&= \frac{p(h_{\tau},o_1,\cdots,o_t)}{\sum_{h_{\tau}} p(o_1,\cdots,o_t,h_{\tau})} \\\
+&\propto p(h_{\tau},o_1,\cdots,o_t) \\\
+&= p(h_{\tau},o_1,\cdots,o_{\tau},o_{\tau+1},\cdots,o_t) \\\
+&= p(o_{\tau+1},\cdots,o_t|h_{\tau},o_1,\cdots,o_{\tau}) p(h_{\tau},o_1,\cdots,o_{\tau}) \\\
+&\because (o_{\tau+1},\cdots,o_t)\perp(o_1,\cdots,o_{\tau}),\text{given $h_{\tau}$}  \\\
+&= p(o_{\tau+1},\cdots,o_t|h_{\tau}) p(h_{\tau},o_1,\cdots,o_{\tau}) \\\
+&= \beta_{t}(h_{\tau}) \alpha_t(h_{\tau})
+\end{align*} \\\
+p(h_{\tau}|o_1,\cdots,o_t) \text{ derived from forward-backward algorithm}
+$$
+
+### Prediction
+#### Predict hidden states
+
+$$
+\begin{align*}
+p(h_{t+1}|o_1,\cdots,o_t) &= \sum_{h_{t}}p(h_{t+1},h_t|o_1,\cdots,o_t) \\\
+&= \sum_{h_{t}}p(h_{t+1}|h_t,o_1,\cdots,o_t) p(h_{t}|o_1,\cdots,o_t) \\\
+&= \sum_{h_{t}}p(h_{t+1}|h_t) p(h_{t}|o_1,\cdots,o_t) \\\
+&= \sum_{h_{t}}A_{h_{t}h_{t+1}} p(h_{t}|o_1,\cdots,o_t) \\\
+&\propto \sum_{h_{t}}A_{h_{t}h_{t+1}} \alpha_t(h_t)
+\end{align*} \\\
+p(h_{t+1}|o_1,\cdots,o_t) \text{ derived from forward algorithm}
+$$
+
+#### Predict observations
+
+$$
+\begin{align*}
+p(o_{t+1}|o_1,\cdots,o_t) &= \sum_{h_{t+1}}p(h_{t+1},o_{t+1}|o_1,\cdots,o_t) \\\
+&= \sum_{h_{t+1}}p(o_{t+1}|h_{t+1},o_1,\cdots,o_t) p(h_{t+1}|o_1,\cdots,o_t) \\\
+&= \sum_{h_{t+1}}p(o_{t+1}|h_{t+1}) p(h_{t+1}|o_1,\cdots,o_t) \\\
+&\propto \sum_{h_{t+1}}B_{h_{t+1}}(o_{t+1}) \sum_{h_{t}}A_{h_{t}h_{t+1}} \alpha_t(h_t)
+\end{align*} \\\
+p(o_{t+1}|o_1,\cdots,o_t) \text{ derived from forward algorithm}
+$$
+
+## Conclusion
+
+$$
+\begin{cases}
+\text{Transition: $A_{ij}=p(h_{t+1}=q_j|h_{t}=q_i)$} \\\
+\text{Emission: $B_{j}(k)=p(o_{t}=v_k|h_{t}=q_j)$} \\\
+\text{Forward: $\alpha_t(i)=\sum_{j=1}^N B_{i}(o_t) A_{ji} \alpha_{t-1}(j)$} \\\
+\text{Backward: $\beta_{\tau}(i)=\sum_{j=1}^N B_{j}(o_{\tau+1}) \beta_{\tau+1}(j) A_{ij}$} \\\
+\text{Evaluation: $p(O|\lambda)=$} \begin{cases}
+  \text{$\sum_{i=1}^N \alpha_t(i), $ (Forward)} \\\
+  \text{$\sum_{i=1}^NB_{i}(o_1) \beta_{1}(i) \pi(q_i), $ (Backward)} 
+\end{cases} \\\
+\text{Learning: $\argmax_{\lambda} \log p(O|\lambda)$, (Baum-Welch)} \begin{cases}
+  \pi^{(t+1)}(q_i) = p(h_1=q_i|O,\lambda^{(t)}) \\\
+  A^{(t+1)}(ab) = \frac{ \sum_{j=2}^tp(O,h_{j-1}=q_a,h_{j}=q_b|\lambda^{(t)}) }{ \sum_{j=2}^t p(O,h_{j-1}=q_a|\lambda^{(t)}) } \\\
+  B_{c}(k)^{(t+1)} = \frac{ \sum_{i=1}^t 1_{o_i=k}p(O,h_{i}=q_c|\lambda^{(t)}) }{ \sum_{i=1}^t p(O,h_{i}=q_c|\lambda^{(t)}) }
+\end{cases} \\\
+\text{Decoding: $\argmax_{H} p(H|O,\lambda)$, (Viterbi)} \begin{cases}
+  \gamma_{\tau+1}(j) = \argmax_{i=1,\cdots,N} \delta_{\tau}(i)A_{ij} \\\
+  \delta_{\tau+1}(j) = \max_{i=1\cdots N} \delta_{\tau}(i)A_{ij} B_{j}(o_{\tau+1}) \\\
+  \delta_1(j) = \pi(q_i)B_i(o_1)
+\end{cases} \\\
+\text{Filtering: $p(h_t|o_1,\cdots,o_t) \propto \alpha_t(h_t)$, (Forward)} \\\
+\text{Smoothing: $p(h_{\tau}|o_1,\cdots,o_t) \propto \beta_{t}(h_{\tau}) \alpha_t(h_{\tau})$, (Forward-Backward)} \\\
+\text{Prediction: } \begin{cases}
+  \text{$p(h_{t+1}|o_1,\cdots,o_t) \propto \sum_{h_{t}}A_{h_{t}h_{t+1}} \alpha_t(h_t)$, (Forward)} \\\
+  \text{$p(o_{t+1}|o_1,\cdots,o_t) \propto \sum_{h_{t+1}}B_{h_{t+1}}(o_{t+1}) \sum_{h_{t}}A_{h_{t}h_{t+1}} \alpha_t(h_t)$, (Backward)}
+\end{cases}
+\end{cases}
 $$
 
 ## Reference
