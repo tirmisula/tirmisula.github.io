@@ -1,0 +1,215 @@
+---
+author: "X. Wang"
+title: "Kalman Filter"
+date: "2023-09-14"
+description: "A brief introduction."
+tags: ["machine learning"]
+categories: ["themes", "syntax"]
+# series: ["Themes Guide"]
+aliases: ["migrate-from-jekyl"]
+math: true
+ShowBreadCrumbs: false
+ShowToc: true
+TocOpen: true
+---
+
+:                                                         
+
+{{< math.inline >}}
+{{ if or .Page.Params.math .Site.Params.math }}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css" integrity="sha384-GvrOXuhMATgEsSwCs4smul74iXGOixntILdUW9XmUC6+HX0sLNAK3q71HotJqlAn" crossorigin="anonymous">
+
+<!-- The loading of KaTeX is deferred to speed up page rendering -->
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js" integrity="sha384-cpW21h6RZv/phavutF+AuVYrr+dA8xD9zs6FwLpaCct6O9ctzYFfFr4dgmgccOTx" crossorigin="anonymous"></script>
+
+<!-- To automatically render math in text elements, include the auto-render extension: -->
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
+{{ end }}
+
+{{ if .Page.Store.Get "hasMermaid" }}
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true });
+  </script>
+{{ end }}
+{{</ math.inline >}}
+
+<style>
+    /* Set the font size of all math elements to 16px */
+    .katex {
+        font-size: 16px !important;
+    }
+</style>
+
+<style>
+/* Custom CSS styles */
+.graph {
+    background-color: white;
+  /* padding: 10px; */
+  /* border-radius: 5px; */
+}
+.graph pre {
+    background-color: white;
+  /* font-family: 'Courier New', monospace;
+  font-size: 14px;
+  line-height: 1.5; */
+}
+</style>
+
+## Background
+
+### Overview of PGM
+
+<cite>[^1]</cite>
+
+$$
+\text{PGM}: \begin{cases}
+    \text{Representation} \begin{cases}
+        \text{directed graph}\rarr  \text{Bayesian network} \\\
+        \text{undirected graph}\rarr \text{Markov network(MRF)} \\\
+        \text{continous variable}\rarr \text{Gaussian BN/Gaussian MRF} \\\
+        \text{time$\rarr$} \underset{\text{$x_i$ not i.i.d.}}{\text{ Dynamic model}} \begin{cases}
+            \text{discrete state$\rarr$Hidden Markov Model} \\\
+            \text{continous state} \begin{cases}
+                \text{Linear model$\rarr$\color{red}{Karman Filter}} \\\
+                \text{Nonlinear model$\rarr$Particle Filter}
+            \end{cases}
+        \end{cases}
+    \end{cases} \\\
+    \text{Inference} \begin{cases}
+        \text{MAP inference$\rarr \hat{x_A}=\argmax_{x_A}p(x_A|x_B)\propto\argmax p(x_A,x_B)$} \\\
+        \text{exact inference} \begin{cases}
+          \text{Variable elimination(VE)} \\\
+          \text{Belief propagation(BP)$\rarr$sum-product algorithm(Tree)} \\\
+          \text{Junction tree algorithm(Normal graph)}
+        \end{cases} \\\
+        \text{approximate inference} \begin{cases}
+            \text{Loop belief propagation(Cyclic graph)} \\\
+            \text{Variational inference} \\\
+            \text{MCMC: importance sampling}
+        \end{cases} 
+    \end{cases} \\\
+    \text{Learning} \begin{cases}
+        \text{parameter learning} \begin{cases}
+            \text{complete data: $(x,z)$} \\\
+            \text{hidden variable: $z$}
+        \end{cases} \\\
+        \text{structure learning}
+    \end{cases}
+\end{cases}
+$$
+
+
+## Kalman Filter
+
+### Definition
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'red',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id1((z_1)) --> id2((z_2))
+    id2((z_2)) --> id3((z_i))
+    id3((z_...)) --> id9(((...)))
+    id3((z_...)) --> id4((z_t))
+    id4((z_t)) --> id5((z_t+1))
+    id1((z_1)) --> id6(((x_1)))
+    id2((z_2)) --> id7(((x_2)))
+    id4((z_t)) --> id8(((x_t)))
+```
+
+</div>
+
+Kalman filter has similar structure compared to HMM, along with linear combination and gaussian noise:
+
+$$
+\begin{cases}
+z_1 \sim \mathcal{N}(\mu_1,\Sigma_1) \\\
+z_t = Az_{t-1}+B+\epsilon,\epsilon\sim \mathcal{N}(0,Q) \\\
+x_t = Cx_{t-1}+D+\delta,\delta\sim \mathcal{N}(0,R)
+\end{cases}
+$$
+
+Then we have unknown parameters:
+
+$$
+\theta = ( A,B,C,D,Q,R,\mu_1,\Sigma_1 )
+$$
+
+The conditional probability is given by:
+
+$$
+\begin{align*}
+p(z_t|z_{t-1}) &= \mathcal{N}(Az_{t-1}+B, Q) \\\
+p(x_t|z_{t}) &= \mathcal{N}(Cz_{t}+D, R)
+\end{align*}
+$$
+
+### Filtering problem
+
+Recall that conclusion in HMM, we can list the same problems here:
+
+$$
+\begin{cases}
+\text{Proof of evidence: $p(X|\theta)$, (Forward/Backward)} \\\
+\text{Decoding: $\argmax_{Z} p(Z|X,\theta)$, (Viterbi)} \\\
+\text{Filtering: $p(z_t|x_1,\cdots,x_t) \rarr$(marginal posterior)} \\\
+\text{Smoothing: $p(z_{t}|x_1,\cdots,x_T)$ } \\\
+\text{Prediction: } \begin{cases}
+  \text{$p(z_{t}|x_1,\cdots,x_{t-1})$} \\\
+  \text{$p(x_{t}|x_1,\cdots,x_{t-1})$}
+\end{cases}
+\end{cases}
+$$
+
+For the filtering problem we have recurrence relation:
+
+$$
+\begin{align*}
+p(z_t|x_1,\cdots,x_t) &= \frac{p(x_1,\cdots,x_t,z_t)}{p(x_1,\cdots,x_t)} \\\
+&\propto p(x_1,\cdots,x_t,z_t) \\\
+&= p(x_t|x_1,\cdots,x_{t-1},z_t)p(x_1,\cdots,x_{t-1},z_t) \\\
+&\text{By observation independence assumption} \\\
+&= p(x_t|z_t)p(x_1,\cdots,x_{t-1},z_t) \\\
+&= p(x_t|z_t)p(z_t|x_1,\cdots,x_{t-1})p(x_1,\cdots,x_{t-1}) \\\
+&\propto p(x_t|z_t)\underset{\color{red}{prediction}}{p(z_t|x_1,\cdots,x_{t-1})} \\\
+&= p(x_t|z_t)\int_{z_{t-1}}p(z_t,z_{t-1}|x_1,\cdots,x_{t-1})dz_{t-1} \\\
+&= p(x_t|z_t)\int_{z_{t-1}}p(z_t|z_{t-1},x_1,\cdots,x_{t-1})p(z_{t-1}|x_1,\cdots,x_{t-1})dz_{t-1} \\\
+&\text{By homogenous assumption} \\\
+&= p(x_t|z_t)\int_{z_{t-1}}p(z_t|z_{t-1})\underset{\color{red}{filtering}}{p(z_{t-1}|x_1,\cdots,x_{t-1})}dz_{t-1} \\\
+\end{align*}
+$$
+
+Then we can give the update order:
+
+$$
+\underset{filtering1}{p(z_1|x_1)} \rarr \underset{prediction1}{p(z_2|x_1)} \rarr p(z_2|x_1,x_2) \rarr p(z_3|x_1,x_2) \cdots p(z_{T}|x_1,\cdots,x_{T-1}) \rarr p(z_{T}|x_1,\cdots,x_{T})
+$$
+
+
+
+## Conclusion
+
+
+## Reference
+
+[^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=82).
+[^3]: From [The Matrix Cookbook](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
+[^5]: From [Mean field variational inference](https://mbernste.github.io/files/notes/MeanFieldVariationalInference.pdf).
+[^4]: From [Ross, Sheldon M. (2019). Introduction to probability models](https://doi.org/10.1016%2FC2017-0-01324-1).
+[^2]: - [Hammersley–Clifford theorem](http://www.statslab.cam.ac.uk/~grg/books/hammfest/hamm-cliff.pdf).
