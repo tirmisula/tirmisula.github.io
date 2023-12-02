@@ -141,7 +141,7 @@ $$
 \begin{cases}
 z_1 \sim \mathcal{N}(\mu_1,\Sigma_1) \\\
 z_t = Az_{t-1}+B+\epsilon,\epsilon\sim \mathcal{N}(0,Q) \\\
-x_t = Cx_{t-1}+D+\delta,\delta\sim \mathcal{N}(0,R)
+x_t = Cz_{t}+D+\delta,\delta\sim \mathcal{N}(0,R)
 \end{cases}
 $$
 
@@ -212,15 +212,28 @@ $$
 \end{cases}
 $$
 
-Besides, we have conclusion from previous artice:
+Besides, we have conclusion for [Conditional Gaussian PDF](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#solve-the-joint-pdf) from previous artice:
 
 $$
 x \sim \mathcal{N} (\mu, \Lambda^{-1}) \\\
 y=Ax+B+\epsilon\\\
 \epsilon \sim \mathcal{N}(0, L^{-1}), \epsilon \perp x \\\
 \dArr \\\
+\begin{cases}
 y|x \sim \mathcal{N}(Ax+B, L^{-1}) \\\
-y \sim \mathcal{N}(A\mu+B, A \Lambda^{-1} A^T + L^{-1})
+y \sim \mathcal{N}(A\mu+B, A \Lambda^{-1} A^T + L^{-1}) \\\
+\begin{bmatrix}
+    x\\\
+    y
+\end{bmatrix} \sim \mathcal{N}(\begin{bmatrix}
+    \mu \\\
+    A\mu + B
+\end{bmatrix}, \begin{bmatrix}
+    \Lambda^{-1} & \Lambda^{-1} A^T\\\
+    (\Lambda^{-1} A^T)^T & A \Lambda^{-1} A^T + L^{-1}
+\end{bmatrix}) \\\
+x|y \sim \mathcal{N}(\Sigma_{xy}\Sigma_{yy}^{-1} (x_y-\mu_{y}) + \mu_{x}, -\Sigma_{xy}\Sigma_{yy}^{-1}\Sigma_{yx}+\Sigma_{xx})
+\end{cases}
 $$
 
 For the prediction part:
@@ -232,19 +245,40 @@ p(z_t|x_1,\cdots,x_{t-1}) &= \int_{z_{t-1}}p(z_t,z_{t-1}|x_1,\cdots,x_{t-1})dz_{
 &= \int_{z_{t-1}} \mathcal{N}(z_{t}|Az_{t-1}+B, Q)p(z_{t-1}|x_1,\cdots,x_{t-1}) \\\
 &\text{Let $p(z_t|x_1,\cdots,x_{t-1})=\mathcal{N}({\mu_{t}}^{\ast},{\Sigma_{t}}^{\ast})$} \\\
 \mathcal{N}({\mu_{t}}^{\ast},{\Sigma_{t}}^{\ast}) &= \int_{z_{t-1}} \mathcal{N}(z_{t}|Az_{t-1}+B, Q)\mathcal{N}(\mu_{t-1},\Sigma_{t-1}) \\\
-&\text{Consider $y|x=z_t|z_{t-1}, x=z_{t-1}$, Then $z_t=y$} \\\
+&\text{Consider $y|x=z_t|z_{t-1}, x=z_{t-1}$, Then $p(z_t)=p(y)$} \\\
 &= \mathcal{N}(A\mu_{t-1}+B, A\Sigma_{t-1}A^T+Q)
 \end{align*}
 $$
 
 $$
 \begin{cases}
-\mu
+{\mu_{t}}^{\ast} = A\mu_{t-1}+B \\\
+{\Sigma_{t}}^{\ast} = A\Sigma_{t-1}A^T+Q
+\end{cases}
+$$
+
+For the update part:
+
+$$
+\begin{align*}
+p(z_t|x_1,\cdots,x_{t}) &\propto p(x_t|z_t)p(z_t|x_1,\cdots,x_{t-1}) \\\
+\mathcal{N}(\mu_t, \Sigma_t) &\propto \mathcal{N}(x_t|Cz_{t}+D, R) \mathcal{N}({\mu_{t}}^{\ast},{\Sigma_{t}}^{\ast}) \\\
+&\text{Consider $x=z_t, y=x_{t}$, Then $p(z_t|x_t)=p(x|y)$} \\\
+& \\\
+&= \mathcal{N}(\Sigma_{z_tx_t}\Sigma_{x_tx_t}^{-1} (x_t-\mu_{x_t}) + \mu_{z_t}, -\Sigma_{z_tx_t}\Sigma_{x_tx_t}^{-1}\Sigma_{x_tz_t}+\Sigma_{z_tz_t})
+\end{align*}
+$$
+
+$$
+\begin{cases}
+{\mu_{t}} = \Lambda^{-1}A^T (Cz_t+D) \\\
+{\Sigma_{t}} = A\Sigma_{t-1}A^T+Q
 \end{cases}
 $$
 
 ## Conclusion
 
+work in progress
 
 ## Reference
 
