@@ -230,8 +230,8 @@ $$
 p(z_t|x_1,\cdots,x_{t-1}) &= \int_{z_{t-1}}p(z_t,z_{t-1}|x_1,\cdots,x_{t-1})dz_{t-1} \\\
 &= \int_{z_{t-1}} p(z_t|z_{t-1})p(z_{t-1}|x_1,\cdots,x_{t-1}) \\\
 &= \int_{z_{t-1}} \mathcal{N}(z_{t}|Az_{t-1}+B, Q)p(z_{t-1}|x_1,\cdots,x_{t-1}) \\\
-&\text{Let $p(z_t|x_1,\cdots,x_{t-1})=\mathcal{N}(\mu^{\ast}_{t},\Sigma^{\ast}_{t})$} \\\
-\mathcal{N}(\mu^{\ast}_{t},\Sigma^{\ast}_{t}) &= \int_{z_{t-1}} \mathcal{N}(z_{t}|Az_{t-1}+B, Q)\mathcal{N}(\mu_{t-1},\Sigma_{t-1}) \\\
+&\text{Let $p(z_t|x_1,\cdots,x_{t-1})=\mathcal{N}({\mu_{t}}^{\ast},{\Sigma_{t}}^{\ast})$} \\\
+\mathcal{N}({\mu_{t}}^{\ast},{\Sigma_{t}}^{\ast}) &= \int_{z_{t-1}} \mathcal{N}(z_{t}|Az_{t-1}+B, Q)\mathcal{N}(\mu_{t-1},\Sigma_{t-1}) \\\
 &\text{Consider $y|x=z_t|z_{t-1}, x=z_{t-1}$, Then $z_t=y$} \\\
 &= \mathcal{N}(A\mu_{t-1}+B, A\Sigma_{t-1}A^T+Q)
 \end{align*}
