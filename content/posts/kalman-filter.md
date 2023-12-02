@@ -198,10 +198,50 @@ $$
 Then we can give the update order:
 
 $$
-\underset{filtering1}{p(z_1|x_1)} \rarr \underset{prediction1}{p(z_2|x_1)} \rarr p(z_2|x_1,x_2) \rarr p(z_3|x_1,x_2) \cdots p(z_{T}|x_1,\cdots,x_{T-1}) \rarr p(z_{T}|x_1,\cdots,x_{T})
+\underset{update1}{p(z_1|x_1)} \rarr \underset{prediction2}{p(z_2|x_1)} \rarr \underset{update2}{p(z_2|x_1,x_2)} \rarr \underset{prediction3}{p(z_3|x_1,x_2)} \cdots \underset{predictionT}{p(z_{T}|x_1,\cdots,x_{T-1})} \rarr \underset{updateT}{p(z_{T}|x_1,\cdots,x_{T})}
 $$
 
+### Solving filtering problem
 
+From previous section we know filtering problem can be written as 2 steps: update, prediction:
+
+$$
+\begin{cases}
+\text{Prediction: $p(z_t|x_1,\cdots,x_{t-1})=\int_{z_{t-1}}p(z_t,z_{t-1}|x_1,\cdots,x_{t-1})dz_{t-1}$} \\\
+\text{Update: $p(z_t|x_1,\cdots,x_{t})\propto p(x_t|z_t)p(z_t|x_1,\cdots,x_{t-1})$}
+\end{cases}
+$$
+
+Besides, we have conclusion from previous artice:
+
+$$
+x \sim \mathcal{N} (\mu, \Lambda^{-1}) \\\
+y=Ax+B+\epsilon\\\
+\epsilon \sim \mathcal{N}(0, L^{-1}), \epsilon \perp x \\\
+\dArr \\\
+y|x \sim \mathcal{N}(Ax+B, L^{-1}) \\\
+y \sim \mathcal{N}(A\mu+B, A \Lambda^{-1} A^T + L^{-1})
+$$
+
+For the prediction part:
+
+$$
+\begin{align*}
+p(z_t|x_1,\cdots,x_{t-1}) &= \int_{z_{t-1}}p(z_t,z_{t-1}|x_1,\cdots,x_{t-1})dz_{t-1} \\\
+&= \int_{z_{t-1}} p(z_t|z_{t-1})p(z_{t-1}|x_1,\cdots,x_{t-1}) \\\
+&= \int_{z_{t-1}} \mathcal{N}(z_{t}|Az_{t-1}+B, Q)p(z_{t-1}|x_1,\cdots,x_{t-1}) \\\
+&\text{Let $p(z_t|x_1,\cdots,x_{t-1})=\mathcal{N}(\mu^{\ast}_{t},\Sigma^{\ast}_{t})$} \\\
+\mathcal{N}(\mu^{\ast}_{t},\Sigma^{\ast}_{t}) &= \int_{z_{t-1}} \mathcal{N}(z_{t}|Az_{t-1}+B, Q)\mathcal{N}(\mu_{t-1},\Sigma_{t-1}) \\\
+&\text{Consider $y|x=z_t|z_{t-1}, x=z_{t-1}$, Then $z_t=y$} \\\
+&= \mathcal{N}(A\mu_{t-1}+B, A\Sigma_{t-1}A^T+Q)
+\end{align*}
+$$
+
+$$
+\begin{cases}
+\mu
+\end{cases}
+$$
 
 ## Conclusion
 
