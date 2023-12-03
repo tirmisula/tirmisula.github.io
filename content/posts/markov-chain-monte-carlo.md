@@ -42,6 +42,8 @@ TocOpen: true
 
 <cite>[^1]</cite>
 
+In real world problem, we want to calculate some expectations based on posterior distribution:
+
 $$
 \begin{align*}
 p(z|x) \rarr E_{z|x\sim p(z|x)}\left[ f(z) \right] &= \int_{z}f(z)p(z|x)dz \\\

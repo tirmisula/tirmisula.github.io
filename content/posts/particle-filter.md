@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
-title: "Kalman Filter"
-date: "2023-09-14"
+title: "Particle Filter"
+date: "2023-09-15"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -73,8 +73,8 @@ $$
         \text{time$\rarr$} \underset{\text{$x_i$ not i.i.d.}}{\text{ Dynamic model}} \begin{cases}
             \text{discrete state$\rarr$Hidden Markov Model} \\\
             \text{continous state} \begin{cases}
-                \text{Linear model$\rarr$\color{red}{Karman Filter}} \\\
-                \text{Nonlinear model$\rarr$Particle Filter}
+                \text{Linear model$\rarr$Karman Filter} \\\
+                \text{Nonlinear model$\rarr$\color{red}{Particle Filter}}
             \end{cases}
         \end{cases}
     \end{cases} \\\
@@ -102,7 +102,7 @@ $$
 $$
 
 
-## Kalman Filter
+## Particle Filter
 
 ### Definition
 
@@ -123,77 +123,81 @@ $$
   }
 }%%
 flowchart LR
-    id1((z_1)) --> id2((z_2))
-    id2((z_2)) --> id3((z_i))
-    id3((z_...)) --> id9(((...)))
-    id3((z_...)) --> id4((z_t))
-    id4((z_t)) --> id5((z_t+1))
-    id1((z_1)) --> id6(((x_1)))
-    id2((z_2)) --> id7(((x_2)))
-    id4((z_t)) --> id8(((x_t)))
+    id1((State z_1)) --> id2((State z_2))
+    id2((State z_2)) --> id3((State z_i))
+    id3((State z_i)) --> id9(((...))) // Continue the sequence
+    id3((State z_i)) --> id4((State z_t)) // Current state
+    id4((State z_t)) --> id5((State z_{t+1})) // Next state
+    id1((State z_1)) --> id6(((Observation x_1))) // Observation for state z_1
+    id2((State z_2)) --> id7(((Observation x_2))) // Observation for state z_2
+    id4((State z_t)) --> id8(((Observation x_t))) // Observation for current state
 ```
 
 </div>
 
-Kalman filter has similar structure compared to HMM, along with linear combination and gaussian noise:
+Particle filter, like the Kalman filter, is a state-space model. However, it is designed to handle non-linear and non-Gaussian scenarios:
 
 $$
 \begin{cases}
-z_1 \sim \mathcal{N}(\mu_1,\Sigma_1) \\\
-z_t = Az_{t-1}+B+\epsilon,\epsilon\sim \mathcal{N}(0,Q) \\\
-x_t = Cz_{t}+D+\delta,\delta\sim \mathcal{N}(0,R)
+z_t = g(z_{t-1}, u, \epsilon) \\\
+x_t = h(z_{t}, u, \delta)
 \end{cases}
 $$
 
 Then we have unknown parameters:
 
 $$
-\theta = ( A,B,C,D,Q,R,\mu_1,\Sigma_1 )
+\theta = (  )
 $$
 
-The conditional probability is given by:
-
-$$
-\begin{align*}
-p(z_t|z_{t-1}) &= \mathcal{N}(Az_{t-1}+B, Q) \\\
-p(x_t|z_{t}) &= \mathcal{N}(Cz_{t}+D, R)
-\end{align*}
-$$
-
-### Filtering problem
-
-Recall that conclusion in HMM, we can list the same problems here:
+It has 2 steps for filtering:
 
 $$
 \begin{cases}
-\text{Proof of evidence: $p(X|\theta)$, (Forward/Backward)} \\\
-\text{Decoding: $\argmax_{Z} p(Z|X,\theta)$, (Viterbi)} \\\
-\text{Filtering: $p(z_t|x_1,\cdots,x_t) \rarr$(marginal posterior)} \\\
-\text{Smoothing: $p(z_{t}|x_1,\cdots,x_T)$ } \\\
-\text{Prediction: } \begin{cases}
-  \text{$p(z_{t}|x_1,\cdots,x_{t-1})$} \\\
-  \text{$p(x_{t}|x_1,\cdots,x_{t-1})$}
-\end{cases}
+\text{Prediction: $p(z_t|x_1,\cdots,x_{t-1})=\int_{z_{t-1}}p(z_t,z_{t-1}|x_1,\cdots,x_{t-1})dz_{t-1}$} \\\
+\text{Update: $p(z_t|x_1,\cdots,x_{t})\propto p(x_t|z_t)p(z_t|x_1,\cdots,x_{t-1})$}
 \end{cases}
 $$
 
-For the filtering problem we have recurrence relation:
+{{< math.inline >}}
+<p>
+Since \( h(\cdot) \) and \( g(\cdot) \) are not linear, \( \epsilon \) and \( \delta \) are not gaussian noise, we can't find a analytic expression for filtering problem like Kalman filter, sampling method is used on the other hand.
+</p>
+{{</ math.inline >}}
+
+### Review Monte Carlo method
 
 $$
 \begin{align*}
-p(z_t|x_1,\cdots,x_t) &= \frac{p(x_1,\cdots,x_t,z_t)}{p(x_1,\cdots,x_t)} \\\
-&\propto p(x_1,\cdots,x_t,z_t) \\\
-&= p(x_t|x_1,\cdots,x_{t-1},z_t)p(x_1,\cdots,x_{t-1},z_t) \\\
-&\text{By observation independence assumption} \\\
-&= p(x_t|z_t)p(x_1,\cdots,x_{t-1},z_t) \\\
-&= p(x_t|z_t)p(z_t|x_1,\cdots,x_{t-1})p(x_1,\cdots,x_{t-1}) \\\
-&\propto p(x_t|z_t)\underset{\color{red}{prediction}}{p(z_t|x_1,\cdots,x_{t-1})} \\\
-&= p(x_t|z_t)\int_{z_{t-1}}p(z_t,z_{t-1}|x_1,\cdots,x_{t-1})dz_{t-1} \\\
-&= p(x_t|z_t)\int_{z_{t-1}}p(z_t|z_{t-1},x_1,\cdots,x_{t-1})p(z_{t-1}|x_1,\cdots,x_{t-1})dz_{t-1} \\\
-&\text{By homogenous assumption} \\\
-&= p(x_t|z_t)\int_{z_{t-1}}p(z_t|z_{t-1})\underset{\color{red}{filtering}}{p(z_{t-1}|x_1,\cdots,x_{t-1})}dz_{t-1} \\\
+p(z|x) \rarr E_{z|x\sim p(z|x)}\left[ f(z) \right] &= \int_{z}f(z)p(z|x)dz \\\
+&\approx \frac{1}{N} \sum_{i=1}^N f(z^{(i)}) \\\
+z^{(1)},\cdots,z^{(N)}&\text{ are randomly sampled from } p(z|x)
 \end{align*}
 $$
+
+Monte Carlo method resolves difficulty in integration part, then the problem comes to how to do sampling.
+
+#### Review importance sampling
+
+{{< math.inline >}}
+<p>
+Since posterior distribution is not easy to solve we want to find a close distribution \( q(z) \), and sampling on \( q(z) \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+E_{z|x\sim p(z|x)}\left[ f(z) \right] &= \int_{z}f(z)p(z|x)dz \\\
+&= \int_{z}f(z)\frac{p(z|x)}{q(z)}q(z)dz \\\
+&\approx \frac{1}{N} \sum_{i=1}^N f(z^{(i)})\frac{p(z^{(i)}|x)}{q(z^{(i)})} \\\
+&\frac{p(z^{(i)}|x)}{q(z^{(i)})}\text{ is weight $w^{(i)}$} \\\
+z^{(1)},\cdots,z^{(N)}&\text{ are randomly sampled from } q(z)
+\end{align*}
+$$
+
+### Apply importance sampling to filtering problem
+
+
 
 Then we can give the update order:
 

@@ -84,7 +84,7 @@ z&: \text{latent variable $+$ parameters} \\\
 \end{align*}
 $$
 
-We mentioned in [EM algorithm](https://tirmisula.github.io/posts/expectation-maximization/#derive-em-from-elbokl-divergence) before, Baed on the fact that log-likelihood can be written as ELBO+KL-Divergence:
+We mentioned in [EM algorithm](https://tirmisula.github.io/posts/expectation-maximization/#derive-em-from-elbokl-divergence) before, Based on the fact that log-likelihood can be written as ELBO+KL-Divergence:
 
 $$
 \begin{align*}
