@@ -212,7 +212,16 @@ $$
 \end{cases}
 $$
 
-Besides, we have conclusion for [Conditional Gaussian PDF](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#solve-the-joint-pdf) from previous artice:
+It is obvious that results from both steps are still gaussian distributions:
+
+$$
+p(z_t|x_1,\cdots,x_{t-1}) \sim \mathcal{N}({\mu_{t}}^{\ast},{\Sigma_{t}}^{\ast}) \\\
+p(z_t|x_1,\cdots,x_{t}) \sim \mathcal{N}({\mu_{t}},{\Sigma_{t}})
+$$
+
+#### Lemma
+
+Besides, we have conclusions for [conditional pdf](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#solve-the-joint-pdf) and [marginal pdf](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#solve-the-conditonal-pdf-1) of Gaussian from previous artice:
 
 $$
 x \sim \mathcal{N} (\mu, \Lambda^{-1}) \\\
@@ -236,19 +245,30 @@ x|y \sim \mathcal{N}(\Sigma_{xy}\Sigma_{yy}^{-1} (x_y-\mu_{y}) + \mu_{x}, -\Sigm
 \end{cases}
 $$
 
+#### Prediction step
 For the prediction part:
 
 $$
 \begin{align*}
 p(z_t|x_1,\cdots,x_{t-1}) &= \int_{z_{t-1}}p(z_t,z_{t-1}|x_1,\cdots,x_{t-1})dz_{t-1} \\\
 &= \int_{z_{t-1}} p(z_t|z_{t-1})p(z_{t-1}|x_1,\cdots,x_{t-1}) \\\
-&= \int_{z_{t-1}} \mathcal{N}(z_{t}|Az_{t-1}+B, Q)p(z_{t-1}|x_1,\cdots,x_{t-1}) \\\
-&\text{Let $p(z_t|x_1,\cdots,x_{t-1})=\mathcal{N}({\mu_{t}}^{\ast},{\Sigma_{t}}^{\ast})$} \\\
-\mathcal{N}({\mu_{t}}^{\ast},{\Sigma_{t}}^{\ast}) &= \int_{z_{t-1}} \mathcal{N}(z_{t}|Az_{t-1}+B, Q)\mathcal{N}(\mu_{t-1},\Sigma_{t-1}) \\\
-&\text{Consider $y|x=z_t|z_{t-1}, x=z_{t-1}$, Then $p(z_t)=p(y)$} \\\
-&= \mathcal{N}(A\mu_{t-1}+B, A\Sigma_{t-1}A^T+Q)
+&\text{Consider $y=z_t, x=z_{t-1}$, Then $p(z_t)=p(y)$} \\\
+p(y) &= \int_{x}p(y|x)p(x) \\\
+\mathcal{N}({\mu_{t}}^{\ast},{\Sigma_{t}}^{\ast}) &= \int_{z_{t-1}} p(z_t|z_{t-1}) \mathcal{N}(\mu_{t-1},\Sigma_{t-1})
 \end{align*}
 $$
+
+Following the [rules](#conditional-and-marginal-pdf-for-gaussian) above we can write down:
+
+$$
+\begin{cases}
+z_{t-1} \sim \mathcal{N}(\mu_{t-1}, \Sigma_t) \\\
+z_t|z_{t-1} \sim \mathcal{N}(Az_{t-1}+B, Q) \\\
+z_t \sim \mathcal{N}(A\mu_{t-1}+B, A\Sigma_{t-1}A^T+Q)
+\end{cases}
+$$
+
+The predicting process is:
 
 $$
 \begin{cases}
@@ -257,6 +277,7 @@ $$
 \end{cases}
 $$
 
+#### Update step
 For the update part:
 
 $$
@@ -264,15 +285,37 @@ $$
 p(z_t|x_1,\cdots,x_{t}) &\propto p(x_t|z_t)p(z_t|x_1,\cdots,x_{t-1}) \\\
 \mathcal{N}(\mu_t, \Sigma_t) &\propto \mathcal{N}(x_t|Cz_{t}+D, R) \mathcal{N}({\mu_{t}}^{\ast},{\Sigma_{t}}^{\ast}) \\\
 &\text{Consider $x=z_t, y=x_{t}$, Then $p(z_t|x_t)=p(x|y)$} \\\
-& \\\
-&= \mathcal{N}(\Sigma_{z_tx_t}\Sigma_{x_tx_t}^{-1} (x_t-\mu_{x_t}) + \mu_{z_t}, -\Sigma_{z_tx_t}\Sigma_{x_tx_t}^{-1}\Sigma_{x_tz_t}+\Sigma_{z_tz_t})
+p(x|y) &\propto p(y|x)p(x)
 \end{align*}
 $$
 
+Following the [rules](#conditional-and-marginal-pdf-for-gaussian) above we can write down:
+
 $$
 \begin{cases}
-{\mu_{t}} = \Lambda^{-1}A^T (Cz_t+D) \\\
-{\Sigma_{t}} = A\Sigma_{t-1}A^T+Q
+z_t \sim \mathcal{N}({\mu_{t}}^{\ast},{\Sigma_{t}}^{\ast}) \\\
+x_t|z_t \sim \mathcal{N}(Cz_{t}+D, R) \\\
+x_t \sim \mathcal{N}(C{\mu_{t}}^{\ast}+D, C{\Sigma_{t}}^{\ast}C^T+R) \\\
+\begin{bmatrix}
+    z_t\\\
+    x_t
+\end{bmatrix} \sim \mathcal{N}(\begin{bmatrix}
+    {\mu_{t}}^{\ast} \\\
+    C{\mu_{t}}^{\ast}+D
+\end{bmatrix}, \begin{bmatrix}
+    {\Sigma_{t}}^{\ast} & {\Sigma_{t}}^{\ast}C^T \\\
+    ({\Sigma_{t}}^{\ast}C^T)^T & C{\Sigma_{t}}^{\ast}C^T+R
+\end{bmatrix}) \\\
+z_t|x_t \sim \mathcal{N}(\Sigma_{z_tx_t}\Sigma_{x_tx_t}^{-1} (x_t-\mu_{x_t}) + \mu_{z_t}, -\Sigma_{z_tx_t}\Sigma_{x_tx_t}^{-1}\Sigma_{x_tz_t}+\Sigma_{z_tz_t})
+\end{cases}
+$$
+
+The updating process is:
+
+$$
+\begin{cases}
+{\mu_{t}} = {\Sigma_{t}}^{\ast}C^T (C{\Sigma_{t}}^{\ast}C^T+R)^{-1} (x_t-C{\mu_{t}}^{\ast}-D)+{\mu_{t}}^{\ast} \\\
+{\Sigma_{t}} = -{\Sigma_{t}}^{\ast}C^T (C{\Sigma_{t}}^{\ast}C^T+R)^{-1} ({\Sigma_{t}}^{\ast}C^T)^T + {\Sigma_{t}}^{\ast}
 \end{cases}
 $$
 
@@ -282,7 +325,7 @@ work in progress
 
 ## Reference
 
-[^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=82).
+[^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=92).
 [^3]: From [The Matrix Cookbook](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
 [^5]: From [Mean field variational inference](https://mbernste.github.io/files/notes/MeanFieldVariationalInference.pdf).
 [^4]: From [Ross, Sheldon M. (2019). Introduction to probability models](https://doi.org/10.1016%2FC2017-0-01324-1).
