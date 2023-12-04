@@ -125,12 +125,12 @@ $$
 flowchart LR
     id1((State z_1)) --> id2((State z_2))
     id2((State z_2)) --> id3((State z_i))
-    id3((State z_i)) --> id9(((...))) // Continue the sequence
-    id3((State z_i)) --> id4((State z_t)) // Current state
-    id4((State z_t)) --> id5((State z_{t+1})) // Next state
-    id1((State z_1)) --> id6(((Observation x_1))) // Observation for state z_1
-    id2((State z_2)) --> id7(((Observation x_2))) // Observation for state z_2
-    id4((State z_t)) --> id8(((Observation x_t))) // Observation for current state
+    id3((State z_i)) --> id9(((...)))
+    id3((State z_i)) --> id4((State z_t))
+    id4((State z_t)) --> id5((State z_{t+1}))
+    id1((State z_1)) --> id6(((Observation x_1)))
+    id2((State z_2)) --> id7(((Observation x_2)))
+    id4((State z_t)) --> id8(((Observation x_t)))
 ```
 
 </div>
@@ -197,10 +197,46 @@ $$
 
 ### Apply importance sampling to filtering problem
 
+Define weight at time t as:
+
 $$
-w_t^{(i)} = \frac{p(z_t^{(i)}|x_{1:t})}{q(z_t^{(i)}|x_{1:t})}
+w_t^{(i)} = \frac{p(z_t^{(i)}|x_{1},\cdots,x_t)}{q(z_t^{(i)}|x_{1},\cdots,x_t)} \\\
+i=1\cdots N, \space t=1\cdots T
 $$
 
+{{< math.inline >}}
+<p>
+Intead of computing weights \( N\times T \) times, we can find a recurrence relation between \( w_t^{(i)} \) and \( w_{t-1}^{(i)} \) which brings us to sequential importance sampling(SIS).
+</p>
+{{</ math.inline >}}
+
+### Sequential importance sampling
+
+{{< math.inline >}}
+<p>
+Denote \( x_{1},\cdots,x_t \) as \( x_{1:t} \), sequential importance sampling(SIS) assumes that the weight is porpotional to the ratio of \( p(z_{1:t}|x_{1:t}) \) and \( q(z_{1:t}|x_{1:t}) \), so we have:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+w_t^{(i)} &= \frac{p(z_t^{(i)}|x_{1:t})}{q(z_t^{(i)}|x_{1:t})} \\\
+&\propto \frac{p(z_{1:t}^{(i)}|x_{1:t})}{q(z_{1:t}^{(i)}|x_{1:t})}
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+For \( p(z_{1:t}^{(i)}|x_{1:t}) \) we have:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+p(z_{1:t}^{(i)}|x_{1:t}) &= \frac{p(z_{1:t}^{(i)},x_{1:t})}{p(x_{1:t})} \\\
+&\propto p(z_{1:t}^{(i)},x_{1:t})
+\end{align*}
+$$
 
 ## Conclusion
 
