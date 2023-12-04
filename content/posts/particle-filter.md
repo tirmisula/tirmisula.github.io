@@ -123,14 +123,14 @@ $$
   }
 }%%
 flowchart LR
-    id1((State z_1)) --> id2((State z_2))
-    id2((State z_2)) --> id3((State z_i))
-    id3((State z_i)) --> id9(((...)))
-    id3((State z_i)) --> id4((State z_t))
-    id4((State z_t)) --> id5((State z_{t+1}))
-    id1((State z_1)) --> id6(((Observation x_1)))
-    id2((State z_2)) --> id7(((Observation x_2)))
-    id4((State z_t)) --> id8(((Observation x_t)))
+    id1((z_1)) --> id2((z_2))
+    id2((z_2)) --> id3((z_i))
+    id3((z_...)) --> id9(((...)))
+    id3((z_...)) --> id4((z_t))
+    id4((z_t)) --> id5((z_t+1))
+    id1((z_1)) --> id6(((x_1)))
+    id2((z_2)) --> id7(((x_2)))
+    id4((z_t)) --> id8(((x_t)))
 ```
 
 </div>
@@ -206,7 +206,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Intead of computing weights \( N\times T \) times, we can find a recurrence relation between \( w_t^{(i)} \) and \( w_{t-1}^{(i)} \) which brings us to sequential importance sampling(SIS).
+Computing weights needs \( N\times T \) times, we can find a recurrence relation between \( w_t^{(i)} \) and \( w_{t-1}^{(i)} \) which brings us to sequential importance sampling(SIS).
 </p>
 {{</ math.inline >}}
 
@@ -234,8 +234,51 @@ For \( p(z_{1:t}^{(i)}|x_{1:t}) \) we have:
 $$
 \begin{align*}
 p(z_{1:t}^{(i)}|x_{1:t}) &= \frac{p(z_{1:t}^{(i)},x_{1:t})}{p(x_{1:t})} \\\
-&\propto p(z_{1:t}^{(i)},x_{1:t})
+&\propto p(z_{1:t}^{(i)},x_{1:t}) \\\
+&= p(x_t|z_{1:t}^{(i)},x_{1:t-1})p(z_{1:t}^{(i)},x_{1:t-1}) \\\
+&= p(x_t|z_{t}^{(i)})p(z_{1:t}^{(i)},x_{1:t-1}) \\\
+&= p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{1:t-1}^{(i)},x_{1:t-1})p(z_{1:t-1}^{(i)},x_{1:t-1}) \\\
+&= p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})p(z_{1:t-1}^{(i)},x_{1:t-1}) \\\
+&= p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})p(z_{1:t-1}^{(i)}|x_{1:t-1})p(x_{1:t-1}) \\\
+&\propto p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})p(z_{1:t-1}^{(i)}|x_{1:t-1})
 \end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+For \( q(z_{1:t}^{(i)}|x_{1:t}) \) we have:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+q(z_{1:t}^{(i)}|x_{1:t}) &= q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t})q(z_{1:t-1}^{(i)}|x_{1:t}) \\\
+&= q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t})q(z_{1:t-1}^{(i)}|x_t,x_{1:t-1}) \\\
+&= q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t})\frac{q(x_t,z_{1:t-1}^{(i)}|x_{1:t-1})}{q(x_t|x_{1:t-1})} \\\
+&= q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t})\frac{q(x_t|z_{1:t-1}^{(i)},x_{1:t-1})q(z_{1:t-1}^{(i)}|x_{1:t-1})}{q(x_t|x_{1:t-1})} \\\
+&= q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t})\frac{q(x_t|z_{1:t-1}^{(i)},x_{1:t-1})q(z_{1:t-1}^{(i)}|x_{1:t-1})}{q(x_t,x_{1:t-1}|x_{1:t-1})} \\\
+&= q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t}) q(x_t|z_{1:t-1}^{(i)},x_{1:t-1})q(z_{1:t-1}^{(i)}|x_{1:t-1}) \frac{1}{q(x_t,x_{1:t-1})/q(x_{1:t-1})} \\\
+&\because \frac{q(x_{1:t-1})}{q(x_{1:t})}=C \\\
+&\propto q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t}) q(x_t|z_{1:t-1}^{(i)},x_{1:t-1})q(z_{1:t-1}^{(i)}|x_{1:t-1})
+\end{align*}
+$$
+
+<cite>[^2]</cite>Finally we have the recurrence relation for importance weight:
+
+$$
+\begin{align*}
+w_t^{(i)} &\propto \frac{p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})p(z_{1:t-1}^{(i)}|x_{1:t-1})}{q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t}) q(x_t|z_{1:t-1}^{(i)},x_{1:t-1})q(z_{1:t-1}^{(i)}|x_{1:t-1})} \\\
+&= \frac{p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})}{q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t}) q(x_t|z_{1:t-1}^{(i)},x_{1:t-1})} w_{t-1}^{(i)} \\\
+\end{align*} \\\
+\dArr
+$$
+
+$$
+\begin{cases}
+w_1^{(i)} = \frac{p(z_{1}^{(i)}|x_{1})}{q(z_{1}^{(i)}|x_{1})} \\\
+w_t^{(i)} = \frac{p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})}{q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t}) q(x_t|z_{1:t-1}^{(i)},x_{1:t-1})} w_{t-1}^{(i)} \\\
+\text{Subject to $\sum_{i=1}^N w_t^{(i)}=1$}
+\end{cases}
 $$
 
 ## Conclusion
@@ -248,4 +291,4 @@ work in progress
 [^3]: From [The Matrix Cookbook](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
 [^5]: From [Mean field variational inference](https://mbernste.github.io/files/notes/MeanFieldVariationalInference.pdf).
 [^4]: From [Ross, Sheldon M. (2019). Introduction to probability models](https://doi.org/10.1016%2FC2017-0-01324-1).
-[^2]: - [Hammersley–Clifford theorem](http://www.statslab.cam.ac.uk/~grg/books/hammfest/hamm-cliff.pdf).
+[^2]: - [Hammersley–Clifford theorem](https://www.stats.ox.ac.uk/~doucet/doucet_johansen_tutorialPF2011.pdf).
