@@ -274,10 +274,21 @@ w_t^{(i)} &\propto \frac{p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})p(z_{1:t-
 $$
 
 $$
+\because \text{weight is normalized in importance sampling} \\\
+\begin{align*}
+E_{z|x\sim q(z|x)}\left[ w(z) \right] &= \int_{z}w(z)q(z)dz \\\
+&= \int_{z} \frac{p(z|x)}{q(z)} q(z)dz \\\
+& \approx \frac{1}{N}\sum_{i=1}^Nw(z_i) =1
+\end{align*} \\\
+\dArr
+$$
+
+$$
+\therefore\text{same restriction for weight in SIS} \\\
 \begin{cases}
 w_1^{(i)} = \frac{p(z_{1}^{(i)}|x_{1})}{q(z_{1}^{(i)}|x_{1})} \\\
 w_t^{(i)} = \frac{p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})}{q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t}) q(x_t|z_{1:t-1}^{(i)},x_{1:t-1})} w_{t-1}^{(i)} \\\
-\text{Subject to $\sum_{i=1}^N w_t^{(i)}=1$}
+\text{Subject to $\sum_{i=1}^N w_t^{(i)}=1$}, \forall t\in[1,T]
 \end{cases}
 $$
 
@@ -291,4 +302,4 @@ work in progress
 [^3]: From [The Matrix Cookbook](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
 [^5]: From [Mean field variational inference](https://mbernste.github.io/files/notes/MeanFieldVariationalInference.pdf).
 [^4]: From [Ross, Sheldon M. (2019). Introduction to probability models](https://doi.org/10.1016%2FC2017-0-01324-1).
-[^2]: - [Hammersley–Clifford theorem](https://www.stats.ox.ac.uk/~doucet/doucet_johansen_tutorialPF2011.pdf).
+[^2]: - [SIS](https://www.stats.ox.ac.uk/~doucet/doucet_johansen_tutorialPF2011.pdf).

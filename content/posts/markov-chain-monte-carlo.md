@@ -139,8 +139,18 @@ $$
 \begin{align*}
 E_{z|x\sim p(z|x)}\left[ f(z) \right] &= \int_{z}f(z)p(z|x)dz \\\
 &= \int_{z}f(z)\frac{p(z|x)}{q(z)}q(z)dz \\\
-&\approx \frac{1}{N} \sum_{i=1}^N f(z_i)\frac{p(z_i|x)}{q(z_i)}, \frac{p(z_i|x)}{q(z_i)}\text{ is weight} \\\
+&\approx \frac{1}{N} \sum_{i=1}^N f(z_i)\frac{p(z_i|x)}{q(z_i)}, \frac{p(z_i|x)}{q(z_i)}\text{ is weight $w(z_i)$} \\\
 z_1,\cdots,z_N&\text{ are randomly sampled from } q(z)
+\end{align*}
+$$
+
+Weight is normalized because:
+
+$$
+\begin{align*}
+E_{z|x\sim q(z|x)}\left[ w(z) \right] &= \int_{z}w(z)q(z)dz \\\
+&= \int_{z} \frac{p(z|x)}{q(z)} q(z)dz \\\
+& \approx \frac{1}{N}\sum_{i=1}^Nw(z_i) =1
 \end{align*}
 $$
 
