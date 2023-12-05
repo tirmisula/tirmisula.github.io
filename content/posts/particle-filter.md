@@ -190,17 +190,18 @@ $$
 E_{z|x\sim p(z|x)}\left[ f(z) \right] &= \int_{z}f(z)p(z|x)dz \\\
 &= \int_{z}f(z)\frac{p(z|x)}{q(z)}q(z)dz \\\
 &\approx \frac{1}{N} \sum_{i=1}^N f(z^{(i)})\frac{p(z^{(i)}|x)}{q(z^{(i)})} \\\
+&= \frac{1}{N} \sum_{i=1}^N f(z^{(i)})w^{(i)} \\\
 &\frac{p(z^{(i)}|x)}{q(z^{(i)})}\text{ is weight $w^{(i)}$} \\\
-z^{(1)},\cdots,z^{(N)}&\text{ are randomly sampled from } q(z)
+z^{(1)},\cdots,z^{(N)}&\text{ are randomly sampled from } q(z) 
 \end{align*}
 $$
 
-### Apply importance sampling to filtering problem
+#### Apply importance sampling to filtering problem
 
 Define weight at time t as:
 
 $$
-w_t^{(i)} = \frac{p(z_t^{(i)}|x_{1},\cdots,x_t)}{q(z_t^{(i)}|x_{1},\cdots,x_t)} \\\
+w_t^{(i)} = \frac{p(z_t^{(i)}|x_{1},\cdots,x_t)}{q(z_t^{(i)})} \\\
 i=1\cdots N, \space t=1\cdots T
 $$
 
@@ -212,22 +213,33 @@ Computing weights needs \( N\times T \) times, we can find a recurrence relation
 
 ### Sequential importance sampling
 
+For convenience, denote \( x_{1},\cdots,x_t \) as \( x_{1:t} \):
+
+$$
+ x_{1},\cdots,x_t \iff x_{1:t}
+$$
+
+In any case of sequential importance sampling(SIS), we should let the proposal distribution has following attribute<cite>[^2]</cite>:
+
+$$
+q(z_t|z_{1:t-1}) = q(z_t|x_t,z_{t-1})
+$$
+
 {{< math.inline >}}
 <p>
-Denote \( x_{1},\cdots,x_t \) as \( x_{1:t} \), sequential importance sampling(SIS) assumes that the weight is porpotional to the ratio of \( p(z_{1:t}|x_{1:t}) \) and \( q(z_{1:t}|x_{1:t}) \), so we have:
+For importance weights in sequential importance sampling(SIS) we define it as:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-w_t^{(i)} &= \frac{p(z_t^{(i)}|x_{1:t})}{q(z_t^{(i)}|x_{1:t})} \\\
-&\propto \frac{p(z_{1:t}^{(i)}|x_{1:t})}{q(z_{1:t}^{(i)}|x_{1:t})}
+w_t^{(i)} &= \frac{p(z_{1:t}^{(i)}| x_{1:t})}{q(z_{1:t}^{(i)})} \propto \frac{p(z_{t}^{(i)}| x_{1:t})}{q(z_{t}^{(i)})}
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-For \( p(z_{1:t}^{(i)}|x_{1:t}) \) we have:
+For the numerator \( p(z_{1:t}^{(i)}|x_{1:t}) \) we have:
 </p>
 {{</ math.inline >}}
 
@@ -241,12 +253,29 @@ p(z_{1:t}^{(i)}|x_{1:t}) &= \frac{p(z_{1:t}^{(i)},x_{1:t})}{p(x_{1:t})} \\\
 &= p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})p(z_{1:t-1}^{(i)},x_{1:t-1}) \\\
 &= p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})p(z_{1:t-1}^{(i)}|x_{1:t-1})p(x_{1:t-1}) \\\
 &\propto p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})p(z_{1:t-1}^{(i)}|x_{1:t-1})
+\end{align*} \\\
+\dArr \\\
+p(z_{1:t}^{(i)}|x_{1:t}) \propto p(z_{1:t}^{(i)},x_{1:t}) \propto p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})p(z_{1:t-1}^{(i)}|x_{1:t-1})
+$$
+
+Thus we can update the weight equation:
+
+$$
+\begin{align*}
+w_t^{(i)} &= \frac{p(z_{1:t}^{(i)}| x_{1:t})}{q(z_{1:t}^{(i)})} \\\
+&\propto \frac{p(z_{1:t}^{(i)}, x_{1:t})}{q(z_{1:t}^{(i)})} \\\
+&= \frac{p(z_{1:t-1}^{(i)}, x_{1:t-1})}{q(z_{1:t-1}^{(i)})} \frac{p(z_{1:t}^{(i)}, x_{1:t})}{p(z_{1:t-1}^{(i)}, x_{1:t-1}) q(z_{t}^{(i)}|z_{1:t-1}^{(i)})} \\\
+&= w_{t-1}^{(i)} \frac{p(z_{1:t}^{(i)}, x_{1:t})}{p(z_{1:t-1}^{(i)}, x_{1:t-1}) q(z_{t}^{(i)}|z_{1:t-1}^{(i)})} \\\
+&\propto w_{t-1}^{(i)} \frac{p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})p(z_{1:t-1}^{(i)}|x_{1:t-1})}{p(z_{1:t-1}^{(i)}, x_{1:t-1}) q(z_{t}^{(i)}|z_{1:t-1}^{(i)})} \\\
+&\propto w_{t-1}^{(i)} \frac{p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})}{ q(z_{t}^{(i)}|z_{1:t-1}^{(i)})} \\\
+&\text{By proposal disribution attribute} \\\
+&= w_{t-1}^{(i)} \frac{p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})}{ q(z_t^{(i)}|x_t,z_{t-1}^{(i)}) }
 \end{align*}
 $$
 
-{{< math.inline >}}
+<!-- {{< math.inline >}}
 <p>
-For \( q(z_{1:t}^{(i)}|x_{1:t}) \) we have:
+For proposal distribution \( q(z_{1:t}^{(i)}|x_{1:t}) \) we have:
 </p>
 {{</ math.inline >}}
 
@@ -261,14 +290,13 @@ q(z_{1:t}^{(i)}|x_{1:t}) &= q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t})q(z_{1:t-1}^{
 &\because \frac{q(x_{1:t-1})}{q(x_{1:t})}=C \\\
 &\propto q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t}) q(x_t|z_{1:t-1}^{(i)},x_{1:t-1})q(z_{1:t-1}^{(i)}|x_{1:t-1})
 \end{align*}
-$$
+$$ -->
 
-<cite>[^2]</cite>Finally we have the recurrence relation for importance weight:
+Finally we have the recurrence relation for importance weight:
 
 $$
 \begin{align*}
-w_t^{(i)} &\propto \frac{p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})p(z_{1:t-1}^{(i)}|x_{1:t-1})}{q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t}) q(x_t|z_{1:t-1}^{(i)},x_{1:t-1})q(z_{1:t-1}^{(i)}|x_{1:t-1})} \\\
-&= \frac{p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})}{q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t}) q(x_t|z_{1:t-1}^{(i)},x_{1:t-1})} w_{t-1}^{(i)} \\\
+w_t^{(i)} &\propto \frac{h(z_{t}^{(i)}, u, \delta) g(z_{t-1}^{(i)}, u, \epsilon)}{ q(z_t^{(i)}|x_t,z_{t-1}^{(i)}) } w_{t-1}^{(i)} 
 \end{align*} \\\
 \dArr
 $$
@@ -284,17 +312,20 @@ E_{z|x\sim q(z|x)}\left[ w(z) \right] &= \int_{z}w(z)q(z)dz \\\
 $$
 
 $$
-\therefore\text{same restriction for weight in SIS} \\\
+\therefore\text{normalize weights in SIS algorithm} \\\
 \begin{cases}
+z_{1}^{(i)}\sim q(z_{1}|x_{1}) \\\
 w_1^{(i)} = \frac{p(z_{1}^{(i)}|x_{1})}{q(z_{1}^{(i)}|x_{1})} \\\
+z_{t}^{(i)}\sim q(z_t^{(i)}|x_t,z_{t-1}^{(i)}) \\\
 w_t^{(i)} = \frac{p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})}{q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t}) q(x_t|z_{1:t-1}^{(i)},x_{1:t-1})} w_{t-1}^{(i)} \\\
-\text{Subject to $\sum_{i=1}^N w_t^{(i)}=1$}, \forall t\in[1,T]
+W_t^{(i)} = \frac{w_{t}^{(i)}}{\sum_{i=1}^N w_t^{(i)}} \\\
+E_{z\sim q(z|x)}\left[ f(z) \right] = \frac{1}{N} \sum_{i=1}^N f(z^{(i)})W_{t}^{(i)}
 \end{cases}
 $$
 
-## Conclusion
+## Summary
 
-work in progress
+If you found any mistakes, please contact me via email.
 
 ## Reference
 
@@ -302,4 +333,4 @@ work in progress
 [^3]: From [The Matrix Cookbook](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
 [^5]: From [Mean field variational inference](https://mbernste.github.io/files/notes/MeanFieldVariationalInference.pdf).
 [^4]: From [Ross, Sheldon M. (2019). Introduction to probability models](https://doi.org/10.1016%2FC2017-0-01324-1).
-[^2]: - [SIS](https://www.stats.ox.ac.uk/~doucet/doucet_johansen_tutorialPF2011.pdf).
+[^2]: - [A Tutorial on Particle Filtering and Smoothing: Fifteen years later](https://www.stats.ox.ac.uk/~doucet/doucet_johansen_tutorialPF2011.pdf).
