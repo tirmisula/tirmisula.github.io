@@ -165,7 +165,7 @@ Since \( h(\cdot) \) and \( g(\cdot) \) are not linear, \( \epsilon \) and \( \d
 </p>
 {{</ math.inline >}}
 
-### Review Monte Carlo method
+## Review Monte Carlo method
 
 $$
 \begin{align*}
@@ -177,7 +177,7 @@ $$
 
 Monte Carlo method resolves difficulty in integration part, then the problem comes to how to do sampling.
 
-#### Review importance sampling
+### Review importance sampling
 
 {{< math.inline >}}
 <p>
@@ -196,7 +196,7 @@ z^{(1)},\cdots,z^{(N)}&\text{ are randomly sampled from } q(z)
 \end{align*}
 $$
 
-#### Apply importance sampling to filtering problem
+### Apply importance sampling to particle filtering problem
 
 Define weight at time t as:
 
@@ -211,9 +211,13 @@ Computing weights needs \( N\times T \) times, we can find a recurrence relation
 </p>
 {{</ math.inline >}}
 
-### Sequential importance sampling
+## Sequential importance sampling(SIS) + Resampling
 
+{{< math.inline >}}
+<p>
 For convenience, denote \( x_{1},\cdots,x_t \) as \( x_{1:t} \):
+</p>
+{{</ math.inline >}}
 
 $$
  x_{1},\cdots,x_t \iff x_{1:t}
@@ -302,7 +306,7 @@ w_t^{(i)} &\propto \frac{h(z_{t}^{(i)}, u, \delta) g(z_{t-1}^{(i)}, u, \epsilon)
 $$
 
 $$
-\because \text{weight is normalized in importance sampling} \\\
+\because \text{In importance sampling weight is normalized} \\\
 \begin{align*}
 E_{z|x\sim q(z|x)}\left[ w(z) \right] &= \int_{z}w(z)q(z)dz \\\
 &= \int_{z} \frac{p(z|x)}{q(z)} q(z)dz \\\
@@ -315,17 +319,18 @@ $$
 \therefore\text{normalize weights in SIS algorithm} \\\
 \begin{cases}
 z_{1}^{(i)}\sim q(z_{1}|x_{1}) \\\
-w_1^{(i)} = \frac{p(z_{1}^{(i)}|x_{1})}{q(z_{1}^{(i)}|x_{1})} \\\
+w_1^{(i)} = \frac{h(z_{1}^{(i)}, u, \delta) \pi(z_1)}{q(z_{1}^{(i)}|x_{1})}, \text{$\pi$ is prior} \\\
 z_{t}^{(i)}\sim q(z_t^{(i)}|x_t,z_{t-1}^{(i)}) \\\
-w_t^{(i)} = \frac{p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})}{q(z_{t}^{(i)}|z_{1:t-1}^{(i)}, x_{1:t}) q(x_t|z_{1:t-1}^{(i)},x_{1:t-1})} w_{t-1}^{(i)} \\\
+w_t^{(i)} = \frac{h(z_{t}^{(i)}, u, \delta) g(z_{t-1}^{(i)}, u, \epsilon)}{q(z_t^{(i)}|x_t,z_{t-1}^{(i)})} w_{t-1}^{(i)} \\\
 W_t^{(i)} = \frac{w_{t}^{(i)}}{\sum_{i=1}^N w_t^{(i)}} \\\
 E_{z\sim q(z|x)}\left[ f(z) \right] = \frac{1}{N} \sum_{i=1}^N f(z^{(i)})W_{t}^{(i)}
 \end{cases}
 $$
 
+
 ## Summary
 
-If you found any mistakes, please contact me via email.
+<!-- If you found any mistakes, please contact me via email. -->
 
 ## Reference
 
