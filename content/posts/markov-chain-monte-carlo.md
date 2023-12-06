@@ -3,7 +3,7 @@ author: "X. Wang"
 title: "Markov Chain Monte Carlo Method"
 date: "2023-09-11"
 description: "A brief introduction."
-tags: ["machine learning"]
+tags: ["MCMC", "sampling"]
 categories: ["themes", "syntax"]
 # series: ["Themes Guide"]
 aliases: ["migrate-from-jekyl"]

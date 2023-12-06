@@ -211,7 +211,7 @@ Computing weights needs \( N\times T \) times, we can find a recurrence relation
 </p>
 {{</ math.inline >}}
 
-## Sequential importance sampling(SIS) + Resampling
+## Sequential importance sampling(SIS)
 
 {{< math.inline >}}
 <p>
@@ -223,7 +223,7 @@ $$
  x_{1},\cdots,x_t \iff x_{1:t}
 $$
 
-In any case of sequential importance sampling(SIS), we should let the proposal distribution has following attribute<cite>[^2]</cite>:
+In any case of sequential importance sampling(SIS), we should choose proposal distribution which has the following attribute<cite>[^2]</cite>:
 
 $$
 q(z_t|z_{1:t-1}) = q(z_t|x_t,z_{t-1})
@@ -301,9 +301,10 @@ Finally we have the recurrence relation for importance weight:
 $$
 \begin{align*}
 w_t^{(i)} &\propto \frac{h(z_{t}^{(i)}, u, \delta) g(z_{t-1}^{(i)}, u, \epsilon)}{ q(z_t^{(i)}|x_t,z_{t-1}^{(i)}) } w_{t-1}^{(i)} 
-\end{align*} \\\
-\dArr
+\end{align*}
 $$
+
+Then we need to normalize importance weight:
 
 $$
 \because \text{In importance sampling weight is normalized} \\\
@@ -312,21 +313,86 @@ E_{z|x\sim q(z|x)}\left[ w(z) \right] &= \int_{z}w(z)q(z)dz \\\
 &= \int_{z} \frac{p(z|x)}{q(z)} q(z)dz \\\
 & \approx \frac{1}{N}\sum_{i=1}^Nw(z_i) =1
 \end{align*} \\\
-\dArr
+\dArr \\\
+W_t^{(i)} = \frac{w_{t}^{(i)}}{\sum_{i=1}^N w_t^{(i)}}
 $$
 
+SIS algorithm:
+
 $$
-\therefore\text{normalize weights in SIS algorithm} \\\
+\text{SIS algorithm} \\\
 \begin{cases}
-z_{1}^{(i)}\sim q(z_{1}|x_{1}) \\\
-w_1^{(i)} = \frac{h(z_{1}^{(i)}, u, \delta) \pi(z_1)}{q(z_{1}^{(i)}|x_{1})}, \text{$\pi$ is prior} \\\
-z_{t}^{(i)}\sim q(z_t^{(i)}|x_t,z_{t-1}^{(i)}) \\\
-w_t^{(i)} = \frac{h(z_{t}^{(i)}, u, \delta) g(z_{t-1}^{(i)}, u, \epsilon)}{q(z_t^{(i)}|x_t,z_{t-1}^{(i)})} w_{t-1}^{(i)} \\\
+\text{For $i=1\cdots N$} \\\
+\quad z_{1}^{(i)}\sim q(z_{1}|x_{1}) \\\
+\quad w_1^{(i)} = \frac{h(z_{1}^{(i)}, u, \delta) \pi(z_1)}{q(z_{1}^{(i)}|x_{1})}, \text{$\pi$ is prior} \\\
+\text{For $t=2\cdots T$} \\\
+\quad \text{For $i=1\cdots N$} \\\
+\quad \quad z_{t}^{(i)}\sim q(z_t^{(i)}|x_t,z_{t-1}^{(i)}) \\\
+\quad \quad w_t^{(i)} = \frac{h(z_{t}^{(i)}, u, \delta) g(z_{t-1}^{(i)}, u, \epsilon)}{q(z_t^{(i)}|x_t,z_{t-1}^{(i)})} w_{t-1}^{(i)} \\\
 W_t^{(i)} = \frac{w_{t}^{(i)}}{\sum_{i=1}^N w_t^{(i)}} \\\
 E_{z\sim q(z|x)}\left[ f(z) \right] = \frac{1}{N} \sum_{i=1}^N f(z^{(i)})W_{t}^{(i)}
 \end{cases}
 $$
 
+## Sampling Importance resampling(SIR):
+
+{{< math.inline >}}
+<p>
+In SIS, some particles \(z\) decays during several iterations because:
+</p>
+{{</ math.inline >}}
+
+$$
+\lbrace W_t^{(i)}\cdots \rbrace\rarr 1, \lbrace W_t^{(j)}\rbrace \rarr 0
+$$
+
+In case of that, we have 2 steps to do: 
+1. resampling 
+2. find suitable proposal distirbution
+
+{{< math.inline >}}
+<p>
+Resampling based on weights distribution \( W_t^{(1)}\cdots W_t^{(N)} \) is called sampling importance resampling(SIR):
+</p>
+{{</ math.inline >}}
+
+$$
+\text{resampling $\lbrace Z_t^{(1)}\cdots Z_t^{(N)} \rbrace\sim \mathcal{Q}(Z)$ } \\\
+\text{where $\mathcal{Q}(Z=z_t^{(i)})=W_t^{(i)},\space i=1\cdots N$}
+$$
+
+{{< math.inline >}}
+<p>
+For choosing proposal distribution, let \( q(z_t|x_t,z_{t-1})=p(z_t|z_{t-1}) \) we have:
+</p>
+{{</ math.inline >}}
+
+
+$$
+\begin{align*}
+w_{t}^{(i)} &= w_{t-1}^{(i)} \frac{p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})}{ q(z_t^{(i)}|x_t,z_{t-1}^{(i)}) } \\\
+&= w_{t-1}^{(i)} \frac{p(x_t|z_{t}^{(i)})p(z_{t}^{(i)}|z_{t-1}^{(i)})}{ p(z_{t}^{(i)}|z_{t-1}^{(i)}) } \\\
+&= w_{t-1}^{(i)} p(x_t|z_{t}^{(i)})
+\end{align*}
+$$
+
+SIR algorithm:
+
+$$
+\text{SIR algorithm} \\\
+\begin{cases}
+\text{For $i=1\cdots N$} \\\
+\quad z_{1}^{(i)}\sim q(z_{1}|x_{1}) \\\
+\quad w_1^{(i)} = \frac{h(z_{1}^{(i)}, u, \delta) \pi(z_1)}{q(z_{1}^{(i)}|x_{1})}, \text{$\pi$ is prior} \\\
+\text{For $t=2\cdots T$} \\\
+\quad \text{For $i=1\cdots N$} \\\
+\quad \quad z_{t}^{(i)}\sim g(z_{t-1}^{(i)}, u, \epsilon) \\\
+\quad \quad w_t^{(i)} = h(z_{t}^{(i)}, u, \delta) w_{t-1}^{(i)} \\\
+W_t^{(i)} = \frac{w_{t}^{(i)}}{\sum_{i=1}^N w_t^{(i)}} \\\
+Z_t^{(i)} \xleftarrow{\text{resampling}} z_t^{(i)},\space i=1\cdots N \\\
+E_{z\sim q(z|x)}\left[ f(z) \right] = \frac{1}{N} \sum_{i=1}^N f(Z_t^{(i)})W_{t}^{(i)}
+\end{cases}
+$$
 
 ## Summary
 
