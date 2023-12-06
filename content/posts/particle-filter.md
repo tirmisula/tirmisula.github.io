@@ -102,9 +102,7 @@ $$
 $$
 
 
-## Particle Filter
-
-### Definition
+## Definition
 
 <div class="graph" style="text-align: center;">
 
@@ -147,7 +145,7 @@ $$
 Then we have unknown parameters:
 
 $$
-\theta = (  )
+\theta=(g,h)
 $$
 
 It has 2 steps for filtering:
@@ -196,7 +194,7 @@ z^{(1)},\cdots,z^{(N)}&\text{ are randomly sampled from } q(z)
 \end{align*}
 $$
 
-### Apply importance sampling to particle filtering problem
+### Importance sampling in particle filtering
 
 Define weight at time t as:
 
@@ -334,7 +332,7 @@ E_{z\sim q(z|x)}\left[ f(z) \right] = \frac{1}{N} \sum_{i=1}^N f(z^{(i)})W_{t}^{
 \end{cases}
 $$
 
-## Sampling Importance resampling(SIR):
+## Sampling Importance resampling(SIR)
 
 {{< math.inline >}}
 <p>
