@@ -159,7 +159,7 @@ Then we can design the object function:
 
 $$
 \begin{align*}
-J(w) &= \frac{(\bar{z_{C1}}-\bar{z_{C2}})^2}{ \sigma_{z_{C1}}^2 + \sigma_{z_{C2}}^2 }\\\
+J(w) &= \frac{(\bar{z_{C1}}-\bar{z_{C2}})^2}{ \sigma_{z_{C1}}^2 + \sigma_{z_{C2}}^2 } \\\
 &= \frac{(w^T \bar{x_{C1}}-w^T \bar{x_{C2}})^2}{ \sigma_{z_{C1}}^2 + \sigma_{z_{C2}}^2 } \\\
 &= \frac{(w^T (\bar{x_{C1}}-\bar{x_{C2}}))^2}{ \sigma_{z_{C1}}^2 + \sigma_{z_{C2}}^2 } \\\
 &= \frac{w^T (\bar{x_{C1}}-\bar{x_{C2}})(w^T (\bar{x_{C1}}-\bar{x_{C2}}))^T}{ \sigma_{z_{C1}}^2 + \sigma_{z_{C2}}^2 } \\\
