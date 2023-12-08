@@ -147,7 +147,7 @@ flowchart TB
         id30((x_1:T)) --> id21((y_1))
         id30((x_1:T)) --> id22((y_2))
         id30((x_1:T)) --> id23((y_...))
-        id30((x_1:T)) --> id24((y_T))
+        id30(((x_1:T))) --> id24((y_T))
     end
 ```
 
@@ -191,6 +191,100 @@ Advantages of MEMM:
 1. Modeling p(Y|X), which simplifies the learning process.
 2. Relaxing the independence assumption of observations, providing a more realistic model.
 
+## MEMM vs CRF
+
+Consider a local structure in MEMM, we have:
+
+$$
+p(y_t|y_{t-1},x_t) = f(y_t,y_{t-1},x_t)
+$$
+
+{{< math.inline >}}
+<p>
+\( p(y_t|y_{t-1},x_t) \) is a function of \( y_t,y_{t-1},x_t \) and needs to be locally normalized to a probabiltiy density function. It brings us the <b>label bias problem</b>.
+</p>
+{{</ math.inline >}}
+
+{{< math.inline >}}
+<p>
+e.g. Suppose we have 4 samples: 3*rob + 1*rib, we train a MEMM based on these 4 samples then we have the graph:
+</p>
+{{</ math.inline >}}
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    "htmlLabels": true,
+    "securityLevel": "loose",
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'grey',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id1((0)) -->|r\nPr=0.25| id2((1))
+    id2((1)) -->|i\nPr=1| id3((2))
+    id3((2)) -->|b\nPr=1| id4((3))
+    id1((0)) -->|r\nPr=0.75| id5((4))
+    id5((4)) -->|o\nPr=1| id6((5))
+    id6((5)) -->|b\nPr=1| id4((3))
+```
+
+</div>
+
+{{< math.inline >}}
+<p>
+The <b>local normalized</b> pdfs of \( p(y_t|y_{t-1},x_t) \) are:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{cases}
+p(y_1=1|y_0=0,x_1=r)=0.25 \\\
+p(y_1=4|y_0=0,x_1=r)=0.75 \\\
+p(y_2=2|y_1=1,x_2=i)=1 \\\
+p(y_2=5|y_1=4,x_2=o)=1 \\\
+p(y_3=3|y_2=2,x_3=b)=1 \\\
+p(y_3=3|y_2=5,x_3=b)=1
+\end{cases}
+$$
+
+Suppose we have a new incoming word 'rib', the decoding result is:
+
+$$
+\begin{align*}
+\hat{Y} &= \argmax_{y_1,y_2,y_3} p(y_1,y_2,y_3|x_1=r,x_2=i,x_3=b) \\\
+&= 0.75 \times 1 \times 1 \\\
+(\hat{y_1},\hat{y_2},\hat{y_3}) &= (4,5,3)
+\end{align*}
+$$
+
+Given a sample 'rib', the inference label is 'rob', the label is biased, then we can backtrack:
+
+$$
+\text{Label Bias} \\\
+\dArr \\\
+\text{Observations not working} \\\
+\dArr \\\
+\text{Low entropy of transition $y_{t-1}\rarr y_t$} \\\
+\dArr \\\
+\text{$p(y_t|y_{t-1},x_t)$ is locally normalized} \\\
+\dArr \\\
+\text{Drawback of MEMM's structure}
+$$
+
+Conditional Random Field(CRF) overcomes this drawback:
+
+1. Acyclic graph of states brings more options and increases the entropy for state transitions.
+2. Global normalization of transition probability helps balancing the influence of different states.
 
 ## Summary
 
