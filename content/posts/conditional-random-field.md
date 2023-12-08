@@ -106,6 +106,90 @@ $$
 \end{cases}
 $$
 
+## HMM vs MEMM
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    "htmlLabels": true,
+    "securityLevel": "loose",
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'grey',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart TB
+    subgraph HMM
+        id1((y_1)) --> id2((y_2))
+        id2((y_2)) --> id3((y_i))
+        id3((y_...)) --> id9(((x_...)))
+        id3((y_...)) --> id4((y_T))
+        id1((y_1)) --> id6(((x_1)))
+        id2((y_2)) --> id7(((x_2)))
+        id4((y_T)) --> id8(((x_T)))
+    end
+    subgraph MEMM
+        id21((y_1)) --> id22((y_2))
+        id22((y_2)) --> id23((y_...))
+        id29(((x_...))) --> id23((y_...))
+        id23((y_...)) --> id24((y_T))
+        id26(((x_1))) --> id21((y_1))
+        id27(((x_2))) --> id22((y_2))
+        id28(((x_T))) --> id24((y_T))
+        id30((x_1:T)) --> id21((y_1))
+        id30((x_1:T)) --> id22((y_2))
+        id30((x_1:T)) --> id23((y_...))
+        id30((x_1:T)) --> id24((y_T))
+    end
+```
+
+</div>
+
+For HMM we have:
+
+$$
+\text{given $y_t\implies$ $y_{t-1}\perp x_t$}
+$$
+
+$$
+\begin{align*}
+p(X,Y|\lambda) &= \prod_{t=1}^T p(x_t,y_t|\lambda,y_{t-1}) \\\
+&= \prod_{t=1}^T p(x_t|y_t,y_{t-1},\lambda)p(y_t|y_{t-1},\lambda) \\\
+&= \prod_{t=1}^T p(x_t|y_t,\lambda)p(y_t|y_{t-1},\lambda) \\\
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+For MEMM we have:
+</p>
+{{</ math.inline >}}
+
+$$
+\text{given $y_t\implies$ $y_{t-1} \cancel{\perp} x_t$}
+$$
+
+$$
+p(x_t|x_{1:t},y_{1:t}) \neq p(x_t|y_t)
+$$
+
+$$
+\begin{align*}
+p(Y|X,\lambda) &= \prod_{t=1}^T p(y_t|x_{1:T},\lambda,y_{t-1})
+\end{align*}
+$$
+
+Advantages of MEMM:
+1. Modeling p(Y|X), which simplifies the learning process.
+2. Relaxing the independence assumption of observations, providing a more realistic model.
 
 
 ## Summary
