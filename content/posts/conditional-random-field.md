@@ -224,7 +224,7 @@ e.g. Suppose we have 4 samples: 3*rob + 1*rib, we train a MEMM based on these 4 
       'primaryTextColor': '#000',
       'primaryBorderColor': '#7C0200',
       'lineColor': '#F8B229',
-      'secondaryColor': 'grey',
+      'secondaryColor': 'orange',
       'tertiaryColor': '#fff'
     }
   }
@@ -278,13 +278,157 @@ $$
 \dArr \\\
 \text{$p(y_t|y_{t-1},x_t)$ is locally normalized} \\\
 \dArr \\\
-\text{Drawback of MEMM's structure}
+\text{Limitation of MEMM's structure}
 $$
 
 Conditional Random Field(CRF) overcomes this drawback:
 
 1. Acyclic graph of states brings more options and increases the entropy for state transitions.
 2. Global normalization of transition probability helps balancing the influence of different states.
+
+## CRF
+
+### CRF structure
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    "htmlLabels": true,
+    "securityLevel": "loose",
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'grey',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id21((y_1)) --> id22((y_2))
+    id22((y_2)) --> id23((y_...))
+    id23((y_...)) --> id24((y_T))
+    id30((x_1:T)) --> id21((y_1))
+    id30((x_1:T)) --> id22((y_2))
+    id30((x_1:T)) --> id23((y_...))
+    id30(((x_1:T))) --> id24((y_T))
+```
+
+</div>
+
+### CRF pdf parametric modeling
+
+Recall that for a acyclic graph Markov random network(MRF) we have the pdf by [factorization](https://tirmisula.github.io/posts/probabilistic-graphical-model/#factorization-of-mrf):
+
+$$
+\begin{align*}
+p(x) &= \frac{1}{z} \prod_{i=1}^K \psi_i(x_{C_i}) \\\
+&= \frac{1}{z}\exp(-\sum_{i=1}^K E_i(x_{C_i})) \\\
+C_i &: \text{i-th maximum clique} \\\
+x_{C_i} &: \text{variable nodes in $C_i$} \\\
+\psi(x) &: \text{potential function, $>0$} \\\
+z &: \text{nomalize factor,$z=\sum_{x_1\cdots x_p}\prod_{i=1}^K \psi(x_{C_i})$} \\\
+E(x) &: \text{energy function}
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+For a chained acyclic graph \( y_1,\cdots,y_T \), it has \( T-1 \) maximum cliques, the local maximum clique is shown as:
+</p>
+{{</ math.inline >}}
+
+<div class="graph" style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    "htmlLabels": true,
+    "securityLevel": "loose",
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'grey',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+flowchart LR
+    id21((y_t-1)) --- id22((y_t))
+    id30((x_1:T)) --> id21((y_t-1))
+    id30((x_1:T)) --> id22((y_t))
+```
+
+</div>
+
+For chained CRF we have factorization:
+
+$$
+\begin{align*}
+p(Y|X) &= \frac{1}{z}\exp\left( \sum_{t=1}^T -E_t(y_{t-1},y_t,x_{1:T}) \right) \\\
+&\text{assume each potential has the same form} \\\
+&= \frac{1}{z}\exp\left( \sum_{t=1}^T -E(y_{t-1},y_t,x_{1:T}) \right) \\\
+&\text{consider $-E(y_{t-1},y_t,x_{1:T})$ a function: $f(y_{t-1},y_t,x_{1:T})$} \\\
+&= \frac{1}{z}\exp\left( \sum_{t=1}^T f(y_{t-1},y_t,x_{1:T}) \right) \\\
+&\text{consider splitting $f(y_{t-1},y_t,x_{1:T})$} \\\
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Assuming \( f(y_{t-1},y_t,x_{1:T}) \) is splitted into \( f_1(y_{t},x_{1:T}), f_2(y_{t-1},x_{1:T}), f_3(y_{t-1},y_t,x_{1:T}) \) three parts:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{cases}
+f(y_{t-1},y_t,x_{1:T}) = f_1(y_{t},x_{1:T}) + f_2(y_{t-1},x_{1:T}) + f_3(y_{t-1},y_t,x_{1:T}) \\\
+f(y_{t-2},y_{t-1},x_{1:T}) = f_1(y_{t-1},x_{1:T}) + f_2(y_{t-2},x_{1:T}) + f_3(y_{t-2},y_{t-1},x_{1:T}) \\\
+\text{$f_2(y_{t-1},x_{1:T})$ repeatly exsists in $f(y_{t-2},y_{t-1},x_{1:T})$, abandoned }
+\end{cases} \\\
+\dArr \\\
+f(y_{t-1},y_t,x_{1:T}) = g(y_{t},x_{1:T}) + h(y_{t-1},y_t,x_{1:T})
+$$
+
+{{< math.inline >}}
+<p>
+For \( g(\cdot) \) and \( h(\cdot) \) we assume it is a summation of indicator functions:
+</p>
+{{</ math.inline >}}
+
+$$
+g(y_t,x_{1:T}) = \sum_{k=1}^K \lambda_k g_k(y_t,x_{1:T}) \\\
+g_k(y_t,x_{1:T}) = \begin{cases}
+1 & y_t\text{ is certain label} \\\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+$$
+h(y_{t-1},y_t,x_{1:T}) = \sum_{l=1}^L \eta_l h_l(y_{t-1},y_t,x_{1:T}) \\\
+h_l(y_{t-1},y_t,x_{1:T}) = \begin{cases}
+1 & y_t,y_{t-1}\text{ are certain labels} \\\
+0 & \text{otherwise}
+\end{cases}
+$$
+
+Overall CRF's pdf can be written as:
+
+$$
+\begin{align*}
+p(Y|X) &= \frac{1}{z}\exp\left( \sum_{t=1}^T f(y_{t-1},y_t,x_{1:T}) \right) \\\
+&= \frac{1}{z}\exp\left( \sum_{t=1}^T \left[ \sum_{k=1}^K \lambda_k g_k(y_t,x_{1:T}) \\\
+g_k(y_t,x_{1:T})+\sum_{l=1}^L \eta_l h_l(y_{t-1},y_t,x_{1:T}) \right] \right) \\\
+\end{align*} \\\
+\theta=(\lambda_1,\cdots,\lambda_K,\eta_1,\cdots,\eta_L) \text{ are parameters}
+$$
 
 ## Summary
 
