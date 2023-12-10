@@ -368,7 +368,7 @@ flowchart LR
 
 </div>
 
-For chained CRF we have factorization:
+Factorize chained CRF we got:
 
 $$
 \begin{align*}
@@ -376,8 +376,7 @@ p(Y|X) &= \frac{1}{z}\exp\left( \sum_{t=1}^T -E_t(y_{t-1},y_t,x_{1:T}) \right) \
 &\text{assume each potential has the same form} \\\
 &= \frac{1}{z}\exp\left( \sum_{t=1}^T -E(y_{t-1},y_t,x_{1:T}) \right) \\\
 &\text{consider $-E(y_{t-1},y_t,x_{1:T})$ a function: $f(y_{t-1},y_t,x_{1:T})$} \\\
-&= \frac{1}{z}\exp\left( \sum_{t=1}^T f(y_{t-1},y_t,x_{1:T}) \right) \\\
-&\text{consider splitting $f(y_{t-1},y_t,x_{1:T})$} \\\
+&= \frac{1}{z}\exp\left( \sum_{t=1}^T f(y_{t-1},y_t,x_{1:T}) \right)
 \end{align*}
 $$
 
@@ -391,7 +390,7 @@ $$
 \begin{cases}
 f(y_{t-1},y_t,x_{1:T}) = f_1(y_{t},x_{1:T}) + f_2(y_{t-1},x_{1:T}) + f_3(y_{t-1},y_t,x_{1:T}) \\\
 f(y_{t-2},y_{t-1},x_{1:T}) = f_1(y_{t-1},x_{1:T}) + f_2(y_{t-2},x_{1:T}) + f_3(y_{t-2},y_{t-1},x_{1:T}) \\\
-\text{$f_2(y_{t-1},x_{1:T})$ repeatly exsists in $f(y_{t-2},y_{t-1},x_{1:T})$, abandoned }
+\text{$f_2(y_{t-1},x_{1:T})\in f(y_{t-2},y_{t-1},x_{1:T}),f(y_{t-1},y_t,x_{1:T})$, abandon }
 \end{cases} \\\
 \dArr \\\
 f(y_{t-1},y_t,x_{1:T}) = g(y_{t},x_{1:T}) + h(y_{t-1},y_t,x_{1:T})
@@ -399,24 +398,28 @@ $$
 
 {{< math.inline >}}
 <p>
-For \( g(\cdot) \) and \( h(\cdot) \) we assume it is a summation of indicator functions:
+For \( g(y_t,x_{1:T}) \) and \( h(y_{t-1},y_t,x_{1:T}) \) we assume it is a summation of indicator functions:
 </p>
 {{</ math.inline >}}
 
 $$
-g(y_t,x_{1:T}) = \sum_{k=1}^K \lambda_k g_k(y_t,x_{1:T}) \\\
-g_k(y_t,x_{1:T}) = \begin{cases}
+\begin{align*}
+&g(y_t,x_{1:T}) = \sum_{k=1}^K \lambda_k g_k(y_t,x_{1:T}) \\\
+&g_k(y_t,x_{1:T}) = \begin{cases}
 1 & y_t\text{ is certain label} \\\
 0 & \text{otherwise}
 \end{cases}
+\end{align*}
 $$
 
 $$
-h(y_{t-1},y_t,x_{1:T}) = \sum_{l=1}^L \eta_l h_l(y_{t-1},y_t,x_{1:T}) \\\
-h_l(y_{t-1},y_t,x_{1:T}) = \begin{cases}
+\begin{align*}
+&h(y_{t-1},y_t,x_{1:T}) = \sum_{l=1}^L \eta_l h_l(y_{t-1},y_t,x_{1:T}) \\\
+&h_l(y_{t-1},y_t,x_{1:T}) = \begin{cases}
 1 & y_t,y_{t-1}\text{ are certain labels} \\\
 0 & \text{otherwise}
 \end{cases}
+\end{align*}
 $$
 
 Overall CRF's pdf can be written as:
