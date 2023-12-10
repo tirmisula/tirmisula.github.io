@@ -320,7 +320,7 @@ flowchart LR
 
 </div>
 
-### CRF pdf parametric modeling
+### PDF expression
 
 Recall that for a acyclic graph Markov random network(MRF) we have the pdf by [factorization](https://tirmisula.github.io/posts/probabilistic-graphical-model/#factorization-of-mrf):
 
@@ -427,10 +427,99 @@ Overall CRF's pdf can be written as:
 $$
 \begin{align*}
 p(Y|X) &= \frac{1}{z}\exp\left( \sum_{t=1}^T f(y_{t-1},y_t,x_{1:T}) \right) \\\
-&= \frac{1}{z}\exp\left( \sum_{t=1}^T \left[ \sum_{k=1}^K \lambda_k g_k(y_t,x_{1:T}) \\\
+&= \frac{1}{z}\exp\left( \sum_{t=1}^T \left[ \sum_{k=1}^K \lambda_k 
 g_k(y_t,x_{1:T})+\sum_{l=1}^L \eta_l h_l(y_{t-1},y_t,x_{1:T}) \right] \right) \\\
 \end{align*} \\\
-\theta=(\lambda_1,\cdots,\lambda_K,\eta_1,\cdots,\eta_L) \text{ are parameters}
+\theta=(\lambda_1,\cdots,\lambda_K,\eta_1,\cdots,\eta_L) \text{ are parameters} \\\
+z=\sum_{y_1\cdots y_T}\prod_{i=1}^K \psi(y_{1:T},x_{1:T},\lambda_{1:K},\eta_{1:L})=z(x_{1:T},\lambda_{1:K},\eta_{1:L})
+$$
+
+### PDF expression vectorization
+
+$$
+\text{Let } \lambda= \begin{bmatrix}
+  \lambda_1 \\\
+  \vdots \\\
+  \lambda_K
+\end{bmatrix}, 
+G= \begin{bmatrix}
+  g_1 \\\
+  \vdots \\\
+  g_K
+\end{bmatrix} \\\
+\sum_{k=1}^K \lambda_k 
+g_k(y_t,x_{1:T}) = \lambda^T G
+$$
+
+$$
+\text{Let } \eta= \begin{bmatrix}
+  \eta_1 \\\
+  \vdots \\\
+  \eta_L
+\end{bmatrix}, 
+H= \begin{bmatrix}
+  h_1 \\\
+  \vdots \\\
+  h_L
+\end{bmatrix} \\\
+\sum_{l=1}^L \eta_l 
+h_l(y_{t-1},y_t,x_{1:T}) = \eta^T H
+$$
+
+$$
+\text{Let } X= \begin{bmatrix}
+  x_1 \\\
+  \vdots \\\
+  x_T
+\end{bmatrix}, 
+Y= \begin{bmatrix}
+  y_1 \\\
+  \vdots \\\
+  y_T
+\end{bmatrix},
+\theta= \begin{bmatrix}
+  \lambda \\\
+  \eta
+\end{bmatrix}
+$$
+
+So we have:
+
+$$
+\begin{align*}
+p(Y|X) &= \frac{1}{z(X,\lambda,\eta)}\exp\left( \sum_{t=1}^T \left[ \lambda^TG + \eta^TH \right] \right) \\\
+&= \frac{1}{z(X,\theta)}\exp\left( \sum_{t=1}^T \begin{bmatrix}
+  \lambda^T & \eta^T
+\end{bmatrix} 
+\begin{bmatrix}
+  G \\\
+  H
+\end{bmatrix} \right) \\\
+&= \frac{1}{z(X,\theta)}\exp\left( \theta^T\sum_{t=1}^T 
+\begin{bmatrix}
+  G \\\
+  H
+\end{bmatrix} \right) \\\
+&= \frac{1}{z(X,\theta)}\exp\left( \theta^T 
+\begin{bmatrix}
+  \sum_{t=1}^TG \\\
+  \sum_{t=1}^TH
+\end{bmatrix} \right) \\\
+&\text{Let } M=\begin{bmatrix}
+  \sum_{t=1}^TG \\\
+  \sum_{t=1}^TH
+\end{bmatrix} = 
+\begin{bmatrix}
+  \sum_{t=1}^T g_1(y_t,x_{1:T}) \\\
+  \vdots \\\
+  \sum_{t=1}^T g_K(y_t,x_{1:T}) \\\
+  \sum_{t=1}^T h_1(y_{t-1},y_t,x_{1:T}) \\\
+  \vdots \\\
+  \sum_{t=1}^T h_L(y_{t-1},y_t,x_{1:T})
+\end{bmatrix}=M(X,Y) \\\
+&= \frac{1}{z(X,\theta)}\exp\left( \theta^T M \right) \\\
+&= \frac{1}{z(X,\theta)}\mathrm{e}^{ \lang\theta^T,M\rang }
+\end{align*}
 $$
 
 ## Summary
