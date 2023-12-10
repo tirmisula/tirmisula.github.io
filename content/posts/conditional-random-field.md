@@ -382,7 +382,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Assuming \( f(y_{t-1},y_t,x_{1:T}) \) is splitted into \( f_1(y_{t},x_{1:T}), f_2(y_{t-1},x_{1:T}), f_3(y_{t-1},y_t,x_{1:T}) \) three parts:
+Assuming \( f(y_{t-1},y_t,x_{1:T}) \) is splitted into three parts:
 </p>
 {{</ math.inline >}}
 
@@ -446,7 +446,7 @@ G= \begin{bmatrix}
   g_1 \\\
   \vdots \\\
   g_K
-\end{bmatrix} \\\
+\end{bmatrix} \implies
 \sum_{k=1}^K \lambda_k 
 g_k(y_t,x_{1:T}) = \lambda^T G
 $$
@@ -461,8 +461,7 @@ H= \begin{bmatrix}
   h_1 \\\
   \vdots \\\
   h_L
-\end{bmatrix} \\\
-\sum_{l=1}^L \eta_l 
+\end{bmatrix} \implies \sum_{l=1}^L \eta_l 
 h_l(y_{t-1},y_t,x_{1:T}) = \eta^T H
 $$
 
@@ -518,7 +517,7 @@ p(Y|X) &= \frac{1}{z(X,\lambda,\eta)}\exp\left( \sum_{t=1}^T \left[ \lambda^TG +
   \sum_{t=1}^T h_L(y_{t-1},y_t,x_{1:T})
 \end{bmatrix}=M(X,Y) \\\
 &= \frac{1}{z(X,\theta)}\exp\left( \theta^T M \right) \\\
-&= \frac{1}{z(X,\theta)}\mathrm{e}^{ \lang\theta^T,M\rang }
+&= \frac{1}{z(X,\theta)}\mathrm{e}^{ \lang\theta^T,M(X,Y)\rang }
 \end{align*}
 $$
 
