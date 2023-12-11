@@ -320,7 +320,7 @@ flowchart LR
 
 </div>
 
-### PDF expression
+### Pdf modeling
 
 Recall that for a acyclic graph Markov random network(MRF) we have the pdf by [factorization](https://tirmisula.github.io/posts/probabilistic-graphical-model/#factorization-of-mrf):
 
@@ -434,7 +434,7 @@ g_k(y_t,x_{1:T})+\sum_{l=1}^L \eta_l h_l(y_{t-1},y_t,x_{1:T}) \right] \right) \\
 z=\sum_{y_1\cdots y_T}\prod_{i=1}^K \psi(y_{1:T},x_{1:T},\lambda_{1:K},\eta_{1:L})=z(x_{1:T},\lambda_{1:K},\eta_{1:L})
 $$
 
-### PDF expression vectorization
+### Pdf expression vectorization
 
 $$
 \text{Let } \lambda= \begin{bmatrix}
@@ -518,6 +518,117 @@ p(Y|X) &= \frac{1}{z(X,\lambda,\eta)}\exp\left( \sum_{t=1}^T \left[ \lambda^TG +
 \end{bmatrix}=M(X,Y) \\\
 &= \frac{1}{z(X,\theta)}\exp\left( \theta^T M \right) \\\
 &= \frac{1}{z(X,\theta)}\mathrm{e}^{ \lang\theta^T,M(X,Y)\rang }
+\end{align*}
+$$
+
+## Problem solving in CRF
+### Problems overview
+Given a dataset with N samples:
+
+$$
+\lbrace x^{(i)},y^{(i)} \rbrace, \space i=1\cdots N \\\
+\text{$x^{(i)},y^{(i)}$ are $T$ dimensional}
+$$
+
+We have following problems to solve:
+
+$$
+\begin{cases}
+\text{Learning: } \hat{\theta} = \argmax_{\theta} \prod_{i=1}^N p(y^{(i)}| x^{(i)},\theta) \\\
+\text{Inference: } \begin{cases}
+  \text{marginal: } p(y_t|x),t\in[1,T] \\\
+  \text{conditional: generative model(\textbf{unrelated})}  \\\
+  \text{MAP(decoding): } \hat{y} = \argmax_{y_1\cdots y_T} p(y|x)
+\end{cases}
+\end{cases}
+$$
+
+### Solve marginal pdf
+
+{{< math.inline >}}
+<p>
+From last section we know \( p(Y|X) \) can be expressed with potential functions:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+p(Y=y|X=x) &= \frac{1}{z} \prod_{t=1}^T \psi_t(y_{t-1},y_t,x_{1:T})
+\end{align*}
+$$
+
+So the marginal pdf is:
+
+$$
+\begin{align*}
+p(y_k|x) &= \sum_{y_1\cdots y_T\setminus y_k} p(Y=y|X=x) \\\
+&= \sum_{y_1\cdots y_T\setminus y_k} \frac{1}{z} \prod_{t=1}^T \psi_t(y_{t-1},y_t,x_{1:T})
+\end{align*}
+$$
+
+The computation complexity is:
+
+$$
+O(|V|^T \cdot T) = |V|\times |V|\cdots\times |V|\times T \\\
+y_j \in V, j\in[1,T], V \text{ is vocabulary}
+$$
+
+We can use [variable elinimation](https://tirmisula.github.io/posts/probabilistic-graphical-model/#variable-elimination) method to reduce complexity:
+
+$$
+\begin{align*}
+p(y_k|x) &= \sum_{y_1\cdots y_T\setminus y_k} \frac{1}{z} \prod_{t=1}^T \psi_t(y_{t-1},y_t,x_{1:T}) \\\
+&= \sum_{y_1\cdots y_{k-1}} \frac{1}{z} \prod_{t=1}^T \psi_t(y_{t-1},y_t,x_{1:T}) + \sum_{y_{k+1}\cdots y_{T}} \frac{1}{z} \prod_{t=1}^T \psi_t(y_{t-1},y_t,x_{1:T}) \\\
+&= \frac{1}{z}(\Delta_{left}+\Delta_{right})
+\end{align*}
+$$
+
+For the left integration part:
+
+$$
+\begin{align*}
+\Delta_{left} &= \sum_{y_1\cdots y_{k-1}} \prod_{t=1}^k \psi_t(y_{t-1},y_t,x_{1:T}) \\\
+&= \sum_{y_1\cdots y_{k-1}} \psi_1(y_0,y_1,x_{1:T})\psi_2(y_1,y_2,x_{1:T})\cdots \psi_{k-1}(y_{k-2},y_{k-1},x_{1:T})\psi_{k}(y_{k-1},y_{k},x_{1:T}) \\\
+&= \sum_{y_{k-1}}\psi_k(y_{k-1},y_k,x_{1:T})\cdots\sum_{y_1}\psi_2(y_1,y_2,x_{1:T})\sum_{y_0}\psi_1(y_0,y_1,x_{1:T}) \\\
+&= \alpha_k(y_k)
+\end{align*} \\\
+\dArr
+$$
+
+$$
+\begin{align*}
+\alpha_k(y_k) &= \sum_{y_{k-1}}\psi_k(y_{k-1},y_k,x_{1:T})\cdots\sum_{y_1}\psi_2(y_1,y_2,x_{1:T})\sum_{y_0}\psi_1(y_0,y_1,x_{1:T}) \\\
+\alpha_{k-1}(y_{k-1}) &= \sum_{y_{k-2}}\psi_{k-1}(y_{k-2},y_{k-1},x_{1:T})\cdots\sum_{y_1}\psi_2(y_1,y_2,x_{1:T})\sum_{y_0}\psi_1(y_0,y_1,x_{1:T}) \\\
+\therefore\alpha_k(y_k) &= \sum_{y_{k-1}}\psi_k(y_{k-1},y_k,x_{1:T}) \alpha_{k-1}(y_{k-1})
+\end{align*}
+$$
+
+For the right integration part:
+
+$$
+\begin{align*}
+\Delta_{right} &= \sum_{y_{k+1}\cdots y_{T}} \frac{1}{z} \prod_{t=1}^T \psi_t(y_{t-1},y_t,x_{1:T}) \\\
+&= \sum_{y_{k+1}\cdots y_{T}} \psi_{k+1}(y_{k},y_{k+1},x_{1:T})\psi_{k+2}(y_{k+1},y_{k+2},x_{1:T})\cdots\psi_{T}(y_{T-1},y_{T},x_{1:T}) \\\
+&= \sum_{y_{k+1}}\psi_{k+1}(y_{k},y_{k+1},x_{1:T})\cdots\sum_{y_{T-1}}\psi_{T-1}(y_{T-2},y_{T-1},x_{1:T})\sum_{y_T}\psi_T(y_{T-1},y_T,x_{1:T}) \\\
+&= \beta_k(y_k)
+\end{align*} \\\
+\dArr
+$$
+
+$$
+\begin{align*}
+\beta_k(y_k) &= \sum_{y_{k+1}}\psi_{k+1}(y_{k},y_{k+1},x_{1:T})\cdots\sum_{y_{T-1}}\psi_{T-1}(y_{T-2},y_{T-1},x_{1:T})\sum_{y_T}\psi_T(y_{T-1},y_T,x_{1:T}) \\\
+\beta_{k+1}(y_{k+1}) &= \sum_{y_{k+2}}\psi_{k+2}(y_{k+1},y_{k+2},x_{1:T})\cdots\sum_{y_{T-1}}\psi_{T-1}(y_{T-2},y_{T-1},x_{1:T})\sum_{y_T}\psi_T(y_{T-1},y_T,x_{1:T}) \\\
+\therefore\beta_k(y_k) &= \sum_{y_{k+1}}\psi_{k+1}(y_{k},y_{k+1},x_{1:T}) \beta_{k+1}(y_{k+1})
+\end{align*}
+$$
+
+Then we can conclude for marginal pdf:
+
+$$
+\begin{align*}
+p(y_k|x) &= \frac{1}{z}(\Delta_{left}+\Delta_{right}) \\\
+&= \frac{1}{z} \alpha_k(y_k)\beta_k(y_k)
 \end{align*}
 $$
 
