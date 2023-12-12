@@ -578,8 +578,9 @@ We can use [variable elinimation](https://tirmisula.github.io/posts/probabilisti
 $$
 \begin{align*}
 p(y_k|x) &= \sum_{y_1\cdots y_T\setminus y_k} \frac{1}{z} \prod_{t=1}^T \psi_t(y_{t-1},y_t,x_{1:T}) \\\
-&= \sum_{y_1\cdots y_{k-1}} \frac{1}{z} \prod_{t=1}^T \psi_t(y_{t-1},y_t,x_{1:T}) + \sum_{y_{k+1}\cdots y_{T}} \frac{1}{z} \prod_{t=1}^T \psi_t(y_{t-1},y_t,x_{1:T}) \\\
-&= \frac{1}{z}(\Delta_{left}+\Delta_{right})
+&= \sum_{y_1\cdots y_T\setminus y_k} \frac{1}{z} \prod_{t=1}^k \psi_t(y_{t-1},y_t,x_{1:T}) \prod_{t=k+1}^T \psi_t(y_{t-1},y_t,x_{1:T}) \\\
+&= \frac{1}{z} \sum_{y_1\cdots y_{k-1}} \prod_{t=1}^k \psi_t(y_{t-1},y_t,x_{1:T})  \sum_{y_{k+1}\cdots y_{T}} \prod_{t=k+1}^T \psi_t(y_{t-1},y_t,x_{1:T}) \\\
+&= \frac{1}{z}(\Delta_{left}\cdot\Delta_{right})
 \end{align*}
 $$
 
@@ -607,7 +608,7 @@ For the right integration part:
 
 $$
 \begin{align*}
-\Delta_{right} &= \sum_{y_{k+1}\cdots y_{T}} \frac{1}{z} \prod_{t=1}^T \psi_t(y_{t-1},y_t,x_{1:T}) \\\
+\Delta_{right} &= \sum_{y_{k+1}\cdots y_{T}} \frac{1}{z} \prod_{t=k+1}^T \psi_t(y_{t-1},y_t,x_{1:T}) \\\
 &= \sum_{y_{k+1}\cdots y_{T}} \psi_{k+1}(y_{k},y_{k+1},x_{1:T})\psi_{k+2}(y_{k+1},y_{k+2},x_{1:T})\cdots\psi_{T}(y_{T-1},y_{T},x_{1:T}) \\\
 &= \sum_{y_{k+1}}\psi_{k+1}(y_{k},y_{k+1},x_{1:T})\cdots\sum_{y_{T-1}}\psi_{T-1}(y_{T-2},y_{T-1},x_{1:T})\sum_{y_T}\psi_T(y_{T-1},y_T,x_{1:T}) \\\
 &= \beta_k(y_k)
@@ -633,7 +634,7 @@ p(y_k|x) &= \frac{1}{z}(\Delta_{left}+\Delta_{right}) \\\
 $$
 
 ### Parameter learning
-
+#### object function
 $$
 \begin{align*}
 \hat{\theta} &= \argmax_{\theta} \prod_{i=1}^N p(y^{(i)}| x^{(i)},\theta) \\\
@@ -652,6 +653,7 @@ G(y_t^{(i)},x_{1:T}^{(i)}), H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}): \text{suff
 \end{cases}
 $$
 
+#### learning eta
 {{< math.inline >}}
 <p>
 \( \eta \) learning:
@@ -680,10 +682,10 @@ $$
 $$
 \begin{align*}
 \nabla_{\eta}\log z(x_{1:T}^{(i)},\lambda,\eta) &= \frac{1}{N}\sum_{i=1}^N \sum_{t=1}^T H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \\\
-&= \sum_{y_1\cdots y_T} p(y_{1:T}|x_{1:T}^{(i)}) \sum_{t=1}^TH(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \\\
-&= \sum_{t=1}^T \sum_{y_1\cdots y_T} p(y_{1:T}|x_{1:T}^{(i)}) H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \\\
-&= \sum_{t=1}^T \sum_{y_{t-1}y_t}\left( \sum_{y_1\cdots y_{t-2}y_{t+1}\cdots y_T} p(y_{1:T}|x_{1:T}^{(i)}) H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right) \\\
-&= \sum_{t=1}^T \sum_{y_{t-1}y_t}\left( p(y_{t-1},y_t|x_{1:T}^{(i)}) H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right)
+&= \sum_{y_1\cdots y_T} p(y_{1:T}|x_{1:T}^{(i)}) \sum_{t=1}^TH(y_{t-1},y_t,x_{1:T}^{(i)}) \\\
+&= \sum_{t=1}^T \sum_{y_1\cdots y_T} p(y_{1:T}|x_{1:T}^{(i)}) H(y_{t-1},y_t,x_{1:T}^{(i)}) \\\
+&= \sum_{t=1}^T \sum_{y_{t-1}y_t}\left( \sum_{y_1\cdots y_{t-2}y_{t+1}\cdots y_T} p(y_{1:T}|x_{1:T}^{(i)}) H(y_{t-1},y_t,x_{1:T}^{(i)}) \right) \\\
+&= \sum_{t=1}^T \sum_{y_{t-1}y_t}\left( p(y_{t-1},y_t|x_{1:T}^{(i)}) H(y_{t-1},y_t,x_{1:T}^{(i)}) \right)
 \end{align*} \\\
 \dArr
 $$
@@ -692,10 +694,30 @@ $$
 \begin{align*}
 \because\text{$p(y_{k-1},y_k|x_{1:T}^{(i)})$} &\implies \text{a marginal pdf} \\\
 \therefore p(y_{k-1},y_k|x_{1:T}^{(i)}) &= \sum_{y_1\cdots y_T\setminus y_{k-1}y_k} \frac{1}{z} \prod_{t=1}^T \psi_t(y_{t-1},y_t,x_{1:T}) \\\
-&= \sum_{y_1\cdots y_{k-2}} \frac{1}{z} \prod_{t=1}^T \psi_t(y_{t-1},y_t,x_{1:T}) + \sum_{y_{k+1}\cdots y_{T}} \frac{1}{z} \prod_{t=1}^T \psi_t(y_{t-1},y_t,x_{1:T}) \\\
-&= \frac{1}{z}(\alpha_{k-1}(y_{k-1})+\beta_k(y_k))
+&= \sum_{y_1\cdots y_T\setminus y_{k-1}y_k} \frac{1}{z} \prod_{t=1}^{k-1} \psi_t(y_{t-1},y_t,x_{1:T}) \psi_k(y_{k-1},y_k,x_{1:T}) \prod_{t=k+1}^T \psi_t(y_{t-1},y_t,x_{1:T}) \\\
+&= \frac{1}{z} \left(\sum_{y_1\cdots y_{k-2}} \prod_{t=1}^{k-1} \psi_t(y_{t-1},y_t,x_{1:T})\right)
+ \psi_t(y_{t-1},y_t,x_{1:T})
+ \left( \sum_{y_{k+1}\cdots y_{T}} \prod_{t=k+1}^T \psi_t(y_{t-1},y_t,x_{1:T})\right) \\\
+&= \frac{1}{z}\alpha_{k-1}(y_{k-1})\psi_t(y_{t-1},y_t,x_{1:T})\beta_k(y_k)
+\end{align*} \\\
+\dArr
+$$
+
+$$
+\begin{align*}
+\nabla_{\eta}\log z(x_{1:T}^{(i)},\lambda,\eta) &= \sum_{t=1}^T \sum_{y_{t-1}y_t}\left( \frac{1}{z}\alpha_{k-1}(y_{k-1})\psi_t(y_{t-1},y_t,x_{1:T})\beta_k(y_k) H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right)
+\end{align*} \\\
+\dArr
+$$
+
+$$
+\begin{align*}
+\nabla_{\eta} \mathcal{L} &= \sum_{i=1}^N \left[ -\nabla_{\eta}\log z(x_{1:T}^{(i)},\lambda,\eta) + \sum_{t=1}^T H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right] \\\
+&= \sum_{i=1}^N \left[ \sum_{t=1}^T H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) -  \sum_{y_{t-1}y_t} \frac{1}{z(x^{(i)},\eta,\lambda)}\alpha_{k-1}(y_{k-1})\psi_t(y_{t-1},y_t,x_{1:T}^{(i)})\beta_k(y_k) H(y_{t-1},y_t,x_{1:T}^{(i)}) \right] \\\
 \end{align*}
 $$
+
+#### learning lambda
 
 ## Summary
 
