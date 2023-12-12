@@ -382,7 +382,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Assuming \( f(y_{t-1},y_t,x_{1:T}) \) is splitted into three parts:
+Function \( f(y_{t-1},y_t,x_{1:T}) \) is assumed to be splitted into three parts:
 </p>
 {{</ math.inline >}}
 
@@ -434,7 +434,7 @@ g_k(y_t,x_{1:T})+\sum_{l=1}^L \eta_l h_l(y_{t-1},y_t,x_{1:T}) \right] \right) \\
 z=\sum_{y_1\cdots y_T}\prod_{i=1}^K \psi(y_{1:T},x_{1:T},\lambda_{1:K},\eta_{1:L})=z(x_{1:T},\lambda_{1:K},\eta_{1:L})
 $$
 
-### Pdf expression vectorization
+### Vectorization of pdf expression 
 
 $$
 \text{Let } \lambda= \begin{bmatrix}
@@ -521,7 +521,7 @@ p(Y|X) &= \frac{1}{z(X,\lambda,\eta)}\exp\left( \sum_{t=1}^T \left[ \lambda^TG +
 \end{align*}
 $$
 
-## Problem solving in CRF
+## CRF Problem solving
 ### Problems overview
 Given a dataset with N samples:
 
@@ -543,7 +543,7 @@ $$
 \end{cases}
 $$
 
-### Solve marginal pdf
+### Marginal pdf calculation
 
 {{< math.inline >}}
 <p>
@@ -629,6 +629,71 @@ $$
 \begin{align*}
 p(y_k|x) &= \frac{1}{z}(\Delta_{left}+\Delta_{right}) \\\
 &= \frac{1}{z} \alpha_k(y_k)\beta_k(y_k)
+\end{align*}
+$$
+
+### Parameter learning
+
+$$
+\begin{align*}
+\hat{\theta} &= \argmax_{\theta} \prod_{i=1}^N p(y^{(i)}| x^{(i)},\theta) \\\
+&= \argmax_{\lambda,\eta}\sum_{i=1}^N \log p(y^{(i)}| x^{(i)},\theta) \\\
+&\text{By vectorizing $p(y^{(i)}| x^{(i)},\theta)$} \\\
+&= \argmax_{\lambda,\eta}\sum_{i=1}^N \log \frac{1}{z(x_{1:T}^{(i)},\lambda,\eta)}\exp\left( \sum_{t=1}^T \left[ \lambda^TG(y_t^{(i)},x_{1:T}^{(i)}) + \eta^TH(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right] \right) \\\
+&= \argmax_{\lambda,\eta}\sum_{i=1}^N \log \frac{1}{z(x_{1:T}^{(i)},\lambda,\eta)}\exp\left( \lambda^T\sum_{t=1}^T \left[ G(y_t^{(i)},x_{1:T}^{(i)}) \right] + \eta^T\sum_{t=1}^T\left[ H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right] \right) \\\
+&= \argmax_{\lambda,\eta}\sum_{i=1}^N -\log z(x_{1:T}^{(i)},\lambda,\eta) + \lambda^T\sum_{t=1}^T \left[ G(y_t^{(i)},x_{1:T}^{(i)}) \right] + \eta^T\sum_{t=1}^T\left[ H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right] \\\
+&= \argmax_{\lambda,\eta}\sum_{i=1}^N \mathcal{L}(x^{(i)}, y^{(i)}, \lambda, \eta)
+\end{align*} \\\
+\dArr \\\
+\mathcal{L}\in\text{ exponential family distribution}\begin{cases}
+\log z(x_{1:T}^{(i)},\lambda,\eta) : \text{log-partition function} \\\
+\lambda^T, \eta^T: \text{parameters} \\\
+G(y_t^{(i)},x_{1:T}^{(i)}), H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}): \text{sufficient statistics}
+\end{cases}
+$$
+
+{{< math.inline >}}
+<p>
+\( \eta \) learning:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\nabla_{\eta} \mathcal{L} &= \sum_{i=1}^N \left[ -\nabla_{\eta}\log z(x_{1:T}^{(i)},\lambda,\eta) + \sum_{t=1}^T H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right]
+\end{align*}
+$$
+
+From [exponential family distribution we have conclusion](https://tirmisula.github.io/posts/exponential-family-distribution/#mle-and-sufficient-statistic) that the derivative of log-partition funciton equals to the expectation of sufficient statistics in MLE:
+
+$$
+\begin{align*}
+\frac{\partial}{\partial \theta} \log \left(h(x_i)\exp(\theta^T\phi(x_i)-A(\theta)) \right) &= 0 \\\
+\frac{\partial}{\partial \theta} \sum_{i=1}^N \log \left(h(x_i)\right) + \theta^T\phi(x_i)-A(\theta) &= 0 \\\
+\sum_{i=1}^N  \left[ \phi(x_i)-A^{'}(\theta) \right] &= 0 \\\
+\frac{1}{N}\sum_{i=1}^N \phi(x_i) &= A^{'}(\theta_{MLE}) \\\
+\mathbb{E}_{x_i\sim p(x_i)}[\phi(x_i)] &= A^{'}(\theta_{MLE})
+\end{align*} \\\
+\dArr
+$$
+
+$$
+\begin{align*}
+\nabla_{\eta}\log z(x_{1:T}^{(i)},\lambda,\eta) &= \frac{1}{N}\sum_{i=1}^N \sum_{t=1}^T H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \\\
+&= \sum_{y_1\cdots y_T} p(y_{1:T}|x_{1:T}^{(i)}) \sum_{t=1}^TH(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \\\
+&= \sum_{t=1}^T \sum_{y_1\cdots y_T} p(y_{1:T}|x_{1:T}^{(i)}) H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \\\
+&= \sum_{t=1}^T \sum_{y_{t-1}y_t}\left( \sum_{y_1\cdots y_{t-2}y_{t+1}\cdots y_T} p(y_{1:T}|x_{1:T}^{(i)}) H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right) \\\
+&= \sum_{t=1}^T \sum_{y_{t-1}y_t}\left( p(y_{t-1},y_t|x_{1:T}^{(i)}) H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right)
+\end{align*} \\\
+\dArr
+$$
+
+$$
+\begin{align*}
+\because\text{$p(y_{k-1},y_k|x_{1:T}^{(i)})$} &\implies \text{a marginal pdf} \\\
+\therefore p(y_{k-1},y_k|x_{1:T}^{(i)}) &= \sum_{y_1\cdots y_T\setminus y_{k-1}y_k} \frac{1}{z} \prod_{t=1}^T \psi_t(y_{t-1},y_t,x_{1:T}) \\\
+&= \sum_{y_1\cdots y_{k-2}} \frac{1}{z} \prod_{t=1}^T \psi_t(y_{t-1},y_t,x_{1:T}) + \sum_{y_{k+1}\cdots y_{T}} \frac{1}{z} \prod_{t=1}^T \psi_t(y_{t-1},y_t,x_{1:T}) \\\
+&= \frac{1}{z}(\alpha_{k-1}(y_{k-1})+\beta_k(y_k))
 \end{align*}
 $$
 
