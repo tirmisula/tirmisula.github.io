@@ -646,7 +646,7 @@ $$
 &= \argmax_{\lambda,\eta}\sum_{i=1}^N \mathcal{L}(x^{(i)}, y^{(i)}, \lambda, \eta)
 \end{align*} \\\
 \dArr \\\
-\mathcal{L}\in\text{exponential family distribution}\begin{cases}
+\text{exponential family distribution}\begin{cases}
 \log z(x_{1:T}^{(i)},\lambda,\eta) &: \text{log-partition function} \\\
 \lambda^T, \eta^T &: \text{parameters} \\\
 \sum_{t=1}^TG(y_t^{(i)},x_{1:T}^{(i)}), \sum_{t=1}^TH(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) &: \text{sufficient statistics}
@@ -685,12 +685,13 @@ $$
 
 {{< math.inline >}}
 <p>
-Since \( \log z(x_{1:T}^{(i)},\lambda,\eta) \) is log-partition function, we have:
+Since \( \log z(x_{1:T}^{(i)},\lambda,\eta) \) is log-partition function of pdf \( -\log z(x_{1:T}^{(i)},\lambda,\eta) + \lambda^T\sum_{t=1}^T \eta^T\sum_{t=1}^T H(y_{t-1},y_t,x_{1:T}^{(i)}) \), we have:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
+\text{Let }p(y_{1:T}|x_{1:T}^{(i)}) &= \exp \left(\eta^T\sum_{t=1}^T H(y_{t-1},y_t,x_{1:T}^{(i)})-\log z(x_{1:T}^{(i)},\lambda,\eta)\right) \\\
 \nabla_{\eta}\log z(x_{1:T}^{(i)},\lambda,\eta) &= E_{y_{1:T}\sim p(y_{1:T}|x_{1:T}^{(i)})}\left[ \sum_{t=1}^TH(y_{t-1},y_t,x_{1:T}^{(i)}) \right] \\\
 &= \sum_{y_1\cdots y_T} p(y_{1:T}|x_{1:T}^{(i)}) \sum_{t=1}^TH(y_{t-1},y_t,x_{1:T}^{(i)}) \\\
 &= \sum_{t=1}^T \sum_{y_1\cdots y_T} p(y_{1:T}|x_{1:T}^{(i)}) H(y_{t-1},y_t,x_{1:T}^{(i)}) \\\
@@ -715,7 +716,7 @@ $$
 
 $$
 \begin{align*}
-\nabla_{\eta}\log z(x_{1:T}^{(i)},\lambda,\eta) &= \sum_{t=1}^T \sum_{y_{t-1}y_t}\left( \frac{1}{z}\alpha_{t-1}(y_{t-1})\psi_t(y_{t-1},y_t,x_{1:T})\beta_t(y_t) H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right)
+\nabla_{\eta}\log z(x_{1:T}^{(i)},\lambda,\eta) &= \sum_{t=1}^T \sum_{y_{t-1}y_t}\left( \frac{1}{z}\alpha_{t-1}(y_{t-1})\psi_t(y_{t-1},y_t,x_{1:T})\beta_t(y_t) H(y_{t-1},y_t,x_{1:T}^{(i)}) \right)
 \end{align*} \\\
 \dArr
 $$
@@ -742,9 +743,21 @@ $$
 &= \sum_{t=1}^T \sum_{y_t}\left( p(y_t|x_{1:T}^{(i)}) G(y_t,x_{1:T}^{(i)}) \right) \\\
 p(y_t|x_{1:T}^{(i)}) &= \frac{1}{z}\alpha_{t}(y_{t})\beta_t(y_t) \\\
 \nabla_{\lambda}\log z(x_{1:T}^{(i)},\lambda,\eta) &= \sum_{t=1}^T \sum_{y_t}\left( \frac{1}{z}\alpha_{t}(y_{t})\beta_t(y_t) G(y_t,x_{1:T}^{(i)}) \right) \\\
-\nabla_{\lambda} \mathcal{L} &= \sum_{i=1}^N \left[ \sum_{t=1}^T G(y_t^{(i)},x_{1:T}^{(i)}) - \sum_{y_t}\left( \frac{1}{z}\alpha_{t}(y_{t})\beta_t(y_t) G(y_t,x_{1:T}^{(i)}) \right) \right]
+\nabla_{\lambda} \mathcal{L} &= \sum_{i=1}^N \left[ \sum_{t=1}^T G(y_t^{(i)},x_{1:T}^{(i)}) - \sum_{y_t}\left( \frac{1}{z(x^{(i)},\eta,\lambda)}\alpha_{t}(y_{t})\beta_t(y_t) G(y_t,x_{1:T}^{(i)}) \right) \right]
 \end{cases}
 $$
+
+#### gradient descent
+
+$$
+\begin{cases}
+\eta^{(t+1)} &= \eta^{(t)} + \alpha\cdot\nabla_{\eta}\mathcal{L} \\\
+\lambda^{(t+1)} &= \lambda^{(t)} + \alpha\cdot\nabla_{\lambda}\mathcal{L}
+\end{cases} \\\
+\text{$\alpha$ is learning rate}
+$$
+
+### Decoding
 
 ## Summary
 
