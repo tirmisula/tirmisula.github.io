@@ -642,14 +642,14 @@ $$
 &\text{By vectorizing $p(y^{(i)}| x^{(i)},\theta)$} \\\
 &= \argmax_{\lambda,\eta}\sum_{i=1}^N \log \frac{1}{z(x_{1:T}^{(i)},\lambda,\eta)}\exp\left( \sum_{t=1}^T \left[ \lambda^TG(y_t^{(i)},x_{1:T}^{(i)}) + \eta^TH(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right] \right) \\\
 &= \argmax_{\lambda,\eta}\sum_{i=1}^N \log \frac{1}{z(x_{1:T}^{(i)},\lambda,\eta)}\exp\left( \lambda^T\sum_{t=1}^T \left[ G(y_t^{(i)},x_{1:T}^{(i)}) \right] + \eta^T\sum_{t=1}^T\left[ H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right] \right) \\\
-&= \argmax_{\lambda,\eta}\sum_{i=1}^N -\log z(x_{1:T}^{(i)},\lambda,\eta) + \lambda^T\sum_{t=1}^T \left[ G(y_t^{(i)},x_{1:T}^{(i)}) \right] + \eta^T\sum_{t=1}^T\left[ H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right] \\\
+&= \argmax_{\lambda,\eta}\sum_{i=1}^N -\log z(x_{1:T}^{(i)},\lambda,\eta) + \lambda^T\sum_{t=1}^T G(y_t^{(i)},x_{1:T}^{(i)}) + \eta^T\sum_{t=1}^T H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \\\
 &= \argmax_{\lambda,\eta}\sum_{i=1}^N \mathcal{L}(x^{(i)}, y^{(i)}, \lambda, \eta)
 \end{align*} \\\
 \dArr \\\
-\mathcal{L}\in\text{ exponential family distribution}\begin{cases}
-\log z(x_{1:T}^{(i)},\lambda,\eta) : \text{log-partition function} \\\
-\lambda^T, \eta^T: \text{parameters} \\\
-G(y_t^{(i)},x_{1:T}^{(i)}), H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}): \text{sufficient statistics}
+\mathcal{L}\in\text{exponential family distribution}\begin{cases}
+\log z(x_{1:T}^{(i)},\lambda,\eta) &: \text{log-partition function} \\\
+\lambda^T, \eta^T &: \text{parameters} \\\
+\sum_{t=1}^TG(y_t^{(i)},x_{1:T}^{(i)}), \sum_{t=1}^TH(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) &: \text{sufficient statistics}
 \end{cases}
 $$
 
@@ -666,22 +666,32 @@ $$
 \end{align*}
 $$
 
-From [exponential family distribution we have conclusion](https://tirmisula.github.io/posts/exponential-family-distribution/#mle-and-sufficient-statistic) that the derivative of log-partition funciton equals to the expectation of sufficient statistics in MLE:
+For [exponential family distribution, we have conclusion](https://tirmisula.github.io/posts/exponential-family-distribution/#mle-and-sufficient-statistic) that the derivative of log-partition funciton equals to the expectation of sufficient statistics:
 
 $$
 \begin{align*}
-\frac{\partial}{\partial \theta} \log \left(h(x_i)\exp(\theta^T\phi(x_i)-A(\theta)) \right) &= 0 \\\
-\frac{\partial}{\partial \theta} \sum_{i=1}^N \log \left(h(x_i)\right) + \theta^T\phi(x_i)-A(\theta) &= 0 \\\
-\sum_{i=1}^N  \left[ \phi(x_i)-A^{'}(\theta) \right] &= 0 \\\
-\frac{1}{N}\sum_{i=1}^N \phi(x_i) &= A^{'}(\theta_{MLE}) \\\
-\mathbb{E}_{x_i\sim p(x_i)}[\phi(x_i)] &= A^{'}(\theta_{MLE})
-\end{align*} \\\
-\dArr
+1 &= \int p(x|\theta) \space dx \\\
+&= \int h(x)\exp(\theta^T\phi(x)-A(\theta)) \space dx \\\
+&= \int \frac{1}{\exp(A(\theta))}h(x)\exp(\theta^T\phi(x)) \space dx \\\
+\exp(A(\theta)) &= \int h(x)\exp(\theta^T\phi(x)) \space dx \\\
+\frac{\partial}{\partial \theta}\exp(A(\theta)) &= \frac{\partial}{\partial \theta}\int h(x)\exp(\theta^T\phi(x)) \space dx \\\
+\exp(A(\theta))A^{'}(\theta) &= \int \frac{\partial}{\partial \theta}h(x)\exp(\theta^T\phi(x)) \space dx \\\
+A^{'}(\theta) &= \frac{1}{\exp(A(\theta))} \int h(x)\exp(\theta^T\phi(x))\phi(x) \space dx \\\
+&= \int h(x)\exp(\theta^T\phi(x)-A(\theta))\phi(x) \space dx \\\
+&= \int p(x|\theta)\phi(x) \space dx \\\
+&= E_{x\sim p(x|\theta)} \left[\phi(x)\right]
+\end{align*}
 $$
+
+{{< math.inline >}}
+<p>
+Since \( \log z(x_{1:T}^{(i)},\lambda,\eta) \) is log-partition function, we have:
+</p>
+{{</ math.inline >}}
 
 $$
 \begin{align*}
-\nabla_{\eta}\log z(x_{1:T}^{(i)},\lambda,\eta) &= \frac{1}{N}\sum_{i=1}^N \sum_{t=1}^T H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \\\
+\nabla_{\eta}\log z(x_{1:T}^{(i)},\lambda,\eta) &= E_{y_{1:T}\sim p(y_{1:T}|x_{1:T}^{(i)})}\left[ \sum_{t=1}^TH(y_{t-1},y_t,x_{1:T}^{(i)}) \right] \\\
 &= \sum_{y_1\cdots y_T} p(y_{1:T}|x_{1:T}^{(i)}) \sum_{t=1}^TH(y_{t-1},y_t,x_{1:T}^{(i)}) \\\
 &= \sum_{t=1}^T \sum_{y_1\cdots y_T} p(y_{1:T}|x_{1:T}^{(i)}) H(y_{t-1},y_t,x_{1:T}^{(i)}) \\\
 &= \sum_{t=1}^T \sum_{y_{t-1}y_t}\left( \sum_{y_1\cdots y_{t-2}y_{t+1}\cdots y_T} p(y_{1:T}|x_{1:T}^{(i)}) H(y_{t-1},y_t,x_{1:T}^{(i)}) \right) \\\
@@ -705,7 +715,7 @@ $$
 
 $$
 \begin{align*}
-\nabla_{\eta}\log z(x_{1:T}^{(i)},\lambda,\eta) &= \sum_{t=1}^T \sum_{y_{t-1}y_t}\left( \frac{1}{z}\alpha_{k-1}(y_{k-1})\psi_t(y_{t-1},y_t,x_{1:T})\beta_k(y_k) H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right)
+\nabla_{\eta}\log z(x_{1:T}^{(i)},\lambda,\eta) &= \sum_{t=1}^T \sum_{y_{t-1}y_t}\left( \frac{1}{z}\alpha_{t-1}(y_{t-1})\psi_t(y_{t-1},y_t,x_{1:T})\beta_t(y_t) H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right)
 \end{align*} \\\
 \dArr
 $$
@@ -713,11 +723,28 @@ $$
 $$
 \begin{align*}
 \nabla_{\eta} \mathcal{L} &= \sum_{i=1}^N \left[ -\nabla_{\eta}\log z(x_{1:T}^{(i)},\lambda,\eta) + \sum_{t=1}^T H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) \right] \\\
-&= \sum_{i=1}^N \left[ \sum_{t=1}^T H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) -  \sum_{y_{t-1}y_t} \frac{1}{z(x^{(i)},\eta,\lambda)}\alpha_{k-1}(y_{k-1})\psi_t(y_{t-1},y_t,x_{1:T}^{(i)})\beta_k(y_k) H(y_{t-1},y_t,x_{1:T}^{(i)}) \right] \\\
+&= \sum_{i=1}^N \left[ \sum_{t=1}^T H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) -  \sum_{y_{t-1}y_t} \frac{1}{z(x^{(i)},\eta,\lambda)}\alpha_{t-1}(y_{t-1})\psi_t(y_{t-1},y_t,x_{1:T}^{(i)})\beta_t(y_t) H(y_{t-1},y_t,x_{1:T}^{(i)}) \right] \\\
 \end{align*}
 $$
 
 #### learning lambda
+
+{{< math.inline >}}
+<p>
+We can derive the same result for \( \lambda \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{cases}
+\nabla_{\lambda} \mathcal{L} &= \sum_{i=1}^N \left[ -\nabla_{\eta}\log z(x_{1:T}^{(i)},\lambda,\eta) + \lambda^T\sum_{t=1}^T G(y_t^{(i)},x_{1:T}^{(i)}) \right] \\\
+\nabla_{\lambda}\log z(x_{1:T}^{(i)},\lambda,\eta) &= E_{y_{1:T}\sim p(y_{1:T}|x_{1:T}^{(i)})}\left[ \sum_{t=1}^TG(y_t,x_{1:T}^{(i)}) \right] \\\
+&= \sum_{t=1}^T \sum_{y_t}\left( p(y_t|x_{1:T}^{(i)}) G(y_t,x_{1:T}^{(i)}) \right) \\\
+p(y_t|x_{1:T}^{(i)}) &= \frac{1}{z}\alpha_{t}(y_{t})\beta_t(y_t) \\\
+\nabla_{\lambda}\log z(x_{1:T}^{(i)},\lambda,\eta) &= \sum_{t=1}^T \sum_{y_t}\left( \frac{1}{z}\alpha_{t}(y_{t})\beta_t(y_t) G(y_t,x_{1:T}^{(i)}) \right) \\\
+\nabla_{\lambda} \mathcal{L} &= \sum_{i=1}^N \left[ \sum_{t=1}^T G(y_t^{(i)},x_{1:T}^{(i)}) - \sum_{y_t}\left( \frac{1}{z}\alpha_{t}(y_{t})\beta_t(y_t) G(y_t,x_{1:T}^{(i)}) \right) \right]
+\end{cases}
+$$
 
 ## Summary
 
