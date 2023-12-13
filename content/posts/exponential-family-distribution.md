@@ -309,7 +309,20 @@ $$
 
 {{< math.inline >}}
 <p>
-The conclusion is when calculating MLE, we only need to compute <mark>sufficient statistic</mark> \(\phi(x_I)\) ignoring the original data samples.
+It gives us idea when calculating MLE, we only need to calculate <mark>sufficient statistic</mark> \(\phi(x_I)\) rather than directly calculating \( x_i \).
+</p>
+{{</ math.inline >}}
+
+$$
+\frac{1}{N}\sum_{i=1}^N \phi(x_i) = A^{'}(\theta_{MLE}) = E_{x\sim p(x|\theta_{MLE})} \left[\phi(x)\right] \\\
+\dArr \\\
+
+\text{$E_{x_i\in\space\hat{p}(x)}[\phi(x_i)] ≜ E_{x\sim p(x|\theta_{MLE})}[\phi(x)]$}
+$$
+
+{{< math.inline >}}
+<p>
+It implies that deriving \( \theta_{MLE} \) from empirical dsitirbution \( x_i \) is equivalent to finding a distirbution \( p(x|\theta_{MLE}) \) that matches empirical distirbution \( \hat{p}(x_i) \).
 </p>
 {{</ math.inline >}}
 

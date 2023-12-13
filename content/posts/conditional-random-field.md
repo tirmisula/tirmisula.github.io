@@ -666,7 +666,7 @@ $$
 \end{align*}
 $$
 
-For [exponential family distribution, we have conclusion](https://tirmisula.github.io/posts/exponential-family-distribution/#mle-and-sufficient-statistic) that the derivative of log-partition funciton equals to the expectation of sufficient statistics:
+For [exponential family distribution, we have conclusion](https://tirmisula.github.io/posts/exponential-family-distribution/#log-partition-function-and-sufficient-statistic) that the derivative of log-partition funciton equals to the expectation of sufficient statistics:
 
 $$
 \begin{align*}
