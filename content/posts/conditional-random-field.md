@@ -757,9 +757,46 @@ $$
 \text{$\alpha$ is learning rate}
 $$
 
-### Decoding
-
 ## Summary
+
+1. **CRF overview:** CRF is a determinant model modeling on p(Y|X) which relaxed the independence assumption of observations.
+
+2. **Features:** CRF uses an acyclic graph for states, which increases the entropy for state transitions due to global normalization, helping to resolve label bias issues.
+
+3. **CRF pdf**:
+
+$$
+\begin{cases}
+p(y_{1:T}|x_{1:T}) &= \frac{1}{z}\exp\left( \sum_{t=1}^T \left[ \sum_{k=1}^K \lambda_k 
+g_k(y_t,x_{1:T})+\sum_{l=1}^L \eta_l h_l(y_{t-1},y_t,x_{1:T}) \right] \right) \\\
+&= \frac{1}{z(X,\theta)}\exp\left( \theta^T 
+\begin{bmatrix}
+  \sum_{t=1}^TG \\\
+  \sum_{t=1}^TH
+\end{bmatrix} \right) \\\
+\theta&=(\lambda_1,\cdots,\lambda_K,\eta_1,\cdots,\eta_L) \\\
+z&=\sum_{y_1\cdots y_T}\prod_{i=1}^K \psi(y_{1:T},x_{1:T},\lambda_{1:K},\eta_{1:L})
+\end{cases}
+$$
+
+4. **CRF marginal pdf**:
+
+$$
+\begin{cases}
+p(y_k|x) &= \frac{1}{z} \alpha_k(y_k)\beta_k(y_k) \\\
+\alpha_k(y_k) &= \sum_{y_{k-1}}\psi_k(y_{k-1},y_k,x_{1:T}) \alpha_{k-1}(y_{k-1}) \\\
+\beta_k(y_k) &= \sum_{y_{k+1}}\psi_{k+1}(y_{k},y_{k+1},x_{1:T}) \beta_{k+1}(y_{k+1})
+\end{cases}
+$$
+
+5. **Parameter learning**:
+
+$$
+\begin{cases}
+\nabla_{\eta} \mathcal{L} &= \sum_{i=1}^N \left[ \sum_{t=1}^T H(y_{t-1}^{(i)},y_t^{(i)},x_{1:T}^{(i)}) -  \sum_{y_{t-1}y_t} \frac{1}{z(x^{(i)},\eta,\lambda)}\alpha_{t-1}(y_{t-1})\psi_t(y_{t-1},y_t,x_{1:T}^{(i)})\beta_t(y_t) H(y_{t-1},y_t,x_{1:T}^{(i)}) \right] \\\
+\nabla_{\lambda} \mathcal{L} &= \sum_{i=1}^N \left[ \sum_{t=1}^T G(y_t^{(i)},x_{1:T}^{(i)}) - \sum_{y_t}\left( \frac{1}{z(x^{(i)},\eta,\lambda)}\alpha_{t}(y_{t})\beta_t(y_t) G(y_t,x_{1:T}^{(i)}) \right) \right]
+\end{cases}
+$$
 
 <!-- If you found any mistakes, please contact me via email. -->
 
