@@ -119,7 +119,7 @@ $$
 We have marginal independence:
 
 $$
-x_i\perp x_j \iff \sigma_{ij}
+x_i\perp x_j \iff \sigma_{ij}=0
 $$
 
 However we want <b>conditional independence</b> in probalistic graphical model(PGM) for simplification, it can be achieved by precision matrix in Gaussian network:
@@ -127,7 +127,7 @@ However we want <b>conditional independence</b> in probalistic graphical model(P
 $$
 \text{conditional independence: } x_A\perp x_B|x_C  \\\
 \dArr \\\
-\text{Let }\Lambda = \Sigma^{-1} = (\lambda_{ij})_{p\times p} \text{, $\quad\Lambda$ is precision matrix} \\\
+\text{Let }\Lambda = \Sigma^{-1} = \lambda_{ij} \text{, $\quad\Lambda$ is precision matrix} \\\
 x_i\perp x_j | x\setminus\lbrace x_i,x_j \rbrace \iff \lambda_{ij}=0
 $$
 
@@ -194,7 +194,6 @@ For \( p(x_i|x_{pa(i)}) \), we can write it in GBN follow linear gaussian model:
 
 $$
 \text{Let $x_i$ has k parents $\in x_{pa(i)}$} \\\
-
 \begin{cases}
 x_{pa(i)} = (x_{pa(i)1},\cdots,x_{pa(i)k})^T \\\
 x_{pa(i)j} \sim \mathcal{N}(\mu_{ij}, \sigma_{ij}^2) \\\
@@ -289,11 +288,14 @@ $$ x_i|x_{pa(i)} \sim \mathcal{N}(w_i^Tx_{pa(i)} + \mu_i, \sigma_i^2) $$
 这里，(\sigma_i^2) 是噪声项 (\epsilon_i) 的方差。 -->
 
 ## Gaussian markov random field
-
+### Potential funciton and Pdf of GMRF
 Gaussian markov random field(GMRF) is a undirected graph, we use [MRF factorization theorem introduced before](https://tirmisula.github.io/posts/probabilistic-graphical-model/#formula-for-nodes-and-edges):
 
 $$
-p(x) = \frac{1}{z} \prod_{i=1}^p \underset{\text{node potential}}{\psi_i(x_i)} \prod_{i,j\in edge} \underset{\text{edge potential}}{\psi_{i,j}(x_i,x_j)}
+\begin{align*}
+p(x) &= \frac{1}{z} \prod_{i=1}^p \underset{\text{node potential}}{\psi_i(x_i)} \prod_{i,j\in edge} \underset{\text{edge potential}}{\psi_{i,j}(x_i,x_j)} \\\
+&= \frac{1}{z} \exp( -\sum_{i=1}^p E_i(x_{i})-\sum_{i,j\in edge}E_{i,j}(x_i,x_j)) \\\
+\end{align*}
 $$
 
 On the other hands, it is a multivariate gaussian distribution:
@@ -307,39 +309,83 @@ p(x) &= \frac{1}{(2\pi)^{\frac{p}{2}}|\Sigma|^{\frac{1}{2}}} \exp(-\frac{1}{2} (
 &= \exp( -\frac{1}{2} \left( x^T\Lambda x-2\mu^T\Lambda x+\mu^T\Lambda\mu \right) ) \\\
 &\propto \exp( -\frac{1}{2} x^T\Lambda x+\mu^T\Lambda x ) \\\
 &\because \Lambda^T=\Lambda \\\
-&= \exp( -\frac{1}{2} \underset{\text{quadratic form}}{x^T\Lambda x}+\underset{\text{linear form}}{(\Lambda\mu)^T x} )
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-Now consider it has relation with potential function. For \(\psi_i(x_i)\), it related to quadratic and linear form:
-</p>
-{{</ math.inline >}}
-
-$$
-\text{Let $\Lambda\mu = \begin{bmatrix}
+&= \exp( -\frac{1}{2} \underset{\text{quadratic form}} {x^T\Lambda x}+\underset{\text{linear form}}{(\Lambda\mu)^T x} ) \\\
+&\text{Let $\Lambda\mu = \begin{bmatrix}
 h_1 \\\
 \vdots \\\
 h_p
 \end{bmatrix}$ be the potential vector,}  \\\
-\begin{align*}
-\log \psi_i(x_i) \propto -\frac{1}{2} x_i^2\lambda_{ii} + h_ix_i
+&= \exp( -\frac{1}{2}\sum_{i=1}^p\sum_{j=1}^px_i\lambda_{ij}x_j+\sum_{i=1}^p h_ix_i )
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-For \(\psi_{i,j}(x_i,x_j)\), it related to quadratic form:
+Now we can say that GMRF's pdf has relation with GMRF's potential function:
 </p>
 {{</ math.inline >}}
 
 $$
+\exp( -\sum_{i=1}^p E_i(x_{i})-\sum_{i,j\in edge}E_{i,j}(x_i,x_j)) \triangleq \exp( -\frac{1}{2}\sum_{i=1}^p\sum_{j=1}^px_i\lambda_{ij}x_j+\sum_{i=1}^p h_ix_i ) \\\
+\dArr
+$$
+
+$$
 \begin{align*}
-\log \psi_{i,j}(x_i,x_j) &\propto -\frac{1}{2} (x_i\lambda_{ij}x_j+x_j\lambda_{ji}x_i) \\\
-&\because \lambda_{ij}=\lambda_{ji} \\\
-&= -\lambda_{ij}x_ix_j
+E_i(x_i) &\propto -\frac{1}{2} x_i^2\lambda_{ii} + h_ix_i \\\
+E_{i,j}(x_i,x_j) &\propto -\frac{1}{2} (x_i\lambda_{ij}x_j+x_j\lambda_{ji}x_i) = -\lambda_{ij}x_ix_j
 \end{align*}
+$$
+
+### Pairwise markov property in GMRF
+
+The precision matrix can be used for determine conditional independence:
+
+$$
+\lambda_{ij}=0 \implies \begin{cases}
+\text{$\psi_i$ and $\psi_j$ exist} \\\
+\text{$\psi_{i,j}$ not exist}
+\end{cases} \implies 
+\text{$x_i,x_j$ not connected} \implies 
+\text{$x_i\perp x_j|x\setminus \lbrace x_i,x_j\rbrace$}
+$$
+
+### Marginal pdf of GMRF
+
+We have the [conslusion for solving marginal pdf by joint pdf](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#solve-the-marginal-pdf):
+
+$$
+\begin{cases}
+x = \begin{bmatrix}
+    x_a \\\
+    x_b
+\end{bmatrix} \\\
+x \sim \mathcal{N}(\mu,\Sigma) \\\
+\mu = \begin{bmatrix}
+    \mu_a \\\
+    \mu_b
+\end{bmatrix} \\\
+\Sigma = \begin{bmatrix}
+    \Sigma_{aa} & \Sigma_{ab} \\\
+    \Sigma_{ba} & \Sigma_{bb}
+\end{bmatrix}
+\end{cases} \implies 
+\begin{cases}
+x_a \sim \mathcal{N}(\mu_a,\Sigma_{aa}) \\\
+x_b \sim \mathcal{N}(\mu_b,\Sigma_{bb})
+\end{cases}
+$$
+
+{{< math.inline >}}
+<p>
+Suppose we are solving \( p(x_i) \):
+</p>
+{{</ math.inline >}}
+
+$$
+x = \begin{bmatrix}x_i \\\
+ x\setminus{x_i}
+\end{bmatrix}
 $$
 
 ## Summary
