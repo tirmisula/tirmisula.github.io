@@ -11,6 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
+draft: true
 ---
 
 :                                                         
@@ -350,9 +351,111 @@ $$
 \text{$x_i\perp x_j|x\setminus \lbrace x_i,x_j\rbrace$}
 $$
 
-### Marginal pdf of GMRF
+### Marginal pdf in GMRF
 
-We have the [conslusion for solving marginal pdf by joint pdf](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#solve-the-marginal-pdf):
+The second thing is <b>natural parameterization</b><cite>[^2][^5]<cite>:
+
+$$
+\begin{align*}
+p(x|\mu, \Sigma) &= \frac{1}{(2\pi)^{d/2}|\Sigma|^{1/2}} \exp\left(-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu)\right) \\\
+&\propto \exp\left( -\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu) \right) \\\
+&\text{Let $\Lambda=\Sigma^{-1},\eta=\Lambda\mu$} \\\
+p(x|\eta, \Lambda) &= \frac{|\Lambda|^{1/2}}{(2\pi)^{d/2}} \exp\left(-\frac{1}{2}(x^T\Lambda x - 2x^T\eta + \eta^T\Lambda^{-1}\eta)\right) \\\
+&\propto \exp\left( (\Lambda\mu)^T x-\frac{1}{2}x^T\Lambda x \right)
+\end{align*} \\\
+\dArr
+$$
+
+$$
+\begin{align*}
+\begin{bmatrix}
+    x_a \\\
+    x_b
+\end{bmatrix} &\sim \mathcal{N}\left(\begin{bmatrix}
+    \mu_a \\\
+    \mu_b
+\end{bmatrix}, \begin{bmatrix}
+    \Sigma_{aa} & \Sigma_{ab} \\\
+    \Sigma_{ba} & \Sigma_{bb}
+\end{bmatrix} \right) \\\
+\begin{bmatrix}
+    x_a \\\
+    x_b
+\end{bmatrix} &\sim \tilde{\mathcal{N}}\left(\begin{bmatrix}
+    \Lambda_{aa}\mu_a + \Lambda_{ab}\mu_b \\\
+    \Lambda_{ba}\mu_a + \Lambda_{bb}\mu_b
+\end{bmatrix}, \begin{bmatrix}
+    \Lambda_{aa} & \Lambda_{ab} \\\
+    \Lambda_{ba} & \Lambda_{bb}
+\end{bmatrix} \right)
+\end{align*} \\\
+\text{$\eta$ and $\Lambda$ are information vector and matrix respectively}
+$$
+
+$$
+\Lambda_Y = (A\Sigma A^T)^{-1} = A^{-T}\Lambda A^{-1} \\\
+\eta_Y = \Lambda_Y \mu_Y = A^{-T}\eta + A^{-T}\Lambda^{-1}b \\\
+\Lambda = \begin{bmatrix} \Lambda_{aa} & \Lambda_{ab} \\\ \Lambda_{ba} & \Lambda_{bb} \end{bmatrix}, \quad \eta = \begin{bmatrix} \eta_a \ \eta_b \end{bmatrix} \\\
+\Lambda_{aa} = (\Sigma_{aa}^{-1} - \Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}) \\\
+\eta_a = \Lambda_{aa}\mu_a + \Lambda_{ab}(\mu_b - \Sigma_{bb}^{-1}\Sigma_{ba}\mu_a)
+$$
+
+The <b>matrix's blockwise inversion</b><cite>[^3]</cite> formula shows:
+
+$$
+\begin{bmatrix} A & B \\\ C & D \end{bmatrix}^{-1} = \begin{bmatrix} A^{-1} + A^{-1}B(D - CA^{-1}B)^{-1}CA^{-1} & -A^{-1}B(D - CA^{-1}B)^{-1} \\\ -(D - CA^{-1}B)^{-1}CA^{-1} & (D - CA^{-1}B)^{-1} \end{bmatrix}
+$$
+
+{{< math.inline >}}
+<p>
+Since \(Sigma\) is symmetric, we have:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{bmatrix}
+\Lambda_{aa} & \Lambda_{ab} \\\
+\Lambda_{ab}^T & \Lambda_{bb}
+\end{bmatrix} 
+= 
+\begin{bmatrix} \Sigma_{aa}^{-1} + \Sigma_{aa}^{-1}\Sigma_{ab}(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}\Sigma_{ab}^T\Sigma_{aa}^{-1} & -\Sigma_{aa}^{-1}\Sigma_{ab}(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1} \\\ -(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}\Sigma_{ab}^T\Sigma_{aa}^{-1} & (\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1} \end{bmatrix} \\\
+\begin{bmatrix}
+\Sigma_{aa} & \Sigma_{ab} \\\
+\Sigma_{ab}^T & \Sigma_{bb}
+\end{bmatrix} 
+= 
+\begin{bmatrix} \Lambda_{aa}^{-1} + \Lambda_{aa}^{-1}\Lambda_{ab}(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1}\Lambda_{ab}^T\Lambda_{aa}^{-1} & -\Lambda_{aa}^{-1}\Lambda_{ab}(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1} \\\ -(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1}\Lambda_{ab}^T\Lambda_{aa}^{-1} & (\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1} \end{bmatrix} \\\
+% P_{22}-P_{12}^TP_{11}^{-1}P_{12}\implies \\\
+% = (\Sigma_{bb}-\Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1} - (\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}\Sigma_{ab}^T\Sigma_{aa}^{-1} (\Sigma_{aa}-\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ab}^T) \Sigma_{aa}^{-1}\Sigma_{ab}(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}
+\begin{bmatrix}
+    \eta_{a} \\\
+    \eta_{b}
+\end{bmatrix} = \begin{bmatrix}
+    \Lambda_{aa}\mu_a + \Lambda_{ab}\mu_b \\\
+    \Lambda_{ba}\mu_a + \Lambda_{bb}\mu_b
+\end{bmatrix}
+$$
+
+And the <b>Woodbury matrix identity</b><cite>[^4]</cite> gives that:
+
+$$
+A^{-1} + A^{-1}B(D - CA^{-1}B)^{-1}CA^{-1} = (A-BD^{-1}C)^{-1}
+$$
+<!-- $$
+(D - CA^{-1}B)^{-1} - (D - CA^{-1}B)^{-1}CA^{-1}(A-BD^{-1}C) (A-BD^{-1}C)^{-1}BD^{-1}
+= (D - CA^{-1}B)^{-1} - (D - CA^{-1}B)^{-1}CA^{-1}BD^{-1} \\\
+= (D - B^TA^{-1}B)^{-1} - (D - B^TA^{-1}B)^{-1}B^TA^{-1}BD^{-1} \\\
+= (D - CA^{-1}B)^{-1} - D^{-1}C(A-BD^{-1}C)^{-1} BD^{-1}
+$$ -->
+
+So we have:
+
+$$
+\Lambda_{aa} = (\Sigma_{aa}-\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ab}^T)^{-1} \\\
+\Sigma_{aa} = (\Lambda_{aa}-\Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ab}^T)^{-1}
+$$
+
+We get the conlusion for [Gaussian marginal pdf and conditional pdf from joint pdf](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#solve-the-marginal-pdf) before:
 
 $$
 \begin{cases}
@@ -372,20 +475,67 @@ x \sim \mathcal{N}(\mu,\Sigma) \\\
 \end{cases} \implies 
 \begin{cases}
 x_a \sim \mathcal{N}(\mu_a,\Sigma_{aa}) \\\
-x_b \sim \mathcal{N}(\mu_b,\Sigma_{bb})
+x_b \sim \mathcal{N}(\mu_b,\Sigma_{bb}) \\\
+x_b|x_a \sim \mathcal{N}(\Sigma_{ba}\Sigma_{aa}^{-1} (x_a-\mu_{a}) + \mu_{b}, {-\Sigma_{ba}\Sigma_{aa}^{-1}\Sigma_{ab}+\Sigma_{bb} } ) \\\
+x_a|x_b \sim \mathcal{N}(\Sigma_{ab}\Sigma_{bb}^{-1} (x_b-\mu_{b}) + \mu_{a}, {-\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}+\Sigma_{aa} } )
 \end{cases}
+$$
+
+$$
+\Sigma_{ab}\Sigma_{bb}^{-1}=-\Lambda_{aa}^{-1}\Lambda_{ab} \\\
+\Sigma = \begin{bmatrix} \Sigma_{aa} & \Sigma_{ab} \\\ \Sigma_{ba} & \Sigma_{bb} \end{bmatrix} = \begin{bmatrix} \Lambda_{aa}^{-1} & -\Lambda_{aa}^{-1}\Lambda_{ab}\Sigma_{bb}^{-1} \\\ -\Sigma_{aa}\Lambda_{ba}\Lambda_{bb}^{-1} & \Sigma_{aa}\Lambda_{ba}\Lambda_{ab}\Sigma_{bb}^{-1} + \Sigma_{bb} \end{bmatrix}
+$$
+
+Combined with above conclusion, we have:
+
+1. Marginal
+$$
+x_a \sim \mathcal{N}(\mu_a,\Sigma_{aa}) \sim \mathcal{N}(\mu_a,\Lambda_{aa}) \\\
+\mu_a =  \\\
+\Sigma_{aa} = (\Lambda_{aa}-\Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ba})^{-1}
+$$
+
+2. Conditional
+$$
+x_a|x_b \sim \mathcal{N}(\Sigma_{ab}\Sigma_{bb}^{-1} (x_b-\mu_{b}) + \mu_{a}, {-\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}+\Sigma_{aa} } ) \sim \mathcal{N}(?,\Lambda_{aa}^{-1}) \\\
+\mu_{a|b} = \Lambda_{aa}\mu_a + \Lambda_{ab}\mu_b - \Lambda_{ab}x_b \\\
+\Sigma_{a|b} = -\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}+\Sigma_{aa} = \Lambda_{aa}^{-1}
+$$
+
+f
+
+$$
+\Lambda_{aa} = \Sigma_{aa}^{-1} + \Sigma_{aa}^{-1}\Sigma_{ab}(\Sigma_{bb} - \Sigma_{ba}\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}\Sigma_{ba}\Sigma_{aa}^{-1} \\\
+= \\\
+(\Sigma_{ba}\Sigma_{aa}^{-1}\Sigma_{ab} = \Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}) \\\
+\Lambda_{aa} = \Sigma_{aa}^{-1} - \Sigma_{aa}^{-1}\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}\Sigma_{aa}^{-1} = \Sigma_{aa}^{-1} - \Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}
+$$
+
+$$
+(\eta_a = \Lambda_{aa}\mu_a + \Lambda_{ab}\mu_b) \\\
+(\Lambda_{ab} = -\Lambda_{aa}\Sigma_{ab}\Sigma_{bb}^{-1})，我们可以将 (\Lambda_{ab}\mu_b) 替换为 (-\Lambda_{aa}\Sigma_{ab}\Sigma_{bb}^{-1}\mu_b) \\\
+(\eta_a = \Lambda_{aa}\mu_a - \Lambda_{aa}\Sigma_{ab}\Sigma_{bb}^{-1}\mu_b) \\\
+(\Sigma_{bb}^{-1}\mu_b = \Sigma_{bb}^{-1}\Sigma_{ba}\mu_a + \Sigma_{bb}^{-1}\mu_b - \Sigma_{bb}^{-1}\Sigma_{ba}\mu_a) \\\
+(\eta_a = \Lambda_{aa}\mu_a + \Lambda_{ab}(\mu_b - \Sigma_{bb}^{-1}\Sigma_{ba}\mu_a))
 $$
 
 {{< math.inline >}}
 <p>
-Suppose we are solving \( p(x_i) \):
+Suppose we are solving \( p(x_i|x_{\setminus i}) \):
 </p>
 {{</ math.inline >}}
 
 $$
-x = \begin{bmatrix}x_i \\\
- x\setminus{x_i}
-\end{bmatrix}
+\begin{align*}
+x &= \begin{bmatrix}x_i \\\
+x_{\setminus i}
+\end{bmatrix} \\\
+x &\sim \mathcal{N}(0, \begin{bmatrix}
+    \sigma_{ii} & \Sigma_{i\setminus{i}} \\\
+    \Sigma_{\setminus{i}i} & \Sigma_{\setminus{i}\setminus{i}}
+\end{bmatrix}) \\\
+x_i|x_{\setminus i} &\sim \mathcal{N}(\Sigma)
+\end{align*}
 $$
 
 ## Summary
@@ -395,7 +545,7 @@ $$
 ## Reference
 
 [^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=105).
-[^3]: From [The Matrix Cookbook](https://www.math.uwaterloo.ca/~hwolkowi/matrixcookbook.pdf).
-[^5]: From [Mean field variational inference](https://mbernste.github.io/files/notes/MeanFieldVariationalInference.pdf).
-[^4]: From [Ross, Sheldon M. (2019). Introduction to probability models](https://doi.org/10.1016%2FC2017-0-01324-1).
-[^2]: - [A Tutorial on Particle Filtering and Smoothing: Fifteen years later](https://www.stats.ox.ac.uk/~doucet/doucet_johansen_tutorialPF2011.pdf).
+[^4]: From [Higham, Nicholas (2002). Accuracy and Stability of Numerical Algorithms](https://archive.org/details/accuracystabilit00high_878).
+[^5]: From [The Multivariate Gaussian](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
+[^3]: From [Tzon-Tzer, Lu; Sheng-Hua, Shiou (2002). "Inverses of 2 × 2 block matrices"](https://doi.org/10.1016%2FS0898-1221%2801%2900278-4).
+[^2]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
