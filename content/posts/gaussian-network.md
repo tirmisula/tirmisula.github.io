@@ -355,7 +355,7 @@ $$
 
 #### Natural parameterization
 
-<b>Natural parameterization</b><cite>[^2][^5]<cite> shows that:
+<b>Natural parameterization</b><cite>[^2]<cite><cite>[^5]</cite> shows that:
 
 $$
 \begin{align*}
@@ -364,10 +364,11 @@ p(x|\mu, \Sigma) &= \frac{1}{(2\pi)^{d/2}|\Sigma|^{1/2}} \exp\left(-\frac{1}{2}(
 &\text{Let $\Lambda=\Sigma^{-1},\eta=\Lambda\mu$} \\\
 p(x|\eta, \Lambda) &= \frac{|\Lambda|^{1/2}}{(2\pi)^{d/2}} \exp\left(-\frac{1}{2}(x^T\Lambda x - 2x^T\eta + \eta^T\Lambda^{-1}\eta)\right) \\\
 &\propto \exp\left( (\Lambda\mu)^T x-\frac{1}{2}x^T\Lambda x \right)
-\end{align*}
+\end{align*} \\\
+\text{$\eta$ and $\Lambda$ are information vector and matrix respectively}
 $$
 
-Besides we can write down the joint distribution by canonical parameterization and natural parameterization as follows:
+The joint distribution by canonical parameterization and natural parameterization are listed as follows:
 
 $$
 \begin{align*}
@@ -391,8 +392,7 @@ $$
     \Lambda_{aa} & \Lambda_{ab} \\\
     \Lambda_{ba} & \Lambda_{bb}
 \end{bmatrix} \right)
-\end{align*} \\\
-\text{$\eta$ and $\Lambda$ are information vector and matrix respectively}
+\end{align*}
 $$
 
 In which we have:
@@ -416,7 +416,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Since \(Sigma\) is symmetric, we can get the mapping relations between submatrices of \( \Sigma \) and \( \Lambda \):
+Since \(\Sigma\) is symmetric, we can get the mapping relations between submatrices of \( \Sigma \) and \( \Lambda \):
 </p>
 {{</ math.inline >}}
 
@@ -424,17 +424,16 @@ $$
 \begin{bmatrix}
 \Lambda_{aa} & \Lambda_{ab} \\\
 \Lambda_{ab}^T & \Lambda_{bb}
-\end{bmatrix} 
-= 
-\begin{bmatrix} \Sigma_{aa}^{-1} + \Sigma_{aa}^{-1}\Sigma_{ab}(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}\Sigma_{ab}^T\Sigma_{aa}^{-1} & -\Sigma_{aa}^{-1}\Sigma_{ab}(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1} \\\ -(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}\Sigma_{ab}^T\Sigma_{aa}^{-1} & (\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1} \end{bmatrix} \\\
+\end{bmatrix} = \begin{bmatrix} \Sigma_{aa}^{-1} + \Sigma_{aa}^{-1}\Sigma_{ab}(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}\Sigma_{ab}^T\Sigma_{aa}^{-1} & -\Sigma_{aa}^{-1}\Sigma_{ab}(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1} \\\ -(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}\Sigma_{ab}^T\Sigma_{aa}^{-1} & (\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1} \end{bmatrix} \\\
+% P_{22}-P_{12}^TP_{11}^{-1}P_{12}\implies \\\
+% = (\Sigma_{bb}-\Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1} - (\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}\Sigma_{ab}^T\Sigma_{aa}^{-1} (\Sigma_{aa}-\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ab}^T) \Sigma_{aa}^{-1}\Sigma_{ab}(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}
+$$
+
+$$
 \begin{bmatrix}
 \Sigma_{aa} & \Sigma_{ab} \\\
 \Sigma_{ab}^T & \Sigma_{bb}
-\end{bmatrix} 
-= 
-\begin{bmatrix} \Lambda_{aa}^{-1} + \Lambda_{aa}^{-1}\Lambda_{ab}(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1}\Lambda_{ab}^T\Lambda_{aa}^{-1} & -\Lambda_{aa}^{-1}\Lambda_{ab}(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1} \\\ -(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1}\Lambda_{ab}^T\Lambda_{aa}^{-1} & (\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1} \end{bmatrix} \\\
-% P_{22}-P_{12}^TP_{11}^{-1}P_{12}\implies \\\
-% = (\Sigma_{bb}-\Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1} - (\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}\Sigma_{ab}^T\Sigma_{aa}^{-1} (\Sigma_{aa}-\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ab}^T) \Sigma_{aa}^{-1}\Sigma_{ab}(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}
+\end{bmatrix} = \begin{bmatrix} \Lambda_{aa}^{-1} + \Lambda_{aa}^{-1}\Lambda_{ab}(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1}\Lambda_{ab}^T\Lambda_{aa}^{-1} & -\Lambda_{aa}^{-1}\Lambda_{ab}(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1} \\\ -(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1}\Lambda_{ab}^T\Lambda_{aa}^{-1} & (\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1} \end{bmatrix}
 $$
 
 And the <b>Woodbury matrix identity</b><cite>[^4]</cite> gives that:
