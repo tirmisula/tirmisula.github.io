@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: true
+draft: false
 ---
 
 :                                                         
@@ -353,7 +353,9 @@ $$
 
 ### Marginal pdf in GMRF
 
-The second thing is <b>natural parameterization</b><cite>[^2][^5]<cite>:
+#### Natural parameterization
+
+<b>Natural parameterization</b><cite>[^2][^5]<cite> shows that:
 
 $$
 \begin{align*}
@@ -362,9 +364,10 @@ p(x|\mu, \Sigma) &= \frac{1}{(2\pi)^{d/2}|\Sigma|^{1/2}} \exp\left(-\frac{1}{2}(
 &\text{Let $\Lambda=\Sigma^{-1},\eta=\Lambda\mu$} \\\
 p(x|\eta, \Lambda) &= \frac{|\Lambda|^{1/2}}{(2\pi)^{d/2}} \exp\left(-\frac{1}{2}(x^T\Lambda x - 2x^T\eta + \eta^T\Lambda^{-1}\eta)\right) \\\
 &\propto \exp\left( (\Lambda\mu)^T x-\frac{1}{2}x^T\Lambda x \right)
-\end{align*} \\\
-\dArr
+\end{align*}
 $$
+
+Besides we can write down the joint distribution by canonical parameterization and natural parameterization as follows:
 
 $$
 \begin{align*}
@@ -382,8 +385,8 @@ $$
     x_a \\\
     x_b
 \end{bmatrix} &\sim \tilde{\mathcal{N}}\left(\begin{bmatrix}
-    \Lambda_{aa}\mu_a + \Lambda_{ab}\mu_b \\\
-    \Lambda_{ba}\mu_a + \Lambda_{bb}\mu_b
+    \eta_a \\\
+    \eta_b
 \end{bmatrix}, \begin{bmatrix}
     \Lambda_{aa} & \Lambda_{ab} \\\
     \Lambda_{ba} & \Lambda_{bb}
@@ -392,14 +395,19 @@ $$
 \text{$\eta$ and $\Lambda$ are information vector and matrix respectively}
 $$
 
+In which we have:
+
 $$
-\Lambda_Y = (A\Sigma A^T)^{-1} = A^{-T}\Lambda A^{-1} \\\
-\eta_Y = \Lambda_Y \mu_Y = A^{-T}\eta + A^{-T}\Lambda^{-1}b \\\
-\Lambda = \begin{bmatrix} \Lambda_{aa} & \Lambda_{ab} \\\ \Lambda_{ba} & \Lambda_{bb} \end{bmatrix}, \quad \eta = \begin{bmatrix} \eta_a \ \eta_b \end{bmatrix} \\\
-\Lambda_{aa} = (\Sigma_{aa}^{-1} - \Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}) \\\
-\eta_a = \Lambda_{aa}\mu_a + \Lambda_{ab}(\mu_b - \Sigma_{bb}^{-1}\Sigma_{ba}\mu_a)
+\begin{bmatrix}
+    \eta_{a} \\\
+    \eta_{b}
+\end{bmatrix} = \Lambda \mu = \begin{bmatrix}
+    \Lambda_{aa}\mu_a + \Lambda_{ab}\mu_b \\\
+    \Lambda_{ba}\mu_a + \Lambda_{bb}\mu_b
+\end{bmatrix}
 $$
 
+#### The relation between covariance and precision matrix
 The <b>matrix's blockwise inversion</b><cite>[^3]</cite> formula shows:
 
 $$
@@ -408,7 +416,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Since \(Sigma\) is symmetric, we have:
+Since \(Sigma\) is symmetric, we can get the mapping relations between submatrices of \( \Sigma \) and \( \Lambda \):
 </p>
 {{</ math.inline >}}
 
@@ -427,13 +435,6 @@ $$
 \begin{bmatrix} \Lambda_{aa}^{-1} + \Lambda_{aa}^{-1}\Lambda_{ab}(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1}\Lambda_{ab}^T\Lambda_{aa}^{-1} & -\Lambda_{aa}^{-1}\Lambda_{ab}(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1} \\\ -(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1}\Lambda_{ab}^T\Lambda_{aa}^{-1} & (\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1} \end{bmatrix} \\\
 % P_{22}-P_{12}^TP_{11}^{-1}P_{12}\implies \\\
 % = (\Sigma_{bb}-\Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1} - (\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}\Sigma_{ab}^T\Sigma_{aa}^{-1} (\Sigma_{aa}-\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ab}^T) \Sigma_{aa}^{-1}\Sigma_{ab}(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}
-\begin{bmatrix}
-    \eta_{a} \\\
-    \eta_{b}
-\end{bmatrix} = \begin{bmatrix}
-    \Lambda_{aa}\mu_a + \Lambda_{ab}\mu_b \\\
-    \Lambda_{ba}\mu_a + \Lambda_{bb}\mu_b
-\end{bmatrix}
 $$
 
 And the <b>Woodbury matrix identity</b><cite>[^4]</cite> gives that:
@@ -454,6 +455,8 @@ $$
 \Lambda_{aa} = (\Sigma_{aa}-\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ab}^T)^{-1} \\\
 \Sigma_{aa} = (\Lambda_{aa}-\Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ab}^T)^{-1}
 $$
+
+#### Marginal and conditional pdf from canonical parameterization 
 
 We get the conlusion for [Gaussian marginal pdf and conditional pdf from joint pdf](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#solve-the-marginal-pdf) before:
 
@@ -481,47 +484,88 @@ x_a|x_b \sim \mathcal{N}(\Sigma_{ab}\Sigma_{bb}^{-1} (x_b-\mu_{b}) + \mu_{a}, {-
 \end{cases}
 $$
 
-$$
-\Sigma_{ab}\Sigma_{bb}^{-1}=-\Lambda_{aa}^{-1}\Lambda_{ab} \\\
-\Sigma = \begin{bmatrix} \Sigma_{aa} & \Sigma_{ab} \\\ \Sigma_{ba} & \Sigma_{bb} \end{bmatrix} = \begin{bmatrix} \Lambda_{aa}^{-1} & -\Lambda_{aa}^{-1}\Lambda_{ab}\Sigma_{bb}^{-1} \\\ -\Sigma_{aa}\Lambda_{ba}\Lambda_{bb}^{-1} & \Sigma_{aa}\Lambda_{ba}\Lambda_{ab}\Sigma_{bb}^{-1} + \Sigma_{bb} \end{bmatrix}
-$$
+#### Marginal and conditional pdf from natural parameterization 
 
-Combined with above conclusion, we have:
+Combined with above conclusions, we can write down natural parameterization results of marginal and conditional pdf:
 
 1. Marginal
-$$
-x_a \sim \mathcal{N}(\mu_a,\Sigma_{aa}) \sim \mathcal{N}(\mu_a,\Lambda_{aa}) \\\
-\mu_a =  \\\
-\Sigma_{aa} = (\Lambda_{aa}-\Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ba})^{-1}
-$$
+    $$
+    x_a \sim \mathcal{N}(\mu_a,\Sigma_{aa})
+    $$
+
+    For the variance:
+
+    $$
+    \begin{align*}
+    Var(x_a) &= \Sigma_{aa} \\\
+    &= (\Lambda_{aa}-\Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ba})^{-1}
+    \end{align*}
+    $$
+
+    For the expectation:
+
+    $$
+    \begin{align*}
+    Var(x_a)^{-1}\mu_a &= (\Lambda_{aa}-\Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ba})\mu_a \\\
+    &= \Lambda_{aa}\mu_a - \Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ba}\mu_a \\\
+    &= \Lambda_{aa}\mu_a - \Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ba}\mu_a + \Lambda_{ab}\mu_b - \Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{bb}\mu_b\\\
+    &= \Lambda_{aa}\mu_a + \Lambda_{ab}\mu_b - \Lambda_{ab}\Lambda_{bb}^{-1}(\Lambda_{ba}\mu_a + \Lambda_{bb}\mu_b) \\\
+    &= \eta_a - \Lambda_{ab}\Lambda_{bb}^{-1}\eta_b
+    \end{align*}
+    $$
+
+    Overall,
+
+    $$
+    x_a \sim \tilde{\mathcal{N}}(\eta_a-\Lambda_{ab}\Lambda_{bb}^{-1}\eta_b, \Lambda_{aa}-\Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ba})
+    $$
 
 2. Conditional
-$$
-x_a|x_b \sim \mathcal{N}(\Sigma_{ab}\Sigma_{bb}^{-1} (x_b-\mu_{b}) + \mu_{a}, {-\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}+\Sigma_{aa} } ) \sim \mathcal{N}(?,\Lambda_{aa}^{-1}) \\\
-\mu_{a|b} = \Lambda_{aa}\mu_a + \Lambda_{ab}\mu_b - \Lambda_{ab}x_b \\\
-\Sigma_{a|b} = -\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}+\Sigma_{aa} = \Lambda_{aa}^{-1}
-$$
 
-f
+    $$
+    x_a|x_b \sim \mathcal{N}(\Sigma_{ab}\Sigma_{bb}^{-1} (x_b-\mu_{b}) + \mu_{a}, {-\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}+\Sigma_{aa} } )
+    $$
 
-$$
-\Lambda_{aa} = \Sigma_{aa}^{-1} + \Sigma_{aa}^{-1}\Sigma_{ab}(\Sigma_{bb} - \Sigma_{ba}\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}\Sigma_{ba}\Sigma_{aa}^{-1} \\\
-= \\\
-(\Sigma_{ba}\Sigma_{aa}^{-1}\Sigma_{ab} = \Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}) \\\
-\Lambda_{aa} = \Sigma_{aa}^{-1} - \Sigma_{aa}^{-1}\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}\Sigma_{aa}^{-1} = \Sigma_{aa}^{-1} - \Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}
-$$
+    For the variance we have:
 
-$$
-(\eta_a = \Lambda_{aa}\mu_a + \Lambda_{ab}\mu_b) \\\
-(\Lambda_{ab} = -\Lambda_{aa}\Sigma_{ab}\Sigma_{bb}^{-1})，我们可以将 (\Lambda_{ab}\mu_b) 替换为 (-\Lambda_{aa}\Sigma_{ab}\Sigma_{bb}^{-1}\mu_b) \\\
-(\eta_a = \Lambda_{aa}\mu_a - \Lambda_{aa}\Sigma_{ab}\Sigma_{bb}^{-1}\mu_b) \\\
-(\Sigma_{bb}^{-1}\mu_b = \Sigma_{bb}^{-1}\Sigma_{ba}\mu_a + \Sigma_{bb}^{-1}\mu_b - \Sigma_{bb}^{-1}\Sigma_{ba}\mu_a) \\\
-(\eta_a = \Lambda_{aa}\mu_a + \Lambda_{ab}(\mu_b - \Sigma_{bb}^{-1}\Sigma_{ba}\mu_a))
-$$
+    $$
+    \begin{align*}
+    Var(a|b) &= -\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}+\Sigma_{aa} \\\
+    &= \Lambda_{aa}^{-1}
+    \end{align*}
+    $$
 
+    For the expectation, notice that:
+
+    $$
+    \begin{align*}
+    \Sigma_{ab}\Sigma_{bb}^{-1} &= -\Lambda_{aa}^{-1}\Lambda_{ab}(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1} (\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab}) \\\
+    &= -\Lambda_{aa}^{-1}\Lambda_{ab}
+    \end{align*}
+    $$
+
+    So we have<cite>[^6]</cite>:
+
+    $$
+    \begin{align*}
+    E[a|b] &= \Sigma_{ab}\Sigma_{bb}^{-1}(x_b-\mu_b)+\mu_a \\\
+    &= \mu_a-\Lambda_{aa}^{-1}\Lambda_{ab}(x_b-\mu_b) \\\
+    Var(a|b)^{-1}E[a|b] &= \Sigma_{a|b}^{-1}(\mu_a-\Lambda_{aa}^{-1}\Lambda_{ab}(x_b-\mu_b)) \\\
+    &= \Lambda_{aa}\mu_a - \Lambda_{ab}x_b + \Lambda_{ab}\mu_b \\\
+    &= \eta_a - \Lambda_{ab}x_b
+    \end{align*}
+    $$
+
+    Overall,
+
+    $$
+    x_a|x_b \sim \tilde{\mathcal{N}}(\eta_a - \Lambda_{ab}x_b, \Lambda_{aa} )
+    $$
+
+#### Solving marginal pdf
 {{< math.inline >}}
 <p>
-Suppose we are solving \( p(x_i|x_{\setminus i}) \):
+In pairwise markov propety, we are solving \( p(x_i|x_{\setminus i}) \):
 </p>
 {{</ math.inline >}}
 
@@ -530,13 +574,46 @@ $$
 x &= \begin{bmatrix}x_i \\\
 x_{\setminus i}
 \end{bmatrix} \\\
-x &\sim \mathcal{N}(0, \begin{bmatrix}
-    \sigma_{ii} & \Sigma_{i\setminus{i}} \\\
-    \Sigma_{\setminus{i}i} & \Sigma_{\setminus{i}\setminus{i}}
-\end{bmatrix}) \\\
-x_i|x_{\setminus i} &\sim \mathcal{N}(\Sigma)
+% x &\sim \mathcal{N}(0, \begin{bmatrix}
+%     \sigma_{ii} & \Sigma_{i\setminus{i}} \\\
+%     \Sigma_{\setminus{i}i} & \Sigma_{\setminus{i}\setminus{i}}
+% \end{bmatrix}) \\\
+% x_i|x_{\setminus i} &\sim \mathcal{N}(\Sigma)
 \end{align*}
 $$
+
+Use the marginalization conclusions above, we have:
+
+$$
+\begin{align*}
+Var(x_i|x_{\setminus{i}}) &= \Lambda_{ii}^{-1}=\sigma_{ii} \\\
+E[x_i|x_{\setminus{i}}] &= \mu_{i}-\Lambda_{ii}^{-1}\Lambda_{i\setminus{i}}(x_{\setminus{i}}-\mu_{\setminus{i}}) \\\
+\text{assume } &\text{$x$ is centralized} \\\
+&= \lambda_{ii}^{-1}\Lambda_{i\setminus{i}}x_{\setminus{i}} \\\
+&= \lambda_{ii}^{-1}\begin{bmatrix}
+    \lambda_{i1} \\\
+    \vdots \\\
+    \lambda_{ij} \\\
+    \vdots \\\
+    \lambda_{iN}
+\end{bmatrix}^T \begin{bmatrix}
+    x_1 \\\
+    \vdots \\\
+    x_j \\\
+    \vdots \\\
+    x_N
+\end{bmatrix} \\\
+&= \sum_{j,j\neq i} \frac{\lambda_{ij}}{\lambda_{ii}}x_j \\\
+&\dArr \\\
+x_i|x_{\setminus{i}} &\sim \mathcal{N}(\sum_{j,j\neq i} \frac{\lambda_{ij}}{\lambda_{ii}}x_j, \sigma_{ii})
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+It tells us the central of marginal \( p(x_i) \) is represented by a linear combination of connected \( x_j \).
+</p>
+{{</ math.inline >}}
 
 ## Summary
 
@@ -546,6 +623,7 @@ $$
 
 [^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=105).
 [^4]: From [Higham, Nicholas (2002). Accuracy and Stability of Numerical Algorithms](https://archive.org/details/accuracystabilit00high_878).
-[^5]: From [The Multivariate Gaussian](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
+[^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
 [^3]: From [Tzon-Tzer, Lu; Sheng-Hua, Shiou (2002). "Inverses of 2 × 2 block matrices"](https://doi.org/10.1016%2FS0898-1221%2801%2900278-4).
 [^2]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
+[^6]: - [Gaussian Processes and Gaussian Markov Random Fields](https://folk.ntnu.no/joeid/MA8702/jan16.pdf)
