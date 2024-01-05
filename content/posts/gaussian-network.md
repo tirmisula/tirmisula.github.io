@@ -123,10 +123,10 @@ $$
 x_i\perp x_j \iff \sigma_{ij}=0
 $$
 
-However we want <b>conditional independence</b> in probalistic graphical model(PGM) for simplification, it can be achieved by precision matrix in Gaussian network:
+However we want <b>conditional independence</b> in probalistic graphical model(PGM) for simplification, it can be achieved by precision matrix in Gaussian network, [we will prove it later](https://tirmisula.github.io/posts/gaussian-network/#pairwise-markov-property-in-gmrf):
 
 $$
-\text{conditional independence: } x_A\perp x_B|x_C  \\\
+x_A\perp x_B|x_C  \\\
 \dArr \\\
 \text{Let }\Lambda = \Sigma^{-1} = \lambda_{ij} \text{, $\quad\Lambda$ is precision matrix} \\\
 x_i\perp x_j | x\setminus\lbrace x_i,x_j \rbrace \iff \lambda_{ij}=0
@@ -140,7 +140,7 @@ Since \( h(\cdot) \) and \( g(\cdot) \) are not linear, \( \epsilon \) and \( \d
 
 ## Gaussian bayesian network
 
-### Review gaussian liniear model
+### Review gaussian linear model
 Gaussian bayesian network(GBN) is a directed graph based on local <b>linear gaussian model</b> [which described before](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#solve-the-joint-pdf):
 
 $$
@@ -189,40 +189,172 @@ $$
 
 {{< math.inline >}}
 <p>
-For \( p(x_i|x_{pa(i)}) \), we can write it in GBN follow linear gaussian model:
+For each node, it is gaussian distribution in GBN, so conditional distribution \( p(x_i|x_{pa(i)}) \) is still gaussian:
 </p>
 {{</ math.inline >}}
+
+$$
+x_i|x_{pa(i)} \sim \mathcal{N}(w_i^T(x_{pa(i)}-\mu_{pa(i)}) + \mu_i, \sigma_i^2)
+$$
+
+We can derive it's linear gaussian model:
 
 $$
 \text{Let $x_i$ has k parents $\in x_{pa(i)}$} \\\
 \begin{cases}
 x_{pa(i)} = (x_{pa(i)1},\cdots,x_{pa(i)k})^T \\\
-x_{pa(i)j} \sim \mathcal{N}(\mu_{ij}, \sigma_{ij}^2) \\\
-\epsilon_i \sim \mathcal{N}(0,\sigma_i) \\\
-w_i = (w_{i1}, \cdots, w_{ik})^T \\\
-x_i = w_i^Tx_{pa(i)} + \mu_i + \epsilon_i \\\
-x_i|x_{pa(i)} \sim \mathcal{N}(w_i^Tx_{pa(i)} + \mu_i, \sigma_i^2)
+x_{pa(i)j} \sim \mathcal{N}(\mu_{ij}, \sigma_{ij}^2\epsilon) \\\
+\epsilon \sim \mathcal{N}(0,1) \\\
+w_i = (w_{i1}, \cdots, w_{ik})^T
 \end{cases} \\\
 \dArr
 $$
 
 $$
-\text{We expand linear combination here:} \\\
-x_i = \sum_{j=1}^k w_{ij}x_{pa(i)j} + \mu_i + \sigma_i\epsilon \\\
-\text{For simplification let:} \\\
-x_i = \sum_{j=1}^k w_{ij}(x_{pa(i)j} - \mu_{ij}) + \mu_i + \sigma_i^2 \\\
-\text{Then we have new linear model:}
-$$
-
-$$
 \begin{cases}
-x_{pa(i)j}-\mu_{ij} \sim \mathcal{N}(0, \sigma_{ij}^2) \\\
-x_i - \mu_i = w_i^T(x_{pa(i)}-\mu_{i}) + \epsilon_i \\\
-x_i-\mu_i|x_{pa(i)}-\mu_i \sim \mathcal{N}(w_i^T(x_{pa(i)} - \mu_{i}), \sigma_i^2)
+x_i &= w_i^T(x_{pa(i)}-\mu_{pa(i)}) + \mu_i + \sigma_i\epsilon \\\
+x_i-\mu_i &= \sum_{j=1}^k w_{ij}(x_{pa(i)j}-\mu_{ij}) + \sigma_i\epsilon \\\
+x_i-\mu_i|x_{pa(i)}-\mu_{pa(i)} &\sim \mathcal{N}(w_i^T(x_{pa(i)}-\mu_{pa(i)}), \sigma_i^2)
 \end{cases}
 $$
 
-### Vectorization
+### Vectorize p(x)
+
+Let:
+
+$$
+x=\begin{bmatrix}
+    x_1 \\\
+    \vdots \\\
+    x_p
+\end{bmatrix},
+\mu = \begin{bmatrix}
+    \mu_1 \\\ 
+    \vdots \\\
+    \mu_p 
+\end{bmatrix}
+$$
+
+Let:
+
+$$
+w_{i} = \begin{bmatrix}
+    w_{i1} \\\
+    \vdots \\\
+    w_{ip}
+\end{bmatrix},
+\begin{cases}
+    w_{ij} = 0, \text{if $x_j\notin x_{pa(i)}$} \\\
+    w_{ij} \neq 0, \text{if $x_j\in x_{pa(i)}$}
+\end{cases}
+$$
+
+We have:
+
+$$
+\begin{align*}
+x_i-\mu_i &= \sum_{j=1}^k w_{ij}(x_{pa(i)j}-\mu_{ij}) + \sigma_i\epsilon \\\
+&= \sum_{j} w_{ij}(x_{pa(i)j}-\mu_{ij})+ \sum_{a,x_a\notin x_{pa(i)}}0\cdot(x_a-\mu_a) + \sigma_i\epsilon \\\
+&= \begin{bmatrix}
+    w_{i1} \\\
+    \vdots \\\
+    w_{ip}
+\end{bmatrix}^T ( 
+    \begin{bmatrix}
+    x_1 \\\
+    \vdots \\\
+    x_p
+\end{bmatrix} - \begin{bmatrix}
+    \mu_1 \\\
+    \vdots \\\
+    \mu_p
+\end{bmatrix}
+ ) + \epsilon\sigma_i \\\
+ &= w_i^T (x-\mu) + \epsilon\cdot \sigma_i
+\end{align*}
+$$
+
+Let:
+
+$$
+W  =\begin{bmatrix}
+    w_1^T \\\
+    \vdots \\\
+    w_p^T
+\end{bmatrix},
+S = \begin{bmatrix}
+    \sigma_1 &  \\\
+    & \ddots \\\
+    & & \sigma_p
+\end{bmatrix},
+\epsilon = \begin{bmatrix}
+    \epsilon_1 \\\
+    \vdots \\\
+    \epsilon_p
+\end{bmatrix}, \epsilon_i\sim\mathcal{N}(0,1)
+$$
+
+We have:
+
+$$
+\begin{align*}
+\begin{bmatrix}
+    x_1-\mu_1 \\\
+    \vdots \\\
+    x_p-\mu_p
+\end{bmatrix} &= \begin{bmatrix}
+    w_1^T (x-\mu) + \epsilon_1\cdot \sigma_1 \\\
+    \vdots \\\
+    w_p^T (x-\mu) + \epsilon_p\cdot \sigma_p
+\end{bmatrix} \\\
+&= \begin{bmatrix}
+    w_1^T \\\
+    \vdots \\\
+    w_p^T
+\end{bmatrix} (x-\mu) + \begin{bmatrix}
+    \sigma_1 &  \\\
+    & \ddots \\\
+    & & \sigma_p
+\end{bmatrix}\begin{bmatrix}
+    \epsilon_1 \\\
+    \vdots \\\
+    \epsilon_p
+\end{bmatrix} \\\
+&\dArr \\\
+x-\mu &= W\cdot(x-\mu)+S\cdot\epsilon \\\
+(I-W)(x-\mu) &= S\cdot\epsilon \\\
+x-\mu &= (I-W)^{-1}S\cdot\epsilon
+\end{align*}
+$$
+
+Then the covariance matrix can be derived:
+
+$$
+\begin{align*}
+Cov(x) &= E[(x-\mu)(x-\mu)^T] \\\
+&= E[(x-\mu-E[x-\mu])(x-\mu-E[x-\mu])^T] \\\
+&=Cov(x-\mu) \\\
+&= E[((I-W)^{-1}S\epsilon)((I-W)^{-1}S\epsilon)^T] \\\
+&= (I-W)^{-1}S\cdot E[\epsilon\epsilon^T]\cdot S^T ((I-W)^{-1})^T \\\
+&= (I-W)^{-1}S S^T ((I-W)^{-1})^T
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Finally we have the vectorized form of \( p(x) \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{bmatrix}
+    x_1 \\\
+    \vdots \\\
+    x_p
+\end{bmatrix} \sim \mathcal{N}\left(
+    \mu,
+    (I-W)^{-1}S S^T ((I-W)^{-1})^T \right) 
+$$
 
 <!-- Define weight at time t as:
 
@@ -289,7 +421,7 @@ $$ x_i|x_{pa(i)} \sim \mathcal{N}(w_i^Tx_{pa(i)} + \mu_i, \sigma_i^2) $$
 这里，(\sigma_i^2) 是噪声项 (\epsilon_i) 的方差。 -->
 
 ## Gaussian markov random field
-### Potential funciton and Pdf of GMRF
+### Potential function and pdf in GMRF
 Gaussian markov random field(GMRF) is a undirected graph, we use [MRF factorization theorem introduced before](https://tirmisula.github.io/posts/probabilistic-graphical-model/#formula-for-nodes-and-edges):
 
 $$
@@ -355,7 +487,7 @@ $$
 
 #### Natural parameterization
 
-<b>Natural parameterization</b><cite>[^2]<cite><cite>[^5]</cite> shows that:
+<b>Natural parameterization</b><cite>[^2]<cite>,<cite>[^5]</cite> shows that:
 
 $$
 \begin{align*}
@@ -505,7 +637,7 @@ Combined with above conclusions, we can write down natural parameterization resu
 
     $$
     \begin{align*}
-    Var(x_a)^{-1}\mu_a &= (\Lambda_{aa}-\Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ba})\mu_a \\\
+    Var(x_a)^{-1}E[x_a] &= (\Lambda_{aa}-\Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ba})\mu_a \\\
     &= \Lambda_{aa}\mu_a - \Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ba}\mu_a \\\
     &= \Lambda_{aa}\mu_a - \Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ba}\mu_a + \Lambda_{ab}\mu_b - \Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{bb}\mu_b\\\
     &= \Lambda_{aa}\mu_a + \Lambda_{ab}\mu_b - \Lambda_{ab}\Lambda_{bb}^{-1}(\Lambda_{ba}\mu_a + \Lambda_{bb}\mu_b) \\\
@@ -529,7 +661,7 @@ Combined with above conclusions, we can write down natural parameterization resu
 
     $$
     \begin{align*}
-    Var(a|b) &= -\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}+\Sigma_{aa} \\\
+    Var(x_a|x_b) &= -\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}+\Sigma_{aa} \\\
     &= \Lambda_{aa}^{-1}
     \end{align*}
     $$
@@ -547,9 +679,9 @@ Combined with above conclusions, we can write down natural parameterization resu
 
     $$
     \begin{align*}
-    E[a|b] &= \Sigma_{ab}\Sigma_{bb}^{-1}(x_b-\mu_b)+\mu_a \\\
+    E[x_a|x_b] &= \Sigma_{ab}\Sigma_{bb}^{-1}(x_b-\mu_b)+\mu_a \\\
     &= \mu_a-\Lambda_{aa}^{-1}\Lambda_{ab}(x_b-\mu_b) \\\
-    Var(a|b)^{-1}E[a|b] &= \Sigma_{a|b}^{-1}(\mu_a-\Lambda_{aa}^{-1}\Lambda_{ab}(x_b-\mu_b)) \\\
+    Var(x_a|x_b)^{-1}E[x_a|x_b] &= \Sigma_{a|b}^{-1}(\mu_a-\Lambda_{aa}^{-1}\Lambda_{ab}(x_b-\mu_b)) \\\
     &= \Lambda_{aa}\mu_a - \Lambda_{ab}x_b + \Lambda_{ab}\mu_b \\\
     &= \eta_a - \Lambda_{ab}x_b
     \end{align*}
