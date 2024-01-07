@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
-title: "Gaussian Network"
-date: "2023-09-17"
+title: "Bayesian Linear Regression"
+date: "2023-09-18"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: false
+draft: true
 ---
 
 :                                                         
