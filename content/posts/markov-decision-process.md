@@ -65,7 +65,7 @@ draft: false
 
 $$
 \begin{cases}
-        \text{Stochastic Process} : \lbrace s_t \rbrace^{\infty}_{t=1} \\\
+        \text{Stochastic Process} : \lbrace s_t \rbrace_{t=1\cdots\infty} \\\
         \text{Markov Chain/Process} : \text{stochastic process with property: } p(s_{t+1}|s_{1:t})=p(s_{t+1}|s_t) \\\
         \text{State Space Model} \rarr \text{HMM, Kalman filter, Particle filter} \\\
                 \text{Markov Reward Process} : \text{Markov Chain + Reward} \\\
