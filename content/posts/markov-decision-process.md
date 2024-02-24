@@ -134,6 +134,46 @@ $$
 \end{cases}
 $$
 
+{{< math.inline >}}
+<p>
+For decision policy at time t, \( A_t \), it follows a probability distirbution \( \pi \):
+</p>
+{{</ math.inline >}}
+
+$$
+\pi : \begin{cases}
+    \text{deterministic } \pi(s) &= \begin{cases}
+        1 & \text{if } A_t = \text{$a^{\ast}$} \\\
+        0 & \text{else}
+    \end{cases} \\\
+    \text{stochastic } \pi(a|s) &= Pr(A_t=a|S_t=s)
+\end{cases}
+$$
+
+{{< math.inline >}}
+<p>
+Another truth should be noted is that a certain decision \( A_t=a \) not only affects reward \( R_{t+1} \), but also affects the following rewards \( R_{T\rarr\infty} \). Thus we can develop a idea of gain \( G_t \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+    G_t(a) &= R_{t+1}+\gamma R_{t+2}+\gamma^2 R_{t+3}+\cdots+\gamma^{T-t-1}R_T \\\
+    &= \sum_{i=0}^{T-t-1} \gamma^{i} R_{t+1+i}
+\end{align*} \\\
+\gamma\in[0,1],\text{$\gamma$ is attenuation factor}
+$$
+
+{{< math.inline >}}
+<p>
+Then we can define value function \( v_{\pi} \), which is the weighted average of \( G_t \) from different decisions:
+</p>
+{{</ math.inline >}}
+
+$$
+v_{\pi}(s) = \mathbb{E}_{A_t\sim \pi(a|s)} [ G_t|S_t=s ]
+$$
+
 ## Reference
 
 [^1]: - [video](https://www.bilibili.com/video/BV1RA411q7wt/?p=1).
