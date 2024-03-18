@@ -141,7 +141,7 @@ For decision policy at time t, \( A_t \), it follows a probability distirbution 
 {{</ math.inline >}}
 
 $$
-\pi : \begin{cases}
+\text{Policy }\pi : \begin{cases}
     \text{deterministic } \pi(s) &= \begin{cases}
         1 & \text{if } A_t = \text{$a^{\ast}$} \\\
         0 & \text{else}
@@ -171,7 +171,154 @@ Then we can define value function \( v_{\pi} \), which is the weighted average o
 {{</ math.inline >}}
 
 $$
-v_{\pi}(s) = \mathbb{E}_{A_t\sim \pi(a|s)} [ G_t|S_t=s ]
+\begin{align*} 
+v_{\pi}(s) &= \sum_{a \in \mathcal{A}} \pi(a|s)G_t(a) \\\
+&= \mathbb{E}_{A_t\sim \pi(a|s)} [ G_t|S_t=s ]
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+We can define a new value function \( q_{\pi} \), which is the expectation of \( G_t \) after \( S_t=s,A_t=a \) is selected:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*} 
+q_{\pi}(s,a) &= \mathbb{E}_{\pi(a|s)} [ G_t|S_t=s,A_t=a] \\\
+&= G_t(a)
+\end{align*}
+$$
+
+## Bellman Expectation Equation
+
+{{< math.inline >}}
+<p>
+Now we can list state transition process regarding \( \mathcal{S},\mathcal{A},\mathcal{R} \):
+</p>
+{{</ math.inline >}}
+
+$$
+\boxed{S_t=s_1} : \begin{cases}
+  A_t = a_1 \\\
+  A_t = a_2 \\\
+  \boxed{A_t = a_3} : \begin{cases}
+    R_{t+1} = r_1 \\\
+    \boxed{R_{t+1} = r_2} : \begin{cases}
+      S_{t+1} = s_1 \\\
+      S_{t+1} = s_2 \\\
+      \boxed{S_{t+1} = s_3} \\\
+      \cdots
+    \end{cases} \\\
+    \cdots
+  \end{cases} \\\
+  \cdots
+\end{cases}
+$$
+
+$$
+(S_t=s) \rarr (A_t=a) \underset{ 
+  \begin{subarray}{c}
+   R_{t+1}=r \\\
+   \cdots \\\
+   \cdots
+\end{subarray}
+ }{\rarr} (S_{t+1}=s') \rarr (A_{t+1}=a')
+$$
+
+{{< math.inline >}}
+<p>
+However, solving \( S_t \) requires backtracing:
+</p>
+{{</ math.inline >}}
+
+$$
+(S_t=s) \larr (A_t=a) \underset{ 
+  \begin{subarray}{c}
+   R_{t+1}=r \\\
+   R_{t+1}=\cdots \\\
+   \cdots
+\end{subarray}
+ }{\larr} (S_{t+1}=s') \larr (A_{t+1}=a') \\\
+$$
+
+Which is backtracing value function:
+
+$$
+v_{\pi}(s) \larr q_{\pi}(s,a) \underset{ 
+  \begin{subarray}{c}
+   R_{t+1}=r \\\
+   R_{t=1}=\cdots \\\
+   \cdots
+\end{subarray}
+ }{\larr}v_{\pi}(s') \larr q_{\pi}(s',a')
+$$
+
+We have the relation between \( v_{\pi}(s) \) and \( q_{\pi}(s,a) \):
+
+$$
+\begin{align*} 
+v_{\pi}(s) &= \sum_{a \in \mathcal{A}} \pi(a|s)G_t(a) \\\
+&= \sum_{a \in \mathcal{A}} \pi(a|s)q_{\pi}(s,a) \\\
+& \leq \max_a q_{\pi}(s,a)
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+For \( q_{\pi}(s,a) \) and \( v_{\pi}(s') \), if it only has one path:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+    q_{\pi}(s,a) = G_t &= R_{t+1}+\gamma R_{t+2}+\gamma^2 R_{t+3}+\cdots+\gamma^{T-t-1}R_T \\\
+    &= R_{t+1} + \gamma \left( R_{t+2}+\gamma R_{t+3}+\cdots+\gamma^{T-t-2} R_T \right) \\\
+    &= R_{t+1} + \gamma G_{t+1} \\\
+    &= R_{t+1} + \gamma v_{\pi}(s') \\\
+    &= r + \gamma v_{\pi}(s')
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Calculate expectation as \( r \) and \( s' \) are variables, and we can get the relation between \( q_{\pi}(s,a) \) and \( v_{\pi}(s') \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+    q_{\pi}(s,a) &= \sum_{r\in \mathcal{R},s'\in \mathcal{S}} p(s^{'},r|s,a)(r + \gamma v_{\pi}(s'))
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Now we can conclude the relation between \( q_{\pi}(s,a) \) and \( q_{\pi}(s',a') \), \( v_{\pi}(s) \) and \( v_{\pi}(s') \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{cases}
+  v_{\pi}(s) = \sum_{a \in \mathcal{A}} \pi(a|s)q_{\pi}(s,a) \\\
+  q_{\pi}(s,a) = \sum_{r\in \mathcal{R},s'\in \mathcal{S}} p(s^{'},r|s,a)(r + \gamma v_{\pi}(s'))
+\end{cases} \\\
+\dArr \\\
+\begin{cases}
+  v_{\pi}(s) = \sum_{a \in \mathcal{A}} \pi(a|s) \left(\sum_{r\in \mathcal{R},s'\in \mathcal{S}} p(s^{'},r|s,a)(r + \gamma v_{\pi}(s'))\right) \\\
+  q_{\pi}(s,a) = \sum_{r\in \mathcal{R},s'\in \mathcal{S}} p(s^{'},r|s,a)\left(r + \gamma \sum_{a' \in \mathcal{A}} \pi(a'|s')q_{\pi}(s',a')\right)
+\end{cases}
+$$
+
+Combine together, we get **Bellman Expectation Equation**:
+
+$$
+\begin{cases}
+  v_{\pi}(s) = \sum_{a \in \mathcal{A}} \pi(a|s)q_{\pi}(s,a) \\\
+  q_{\pi}(s,a) = \sum_{r\in \mathcal{R},s'\in \mathcal{S}} p(s^{'},r|s,a)(r + \gamma v_{\pi}(s')) \\\
+  v_{\pi}(s) = \sum_{a \in \mathcal{A}} \pi(a|s) \left(\sum_{r\in \mathcal{R},s'\in \mathcal{S}} p(s^{'},r|s,a)(r + \gamma v_{\pi}(s'))\right) \\\
+  q_{\pi}(s,a) = \sum_{r\in \mathcal{R},s'\in \mathcal{S}} p(s^{'},r|s,a)\left(r + \gamma \sum_{a' \in \mathcal{A}} \pi(a'|s')q_{\pi}(s',a')\right)
+\end{cases}
 $$
 
 ## Reference
