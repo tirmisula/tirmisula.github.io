@@ -254,7 +254,11 @@ v_{\pi}(s) \larr q_{\pi}(s,a) \underset{
  }{\larr}v_{\pi}(s') \larr q_{\pi}(s',a')
 $$
 
-We have the relation between \( v_{\pi}(s) \) and \( q_{\pi}(s,a) \):
+{{< math.inline >}}
+<p>
+For \( v_{\pi}(s) \) and \( q_{\pi}(s,a) \) we have the relation:
+</p>
+{{</ math.inline >}}
 
 $$
 \begin{align*} 
