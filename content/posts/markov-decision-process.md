@@ -270,7 +270,7 @@ $$
 
 {{< math.inline >}}
 <p>
-For \( q_{\pi}(s,a) \) and \( v_{\pi}(s') \), if it only has one path:
+For \( q_{\pi}(s,a) \) and \( v_{\pi}(s') \), if it only has one path to go:
 </p>
 {{</ math.inline >}}
 
@@ -322,6 +322,115 @@ $$
   q_{\pi}(s,a) = \sum_{r\in \mathcal{R},s'\in \mathcal{S}} p(s^{'},r|s,a)(r + \gamma v_{\pi}(s')) \\\
   v_{\pi}(s) = \sum_{a \in \mathcal{A}} \pi(a|s) \left(\sum_{r\in \mathcal{R},s'\in \mathcal{S}} p(s^{'},r|s,a)(r + \gamma v_{\pi}(s'))\right) \\\
   q_{\pi}(s,a) = \sum_{r\in \mathcal{R},s'\in \mathcal{S}} p(s^{'},r|s,a)\left(r + \gamma \sum_{a' \in \mathcal{A}} \pi(a'|s')q_{\pi}(s',a')\right)
+\end{cases}
+$$
+
+## Bellman Optimality Equation
+
+{{< math.inline >}}
+<p>
+Suppose there is only one optimal policy \( \pi_{\ast} \) maximizing the value function, optimal policy \( \pi_{\ast} \) and optimal value function \( v_{\ast}(s) \) can be defined as:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{cases}
+\pi_{\ast} = \argmax_{\pi} v_{\pi}(s) \\\
+v_{\ast}(s) = \max_{\pi} v_{\pi}(s)
+\end{cases} \\\
+\dArr \\\
+v_{\ast}(s) = v_{\pi_{\ast}}(s)
+$$
+
+{{< math.inline >}}
+<p>
+We can do the same thing for action value function:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{cases}
+\pi_{\ast} = \argmax_{\pi} q_{\pi}(s,a) \\\
+q_{\ast}(s,a) = \max_{\pi} q_{\pi}(s,a)
+\end{cases} \\\
+\dArr \\\
+q_{\ast}(s,a) = q_{\pi_{\ast}}(s,a)
+$$
+
+{{< math.inline >}}
+<p>
+We want to write a same form as Bellman expectation equation for \( v_{\pi_{\ast}} \) and \( q_{\pi_{\ast}} \). First, we can conclude from Bellman expectation equation:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+v_{\pi_{\ast}}(s) &= \sum_{a \in \mathcal{A}} \pi_{\ast}(a|s)q_{\pi_{\ast}}(s,a) \\\
+&\leq \max_{a} q_{\pi_{\ast}}(s,a)
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Next, to verify the assumption we want to prove \( v_{\pi_{\ast}}(s) = \max_{a} q_{\pi_{\ast}} \):
+</p>
+{{</ math.inline >}}
+
+$$
+\textbf{Proof by Contradiction: } v_{\pi_{\ast}}(s) = \max_{a} q_{\pi_{\ast}}(s,a) \\\
+\begin{cases}
+&\text{Assume exists $v_{\pi_{\ast}}(s) < \max_{a} q_{\pi_{\ast}}(s,a)$, we can construct a new policy $\pi_{new}$:} \\\
+&\quad\quad\text{$\pi_{new} : \begin{cases}
+  \pi_{new}(a|s) = \begin{cases}
+    1, & if \space a = \argmax_a q_{\pi_{\ast}}(s,a) \\\
+    0, & else
+  \end{cases} \\\
+  \pi_{new}(a|\neg s) = \pi_{\ast}(a|\neg s), \quad \neg s \in \lbrace\mathcal{S}\setminus s\rbrace
+\end{cases}$} \\\
+&\text{In this case $v_{\pi_{new}}(s)=1*\max_a q_{\pi_{\ast}}(s,a)>v_{\pi_{\ast}}(s)$, which is conflict with $v_{\pi_{\ast}}(s)=\max_{\pi}v_{\pi}(s)$} \\\
+&\text{Therefore, our assumption must be false, and we conclude that } v_{\pi_{\ast}}(s) = \max_{a} q_{\pi_{\ast}}(s,a)
+\end{cases}
+$$
+
+{{< math.inline >}}
+<p>
+It gives us recurrence relation between \(v_{\ast}(s)\) and \(q_{\ast}(s,a)\), the optimal \( \pi_{\ast} \) policy is the same optimal policy for both \( v_{\pi}(s) \) and \( q_{\pi}(s,a) \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{cases}
+  \max_{\pi} v_{\pi}(s) = \max_{a} q_{\pi_{\ast}}(s,a) = \max_a \max_{\pi} q_{\pi}(s,a) \\\
+  v_{\ast}(s) = \max_a q_{\ast}(s,a) 
+\end{cases}
+$$
+
+{{< math.inline >}}
+<p>
+It tells us what action to take during \( v_{\ast}(s) \rarr q_{\ast}(s,a) \) transition process by greedy stategy at each time t. On the other hands, we cannot decide what state to choose for \( q_{\ast}(s,a) \rarr v_{\ast}(s') \), <b>this transition natrually happens</b> in a Markov system, thus we can write down:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{cases}
+  v_{\ast}(s) = \max_a q_{\ast}(s,a) \\\
+  q_{\ast}(s,a) = \sum_{r\in \mathcal{R},s'\in \mathcal{S}} p(s^{'},r|s,a)(r + \gamma v_{\ast}(s'))
+\end{cases} \\\
+\dArr \\\
+\begin{cases}
+  v_{\ast}(s) = \max_a \sum_{r\in \mathcal{R},s'\in \mathcal{S}} p(s^{'},r|s,a)(r + \gamma v_{\ast}(s')) \\\
+  q_{\ast}(s,a) = \sum_{r\in \mathcal{R},s'\in \mathcal{S}} p(s^{'},r|s,a)(r + \gamma q_{\ast}(s',a'))
+\end{cases}
+$$
+
+Combine together, we get **Bellman Optimality Equation**:
+
+$$
+\begin{cases}
+  v_{\ast}(s) = \max_a q_{\ast}(s,a) \\\
+  q_{\ast}(s,a) = \sum_{r\in \mathcal{R},s'\in \mathcal{S}} p(s^{'},r|s,a)(r + \gamma v_{\ast}(s')) \\\
+  v_{\ast}(s) = \max_a \sum_{r\in \mathcal{R},s'\in \mathcal{S}} p(s^{'},r|s,a)(r + \gamma v_{\ast}(s')) \\\
+  q_{\ast}(s,a) = \sum_{r\in \mathcal{R},s'\in \mathcal{S}} p(s^{'},r|s,a)(r + \gamma q_{\ast}(s',a'))
 \end{cases}
 $$
 
