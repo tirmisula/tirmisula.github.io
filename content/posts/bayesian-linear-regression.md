@@ -59,49 +59,35 @@ draft: true
 }
 </style>
 
-## Background
-
-### Overview of PGM
+## Review of Linear Regression
 
 <cite>[^1]</cite>
 
 $$
-\text{PGM}: \begin{cases}
-    \text{Representation} \begin{cases}
-        \text{directed graph}\rarr  \text{Bayesian network} \\\
-        \text{undirected graph}\rarr \text{Markov network(MRF)} \\\
-        \text{continous variable}\rarr \text{\color{red}{Gaussian BN/Gaussian MRF}} \\\
-        \text{time$\rarr$} \underset{\text{$x_i$ not i.i.d.}}{\text{ Dynamic model}} \begin{cases}
-            \text{discrete state$\rarr$Hidden Markov Model} \\\
-            \text{continous state} \begin{cases}
-                \text{Linear model$\rarr$Karman Filter} \\\
-                \text{Nonlinear model$\rarr$Particle Filter}
-            \end{cases}
-        \end{cases}
+\begin{cases}
+    \underset{\text{MLE}}{\text{LS method: }}\begin{cases}
+            y = w^Tx + \epsilon\\\
+            \epsilon \sim \mathcal{N}(0, \sigma^2) \\\ 
+             \argmax_w \sum_{i=1}^N \log\left( \frac{1}{ \sqrt{2\pi} \sigma} \mathrm{e}^{-\frac{(y_i-w^Tx_i)^2}{2\sigma^2}} \right)\\\
+            \argmin_w \sum_{i=1}^N (y_i-w^Tx_i)^2
     \end{cases} \\\
-    \text{Inference} \begin{cases}
-        \text{MAP inference$\rarr \hat{x_A}=\argmax_{x_A}p(x_A|x_B)\propto\argmax p(x_A,x_B)$} \\\
-        \text{exact inference} \begin{cases}
-          \text{Variable elimination(VE)} \\\
-          \text{Belief propagation(BP)$\rarr$sum-product algorithm(Tree)} \\\
-          \text{Junction tree algorithm(Normal graph)}
-        \end{cases} \\\
-        \text{approximate inference} \begin{cases}
-            \text{Loop belief propagation(Cyclic graph)} \\\
-            \text{Variational inference} \\\
-            \text{MCMC: importance sampling}
-        \end{cases} 
-    \end{cases} \\\
-    \text{Learning} \begin{cases}
-        \text{parameter learning} \begin{cases}
-            \text{complete data: $(x,z)$} \\\
-            \text{hidden variable: $z$}
-        \end{cases} \\\
-        \text{structure learning}
+    \underset{\text{MAP}}{\text{Regularized LS: }}\begin{cases}
+        \text{Ridge: }   \begin{cases}
+            y = w^Tx + \epsilon\\\
+            \epsilon \sim \mathcal{N}(0, \sigma^2) \\\ 
+            \argmax_w \log\left( \prod_{i=1}^Np(y_i|w)p(w) \right) \\\
+            \argmin_w \sum_{i=1}^N (y_i-w^Tx_i)^2 + \frac{\sigma^2}{\sigma_0^2}{\lVert w \rVert}^2
+            \end{cases} \\\
+        \text{Lasso: }   \begin{cases}
+            y = w^Tx + \epsilon\\\
+            \epsilon \sim Laplace \\\ 
+            \argmax_w \log\left( \prod_{i=1}^Np(y_i|w)p(w) \right) \\\
+            \argmin_w \sum_{i=1}^N (y_i-w^Tx_i)^2 + \frac{\sigma^2}{\sigma_0^2}{\lVert w \rVert}^2
+            \end{cases} 
     \end{cases}
+
 \end{cases}
 $$
-
 
 ## Gaussian network
 
