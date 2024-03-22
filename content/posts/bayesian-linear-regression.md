@@ -169,10 +169,27 @@ $$
 $$
 \begin{align*}
 p(w|X,Y) &\propto \mathcal{N}(Xw, \sigma^{-2}I)\mathcal{N}(0,\Sigma_p) \\\
-&\propto 
+&\propto \exp\left(-\frac{1}{2\sigma^2}(Y^T-w^TX^T)(Y-Xw)\right)\exp\left(-\frac{1}{2}w^T\Sigma_p^{-1}w\right) \\\
+&= \exp\left(-\frac{1}{2\sigma^2}(Y^TY-2Y^TXw+w^TX^TXw)-\frac{1}{2}(w^T\Sigma_p^{-1}w)\right) \\\
+&= \exp\left( \frac{1}{\sigma^2}Y^TXw-\frac{1}{2}w^T(\frac{1}{\sigma^{2}}X^TX+\Sigma_p^{-1})w-\frac{1}{2\sigma^2}Y^TY \right) \\\
+&\triangleq \exp\left( -\frac{1}{2}(w-\mu_{?})^T \Sigma_{?}^{-1} (w-\mu_{?}) \right) \\\
+&\triangleq \exp(-\frac{1}{2}(w^T\Sigma_{?}^{-1}w-2\mu_{?}^T\Sigma_{?}^{-1}w+\mu_{?}^T\Sigma_{?}^{-1}\mu_{?}))
 \end{align*}
 $$
 
+Thus we can conclude:
+
+$$
+\begin{cases}
+-\frac{1}{2}w^T\Sigma_{?}^{-1}w = -\frac{1}{2}w^T(\frac{1}{\sigma^{2}}X^TX+\Sigma_p^{-1})w \\\
+\mu_{?}^T\Sigma_{?}^{-1}w = \sigma^{-2}Y^TXw
+\end{cases} \\\
+\dArr \\\
+\begin{cases}
+\Sigma_{?} = (\sigma^{-2}X^TX+\Sigma_p^{-1})^{-1} \\\
+\mu_{?} = \sigma^{-2}(\sigma^{-2}X^TX+\Sigma_p^{-1})^{-1}X^TY
+\end{cases}
+$$
 
 ## Summary
 
