@@ -240,8 +240,8 @@ For current prediction problem:
 $$
 \begin{align*}
 f(x_{new}) &= w^Tx_{new} = x_{new}^Tw \\\
-f(x_{new})|\text{Data},x_{new} &\sim \mathcal{N}(x^T_{new}\mu_w, x_{new}^T\Sigma_{w}x_{new}) \\\
-p(f(x_{new})|\text{Data},x_{new}) &= \int_w \mathcal{N}(x^T_{new}\mu_w, x_{new}^T\Sigma_{w}x_{new})p(w|\text{Data}) dw
+f(x_{new})|w,\text{Data},x_{new} &\sim \mathcal{N}(x^T_{new}\mu_w, x_{new}^T\Sigma_{w}x_{new}) \\\
+p(f(x_{new})|\text{Data},x_{new}) &= \int_w p(f(x_{new})|w,\text{Data},x_{new})p(w|\text{Data}) dw
 \end{align*}
 $$
 
@@ -267,8 +267,8 @@ For current prediction problem:
 $$
 \begin{align*}
 f(x_{new})+\epsilon &= x_{new}^Tw + \epsilon \\\
-y_{new}|\text{Data},x_{new}&\sim \mathcal{N}(x^T_{new}\mu_w, x_{new}^T\Sigma_{w}x_{new}+\sigma^2) \\\
-p(y_{new}|\text{Data},x_{new}) &= \int_w \mathcal{N}(x^T_{new}\mu_w, x_{new}^T\Sigma_{w}x_{new}+\sigma^2)p(w|\text{Data}) dw
+y_{new}|w,\text{Data},x_{new} &\sim \mathcal{N}(x^T_{new}\mu_w, x_{new}^T\Sigma_{w}x_{new}+\sigma^2) \\\
+p(y_{new}|\text{Data},x_{new}) &= \int_w p(y_{new}|w,\text{Data},x_{new})p(w|\text{Data}) dw
 \end{align*}
 $$
 
