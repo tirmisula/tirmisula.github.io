@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: true
+draft: false
 ---
 
 :                                                         
@@ -87,14 +87,16 @@ $$
             \argmin_w \sum_{i=1}^N (y_i-w^Tx_i)^2 + \lambda{\lVert w \rVert}
             \end{cases} 
     \end{cases} \\\
-    \text{Bayesian Linear Regresion} \text{: } \begin{cases}
+    \text{\color{red}{Bayesian Linear Regresion}} \text{: } \begin{cases}
+        \text{$w\in$ a distribution rather than a constant}  \\\
         \text{Inference } p(w|y)
     \end{cases}
 \end{cases}
 $$
 
 ## Bayesian Linear Regression
-### Problem Statement
+### Inference
+#### Problem Statement
 {{< math.inline >}}
 <p>
 Given that dataset \(\mathcal{D} = \{(x_1,y_1), (x_2,y_2), ..., (x_N,y_N)\}\):
@@ -145,7 +147,7 @@ $$
 \end{align*}
 $$
 
-### Posterier is Gaussian
+#### Posterier is Gaussian
 From previous [Exponential Family Distribution Chapter](https://tirmisula.github.io/posts/exponential-family-distribution/#conjugate-distribution), we know that if likelihood is exponential family distribution then the prior and posterier distributions are conjugate distributions. So we have:
 
 $$
@@ -191,7 +193,84 @@ $$
 \end{cases}
 $$
 
-## Summary
+$$
+w|X,Y \sim \mathcal{N}(\sigma^{-2}(\sigma^{-2}X^TX+\Sigma_p^{-1})^{-1}X^TY, (\sigma^{-2}X^TX+\Sigma_p^{-1})^{-1})
+$$
+
+### Prediction
+#### Problem statement
+Given new data and the posterier parameter:
+
+$$
+\begin{cases}
+x_{new}, y_{new} \\\
+f(x) = w^Tx \\\
+y = f(x) + \epsilon\\\
+\epsilon \sim \mathcal{N}(0, \sigma^2) \\\
+w|\text{Data} \sim \mathcal{N}(\mu_w,\Sigma_w)
+\end{cases}
+$$
+
+We want to predict:
+
+$$
+\begin{cases}
+f(x_{new}) & \text{without noise}\\\
+f(x_{new})+\epsilon & \text{with noise}
+\end{cases}
+$$
+
+#### Without Noise
+We have the conclusion of linear gaussian system from [previous chapter](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#prerequisite):
+
+$$
+\begin{cases}
+x \sim \mathcal{N}(\mu,\Sigma),
+x \in \mathbb{R}^p\\\
+y = Ax+B,
+y \in \mathbb{R}^q
+\end{cases}
+\\\
+\dArr \\\
+y \sim \mathcal{N}(A\mu+B,A\Sigma A^T)
+$$
+
+For current prediction problem:
+
+$$
+\begin{align*}
+f(x_{new}) &= w^Tx_{new} = x_{new}^Tw \\\
+f(x_{new})|\text{Data},x_{new} &\sim \mathcal{N}(x^T_{new}\mu_w, x_{new}^T\Sigma_{w}x_{new}) \\\
+p(f(x_{new})|\text{Data},x_{new}) &= \int_w \mathcal{N}(x^T_{new}\mu_w, x_{new}^T\Sigma_{w}x_{new})p(w|\text{Data}) dw
+\end{align*}
+$$
+
+#### With Noise
+We have the conclusion of linear gaussian system with random noise from [previous chapter](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#joint-pdf-problem-clarification-cite2cite):
+
+$$
+\begin{cases}
+x \sim \mathcal{N} (\mu, \Lambda^{-1})\\\
+\epsilon \sim \mathcal{N}(0, L^{-1}), \epsilon \perp x \\\
+y=Ax+B+\epsilon
+\end{cases}
+$$
+
+
+
+$$
+y \sim \mathcal{N}(A\mu+B, A \Lambda^{-1} A^T + L^{-1})
+$$
+
+For current prediction problem:
+
+$$
+\begin{align*}
+f(x_{new})+\epsilon &= x_{new}^Tw + \epsilon \\\
+y_{new}|\text{Data},x_{new}&\sim \mathcal{N}(x^T_{new}\mu_w, x_{new}^T\Sigma_{w}x_{new}+\sigma^2) \\\
+p(y_{new}|\text{Data},x_{new}) &= \int_w \mathcal{N}(x^T_{new}\mu_w, x_{new}^T\Sigma_{w}x_{new}+\sigma^2)p(w|\text{Data}) dw
+\end{align*}
+$$
 
 <!-- If you found any mistakes, please contact me via email. -->
 
