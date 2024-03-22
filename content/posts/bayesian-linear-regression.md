@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
 title: "Bayesian Linear Regression"
-date: "2023-09-18"
+date: "2023-09-22"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -215,8 +215,8 @@ We want to predict:
 
 $$
 \begin{cases}
-f(x_{new}) & \text{without noise}\\\
-f(x_{new})+\epsilon & \text{with noise}
+f(x_{new}) &: \text{without noise}\\\
+f(x_{new})+\epsilon &: \text{with noise}
 \end{cases}
 $$
 
@@ -235,7 +235,7 @@ y \in \mathbb{R}^q
 y \sim \mathcal{N}(A\mu+B,A\Sigma A^T)
 $$
 
-For current prediction problem:
+For current noise-free prediction problem:
 
 $$
 \begin{align*}
@@ -262,7 +262,7 @@ $$
 y \sim \mathcal{N}(A\mu+B, A \Lambda^{-1} A^T + L^{-1})
 $$
 
-For current prediction problem:
+For current with-noise prediction problem:
 
 $$
 \begin{align*}
