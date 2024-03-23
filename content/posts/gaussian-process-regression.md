@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: false
+draft: true
 ---
 
 :                                                         
@@ -115,7 +115,7 @@ $$
 \begin{cases}
 T : \text{continous domain} \\\
 t_1 \cdots t_n \in T, \forall n \in \mathbb{N} : \text{any finite subset in $T$} \\\
-\lbrace \xi_{t_1}\cdots\xi_{t_n} \rbrace : \text{$\forall \xi_{t_i\cdots\xi_{j}}\in$ multivariate gaussian}
+r.v.\space\lbrace \xi_{t_1}\cdots\xi_{t_n} \rbrace : \text{$\forall \xi_{t_i\cdots\xi_{j}}\in$ multivariate gaussian}
 \end{cases}
 $$
 
@@ -126,14 +126,25 @@ We can say stochastic function \( \xi \) distributed through Gaussian Process(GP
 {{</ math.inline >}}
 
 $$
-\xi \sim GP(m(t),k(t,t')) \\\
+\xi \sim \text{GP}(m(t),k(t,t')) \\\
 \begin{cases}
 m(t) &= \mathbb{E}[\xi_t] & \text{mean function} \\\
 k(t,t') &= \mathbb{E}[(\xi_t-\mathbb{E}[\xi_t])(\xi_{t'}-\mathbb{E}[\xi_{t'}])] & \text{covariance function}
 \end{cases}
 $$
 
-## Gaussian bayesian network
+## Review Bayesian Linear Regression
+Recall that in [bayesian linear regression chapter](https://tirmisula.github.io/posts/bayesian-linear-regression/) we have inference:
+
+$$
+a
+$$
+
+And prediction:
+
+$$
+a
+$$
 
 ### Review gaussian linear model
 Gaussian bayesian network(GBN) is a directed graph based on local <b>linear gaussian model</b> [which described before](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#solve-the-joint-pdf):
