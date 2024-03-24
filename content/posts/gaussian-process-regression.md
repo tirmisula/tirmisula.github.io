@@ -133,17 +133,81 @@ k(t,t') &= \mathbb{E}[(\xi_t-\mathbb{E}[\xi_t])(\xi_{t'}-\mathbb{E}[\xi_{t'}])] 
 \end{cases}
 $$
 
-## Review Bayesian Linear Regression
-Recall that in [bayesian linear regression chapter](https://tirmisula.github.io/posts/bayesian-linear-regression/) we have inference:
+## Gaussian Process Regression
+### Nonlinear Bayesian LR
+Recall that in [bayesian linear regression chapter](https://tirmisula.github.io/posts/bayesian-linear-regression/), we have the conclusion of posterier inference:
 
 $$
-a
+p(w|\text{Data}) = \mathcal{N}(\mu_w, \Sigma_w) \\\
+\begin{cases}
+    \mu_w = \sigma^{-2}(\sigma^{-2}X^TX+\Sigma_p^{-1})^{-1}X^TY \\\
+    \Sigma_w =  \sigma^{-2}X^TX+\Sigma_p^{-1})^{-1}
+\end{cases}
 $$
 
-And prediction:
+And the conlusion of new data prediction:
 
 $$
-a
+\begin{cases}
+    y = f(x) + \epsilon \\\
+    f(x) = x^Tw \\\
+    p(f(x_{new})|w,\text{Data},x_{new}) = \mathcal{N}(x^T_{new}\mu_w, x_{new}^T\Sigma_{w}x_{new}) \\\
+    p(y_{new}|w,\text{Data},x_{new}) = \mathcal{N}(x^T_{new}\mu_w, x_{new}^T\Sigma_{w}x_{new}+\sigma^2)
+\end{cases}
+$$
+
+{{< math.inline >}}
+<p>
+Nonlinear Bayesian LR indicates that \( f(x) \) is not a linear function. In this case \( f(x) \) usually has a new form which we have introduced in <a href="https://tirmisula.github.io/posts/support-vector-machine/#background-of-kernel-method">Kernel SVM chapter</a> before, a non-linear tranformation on \(x\) + a linear regression model:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{cases}
+    f(x) &= \phi(x)^Tw, \quad p(w)\sim\mathcal{N}(0,\Sigma_q) \\\
+    \phi(x) &= z, \quad\phi : x \mapsto z, x\in\mathbb{R}^p, z\in\mathbb{R}^q, p<q
+\end{cases}
+$$
+
+{{< math.inline >}}
+<p>
+Like <a href="https://tirmisula.github.io/posts/support-vector-machine/#background-of-kernel-method">Kernel SVM chapter</a> mentioned, we want to use the kernel trick to find a kernel function, so that we don't directly solve \( \phi(x) \):
+</p>
+{{</ math.inline >}}
+
+$$
+\text{Given: } X = \begin{bmatrix}
+    x_1 \cdots x_N
+\end{bmatrix}^T,
+Y = \begin{bmatrix}
+    y_1 \cdots y_N
+\end{bmatrix}^T, \lbrace x^{\ast},y^{\ast} \rbrace\in\lbrace x_{new},y_{new}\rbrace
+$$
+
+$$
+\text{Let } \Phi = \phi(X) = \begin{bmatrix}
+    \phi(x_1) \cdots \phi(x_N)
+\end{bmatrix}^T_{N\times q}
+$$
+
+$$
+\text{We have } \begin{cases}
+    \mu_w &= \sigma^{-2}(\sigma^{-2}\Phi^T\Phi+\Sigma_p^{-1})^{-1}X^TY \\\
+    \Sigma_w &=  \sigma^{-2}X^TX+\Sigma_p^{-1})^{-1}
+\end{cases}
+$$
+
+{{< math.inline >}}
+<p>
+For the new coming data \( x^{\ast} \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+f(x^{\ast}) &= \phi(x^{\ast})^Tw \\\
+
+\end{align*}
 $$
 
 ### Review gaussian linear model
