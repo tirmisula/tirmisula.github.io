@@ -164,7 +164,7 @@ Nonlinear Bayesian LR indicates that \( f(x) \) is not a linear function. In thi
 
 $$
 \begin{cases}
-    f(x) &= \phi(x)^Tw, \quad p(w)\sim\mathcal{N}(0,\Sigma_q) \\\
+    f(x) &= \phi(x)^Tw \\\
     \phi(x) &= z, \quad\phi : x \mapsto z, x\in\mathbb{R}^p, z\in\mathbb{R}^q, p<q
 \end{cases}
 $$
@@ -190,10 +190,20 @@ $$
 \end{bmatrix}^T_{N\times q}
 $$
 
+{{< math.inline >}}
+<p>
+Now the posterier \( p(w|\text{Data}) \) is calculated based on transformed data \( \Phi \), so we do the mapping \( X\mapsto\Phi \):
+</p>
+{{</ math.inline >}}
+
+$$
+\text{Let } p(w)\sim\mathcal{N}(0,\Sigma_q)
+$$
+
 $$
 \text{We have } \begin{cases}
-    \mu_w &= \sigma^{-2}(\sigma^{-2}\Phi^T\Phi+\Sigma_p^{-1})^{-1}X^TY \\\
-    \Sigma_w &=  \sigma^{-2}X^TX+\Sigma_p^{-1})^{-1}
+    \mu_w &= \sigma^{-2}(\sigma^{-2}\Phi^T\Phi+\Sigma_q^{-1})^{-1}\Phi^TY \\\
+    \Sigma_w &=  (\sigma^{-2}\Phi^T\Phi+\Sigma_q^{-1})^{-1}
 \end{cases}
 $$
 
@@ -206,8 +216,70 @@ For the new coming data \( x^{\ast} \):
 $$
 \begin{align*}
 f(x^{\ast}) &= \phi(x^{\ast})^Tw \\\
-
+f(x^{\ast})|X,Y,x^{\ast} &\sim \mathcal{N}\left(\phi(x^{\ast})^T\mu_w, \phi(x^{\ast})^T\Sigma_{w}\phi(x^{\ast})\right)
 \end{align*}
+$$
+
+$$
+\begin{align*}
+    \Sigma_w^{-1}\Sigma_q\Phi^T &= (\sigma^{-2}\Phi^T\Phi+\Sigma_q^{-1})\Sigma_q\Phi^T \\\
+    &= \sigma^{-2}\Phi^T\Phi\Sigma_q\Phi^T + \Phi^T \\\
+    &\text{Let } K = \Phi\Sigma_q\Phi^T \\\
+    &= \sigma^{-2}\Phi^TK + \Phi^T \\\
+    &= \sigma^{-2}\Phi^T(K+\sigma^2I)
+\end{align*}
+$$
+
+For the mean we have:
+
+$$
+\begin{align*}
+    \Sigma_{q}\Phi^T &= \sigma^{-2}\Sigma_w\Phi^T(K+\sigma^2I) \\\
+    \Sigma_{q}\Phi^T(K+\sigma^2I)^{-1} &= \sigma^{-2}\Sigma_w\Phi^T \\\
+    \Sigma_{q}\Phi^T(K+\sigma^2I)^{-1}Y &= \sigma^{-2}\Sigma_w\Phi^TY \\\
+    \Sigma_{q}\Phi^T(K+\sigma^2I)^{-1}Y &= \mu_w \\\
+    \phi(x^{\ast})^T\Sigma_{q}\Phi^T(K+\sigma^2I)^{-1}Y &= \phi(x^{\ast})^T\mu_w \\\
+\end{align*}
+$$
+
+We have introduced [Woodbury formula](https://tirmisula.github.io/posts/gaussian-network/#marginal-pdf-in-gmrf) for calculating matrix inversion in previous chapter, we have:
+
+$$
+A^{-1} + A^{-1}B(D - CA^{-1}B)^{-1}CA^{-1} = (A-BD^{-1}C)^{-1} \\\
+    \dArr \\\
+\Sigma_w = (\sigma^{-2}\Phi^T\Phi+\Sigma_q^{-1})^{-1} : \begin{cases}
+    A = \Sigma_q^{-1} \\\
+    B = \Phi^T \\\
+    D = -\sigma^2I \\\
+    C = \Phi
+\end{cases} \\\
+\dArr \\\
+$$
+
+$$
+\begin{align*}
+    \Sigma_w &= \Sigma_q + \Sigma_q\Phi^T(-\sigma^2I-\Phi\Sigma_q\Phi^T)^{-1}\Phi\Sigma_q \\\
+    &= \Sigma_q - \Sigma_q\Phi^T(\sigma^2I+\Phi\Sigma_q\Phi^T)^{-1}\Phi\Sigma_q \\\
+    &= \Sigma_q - \Sigma_q\Phi^T(\sigma^2I+K)^{-1}\Phi\Sigma_q \\\
+\end{align*}
+$$
+
+So for the covariance we have:
+
+$$
+\begin{align*}
+    \phi(x^{\ast})^T\Sigma_w\phi(x^{\ast}) &= \phi(x^{\ast})^T(\Sigma_q - \Sigma_q\Phi^T(\sigma^2I+K)^{-1}\Phi\Sigma_q)\phi(x^{\ast}) \\\
+    &= \phi(x^{\ast})^T\Sigma_q\phi(x^{\ast}) - \phi(x^{\ast})^T\Sigma_q\Phi^T(\sigma^2I+K)^{-1}\Phi\Sigma_q\phi(x^{\ast})
+\end{align*}
+$$
+
+In conclusion we have:
+
+$$
+f(x^{\ast})|X,Y,x^{\ast} \sim \mathcal{N}\begin{cases}
+    \mu^{\ast} = \phi(x^{\ast})^T\Sigma_{q}\Phi^T(K+\sigma^2I)^{-1}Y \\\
+    \Sigma^{\ast} = \phi(x^{\ast})^T\Sigma_q\phi(x^{\ast}) - \phi(x^{\ast})^T\Sigma_q\Phi^T(\sigma^2I+K)^{-1}\Phi\Sigma_q\phi(x^{\ast})
+\end{cases}
 $$
 
 ### Review gaussian linear model
