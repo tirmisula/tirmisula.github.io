@@ -134,7 +134,8 @@ k(t,t') &= \mathbb{E}[(\xi_t-\mathbb{E}[\xi_t])(\xi_{t'}-\mathbb{E}[\xi_{t'}])] 
 $$
 
 ## Gaussian Process Regression
-### Nonlinear Bayesian LR
+### Kernel Bayesian LR
+#### Definition
 Recall that in [bayesian linear regression chapter](https://tirmisula.github.io/posts/bayesian-linear-regression/), we have the conclusion of posterier inference:
 
 $$
@@ -158,7 +159,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Nonlinear Bayesian LR indicates that \( f(x) \) is not a linear function. In this case \( f(x) \) usually has a new form which we have introduced in <a href="https://tirmisula.github.io/posts/support-vector-machine/#background-of-kernel-method">Kernel SVM chapter</a> before, a non-linear tranformation on \(x\) + a linear regression model:
+Kernel Bayesian LR indicates that \( f(x) \) is not a linear function. In this case \( f(x) \) usually has a new form which we have introduced in <a href="https://tirmisula.github.io/posts/support-vector-machine/#background-of-kernel-method">Kernel SVM chapter</a> before, a non-linear tranformation on \(x\) + a linear regression model:
 </p>
 {{</ math.inline >}}
 
@@ -197,15 +198,23 @@ Now the posterier \( p(w|\text{Data}) \) is calculated based on transformed data
 {{</ math.inline >}}
 
 $$
-\text{Let } p(w)\sim\mathcal{N}(0,\Sigma_q)
+\begin{align*}
+&\text{Let } p(w)\sim\mathcal{N}(0,\Sigma_q) \\\
+&\text{Let } \epsilon\sim\mathcal{N}(0,\sigma^2)
+\end{align*}
 $$
 
 $$
 \text{We have } \begin{cases}
+    \mu_w &= \sigma^{-2}(\sigma^{-2}X^TX+\Sigma_p^{-1})^{-1}X^TY \\\
+    \Sigma_w &=  \sigma^{-2}X^TX+\Sigma_p^{-1})^{-1} \\\
+    &\dArr \\\
     \mu_w &= \sigma^{-2}(\sigma^{-2}\Phi^T\Phi+\Sigma_q^{-1})^{-1}\Phi^TY \\\
     \Sigma_w &=  (\sigma^{-2}\Phi^T\Phi+\Sigma_q^{-1})^{-1}
 \end{cases}
 $$
+
+#### Prediction
 
 {{< math.inline >}}
 <p>
@@ -278,11 +287,160 @@ In conclusion we have:
 $$
 f(x^{\ast})|X,Y,x^{\ast} \sim \mathcal{N}\begin{cases}
     \mu^{\ast} = \phi(x^{\ast})^T\Sigma_{q}\Phi^T(K+\sigma^2I)^{-1}Y \\\
-    \Sigma^{\ast} = \phi(x^{\ast})^T\Sigma_q\phi(x^{\ast}) - \phi(x^{\ast})^T\Sigma_q\Phi^T(\sigma^2I+K)^{-1}\Phi\Sigma_q\phi(x^{\ast})
+    \sigma^{\ast} = \phi(x^{\ast})^T\Sigma_q\phi(x^{\ast}) - \phi(x^{\ast})^T\Sigma_q\Phi^T(\sigma^2I+K)^{-1}\Phi\Sigma_q\phi(x^{\ast})
 \end{cases}
 $$
 
-### Review gaussian linear model
+$$
+y^{\ast}|X,Y,x^{\ast} \sim \mathcal{N}\begin{cases}
+    \mu_y^{\ast} = \phi(x^{\ast})^T\Sigma_{q}\Phi^T(K+\sigma^2I)^{-1}Y \\\
+    \sigma_y^{\ast} = \phi(x^{\ast})^T\Sigma_q\phi(x^{\ast}) - \phi(x^{\ast})^T\Sigma_q\Phi^T(\sigma^2I+K)^{-1}\Phi\Sigma_q\phi(x^{\ast})+\sigma^2
+\end{cases}
+$$
+
+#### Find kernel function
+{{< math.inline >}}
+<p>
+By observing \( \mu^{\ast},\sigma^{\ast} \), it exists a common pattern \( \phi\Sigma_q\phi \) which helps us to define the kernel function \( k(x,x') \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\text{Define } k(x,x') &= \phi(x)^T\Sigma_q\phi(x') \\\
+&\because \text{$\Sigma_q$ is positive definite}\\\
+&= \phi(x)^T\Sigma_q^{\frac{1}{2}}\Sigma_q^{\frac{1}{2}}\phi(x') \\\
+&= \left(\Sigma_q^{\frac{1}{2}}\phi(x)\right)^T\Sigma_q^{\frac{1}{2}}\phi(x') \\\
+&\text{Let }\psi(x)=\Sigma_q^{\frac{1}{2}}\phi(x) \\\
+&= \langle\psi(x),\psi(x')\rangle
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+\( k(x,x') \) is the inner product of high-dimensional function \(\psi(x)\), and we can represents common patterns in \( \mu^{\ast},\sigma^{\ast} \) with kernel function:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+K &= \begin{bmatrix}
+    \phi(x_1)^T \\\
+    \cdots \\\
+    \phi(x_N)^T
+\end{bmatrix}\Sigma_q\begin{bmatrix}\phi(x_1)\cdots\phi(x_N)\end{bmatrix} \\\
+&= \begin{bmatrix}
+    \phi(x_1)^T\Sigma_q\phi(x_1) & \cdots & \phi(x_1)^T\Sigma_q\phi(x_N) \\\
+    & \vdots & \\\
+    \phi(x_N)^T\Sigma_q\phi(x_1) & \cdots & \phi(x_N)^T\Sigma_q\phi(x_N)
+\end{bmatrix} \\\
+&= \begin{bmatrix}
+    k(x_1,x_1) & \cdots & k(x_1,x_N) \\\
+    & \vdots & \\\
+    k(x_N,x_1) & \cdots & k(x_N,x_N)
+\end{bmatrix} \\\
+\phi(x^{\ast})^T\Sigma_q\Phi^T &= \phi(x^{\ast})^T\Sigma_q\begin{bmatrix}\phi(x_1)\cdots\phi(x_N)\end{bmatrix} \\\
+&= \begin{bmatrix}\phi(x^{\ast})^T\Sigma_q\phi(x_1)\cdots\phi(x^{\ast})^T\Sigma_q\phi(x_N)\end{bmatrix} \\\
+&= \begin{bmatrix}k(x^{\ast},x_1)\cdots k(x^{\ast},x_N)\end{bmatrix} \\\
+\Phi\Sigma_q\phi(x^{\ast}) &= \begin{bmatrix}
+    \phi(x_1)^T \\\
+    \cdots \\\
+    \phi(x_N)^T
+\end{bmatrix}\Sigma_q \phi(x^{\ast}) \\\
+&= \begin{bmatrix}
+    \phi(x_1)^T\Sigma_q\phi(x^{\ast}) \\\
+    \cdots \\\
+    \phi(x_N)^T\Sigma_q\phi(x^{\ast})
+\end{bmatrix} \\\
+&= \begin{bmatrix}
+    k(x_1,x^{\ast}) \\\
+    \cdots \\\
+    k(x_N,x^{\ast})
+\end{bmatrix}
+\end{align*}
+$$
+
+So we have:
+
+$$
+f(x^{\ast}) \sim \mathcal{N}(\mu^{\ast}, \sigma^{\ast}) \\\
+\\\
+\begin{cases}
+    \mu^{\ast} = \begin{bmatrix}k(x^{\ast},x_1) \\\
+    \cdots \\\
+    k(x^{\ast},x_N)\end{bmatrix}^T\begin{bmatrix}
+    k(x_1,x_1)+\sigma^2 & \cdots & k(x_1,x_N) \\\
+    & \ddots & \\\
+    k(x_N,x_1) & \cdots & k(x_N,x_N)+\sigma^2
+\end{bmatrix}^{-1}Y \\\
+    \sigma^{\ast} = k(x^{\ast},x^{\ast}) - \begin{bmatrix}k(x^{\ast},x_1) \\\
+    \cdots \\\
+    k(x^{\ast},x_N)\end{bmatrix}^T\begin{bmatrix}
+    k(x_1,x_1)+\sigma^2 & \cdots & k(x_1,x_N) \\\
+    & \ddots & \\\
+    k(x_N,x_1) & \cdots & k(x_N,x_N)+\sigma^2
+\end{bmatrix}^{-1}\begin{bmatrix}k(x^{\ast},x_1) \\\
+    \cdots \\\
+    k(x^{\ast},x_N)\end{bmatrix}
+\end{cases}
+$$
+
+#### Relation with GPR
+
+Gaussian Process Regression(GPR) is related to prediction in nonlinear Bayesian linear regression by:
+
+$$
+f(x^{\ast}) \sim GP(m,k)
+$$
+
+Thus we say, 
+
+$$
+\text{GPR} = \text{Bayesian LR} + \text{kernel trick}
+$$
+
+#### Prove f(x) is a Gaussian process
+
+$$
+\begin{align*}
+    f(x) &= \phi(x)^Tw \\\
+    \\\
+    \mathbb{E}[f(x)] &= \mathbb{E}[ \phi(x)^Tw] \\\
+    &= \phi(x)^T\mathbb{E}[w] \\\
+    &= \phi(x)^T\mu_w \\\
+    \\\
+    \text{Cov}(f(x),f(x')) &= \mathbb{E}\left[ (f(x)-\mathbb{E}[f(x)])(f(x‘)-\mathbb{E}[f(x')]) \right] \\\
+    &= \mathbb{E}\left[\phi(x)^Tw\phi(x')^Tw - \phi(x)^Tw\phi(x')^T\mu_w - \phi(x')^Tw\phi(x)^T\mu_w + \phi(x)^T\mu_w\phi(x')^T\mu_w \right] \\\
+    &= \mathbb{E}\left[ \phi(x)^Tww^T\phi(x') - \phi(x)^Tw\mu_w^T\phi(x') - \phi(x)^T\mu_ww^T\phi(x') + \phi(x)^T\mu_w\mu_w^T\phi(x') \right] \\\
+    &= \mathbb{E}\left[ \phi(x)^T(ww^T-w\mu_w^T-\mu_ww^T+\mu_w\mu_w^T)\phi(x') \right] \\\
+    &= \phi(x)^T\mathbb{E}\left[(w-\mu_w)(w-\mu_w)^T\right]\phi(x') \\\
+    &= \phi(x)^T\Sigma_w\phi(x') = \langle\psi(x),\psi(x')\rangle \\\
+    &= k(x,x')
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+It tells us the expectation and covariance of \( f(x) \) can map to a mean function and a kernel function respectively.
+</p>
+{{</ math.inline >}}
+
+Based on the definition of GP we provided in the [above section](#formulation-of-gaussian-process), we can accordingly write:
+
+$$
+\begin{cases}
+    t\rarr\xi_t, &\lbrace \xi_t \rbrace_{t\in T} \sim \text{GP} \\\
+    x\rarr f(x), &\lbrace f(x) \rbrace_{x\in \mathbb{R}^{p}} \sim \text{GP}
+\end{cases}
+$$
+
+{{< math.inline >}}
+<p>
+So \( f(x) \) is the expected Gaussian process.
+</p>
+{{</ math.inline >}}
+
+### Prediction in GPR
 Gaussian bayesian network(GBN) is a directed graph based on local <b>linear gaussian model</b> [which described before](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#solve-the-joint-pdf):
 
 $$
