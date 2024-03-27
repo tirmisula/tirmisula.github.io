@@ -354,7 +354,7 @@ K &= \begin{bmatrix}
 \end{align*}
 $$
 
-So we have:
+So we have prediction result in kernel form:
 
 $$
 f(x^{\ast}) \sim \mathcal{N}(\mu^{\ast}, \sigma^{\ast}) \\\
@@ -533,19 +533,22 @@ $$
 
 {{< math.inline >}}
 <p>
-We can conclude that these two expressions of prediction between Kernel BLR and GPR are identically the same, if \( f(x) \) in GPR has attribute:
+We can conclude that these two expressions of prediction between Kernel BLR and GPR are identically the same, if Gaussian process \( f(x) \) has attributes:
 </p>
 {{</ math.inline >}}
 
 $$
-\lbrace f(x) \rbrace_{x\in\mathbb{R}^p} \sim \text{GP}(0,k(x,x')) \\\
+\begin{cases}
+    m(X) &= 0 \\\
+    k(X,X) &\triangleq k(x,x) = \langle \Sigma_q^{\frac{1}{2}}\phi(x),\Sigma_q^{\frac{1}{2}}\phi(x) \rangle
+\end{cases}
 $$
 
-{{< math.inline >}}
+<!-- {{< math.inline >}}
 <p>
 Furthermore kernel function \( k(x,x) \) in BLR is exactly the covariance function \( k(X,X) \) in GP.
 </p>
-{{</ math.inline >}}
+{{</ math.inline >}} -->
 
 ### f(x) in kernel BLR is a Gaussian process
 
