@@ -59,46 +59,40 @@ draft: true
 }
 </style>
 
-## Background
-
-### Overview of PGM
+## Review Linear Regression
 
 <cite>[^1]</cite>
 
 $$
-\text{PGM}: \begin{cases}
-    \text{Representation} \begin{cases}
-        \text{directed graph}\rarr  \text{Bayesian network} \\\
-        \text{undirected graph}\rarr \text{Markov network(MRF)} \\\
-        \text{continous variable}\rarr \text{\color{red}{Gaussian BN/Gaussian MRF}} \\\
-        \text{time$\rarr$} \underset{\text{$x_i$ not i.i.d.}}{\text{ Dynamic model}} \begin{cases}
-            \text{discrete state$\rarr$Hidden Markov Model} \\\
-            \text{continous state} \begin{cases}
-                \text{Linear model$\rarr$Karman Filter} \\\
-                \text{Nonlinear model$\rarr$Particle Filter}
-            \end{cases}
-        \end{cases}
+\begin{cases}
+    \underset{\text{MLE}}{\text{LS method: }}\begin{cases}
+            y = w^Tx + \epsilon\\\
+            \epsilon \sim \mathcal{N}(0, \sigma^2) \\\ 
+             \argmax_w \sum_{i=1}^N \log\left( \frac{1}{ \sqrt{2\pi} \sigma} \mathrm{e}^{-\frac{(y_i-w^Tx_i)^2}{2\sigma^2}} \right)\\\
+            \argmin_w \sum_{i=1}^N (y_i-w^Tx_i)^2
     \end{cases} \\\
-    \text{Inference} \begin{cases}
-        \text{MAP inference$\rarr \hat{x_A}=\argmax_{x_A}p(x_A|x_B)\propto\argmax p(x_A,x_B)$} \\\
-        \text{exact inference} \begin{cases}
-          \text{Variable elimination(VE)} \\\
-          \text{Belief propagation(BP)$\rarr$sum-product algorithm(Tree)} \\\
-          \text{Junction tree algorithm(Normal graph)}
-        \end{cases} \\\
-        \text{approximate inference} \begin{cases}
-            \text{Loop belief propagation(Cyclic graph)} \\\
-            \text{Variational inference} \\\
-            \text{MCMC: importance sampling}
-        \end{cases} 
+    \underset{\text{MAP}}{\text{Regularized LS: }}\begin{cases}
+        \text{Ridge: }   \begin{cases}
+            y = w^Tx + \epsilon\\\
+            y|w^Tx \sim \mathcal{N}(w^Tx, \sigma^2) \\\
+            w \sim \mathcal{N}(0, \sigma_0^2) \\\ 
+            \argmax_w \log\left( \prod_{i=1}^Np(y_i|w)p(w) \right) \\\
+            \argmin_w \sum_{i=1}^N (y_i-w^Tx_i)^2 + \frac{\sigma^2}{\sigma_0^2}{\lVert w \rVert}^2
+            \end{cases} \\\
+        \text{Lasso: }   \begin{cases}
+            y = w^Tx + \epsilon\\\
+            y|w^Tx \sim \mathcal{N}(w^Tx, \sigma^2) \\\
+            w \sim \text{Laplace}(0,\frac{1}{\lambda}) = \frac{\lambda}{2}\exp(-\lambda \Vert w \rVert) \\\ 
+            \argmax_w \log\left( \prod_{i=1}^Np(y_i|w)p(w) \right) \\\
+            \argmin_w \sum_{i=1}^N (y_i-w^Tx_i)^2 + \lambda{\lVert w \rVert}
+            \end{cases} 
     \end{cases} \\\
-    \text{Learning} \begin{cases}
-        \text{parameter learning} \begin{cases}
-            \text{complete data: $(x,z)$} \\\
-            \text{hidden variable: $z$}
-        \end{cases} \\\
-        \text{structure learning}
-    \end{cases}
+    \text{{Bayesian Linear Regresion}} \text{: } \begin{cases}
+        \text{$w\in$ dist}  \\\
+        \text{Inference } p(w|y) \\\
+        \text{Predict } p(y^{\ast}|w,\text{Data})
+    \end{cases} \\\
+    \text{\color{red}{Gaussian Process Regression}} : \text{Bayesian LR} + \text{kernel trick}
 \end{cases}
 $$
 
@@ -133,9 +127,9 @@ k(t,t') &= \mathbb{E}[(\xi_t-\mathbb{E}[\xi_t])(\xi_{t'}-\mathbb{E}[\xi_{t'}])] 
 \end{cases}
 $$
 
-## Gaussian Process Regression
-### Kernel Bayesian LR
-#### Definition
+<!-- ## Gaussian Process Regression -->
+## Kernel Bayesian LR
+### Definition
 Recall that in [bayesian linear regression chapter](https://tirmisula.github.io/posts/bayesian-linear-regression/), we have the conclusion of posterier inference:
 
 $$
@@ -214,7 +208,7 @@ $$
 \end{cases}
 $$
 
-#### Prediction
+### Prediction
 
 {{< math.inline >}}
 <p>
@@ -251,7 +245,7 @@ $$
 \end{align*}
 $$
 
-We have introduced [Woodbury formula](https://tirmisula.github.io/posts/gaussian-network/#marginal-pdf-in-gmrf) for calculating matrix inversion in previous chapter, we have:
+On the other hand, we have introduced [Woodbury formula](https://tirmisula.github.io/posts/gaussian-network/#marginal-pdf-in-gmrf) for calculating matrix inversion in previous chapter:
 
 $$
 A^{-1} + A^{-1}B(D - CA^{-1}B)^{-1}CA^{-1} = (A-BD^{-1}C)^{-1} \\\
@@ -298,7 +292,7 @@ y^{\ast}|X,Y,x^{\ast} \sim \mathcal{N}\begin{cases}
 \end{cases}
 $$
 
-#### Find kernel function
+### Find kernel function
 {{< math.inline >}}
 <p>
 By observing \( \mu^{\ast},\sigma^{\ast} \), it exists a common pattern \( \phi\Sigma_q\phi \) which helps us to define the kernel function \( k(x,x') \):
@@ -385,511 +379,93 @@ f(x^{\ast}) \sim \mathcal{N}(\mu^{\ast}, \sigma^{\ast}) \\\
 \end{cases}
 $$
 
-#### Relation with GPR
-
-Gaussian Process Regression(GPR) is related to prediction in nonlinear Bayesian linear regression by:
-
-$$
-f(x^{\ast}) \sim GP(m,k)
-$$
-
-Thus we say, 
-
-$$
-\text{GPR} = \text{Bayesian LR} + \text{kernel trick}
-$$
-
-#### Prove f(x) is a Gaussian process
-
-$$
-\begin{align*}
-    f(x) &= \phi(x)^Tw \\\
-    \\\
-    \mathbb{E}[f(x)] &= \mathbb{E}[ \phi(x)^Tw] \\\
-    &= \phi(x)^T\mathbb{E}[w] \\\
-    &= \phi(x)^T\mu_w \\\
-    \\\
-    \text{Cov}(f(x),f(x')) &= \mathbb{E}\left[ (f(x)-\mathbb{E}[f(x)])(f(x‘)-\mathbb{E}[f(x')]) \right] \\\
-    &= \mathbb{E}\left[\phi(x)^Tw\phi(x')^Tw - \phi(x)^Tw\phi(x')^T\mu_w - \phi(x')^Tw\phi(x)^T\mu_w + \phi(x)^T\mu_w\phi(x')^T\mu_w \right] \\\
-    &= \mathbb{E}\left[ \phi(x)^Tww^T\phi(x') - \phi(x)^Tw\mu_w^T\phi(x') - \phi(x)^T\mu_ww^T\phi(x') + \phi(x)^T\mu_w\mu_w^T\phi(x') \right] \\\
-    &= \mathbb{E}\left[ \phi(x)^T(ww^T-w\mu_w^T-\mu_ww^T+\mu_w\mu_w^T)\phi(x') \right] \\\
-    &= \phi(x)^T\mathbb{E}\left[(w-\mu_w)(w-\mu_w)^T\right]\phi(x') \\\
-    &= \phi(x)^T\Sigma_w\phi(x') = \langle\psi(x),\psi(x')\rangle \\\
-    &= k(x,x')
-\end{align*}
-$$
-
+## Gaussian Process Regression
+### GPR definition
 {{< math.inline >}}
 <p>
-It tells us the expectation and covariance of \( f(x) \) can map to a mean function and a kernel function respectively.
+Given a Gaussian process \( f(x) \), we have:
 </p>
 {{</ math.inline >}}
 
-Based on the definition of GP we provided in the [above section](#formulation-of-gaussian-process), we can accordingly write:
-
 $$
+\lbrace f(x) \rbrace_{x\in\mathbb{R}^p} \sim \text{GP}(m(x),k(x,x')) \\\
+\\\
 \begin{cases}
-    t\rarr\xi_t, &\lbrace \xi_t \rbrace_{t\in T} \sim \text{GP} \\\
-    x\rarr f(x), &\lbrace f(x) \rbrace_{x\in \mathbb{R}^{p}} \sim \text{GP}
+    m(x) &= \mathbb{E}[f(x)] \\\
+    k(x,x') &= \mathbb{E}\left[ (f(x)-m(x))(f(x')-m(x')) \right] 
 \end{cases}
 $$
 
-{{< math.inline >}}
-<p>
-So \( f(x) \) is the expected Gaussian process.
-</p>
-{{</ math.inline >}}
+The Gaussian process regression is given by:
+
+$$
+\text{Data: }\lbrace x_i,y_i \rbrace_{i=1}^N, X = \begin{bmatrix}
+    x_{11} & x_{12} & \dots & x_{1p}\\\
+    x_{21} & x_{22} & \dots & x_{2p}\\\
+    \dots \\\
+    x_{N1} & x_{N2} & \dots & x_{Np}
+\end{bmatrix}, Y = \begin{bmatrix}
+    y_1 \\\
+    y_2 \\\
+    \dots \\\
+    y_N
+\end{bmatrix} \\\
+\text{Model: }\begin{cases}
+    y = f(x)+\epsilon, \quad\epsilon\sim\mathcal{N}(0,\sigma^2) \\\
+    f(X) \sim \mathcal{N}(m(X),k(X,X)) \\\
+    Y \sim \mathcal{N}(m(x), k(X,X)+\sigma^2I)
+\end{cases}
+$$
 
 ### Prediction in GPR
-Gaussian bayesian network(GBN) is a directed graph based on local <b>linear gaussian model</b> [which described before](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#solve-the-joint-pdf):
+For the new data in GP, we have predictions:
 
 $$
-x \sim \mathcal{N} (\mu, \Lambda^{-1}) \\\
-y=Ax+B+\epsilon\\\
-\epsilon \sim \mathcal{N}(0, L^{-1}), \epsilon \perp x \\\
-\dArr \\\
-\begin{cases}
-y|x \sim \mathcal{N}(Ax+B, L^{-1}) \\\
-y \sim \mathcal{N}(A\mu+B, A \Lambda^{-1} A^T + L^{-1}) \\\
-\begin{bmatrix}
-    x\\\
-    y
-\end{bmatrix} \sim \mathcal{N}(\begin{bmatrix}
-    \mu \\\
-    A\mu + B
-\end{bmatrix}, \begin{bmatrix}
-    \Lambda^{-1} & \Lambda^{-1} A^T\\\
-    (\Lambda^{-1} A^T)^T & A \Lambda^{-1} A^T + L^{-1}
-\end{bmatrix}) \\\
-x|y \sim \mathcal{N}(\Sigma_{xy}\Sigma_{yy}^{-1} (x_y-\mu_{y}) + \mu_{x}, -\Sigma_{xy}\Sigma_{yy}^{-1}\Sigma_{yx}+\Sigma_{xx})
-\end{cases}
-$$
-
-A typical linear gaussian model is [Kalman filter](https://tirmisula.github.io/posts/kalman-filter/#definition):
-
-$$
-\begin{cases}
-z_1 \sim \mathcal{N}(\mu_1,\Sigma_1) \\\
-\epsilon\sim \mathcal{N}(0,Q) \\\
-\delta\sim \mathcal{N}(0,R) \\\
-z_t = Az_{t-1}+B+\epsilon \\\
-x_t = Cz_{t}+D+\delta \\\
-p(z_t|z_{t-1}) = \mathcal{N}(Az_{t-1}+B, Q) \\\
-p(x_t|z_{t}) = \mathcal{N}(Cz_{t}+D, R)
-\end{cases}
-$$
-
-### Modeling p(x) in GBN
-
-Recall that the factorization in [PGM chapter](https://tirmisula.github.io/posts/probabilistic-graphical-model/#definition):
-
-$$
-p(x_1,\cdots,x_p)=\prod_{i=1}^p p(x_i|x_{pa(i)})
+X^{\ast} = \begin{bmatrix}x_1^{\ast}\cdots x_M^{\ast}\end{bmatrix} \\\
+Y^{\ast} = f(X^{\ast}) + \epsilon
 $$
 
 {{< math.inline >}}
 <p>
-For each node, it is gaussian distribution in GBN, so conditional distribution \( p(x_i|x_{pa(i)}) \) is still gaussian:
+We can easily write down joint distribution of \( Y \) and \( f(X^{\ast}) \), since they are both Gaussian:
 </p>
 {{</ math.inline >}}
 
 $$
-x_i|x_{pa(i)} \sim \mathcal{N}(w_i^T(x_{pa(i)}-\mu_{pa(i)}) + \mu_i, \sigma_i^2)
-$$
-
-We can derive it's linear gaussian model:
-
-$$
-\text{Let $x_i$ has k parents $\in x_{pa(i)}$} \\\
-\begin{cases}
-x_{pa(i)} = (x_{pa(i)1},\cdots,x_{pa(i)k})^T \\\
-x_{pa(i)j} \sim \mathcal{N}(\mu_{ij}, \sigma_{ij}^2\epsilon) \\\
-\epsilon \sim \mathcal{N}(0,1) \\\
-w_i = (w_{i1}, \cdots, w_{ik})^T
-\end{cases} \\\
-\dArr
-$$
-
-$$
-\begin{cases}
-x_i &= w_i^T(x_{pa(i)}-\mu_{pa(i)}) + \mu_i + \sigma_i\epsilon \\\
-x_i-\mu_i &= \sum_{j=1}^k w_{ij}(x_{pa(i)j}-\mu_{ij}) + \sigma_i\epsilon \\\
-x_i-\mu_i|x_{pa(i)}-\mu_{pa(i)} &\sim \mathcal{N}(w_i^T(x_{pa(i)}-\mu_{pa(i)}), \sigma_i^2)
-\end{cases}
-$$
-
-### Vectorize p(x)
-
-Let:
-
-$$
-x=\begin{bmatrix}
-    x_1 \\\
-    \vdots \\\
-    x_p
-\end{bmatrix},
-\mu = \begin{bmatrix}
-    \mu_1 \\\ 
-    \vdots \\\
-    \mu_p 
-\end{bmatrix}
-$$
-
-Let:
-
-$$
-w_{i} = \begin{bmatrix}
-    w_{i1} \\\
-    \vdots \\\
-    w_{ip}
-\end{bmatrix},
-\begin{cases}
-    w_{ij} = 0, \text{if $x_j\notin x_{pa(i)}$} \\\
-    w_{ij} \neq 0, \text{if $x_j\in x_{pa(i)}$}
-\end{cases}
-$$
-
-We have:
-
-$$
 \begin{align*}
-x_i-\mu_i &= \sum_{j=1}^k w_{ij}(x_{pa(i)j}-\mu_{ij}) + \sigma_i\epsilon \\\
-&= \sum_{j} w_{ij}(x_{pa(i)j}-\mu_{ij})+ \sum_{a,x_a\notin x_{pa(i)}}0\cdot(x_a-\mu_a) + \sigma_i\epsilon \\\
-&= \begin{bmatrix}
-    w_{i1} \\\
-    \vdots \\\
-    w_{ip}
-\end{bmatrix}^T ( 
-    \begin{bmatrix}
-    x_1 \\\
-    \vdots \\\
-    x_p
-\end{bmatrix} - \begin{bmatrix}
-    \mu_1 \\\
-    \vdots \\\
-    \mu_p
-\end{bmatrix}
- ) + \epsilon\sigma_i \\\
- &= w_i^T (x-\mu) + \epsilon\cdot \sigma_i
-\end{align*}
-$$
-
-Let:
-
-$$
-W  =\begin{bmatrix}
-    w_1^T \\\
-    \vdots \\\
-    w_p^T
-\end{bmatrix},
-S = \begin{bmatrix}
-    \sigma_1 &  \\\
-    & \ddots \\\
-    & & \sigma_p
-\end{bmatrix},
-\epsilon = \begin{bmatrix}
-    \epsilon_1 \\\
-    \vdots \\\
-    \epsilon_p
-\end{bmatrix}, \epsilon_i\sim\mathcal{N}(0,1)
-$$
-
-We have:
-
-$$
-\begin{align*}
-\begin{bmatrix}
-    x_1-\mu_1 \\\
-    \vdots \\\
-    x_p-\mu_p
-\end{bmatrix} &= \begin{bmatrix}
-    w_1^T (x-\mu) + \epsilon_1\cdot \sigma_1 \\\
-    \vdots \\\
-    w_p^T (x-\mu) + \epsilon_p\cdot \sigma_p
-\end{bmatrix} \\\
-&= \begin{bmatrix}
-    w_1^T \\\
-    \vdots \\\
-    w_p^T
-\end{bmatrix} (x-\mu) + \begin{bmatrix}
-    \sigma_1 &  \\\
-    & \ddots \\\
-    & & \sigma_p
-\end{bmatrix}\begin{bmatrix}
-    \epsilon_1 \\\
-    \vdots \\\
-    \epsilon_p
-\end{bmatrix} \\\
-&\dArr \\\
-x-\mu &= W\cdot(x-\mu)+S\cdot\epsilon \\\
-(I-W)(x-\mu) &= S\cdot\epsilon \\\
-x-\mu &= (I-W)^{-1}S\cdot\epsilon
-\end{align*}
-$$
-
-Then the covariance matrix can be derived:
-
-$$
-\begin{align*}
-Cov(x) &= E[(x-\mu)(x-\mu)^T] \\\
-&= E[(x-\mu-E[x-\mu])(x-\mu-E[x-\mu])^T] \\\
-&=Cov(x-\mu) \\\
-&= E[((I-W)^{-1}S\epsilon)((I-W)^{-1}S\epsilon)^T] \\\
-&= (I-W)^{-1}S\cdot E[\epsilon\epsilon^T]\cdot S^T ((I-W)^{-1})^T \\\
-&= (I-W)^{-1}S S^T ((I-W)^{-1})^T
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-The vectorized form of \( p(x) \) is:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{bmatrix}
-    x_1 \\\
-    \vdots \\\
-    x_p
-\end{bmatrix} \sim \mathcal{N}\left(
-    \mu,
-    (I-W)^{-1}S S^T ((I-W)^{-1})^T \right) 
-$$
-
-<!-- Define weight at time t as:
-
-$$
-\begin{align*}
-\begin{bmatrix}
-x_1 \\\
-\vdots \\\
-x_p
-\end{bmatrix} - 
-\begin{bmatrix}
-\mu_1 \\\
-\vdots \\\
-\mu_p
-\end{bmatrix} &= 
-\begin{bmatrix}
-\sum_{j=1}^k w_{ij}(x_{pa(i)j} - \mu_{ij}) + \sigma_1^2 \\\
-\vdots \\\
-w_p^T(x_{pa(p)}-\mu_{p}) + \sigma_p^2
-\end{bmatrix} \\\
-&= 
-\end{align*}
-$$
-
-$$
-X = 
-\begin{bmatrix}
-x_1 \\
-\vdots \\
-x_p
-\end{bmatrix}, 
-\mu = 
-\begin{bmatrix}
-\mu_1 \\
-\vdots \\
-\mu_p
-\end{bmatrix}
-$$
-
-We can then express the linear model in vector form:
-
-$$
-X - \mu = WX + \epsilon
-$$
-
-where \(W\) is a weight matrix and \(\epsilon\) is a vector of noise terms. 
-
-The conditional distribution of \(X\) given its parents is then:
-
-$$
-X - \mu | Pa(X) \sim \mathcal{N}(W(Pa(X) - \mu), \Sigma)
-$$
-
-where \(\Sigma\) is the covariance matrix.
-
-在高斯贝叶斯网络中，每个节点的条件分布可以通过线性回归模型来表示。具体来说，给定节点 (i) 的父节点 (pa(i))，节点 (i) 的值 (x_i) 可以表示为其父节点的线性组合加上一个高斯噪声项 (\epsilon_i)：
-
-$$ x_i = w_i^Tx_{pa(i)} + \mu_i + \epsilon_i $$
-
-其中，(w_i) 是权重向量，(\mu_i) 是偏置项，(\epsilon_i) 是服从高斯分布的噪声项。因此，给定父节点的条件下，节点 (i) 的条件分布为：
-
-$$ x_i|x_{pa(i)} \sim \mathcal{N}(w_i^Tx_{pa(i)} + \mu_i, \sigma_i^2) $$
-
-这里，(\sigma_i^2) 是噪声项 (\epsilon_i) 的方差。 -->
-
-## Gaussian markov random field
-### Potential function and pdf in GMRF
-Gaussian markov random field(GMRF) is a undirected graph, we use [MRF factorization theorem introduced before](https://tirmisula.github.io/posts/probabilistic-graphical-model/#formula-for-nodes-and-edges):
-
-$$
-\begin{align*}
-p(x) &= \frac{1}{z} \prod_{i=1}^p \underset{\text{node potential}}{\psi_i(x_i)} \prod_{i,j\in edge} \underset{\text{edge potential}}{\psi_{i,j}(x_i,x_j)} \\\
-&= \frac{1}{z} \exp( -\sum_{i=1}^p E_i(x_{i})-\sum_{i,j\in edge}E_{i,j}(x_i,x_j)) \\\
-\end{align*}
-$$
-
-On the other hands, it is a multivariate gaussian distribution:
-
-$$
-\begin{align*}
-p(x) &= \frac{1}{(2\pi)^{\frac{p}{2}}|\Sigma|^{\frac{1}{2}}} \exp(-\frac{1}{2} (x-\mu)^T\Sigma^{-1}(x-\mu)) \\\
-&\propto \exp(-\frac{1}{2} (x-\mu)^T\Sigma^{-1}(x-\mu)) \\\
-&= \exp( -\frac{1}{2} \left( x^T\Lambda-\mu^T\Lambda(x-\mu) \right) ) \\\
-&= \exp( -\frac{1}{2} \left( x^T\Lambda x-\mu^T\Lambda x-x^T\Lambda\mu+\mu^T\Lambda\mu \right) ) \\\
-&= \exp( -\frac{1}{2} \left( x^T\Lambda x-2\mu^T\Lambda x+\mu^T\Lambda\mu \right) ) \\\
-&\propto \exp( -\frac{1}{2} x^T\Lambda x+\mu^T\Lambda x ) \\\
-&\because \Lambda^T=\Lambda \\\
-&= \exp( -\frac{1}{2} \underset{\text{quadratic form}} {x^T\Lambda x}+\underset{\text{linear form}}{(\Lambda\mu)^T x} ) \\\
-&\text{Let $\Lambda\mu = \begin{bmatrix}
-h_1 \\\
-\vdots \\\
-h_p
-\end{bmatrix}$ be the potential vector,}  \\\
-&= \exp( -\frac{1}{2}\sum_{i=1}^p\sum_{j=1}^px_i\lambda_{ij}x_j+\sum_{i=1}^p h_ix_i )
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-Now we can say that GMRF's pdf has relation with GMRF's potential function:
-</p>
-{{</ math.inline >}}
-
-$$
-\exp( -\sum_{i=1}^p E_i(x_{i})-\sum_{i,j\in edge}E_{i,j}(x_i,x_j)) \triangleq \exp( -\frac{1}{2}\sum_{i=1}^p\sum_{j=1}^px_i\lambda_{ij}x_j+\sum_{i=1}^p h_ix_i ) \\\
-\dArr
-$$
-
-$$
-\begin{align*}
-E_i(x_i) &\propto -\frac{1}{2} x_i^2\lambda_{ii} + h_ix_i \\\
-E_{i,j}(x_i,x_j) &\propto -\frac{1}{2} (x_i\lambda_{ij}x_j+x_j\lambda_{ji}x_i) = -\lambda_{ij}x_ix_j
-\end{align*}
-$$
-
-### Pairwise markov property in GMRF
-
-The precision matrix can be used for determine conditional independence:
-
-$$
-\lambda_{ij}=0 \implies \begin{cases}
-\text{$\psi_i$ and $\psi_j$ exist} \\\
-\text{$\psi_{i,j}$ not exist}
-\end{cases} \implies 
-\text{$x_i,x_j$ not connected} \implies 
-\text{$x_i\perp x_j|x\setminus \lbrace x_i,x_j\rbrace$}
-$$
-
-### Marginal pdf in GMRF
-
-#### Natural parameterization
-
-<b>Natural parameterization</b><cite>[^2]<cite> <cite>[^5]</cite> gives:
-
-$$
-\begin{align*}
-p(x|\mu, \Sigma) &= \frac{1}{(2\pi)^{d/2}|\Sigma|^{1/2}} \exp\left(-\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu)\right) \\\
-&\propto \exp\left( -\frac{1}{2}(x-\mu)^T\Sigma^{-1}(x-\mu) \right) \\\
-&\text{Let $\Lambda=\Sigma^{-1},\eta=\Lambda\mu$} \\\
-p(x|\eta, \Lambda) &= \frac{|\Lambda|^{1/2}}{(2\pi)^{d/2}} \exp\left(-\frac{1}{2}(x^T\Lambda x - 2x^T\eta + \eta^T\Lambda^{-1}\eta)\right) \\\
-&\propto \exp\left( (\Lambda\mu)^T x-\frac{1}{2}x^T\Lambda x \right)
+\because \text{Cov}(f(X)+\epsilon,f(X^{\ast}))&=\text{Cov}(f(X),f(X^{\ast}))+\text{Cov}(\epsilon,f(X^{\ast})) \\\
+&=\text{Cov}(f(X),f(X^{\ast})), \epsilon\perp f(X^{\ast})
 \end{align*} \\\
-\text{$\eta$ and $\Lambda$ are information vector and matrix respectively}
+\dArr
 $$
-
-The joint distribution by canonical parameterization and natural parameterization are listed as follows:
-
-$$
-\begin{align*}
-\begin{bmatrix}
-    x_a \\\
-    x_b
-\end{bmatrix} &\sim \mathcal{N}\left(\begin{bmatrix}
-    \mu_a \\\
-    \mu_b
-\end{bmatrix}, \begin{bmatrix}
-    \Sigma_{aa} & \Sigma_{ab} \\\
-    \Sigma_{ba} & \Sigma_{bb}
-\end{bmatrix} \right) \\\
-\begin{bmatrix}
-    x_a \\\
-    x_b
-\end{bmatrix} &\sim \tilde{\mathcal{N}}\left(\begin{bmatrix}
-    \eta_a \\\
-    \eta_b
-\end{bmatrix}, \begin{bmatrix}
-    \Lambda_{aa} & \Lambda_{ab} \\\
-    \Lambda_{ba} & \Lambda_{bb}
-\end{bmatrix} \right)
-\end{align*}
-$$
-
-In which we have:
 
 $$
 \begin{bmatrix}
-    \eta_{a} \\\
-    \eta_{b}
-\end{bmatrix} = \Lambda \mu = \begin{bmatrix}
-    \Lambda_{aa}\mu_a + \Lambda_{ab}\mu_b \\\
-    \Lambda_{ba}\mu_a + \Lambda_{bb}\mu_b
-\end{bmatrix}
-$$
-
-#### The relation between covariance and precision matrix
-The <b>matrix's blockwise inversion</b><cite>[^3]</cite> formula shows:
-
-$$
-\begin{bmatrix} A & B \\\ C & D \end{bmatrix}^{-1} = \begin{bmatrix} A^{-1} + A^{-1}B(D - CA^{-1}B)^{-1}CA^{-1} & -A^{-1}B(D - CA^{-1}B)^{-1} \\\ -(D - CA^{-1}B)^{-1}CA^{-1} & (D - CA^{-1}B)^{-1} \end{bmatrix}
+    Y \\\
+    f(X^{\ast})
+\end{bmatrix} \sim \mathcal{N}(
+    \begin{bmatrix}
+        m(X) \\\
+        m(X^{\ast})
+    \end{bmatrix}, \begin{bmatrix}
+        k(X,X)+\sigma^2I & k(X,X^{\ast}) \\\
+        k(X^{\ast},X) & k(X^{\ast},X^{\ast})
+    \end{bmatrix}
+)
 $$
 
 {{< math.inline >}}
 <p>
-Since \(\Sigma\) is symmetric, we can get the mapping relations between submatrices of \( \Sigma \) and \( \Lambda \):
+On the other hand, the conditional distribution \( f(X^{\ast})|Y \) is exactly the prediction problem:
 </p>
 {{</ math.inline >}}
 
-$$
-\begin{bmatrix}
-\Lambda_{aa} & \Lambda_{ab} \\\
-\Lambda_{ab}^T & \Lambda_{bb}
-\end{bmatrix} = \begin{bmatrix} \Sigma_{aa}^{-1} + \Sigma_{aa}^{-1}\Sigma_{ab}(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}\Sigma_{ab}^T\Sigma_{aa}^{-1} & -\Sigma_{aa}^{-1}\Sigma_{ab}(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1} \\\ -(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}\Sigma_{ab}^T\Sigma_{aa}^{-1} & (\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1} \end{bmatrix} \\\
-% P_{22}-P_{12}^TP_{11}^{-1}P_{12}\implies \\\
-% = (\Sigma_{bb}-\Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1} - (\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}\Sigma_{ab}^T\Sigma_{aa}^{-1} (\Sigma_{aa}-\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ab}^T) \Sigma_{aa}^{-1}\Sigma_{ab}(\Sigma_{bb} - \Sigma_{ab}^T\Sigma_{aa}^{-1}\Sigma_{ab})^{-1}
-$$
 
 $$
-\begin{bmatrix}
-\Sigma_{aa} & \Sigma_{ab} \\\
-\Sigma_{ab}^T & \Sigma_{bb}
-\end{bmatrix} = \begin{bmatrix} \Lambda_{aa}^{-1} + \Lambda_{aa}^{-1}\Lambda_{ab}(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1}\Lambda_{ab}^T\Lambda_{aa}^{-1} & -\Lambda_{aa}^{-1}\Lambda_{ab}(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1} \\\ -(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1}\Lambda_{ab}^T\Lambda_{aa}^{-1} & (\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1} \end{bmatrix}
+p(f(X^{\ast})|\text{Data},X^{\ast}) = p(f(X^{\ast})|Y,X,X^{\ast})
 $$
 
-And the <b>Woodbury matrix identity</b><cite>[^4]</cite> gives that:
-
-$$
-A^{-1} + A^{-1}B(D - CA^{-1}B)^{-1}CA^{-1} = (A-BD^{-1}C)^{-1}
-$$
-<!-- $$
-(D - CA^{-1}B)^{-1} - (D - CA^{-1}B)^{-1}CA^{-1}(A-BD^{-1}C) (A-BD^{-1}C)^{-1}BD^{-1}
-= (D - CA^{-1}B)^{-1} - (D - CA^{-1}B)^{-1}CA^{-1}BD^{-1} \\\
-= (D - B^TA^{-1}B)^{-1} - (D - B^TA^{-1}B)^{-1}B^TA^{-1}BD^{-1} \\\
-= (D - CA^{-1}B)^{-1} - D^{-1}C(A-BD^{-1}C)^{-1} BD^{-1}
-$$ -->
-
-So we have:
-
-$$
-\Lambda_{aa} = (\Sigma_{aa}-\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ab}^T)^{-1} \\\
-\Sigma_{aa} = (\Lambda_{aa}-\Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ab}^T)^{-1}
-$$
-
-#### Marginal and conditional pdf from canonical parameterization 
-
-We get the conlusion for [Gaussian marginal pdf and conditional pdf from joint pdf](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#solve-the-marginal-pdf) before:
+We have learned how to calculate a conditional Gaussian distribution from a joint Gaussian distribution in [previous chapter](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#solve-the-conditonal-pdf):
 
 $$
 \begin{cases}
@@ -915,138 +491,117 @@ x_a|x_b \sim \mathcal{N}(\Sigma_{ab}\Sigma_{bb}^{-1} (x_b-\mu_{b}) + \mu_{a}, {-
 \end{cases}
 $$
 
-#### Marginal and conditional pdf from natural parameterization 
+So we have:
 
-Combined with above conclusions, we can write down natural parameterization results of marginal and conditional pdf:
+$$
+f(X^{\ast})|Y,X,X^{\ast} \sim \mathcal{N}(\mu^{\ast}, \Sigma^{\ast}) \\\
+\begin{cases}
+    \mu^{\ast} = k(X^{\ast},X)(k(X,X)+\sigma^2I)^{-1}(Y-m(X)) + m(X^{\ast}) \\\
+    \Sigma^{\ast} = -k(X^{\ast},X)(k(X,X)+\sigma^2I)^{-1}k(X,X^{\ast})+k(X^{\ast},X^{\ast})
+\end{cases}
+$$
 
-1. Marginal
-    $$
-    x_a \sim \mathcal{N}(\mu_a,\Sigma_{aa})
-    $$
+$$
+Y^{\ast}|Y,X,X^{\ast} \sim \mathcal{N}(\mu_Y^{\ast}, \Sigma_Y^{\ast}) \\\
+\begin{cases}
+    \mu_Y^{\ast} = k(X^{\ast},X)(k(X,X)+\sigma^2I)^{-1}(Y-m(X)) + m(X^{\ast}) \\\
+    \Sigma_Y^{\ast} = -k(X^{\ast},X)(k(X,X)+\sigma^2I)^{-1}k(X,X^{\ast})+k(X^{\ast},X^{\ast}) + \sigma^2I
+\end{cases}
+$$
 
-    For the variance:
+## Kernel BLR and GPR comparison
+### Kernel function is covariance function
+By observing the prediction results in Kernel BLR and GPR we have:
 
-    $$
-    \begin{align*}
-    Var(x_a) &= \Sigma_{aa} \\\
-    &= (\Lambda_{aa}-\Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ba})^{-1}
-    \end{align*}
-    $$
+$$
+\text{BLR} : \begin{cases}
+    \mu^{\ast} = \phi(x^{\ast})^T\Sigma_{q}\Phi^T(K+\sigma^2I)^{-1}Y \\\
+    \sigma^{\ast} = \phi(x^{\ast})^T\Sigma_q\phi(x^{\ast}) - \phi(x^{\ast})^T\Sigma_q\Phi^T(\sigma^2I+K)^{-1}\Phi\Sigma_q\phi(x^{\ast}) \\\
+    \mu_y^{\ast} = \phi(x^{\ast})^T\Sigma_{q}\Phi^T(K+\sigma^2I)^{-1}Y \\\
+    \sigma_y^{\ast} = \phi(x^{\ast})^T\Sigma_q\phi(x^{\ast}) - \phi(x^{\ast})^T\Sigma_q\Phi^T(\sigma^2I+K)^{-1}\Phi\Sigma_q\phi(x^{\ast})+\sigma^2
+\end{cases}
+$$
 
-    For the expectation:
+$$
+\text{GPR} : \begin{cases}
+    \mu^{\ast} = k(X^{\ast},X)(k(X,X)+\sigma^2I)^{-1}(Y-m(X)) + m(X^{\ast}) \\\
+    \Sigma^{\ast} = -k(X^{\ast},X)(k(X,X)+\sigma^2I)^{-1}k(X,X^{\ast})+k(X^{\ast},X^{\ast}) \\\
+    \mu_Y^{\ast} = k(X^{\ast},X)(k(X,X)+\sigma^2I)^{-1}(Y-m(X)) + m(X^{\ast}) \\\
+    \Sigma_Y^{\ast} = -k(X^{\ast},X)(k(X,X)+\sigma^2I)^{-1}k(X,X^{\ast})+k(X^{\ast},X^{\ast}) + \sigma^2I
+\end{cases}
+$$
 
-    $$
-    \begin{align*}
-    Var(x_a)^{-1}E[x_a] &= (\Lambda_{aa}-\Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ba})\mu_a \\\
-    &= \Lambda_{aa}\mu_a - \Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ba}\mu_a \\\
-    &= \Lambda_{aa}\mu_a - \Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ba}\mu_a + \Lambda_{ab}\mu_b - \Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{bb}\mu_b\\\
-    &= \Lambda_{aa}\mu_a + \Lambda_{ab}\mu_b - \Lambda_{ab}\Lambda_{bb}^{-1}(\Lambda_{ba}\mu_a + \Lambda_{bb}\mu_b) \\\
-    &= \eta_a - \Lambda_{ab}\Lambda_{bb}^{-1}\eta_b
-    \end{align*}
-    $$
-
-    Overall,
-
-    $$
-    x_a \sim \tilde{\mathcal{N}}(\eta_a-\Lambda_{ab}\Lambda_{bb}^{-1}\eta_b, \Lambda_{aa}-\Lambda_{ab}\Lambda_{bb}^{-1}\Lambda_{ba})
-    $$
-
-2. Conditional
-
-    $$
-    x_a|x_b \sim \mathcal{N}(\Sigma_{ab}\Sigma_{bb}^{-1} (x_b-\mu_{b}) + \mu_{a}, {-\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}+\Sigma_{aa} } )
-    $$
-
-    For the variance we have:
-
-    $$
-    \begin{align*}
-    Var(x_a|x_b) &= -\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}+\Sigma_{aa} \\\
-    &= \Lambda_{aa}^{-1}
-    \end{align*}
-    $$
-
-    For the expectation, notice that:
-
-    $$
-    \begin{align*}
-    \Sigma_{ab}\Sigma_{bb}^{-1} &= -\Lambda_{aa}^{-1}\Lambda_{ab}(\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab})^{-1} (\Lambda_{bb} - \Lambda_{ab}^T\Lambda_{aa}^{-1}\Lambda_{ab}) \\\
-    &= -\Lambda_{aa}^{-1}\Lambda_{ab}
-    \end{align*}
-    $$
-
-    So we have<cite>[^6]</cite>:
-
-    $$
-    \begin{align*}
-    E[x_a|x_b] &= \Sigma_{ab}\Sigma_{bb}^{-1}(x_b-\mu_b)+\mu_a \\\
-    &= \mu_a-\Lambda_{aa}^{-1}\Lambda_{ab}(x_b-\mu_b) \\\
-    Var(x_a|x_b)^{-1}E[x_a|x_b] &= \Sigma_{a|b}^{-1}(\mu_a-\Lambda_{aa}^{-1}\Lambda_{ab}(x_b-\mu_b)) \\\
-    &= \Lambda_{aa}\mu_a - \Lambda_{ab}x_b + \Lambda_{ab}\mu_b \\\
-    &= \eta_a - \Lambda_{ab}x_b
-    \end{align*}
-    $$
-
-    Overall,
-
-    $$
-    x_a|x_b \sim \tilde{\mathcal{N}}(\eta_a - \Lambda_{ab}x_b, \Lambda_{aa} )
-    $$
-
-#### Solving marginal pdf
 {{< math.inline >}}
 <p>
-In pairwise markov propety, we are solving \( p(x_i|x_{\setminus i}) \):
+We can conclude that these two expressions of prediction between Kernel BLR and GPR are identically the same, if \( f(x) \) in GPR has attribute:
+</p>
+{{</ math.inline >}}
+
+$$
+\lbrace f(x) \rbrace_{x\in\mathbb{R}^p} \sim \text{GP}(0,k(x,x')) \\\
+$$
+
+{{< math.inline >}}
+<p>
+Furthermore kernel function \( k(x,x) \) in BLR is exactly the covariance function \( k(X,X) \) in GP.
+</p>
+{{</ math.inline >}}
+
+### f(x) in kernel BLR is a Gaussian process
+
+{{< math.inline >}}
+<p>
+On the other hand, in kernel BLR:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-x &= \begin{bmatrix}x_i \\\
-x_{\setminus i}
-\end{bmatrix} \\\
-% x &\sim \mathcal{N}(0, \begin{bmatrix}
-%     \sigma_{ii} & \Sigma_{i\setminus{i}} \\\
-%     \Sigma_{\setminus{i}i} & \Sigma_{\setminus{i}\setminus{i}}
-% \end{bmatrix}) \\\
-% x_i|x_{\setminus i} &\sim \mathcal{N}(\Sigma)
+    f(x) &= \phi(x)^Tw \\\
+    \\\
+    \mathbb{E}[f(x)] &= \mathbb{E}[ \phi(x)^Tw] \\\
+    &= \phi(x)^T\mathbb{E}[w] \\\
+    &= \phi(x)^T\mu_w \\\
+    \\\
+    \text{Cov}(f(x),f(x')) &= \mathbb{E}\left[ (f(x)-\mathbb{E}[f(x)])(f(x‘)-\mathbb{E}[f(x')]) \right] \\\
+    &= \mathbb{E}\left[\phi(x)^Tw\phi(x')^Tw - \phi(x)^Tw\phi(x')^T\mu_w - \phi(x')^Tw\phi(x)^T\mu_w + \phi(x)^T\mu_w\phi(x')^T\mu_w \right] \\\
+    &= \mathbb{E}\left[ \phi(x)^Tww^T\phi(x') - \phi(x)^Tw\mu_w^T\phi(x') - \phi(x)^T\mu_ww^T\phi(x') + \phi(x)^T\mu_w\mu_w^T\phi(x') \right] \\\
+    &= \mathbb{E}\left[ \phi(x)^T(ww^T-w\mu_w^T-\mu_ww^T+\mu_w\mu_w^T)\phi(x') \right] \\\
+    &= \phi(x)^T\mathbb{E}\left[(w-\mu_w)(w-\mu_w)^T\right]\phi(x') \\\
+    &= \phi(x)^T\Sigma_w\phi(x') = \langle\psi(x),\psi(x')\rangle \\\
+    &= k(x,x')
 \end{align*}
 $$
 
-Use the marginalization conclusions above, we have:
+Based on the definition of GP we provided in the [above section](#formulation-of-gaussian-process), we can accordingly write:
 
 $$
-\begin{align*}
-Var(x_i|x_{\setminus{i}}) &= \Lambda_{ii}^{-1}=\sigma_{ii} \\\
-E[x_i|x_{\setminus{i}}] &= \mu_{i}-\Lambda_{ii}^{-1}\Lambda_{i\setminus{i}}(x_{\setminus{i}}-\mu_{\setminus{i}}) \\\
-\text{assume } &\text{$x$ is centralized} \\\
-&= \lambda_{ii}^{-1}\Lambda_{i\setminus{i}}x_{\setminus{i}} \\\
-&= \lambda_{ii}^{-1}\begin{bmatrix}
-    \lambda_{i1} \\\
-    \vdots \\\
-    \lambda_{ij} \\\
-    \vdots \\\
-    \lambda_{iN}
-\end{bmatrix}^T \begin{bmatrix}
-    x_1 \\\
-    \vdots \\\
-    x_j \\\
-    \vdots \\\
-    x_N
-\end{bmatrix} \\\
-&= \sum_{j,j\neq i} \frac{\lambda_{ij}}{\lambda_{ii}}x_j \\\
-&\dArr \\\
-x_i|x_{\setminus{i}} &\sim \mathcal{N}(\sum_{j,j\neq i} \frac{\lambda_{ij}}{\lambda_{ii}}x_j, \sigma_{ii})
-\end{align*}
+\begin{cases}
+    t\rarr\xi_t, &\lbrace \xi_t \rbrace_{t\in T} \sim \text{GP} \\\
+    x\rarr f(x), &\lbrace f(x) \rbrace_{x\in \mathbb{R}^{p}} \sim \text{GP}
+\end{cases}
 $$
 
 {{< math.inline >}}
 <p>
-Apparently the central of marginal \( p(x_i) \) is represented by a linear combination of connected \( x_j \).
+So \( f(x) \) in kernel BLR is the expected Gaussian process.
 </p>
 {{</ math.inline >}}
 
-## Summary
+### Summary
+
+$$
+\text{GPR}: \begin{cases}
+    \text{weight space} : \phi(x)^Tw\sim\mathcal{N}\left(\phi(x^T\mu_w, \phi(x)^T\Sigma_{w}\phi(x)\right) \\\
+    \text{function space} : f(x)\sim \text{GP}(m,k)
+\end{cases} \rArr \phi(x)^Tw=f(x)
+$$
+
+Thus, 
+
+$$
+\text{Gaussian process regression} = \text{Bayesian linear regression} + \text{kernel trick}
+$$
 
 <!-- If you found any mistakes, please contact me via email. -->
 
