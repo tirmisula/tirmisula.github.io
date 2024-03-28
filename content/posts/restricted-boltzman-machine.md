@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
-title: "Gaussian Process Regression"
-date: "2023-09-23"
+title: "Ristricted Boltzman Machine"
+date: "2023-09-24"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: false
+draft: true
 ---
 
 :                                                         
@@ -59,110 +59,79 @@ draft: false
 }
 </style>
 
-## Review Linear Regression
+## Review Markov Random Field
 
 <cite>[^1]</cite>
 
-$$
-\begin{cases}
-    \underset{\text{MLE}}{\text{LS method: }}\begin{cases}
-            y = w^Tx + \epsilon\\\
-            \epsilon \sim \mathcal{N}(0, \sigma^2) \\\ 
-             \argmax_w \sum_{i=1}^N \log\left( \frac{1}{ \sqrt{2\pi} \sigma} \mathrm{e}^{-\frac{(y_i-w^Tx_i)^2}{2\sigma^2}} \right)\\\
-            \argmin_w \sum_{i=1}^N (y_i-w^Tx_i)^2
-    \end{cases} \\\
-    \underset{\text{MAP}}{\text{Regularized LS: }}\begin{cases}
-        \text{Ridge: }   \begin{cases}
-            y = w^Tx + \epsilon\\\
-            y|w^Tx \sim \mathcal{N}(w^Tx, \sigma^2) \\\
-            w \sim \mathcal{N}(0, \sigma_0^2) \\\ 
-            \argmax_w \log\left( \prod_{i=1}^Np(y_i|w)p(w) \right) \\\
-            \argmin_w \sum_{i=1}^N (y_i-w^Tx_i)^2 + \frac{\sigma^2}{\sigma_0^2}{\lVert w \rVert}^2
-            \end{cases} \\\
-        \text{Lasso: }   \begin{cases}
-            y = w^Tx + \epsilon\\\
-            y|w^Tx \sim \mathcal{N}(w^Tx, \sigma^2) \\\
-            w \sim \text{Laplace}(0,\frac{1}{\lambda}) = \frac{\lambda}{2}\exp(-\lambda \Vert w \rVert) \\\ 
-            \argmax_w \log\left( \prod_{i=1}^Np(y_i|w)p(w) \right) \\\
-            \argmin_w \sum_{i=1}^N (y_i-w^Tx_i)^2 + \lambda{\lVert w \rVert}
-            \end{cases} 
-    \end{cases} \\\
-    \text{{Bayesian Linear Regresion}} \text{: } \begin{cases}
-        \text{$w\in$ dist}  \\\
-        \text{Inference } p(w|y) \\\
-        \text{Predict } p(y^{\ast}|w,\text{Data})
-    \end{cases} \\\
-    \text{\color{red}{Gaussian Process Regression}} : \text{Bayesian LR} + \text{kernel trick}
-\end{cases}
-$$
-
-
-## Formulation of Gaussian Process
-
-{{< math.inline >}}
-<p>
-\( \lbrace \xi_{t} \rbrace_{t \in T} \) is a <b>Gaussian Process</b>, where:
-</p>
-{{</ math.inline >}}
+Markov Random Field or Markov Random Network is a kind of undirected probalistic graphical model. The key content is [factorization of MRF](https://tirmisula.github.io/posts/probabilistic-graphical-model/#factorization-of-mrf), which we have introduced before. According to Hammersley Clifford theorem<cite>[^2]</cite>, we can express MRF with potential function:
 
 $$
-\begin{cases}
-T : \text{continous domain} \\\
-t_1 \cdots t_n \in T, \forall n \in \mathbb{N} : \text{any finite subset in $T$} \\\
-r.v.\space\lbrace \xi_{t_1}\cdots\xi_{t_n} \rbrace : \text{$\forall \xi_{t_i\cdots\xi_{j}}\in$ multivariate gaussian}
-\end{cases}
+\begin{align*}
+p(x) &= \frac{1}{z} \prod_{i=1}^K \psi(x_{C_i})=\frac{1}{z}\prod_{i=1}^K\exp(-E(x_{C_i})) \\\
+C_i &: \text{i-th maximum clique} \\\
+x_{C_i} &: \text{variable nodes in $C_i$} \\\
+\psi &: \text{potential function, $\psi>0$} \\\
+\psi(x_{C_i}) &= \exp(-E(x_{C_i})) \\\
+E(x) &: \text{energy function} \\\
+z &: \text{nomalize factor, $z=\sum_{x_1\cdots x_p}\prod_{i=1}^K \psi(x_{C_i})$} 
+\end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-We can say stochastic function \( \xi \) distributed through Gaussian Process(GP):
+MRF probability model \( p(x) \) belongs to exponential family distribution, we call it Gibbs distribution or Boltzman distribution:
 </p>
 {{</ math.inline >}}
 
 $$
-\xi \sim \text{GP}(m(t),k(t,t')) \\\
-\begin{cases}
-m(t) &= \mathbb{E}[\xi_t] & \text{mean function} \\\
-k(t,t') &= \mathbb{E}[(\xi_t-\mathbb{E}[\xi_t])(\xi_{t'}-\mathbb{E}[\xi_{t'}])] & \text{covariance function}
+\begin{align*}
+p(x) &= \frac{1}{z} \exp( -\sum_{i=1}^K E(x_{C_i})) \\\
+&\triangleq \frac{1}{z} \exp( -\mathrm{E}(x)) \\\
+&= \frac{1}{z(\eta)}h(x)\exp( \eta^T\phi(x) )
+\end{align*}
+$$
+
+**Boltzman machine** named after this Boltzman distribution which is equivalent to MRF + hidden nodes.
+
+## RBM Model
+### Trouble in Boltzman machine
+Based on the statement above, nodes in Boltzman machine have 2 classes:
+
+$$
+\text{Nodes }x : \begin{cases}
+    \text{observed } r.v. & o \\\
+    \text{hidden } r.v. & h
 \end{cases}
 $$
 
-<!-- ## Gaussian Process Regression -->
-## Kernel Bayesian LR
-### Definition
-Recall that in [bayesian linear regression chapter](https://tirmisula.github.io/posts/bayesian-linear-regression/), we have the conclusion of posterier inference:
+We have:
 
 $$
-p(w|\text{Data}) = \mathcal{N}(\mu_w, \Sigma_w) \\\
-\begin{cases}
-    \mu_w = \sigma^{-2}(\sigma^{-2}X^TX+\Sigma_p^{-1})^{-1}X^TY \\\
-    \Sigma_w =  \sigma^{-2}X^TX+\Sigma_p^{-1})^{-1}
-\end{cases}
+x = \begin{bmatrix}
+    x_1 \\\
+    \vdots \\\
+    x_p
+\end{bmatrix}=\begin{bmatrix}
+    h \\\
+    o
+\end{bmatrix}, h = \begin{bmatrix}
+    h_1 \\\
+    \vdots \\\
+    h_m
+\end{bmatrix}, o = \begin{bmatrix}
+    o_1 \\\
+    \vdots \\\
+    o_n
+\end{bmatrix} \\\
+p = m+n
 $$
 
-And the conlusion of new data prediction:
-
+The common inference problem in PGM is finding posterier:
 $$
-\begin{cases}
-    y = f(x) + \epsilon \\\
-    f(x) = x^Tw \\\
-    p(f(x_{new})|w,\text{Data},x_{new}) = \mathcal{N}(x^T_{new}\mu_w, x_{new}^T\Sigma_{w}x_{new}) \\\
-    p(y_{new}|w,\text{Data},x_{new}) = \mathcal{N}(x^T_{new}\mu_w, x_{new}^T\Sigma_{w}x_{new}+\sigma^2)
-\end{cases}
+p(h|o)
 $$
 
-{{< math.inline >}}
-<p>
-Kernel Bayesian LR indicates that \( f(x) \) is not a linear function. In this case \( f(x) \) usually has a new form which we have introduced in <a href="https://tirmisula.github.io/posts/support-vector-machine/#background-of-kernel-method">Kernel SVM chapter</a> before, a non-linear tranformation on \(x\) + a linear regression model:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{cases}
-    f(x) &= \phi(x)^Tw \\\
-    \phi(x) &= z, \quad\phi : x \mapsto z, x\in\mathbb{R}^p, z\in\mathbb{R}^q, p<q
-\end{cases}
-$$
+We have introduced exact inference and approximate inference in previous Variational Inference and MCMC chapter:
 
 {{< math.inline >}}
 <p>
@@ -612,9 +581,10 @@ $$
 
 ## Reference
 
-[^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=113).
+[^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=117).
 [^4]: From [Higham, Nicholas (2002). Accuracy and Stability of Numerical Algorithms](https://archive.org/details/accuracystabilit00high_878).
 [^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
 [^3]: From [Tzon-Tzer, Lu; Sheng-Hua, Shiou (2002). "Inverses of 2 × 2 block matrices"](https://doi.org/10.1016%2FS0898-1221%2801%2900278-4).
-[^2]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
+[^7]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
 [^6]: - [Gaussian Processes and Gaussian Markov Random Fields](https://folk.ntnu.no/joeid/MA8702/jan16.pdf)
+[^2]: - [Hammersley–Clifford theorem](http://www.statslab.cam.ac.uk/~grg/books/hammfest/hamm-cliff.pdf).
