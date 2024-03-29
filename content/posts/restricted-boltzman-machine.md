@@ -94,7 +94,7 @@ $$
 **Boltzman machine** named after this Boltzman distribution which is equivalent to MRF + hidden nodes.
 
 ## RBM Model
-### Trouble in Boltzman machine
+### Inference trouble in Boltzman machine
 Based on the statement above, nodes in Boltzman machine have 2 classes:
 
 $$
@@ -126,56 +126,27 @@ x = \begin{bmatrix}
 p = m+n
 $$
 
-The common inference problem in PGM is finding posterier:
+Inference problem in PGM is finding posterier, and we have introduced exact inference[(variable elimination)](https://tirmisula.github.io/posts/probabilistic-graphical-model/#variable-elimination) and approximate inference[(variational inference)](https://tirmisula.github.io/posts/variational-inference/#mean-field-vi-derivation)[(MCMC)](https://tirmisula.github.io/posts/markov-chain-monte-carlo/) in previous chapter::
 $$
-p(h|o)
-$$
-
-We have introduced exact inference and approximate inference in previous Variational Inference and MCMC chapter:
-
-{{< math.inline >}}
-<p>
-Like <a href="https://tirmisula.github.io/posts/support-vector-machine/#background-of-kernel-method">Kernel SVM chapter</a> mentioned, we want to use the kernel trick to find a kernel function, so that we don't directly solve \( \phi(x) \):
-</p>
-{{</ math.inline >}}
-
-$$
-\text{Given: } X = \begin{bmatrix}
-    x_1 \cdots x_N
-\end{bmatrix}^T,
-Y = \begin{bmatrix}
-    y_1 \cdots y_N
-\end{bmatrix}^T, \lbrace x^{\ast},y^{\ast} \rbrace\in\lbrace x_{new},y_{new}\rbrace
-$$
-
-$$
-\text{Let } \Phi = \phi(X) = \begin{bmatrix}
-    \phi(x_1) \cdots \phi(x_N)
-\end{bmatrix}^T_{N\times q}
-$$
-
-{{< math.inline >}}
-<p>
-Now the posterier \( p(w|\text{Data}) \) is calculated based on transformed data \( \Phi \), so we do the mapping \( X\mapsto\Phi \):
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-&\text{Let } p(w)\sim\mathcal{N}(0,\Sigma_q) \\\
-&\text{Let } \epsilon\sim\mathcal{N}(0,\sigma^2)
-\end{align*}
-$$
-
-$$
-\text{We have } \begin{cases}
-    \mu_w &= \sigma^{-2}(\sigma^{-2}X^TX+\Sigma_p^{-1})^{-1}X^TY \\\
-    \Sigma_w &=  \sigma^{-2}X^TX+\Sigma_p^{-1})^{-1} \\\
-    &\dArr \\\
-    \mu_w &= \sigma^{-2}(\sigma^{-2}\Phi^T\Phi+\Sigma_q^{-1})^{-1}\Phi^TY \\\
-    \Sigma_w &=  (\sigma^{-2}\Phi^T\Phi+\Sigma_q^{-1})^{-1}
+p(h|o) : \begin{cases}
+    \text{exact inference} &: \text{variable elimination} \\\
+    \text{approximate inference} &: \begin{cases}
+            \text{variational method} \\\
+            \text{MCMC}
+        \end{cases}
 \end{cases}
 $$
+
+However exact inference is intractable because the overall complexity is determined by the number of largest
+elimination clique[3] and finding optimal elimination order is NP-hard.
+
+Variational inference face the same problem when integrating:
+
+$$
+\int_{q_1\cdots q_N}q_1\cdots q_N\log p(o,h)dq_1\cdots dq_N
+$$
+
+MCMC method takes long time to converge which leads to high computation cost.
 
 ### Prediction
 
@@ -584,7 +555,7 @@ $$
 [^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=117).
 [^4]: From [Higham, Nicholas (2002). Accuracy and Stability of Numerical Algorithms](https://archive.org/details/accuracystabilit00high_878).
 [^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
-[^3]: From [Tzon-Tzer, Lu; Sheng-Hua, Shiou (2002). "Inverses of 2 × 2 block matrices"](https://doi.org/10.1016%2FS0898-1221%2801%2900278-4).
+[^3]: From [Probabilistic Graphical Models (II) Inference & Leaning. Jun Zhu](https://ml.cs.tsinghua.edu.cn/~jun/courses/statml-fall2015/8-PGM-Inference.pdf).
 [^7]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
 [^6]: - [Gaussian Processes and Gaussian Markov Random Fields](https://folk.ntnu.no/joeid/MA8702/jan16.pdf)
 [^2]: - [Hammersley–Clifford theorem](http://www.statslab.cam.ac.uk/~grg/books/hammfest/hamm-cliff.pdf).
