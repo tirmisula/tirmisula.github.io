@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: true
+draft: false
 ---
 
 :                                                         
@@ -59,9 +59,71 @@ draft: true
 }
 </style>
 
-## Review Markov Random Field
+## Overview of PGM
 
 <cite>[^1]</cite>
+
+$$
+\text{PGM}: \begin{cases}
+    \text{Representation} \begin{cases}
+        \text{directed graph}\rarr \begin{cases} 
+            \text{Naive Bayes:} \begin{cases}
+            p(x_i|y) = \prod_{j=1}^p p(x_i^j|y) \\\
+            \argmax \prod_{i=1}^N \left(\prod_{j=1}^p p(x_i^j|y_i)\right) p(y_i)
+            \end{cases} \\\
+            \text{Gaussian Mixture} \\\
+            {\text{MEMM: }} \begin{cases}
+                p(y_t|y_{t-1}) \\\
+                p(y_t|x_{1:T},x_t)
+            \end{cases} \\\
+            \text{Bayesian network} 
+        \end{cases} \\\
+        \text{undirected graph}\rarr \begin{cases}
+            \text{CRF}\rarr\text{Linear Chain CRF: } \begin{cases}
+                p(y_t|y_{t-1}) \\\
+                p(y_{t-1}|y_t) \\\
+                p(y_t|x_{1:T},x_t)
+            \end{cases} \\\
+            \text{Boltzman Machine(BM): } \begin{cases}
+                \text{visible nodes} \\\
+                \text{hidden nodes}
+            \end{cases} \\\
+            \text{\color{red}{Restricted Boltzman Machine(RBM)}} : \text{Bipartite BM} \\\
+            \text{Markov network(MRF)}
+        \end{cases} \\\
+        \text{continous variable}\rarr \text{{Gaussian BN/Gaussian MRF}} \\\
+        \text{time$\rarr$} \underset{\text{$x_i$ not i.i.d.}}{\text{ Dynamic model}} \begin{cases}
+            \text{discrete state$\rarr$Hidden Markov Model} \\\
+            \text{continous state} \begin{cases}
+                \text{Linear model$\rarr$Karman Filter} \\\
+                \text{Nonlinear model$\rarr$Particle Filter}
+            \end{cases}
+        \end{cases}
+    \end{cases} \\\
+    \text{Inference} \begin{cases}
+        \text{MAP inference$\rarr \hat{x_A}=\argmax_{x_A}p(x_A|x_B)\propto\argmax p(x_A,x_B)$} \\\
+        \text{exact inference} \begin{cases}
+          \text{Variable elimination(VE)} \\\
+          \text{Belief propagation(BP)$\rarr$sum-product algorithm(Tree)} \\\
+          \text{Junction tree algorithm(Normal graph)}
+        \end{cases} \\\
+        \text{approximate inference} \begin{cases}
+            \text{Loop belief propagation(Cyclic graph)} \\\
+            \text{Variational inference} \\\
+            \text{MCMC: importance sampling}
+        \end{cases} 
+    \end{cases} \\\
+    \text{Learning} \begin{cases}
+        \text{parameter learning} \begin{cases}
+            \text{complete data: $(x,z)$} \\\
+            \text{hidden variable: $z$}
+        \end{cases} \\\
+        \text{structure learning}
+    \end{cases}
+\end{cases}
+$$
+
+## Review Markov Random Field
 
 Markov Random Field or Markov Random Network is a kind of undirected probalistic graphical model. The key content is [factorization of MRF](https://tirmisula.github.io/posts/probabilistic-graphical-model/#factorization-of-mrf), which we have introduced before. According to Hammersley Clifford theorem<cite>[^2]</cite>, we can express MRF with potential function:
 
@@ -148,7 +210,7 @@ $$
 
 [MCMC](https://tirmisula.github.io/posts/markov-chain-monte-carlo/) method takes long time to converge which leads to high computation cost.
 
-### Model representation
+### Model definition
 
 To resolve the inference trouble in Boltzman machine, restricted boltzman machine(RBM) has a bipartite graph structure for simplification:
 
@@ -189,9 +251,29 @@ flowchart TB
 Combining factors above, we can model the joint pdf of RBM:
 
 $$
+\text{Given: }
+x = \begin{bmatrix}
+    x_1 \\\
+    \vdots \\\
+    x_p
+\end{bmatrix}=\begin{bmatrix}
+    h \\\
+    o
+\end{bmatrix}, h = \begin{bmatrix}
+    h_1 \\\
+    \vdots \\\
+    h_m
+\end{bmatrix}, o = \begin{bmatrix}
+    o_1 \\\
+    \vdots \\\
+    o_n
+\end{bmatrix} \\\
+$$
+
+$$
 \text{Let } \begin{cases}
-    f(o) = \exp(\alpha o) \\\
-    f(h) = \exp(\beta h) \\\
+    f(o) = \exp(\alpha^T o) \\\
+    f(h) = \exp(\beta^T h) \\\
     f(o,w,h) = \exp(h^Two) \\\
     p(x) = \frac{1}{z}f(o)f(h)f(o,w,h)
 \end{cases},\text{We have }
@@ -202,14 +284,14 @@ $$
 p(x)=p(o,h) &= \frac{1}{z} \prod_{i=1}^K \psi(x_{C_i}) \\\
 &= \frac{1}{z}\prod_{i=1}^K\exp(-E(x_{C_i})) \\\
 &= \frac{1}{z}\exp(-E(o,h)) \\\
-&= \frac{1}{z}\exp(h^Two+\alpha o+\beta h) \\\
-&= \frac{1}{z}\exp(h^Two)\exp(\alpha o)\exp(\beta h) \\\
+&= \frac{1}{z}\exp(h^Two+\alpha^To+\beta^Th) \\\
+&= \frac{1}{z}\exp(h^Two)\exp(\alpha^To)\exp(\beta^Th) \\\
 \because &h^Two = \sum_{i=1}^m\sum_{j=1}^n h_iw_{ij}o_j, \space\text{we have } \\\
 &= \frac{1}{z} \prod_{i=1}^m\prod_{j=1}^n\exp(h_iw_{ij}o_j) \prod_{i=1}^m\exp(\beta_i h_i) \prod_{j=1}^n\exp(\alpha_j o_j)
 \end{align*}
 $$
 
-### RBM posterier inference
+### Posterier inference
 By local markov property, we have conditional independence:
 
 $$
@@ -290,234 +372,38 @@ p(o_k=0|h) &= 1-\sigma(\sum_{i=1}^mh_iw_{ik}+\alpha_k) \\\
 \end{align*}
 $$
 
-## Gaussian Process Regression
-### GPR definition
-{{< math.inline >}}
-<p>
-Given a Gaussian process \( f(x) \), we have:
-</p>
-{{</ math.inline >}}
-
-$$
-\lbrace f(x) \rbrace_{x\in\mathbb{R}^p} \sim \text{GP}(m(x),k(x,x')) \\\
-\\\
-\begin{cases}
-    m(x) &= \mathbb{E}[f(x)] \\\
-    k(x,x') &= \mathbb{E}\left[ (f(x)-m(x))(f(x')-m(x')) \right] 
-\end{cases}
-$$
-
-The Gaussian process regression is given by:
-
-$$
-\text{Data: }\lbrace x_i,y_i \rbrace_{i=1}^N, X = \begin{bmatrix}
-    x_{11} & x_{12} & \dots & x_{1p}\\\
-    x_{21} & x_{22} & \dots & x_{2p}\\\
-    \dots \\\
-    x_{N1} & x_{N2} & \dots & x_{Np}
-\end{bmatrix}, Y = \begin{bmatrix}
-    y_1 \\\
-    y_2 \\\
-    \dots \\\
-    y_N
-\end{bmatrix} \\\
-\text{Model: }\begin{cases}
-    y = f(x)+\epsilon, \quad\epsilon\sim\mathcal{N}(0,\sigma^2) \\\
-    f(X) \sim \mathcal{N}(m(X),k(X,X)) \\\
-    Y \sim \mathcal{N}(m(x), k(X,X)+\sigma^2I)
-\end{cases}
-$$
-
-### Prediction in GPR
-For the new data in GP, we have predictions:
-
-$$
-X^{\ast} = \begin{bmatrix}x_1^{\ast}\cdots x_M^{\ast}\end{bmatrix} \\\
-Y^{\ast} = f(X^{\ast}) + \epsilon
-$$
-
-{{< math.inline >}}
-<p>
-We can easily write down joint distribution of \( Y \) and \( f(X^{\ast}) \), since they are both Gaussian:
-</p>
-{{</ math.inline >}}
+### Marginal probability inference
 
 $$
 \begin{align*}
-\because \text{Cov}(f(X)+\epsilon,f(X^{\ast}))&=\text{Cov}(f(X),f(X^{\ast}))+\text{Cov}(\epsilon,f(X^{\ast})) \\\
-&=\text{Cov}(f(X),f(X^{\ast})), \epsilon\perp f(X^{\ast})
-\end{align*} \\\
-\dArr
-$$
-
-$$
-\begin{bmatrix}
-    Y \\\
-    f(X^{\ast})
-\end{bmatrix} \sim \mathcal{N}(
-    \begin{bmatrix}
-        m(X) \\\
-        m(X^{\ast})
-    \end{bmatrix}, \begin{bmatrix}
-        k(X,X)+\sigma^2I & k(X,X^{\ast}) \\\
-        k(X^{\ast},X) & k(X^{\ast},X^{\ast})
-    \end{bmatrix}
-)
-$$
-
-{{< math.inline >}}
-<p>
-On the other hand, the conditional distribution \( f(X^{\ast})|Y \) is exactly the prediction problem:
-</p>
-{{</ math.inline >}}
-
-
-$$
-p(f(X^{\ast})|\text{Data},X^{\ast}) = p(f(X^{\ast})|Y,X,X^{\ast})
-$$
-
-We have learned how to calculate a conditional Gaussian distribution from a joint Gaussian distribution in [previous chapter](https://tirmisula.github.io/posts/marginal-and-joint-gaussian-probability/#solve-the-conditonal-pdf):
-
-$$
-\begin{cases}
-x = \begin{bmatrix}
-    x_a \\\
-    x_b
-\end{bmatrix} \\\
-x \sim \mathcal{N}(\mu,\Sigma) \\\
-\mu = \begin{bmatrix}
-    \mu_a \\\
-    \mu_b
-\end{bmatrix} \\\
-\Sigma = \begin{bmatrix}
-    \Sigma_{aa} & \Sigma_{ab} \\\
-    \Sigma_{ba} & \Sigma_{bb}
-\end{bmatrix}
-\end{cases} \implies 
-\begin{cases}
-x_a \sim \mathcal{N}(\mu_a,\Sigma_{aa}) \\\
-x_b \sim \mathcal{N}(\mu_b,\Sigma_{bb}) \\\
-x_b|x_a \sim \mathcal{N}(\Sigma_{ba}\Sigma_{aa}^{-1} (x_a-\mu_{a}) + \mu_{b}, {-\Sigma_{ba}\Sigma_{aa}^{-1}\Sigma_{ab}+\Sigma_{bb} } ) \\\
-x_a|x_b \sim \mathcal{N}(\Sigma_{ab}\Sigma_{bb}^{-1} (x_b-\mu_{b}) + \mu_{a}, {-\Sigma_{ab}\Sigma_{bb}^{-1}\Sigma_{ba}+\Sigma_{aa} } )
-\end{cases}
-$$
-
-So we have:
-
-$$
-f(X^{\ast})|Y,X,X^{\ast} \sim \mathcal{N}(\mu^{\ast}, \Sigma^{\ast}) \\\
-\begin{cases}
-    \mu^{\ast} = k(X^{\ast},X)(k(X,X)+\sigma^2I)^{-1}(Y-m(X)) + m(X^{\ast}) \\\
-    \Sigma^{\ast} = -k(X^{\ast},X)(k(X,X)+\sigma^2I)^{-1}k(X,X^{\ast})+k(X^{\ast},X^{\ast})
-\end{cases}
-$$
-
-$$
-Y^{\ast}|Y,X,X^{\ast} \sim \mathcal{N}(\mu_Y^{\ast}, \Sigma_Y^{\ast}) \\\
-\begin{cases}
-    \mu_Y^{\ast} = k(X^{\ast},X)(k(X,X)+\sigma^2I)^{-1}(Y-m(X)) + m(X^{\ast}) \\\
-    \Sigma_Y^{\ast} = -k(X^{\ast},X)(k(X,X)+\sigma^2I)^{-1}k(X,X^{\ast})+k(X^{\ast},X^{\ast}) + \sigma^2I
-\end{cases}
-$$
-
-## Kernel BLR and GPR comparison
-### Kernel function is covariance function
-By observing the prediction results in Kernel BLR and GPR we have:
-
-$$
-\text{BLR} : \begin{cases}
-    \mu^{\ast} = \phi(x^{\ast})^T\Sigma_{q}\Phi^T(K+\sigma^2I)^{-1}Y \\\
-    \sigma^{\ast} = \phi(x^{\ast})^T\Sigma_q\phi(x^{\ast}) - \phi(x^{\ast})^T\Sigma_q\Phi^T(\sigma^2I+K)^{-1}\Phi\Sigma_q\phi(x^{\ast}) \\\
-    \mu_y^{\ast} = \phi(x^{\ast})^T\Sigma_{q}\Phi^T(K+\sigma^2I)^{-1}Y \\\
-    \sigma_y^{\ast} = \phi(x^{\ast})^T\Sigma_q\phi(x^{\ast}) - \phi(x^{\ast})^T\Sigma_q\Phi^T(\sigma^2I+K)^{-1}\Phi\Sigma_q\phi(x^{\ast})+\sigma^2
-\end{cases}
-$$
-
-$$
-\text{GPR} : \begin{cases}
-    \mu^{\ast} = k(X^{\ast},X)(k(X,X)+\sigma^2I)^{-1}(Y-m(X)) + m(X^{\ast}) \\\
-    \Sigma^{\ast} = -k(X^{\ast},X)(k(X,X)+\sigma^2I)^{-1}k(X,X^{\ast})+k(X^{\ast},X^{\ast}) \\\
-    \mu_Y^{\ast} = k(X^{\ast},X)(k(X,X)+\sigma^2I)^{-1}(Y-m(X)) + m(X^{\ast}) \\\
-    \Sigma_Y^{\ast} = -k(X^{\ast},X)(k(X,X)+\sigma^2I)^{-1}k(X,X^{\ast})+k(X^{\ast},X^{\ast}) + \sigma^2I
-\end{cases}
-$$
-
-{{< math.inline >}}
-<p>
-We can conclude that these two expressions of prediction between Kernel BLR and GPR are identically the same, if Gaussian process \( f(x) \) has attributes:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{cases}
-    m(X) &= 0 \\\
-    k(X,X) &\triangleq k(x,x) = \langle \Sigma_q^{\frac{1}{2}}\phi(x),\Sigma_q^{\frac{1}{2}}\phi(x) \rangle
-\end{cases}
-$$
-
-<!-- {{< math.inline >}}
-<p>
-Furthermore kernel function \( k(x,x) \) in BLR is exactly the covariance function \( k(X,X) \) in GP.
-</p>
-{{</ math.inline >}} -->
-
-### f(x) in kernel BLR is a Gaussian process
-
-{{< math.inline >}}
-<p>
-On the other hand, in kernel BLR:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-    f(x) &= \phi(x)^Tw \\\
-    \\\
-    \mathbb{E}[f(x)] &= \mathbb{E}[ \phi(x)^Tw] \\\
-    &= \phi(x)^T\mathbb{E}[w] \\\
-    &= \phi(x)^T\mu_w \\\
-    \\\
-    \text{Cov}(f(x),f(x')) &= \mathbb{E}\left[ (f(x)-\mathbb{E}[f(x)])(f(x‘)-\mathbb{E}[f(x')]) \right] \\\
-    &= \mathbb{E}\left[\phi(x)^Tw\phi(x')^Tw - \phi(x)^Tw\phi(x')^T\mu_w - \phi(x')^Tw\phi(x)^T\mu_w + \phi(x)^T\mu_w\phi(x')^T\mu_w \right] \\\
-    &= \mathbb{E}\left[ \phi(x)^Tww^T\phi(x') - \phi(x)^Tw\mu_w^T\phi(x') - \phi(x)^T\mu_ww^T\phi(x') + \phi(x)^T\mu_w\mu_w^T\phi(x') \right] \\\
-    &= \mathbb{E}\left[ \phi(x)^T(ww^T-w\mu_w^T-\mu_ww^T+\mu_w\mu_w^T)\phi(x') \right] \\\
-    &= \phi(x)^T\mathbb{E}\left[(w-\mu_w)(w-\mu_w)^T\right]\phi(x') \\\
-    &= \phi(x)^T\Sigma_w\phi(x') = \langle\psi(x),\psi(x')\rangle \\\
-    &= k(x,x')
+p(o) &= \sum_h p(h,o) \\\
+&= \sum_h\frac{1}{z} \prod_{i=1}^m\prod_{j=1}^n\exp(h_iw_{ij}o_j) \prod_{i=1}^m\exp(\beta_i h_i) \prod_{j=1}^n\exp(\alpha_j o_j) \\\
+&= \frac{1}{z}\exp(\alpha^To)\sum_{h_1}\cdots\sum_{h_m}\exp(\sum_{i=1}^m\sum_{j=1}^nh_iw_{ij}o_j)\exp(\sum_{i=1}^m\beta_ih_i) \\\
+&= \frac{1}{z}\exp(\alpha^To)\sum_{h_1}\cdots\sum_{h_m}\exp(\sum_{i=1}^mh_i\sum_{j=1}^nw_{ij}o_j + \sum_{i=1}^m\beta_ih_i) \\\
+&\text{Let } w_i = \begin{bmatrix} w_{i1}\cdots w_{in} \end{bmatrix}^T \\\
+&= \frac{1}{z}\exp(\alpha^To)\sum_{h_1}\cdots\sum_{h_m}\exp(\sum_{i=1}^mh_iw_{i}^To + \sum_{i=1}^m\beta_ih_i) \\\
+&= \frac{1}{z}\exp(\alpha^To)\sum_{h_1}\cdots\sum_{h_m}\exp\left(\sum_{i=1}^m(h_iw_{i}^To + \beta_ih_i)\right) \\\
+&= \frac{1}{z}\exp(\alpha^To)\sum_{h_1}\cdots\sum_{h_m}\prod_{i=1}^m\exp\left(h_iw_{i}^To + \beta_ih_i\right) \\\
+&= \frac{1}{z}\exp(\alpha^To)\sum_{h_1}\exp(h_1w_1^To+\beta_1h_1)\cdots\sum_{h_m}\exp\left(h_mw_{m}^To + \beta_mh_m\right) \\\
+&\because h\in\lbrace 0,1 \rbrace \\\
+&\therefore \sum_{h_1}\exp(h_1w_1^To+\beta_1h_1) = \exp(0)+\exp(w_1^To+\beta_1) \\\
+&= \frac{1}{z}\exp(\alpha^To)\prod_{i=1}^m\left(1+\exp(w_i^To+\beta_i\right) \\\
+&= \frac{1}{z}\exp(\alpha^To)\exp\left(\log\left(\prod_{i=1}^m\left(1+\exp(w_i^To+\beta_i\right)\right)\right) \\\
+&= \frac{1}{z}\exp(\alpha^To)\exp\left(\sum_{i=1}^m\log\left(1+\exp(w_i^To+\beta_i\right)\right) \\\
+&= \frac{1}{z}\exp\left(\alpha^To+\sum_{i=1}^m\log\left(1+\exp(w_i^To+\beta_i\right)\right)
 \end{align*}
 $$
 
-Based on the definition of GP we provided in the [above section](#formulation-of-gaussian-process), we can accordingly write:
-
-$$
-\begin{cases}
-    t\rarr\xi_t, &\lbrace \xi_t \rbrace_{t\in T} \sim \text{GP} \\\
-    x\rarr f(x), &\lbrace f(x) \rbrace_{x\in \mathbb{R}^{p}} \sim \text{GP}
-\end{cases}
-$$
-
 {{< math.inline >}}
 <p>
-So \( f(x) \) in kernel BLR is the expected Gaussian process.
+Since \( \log(1+\mathrm{e}^x) \) is a Softplus(SmoothReLU) function so we have:
 </p>
 {{</ math.inline >}}
 
-### Summary
-
 $$
-\text{GPR}: \begin{cases}
-    \text{weight space} : \phi(x)^Tw\sim\mathcal{N}\left(\phi(x^T\mu_w, \phi(x)^T\Sigma_{w}\phi(x)\right) \\\
-    \text{function space} : f(x)\sim \text{GP}(m,k)
-\end{cases} \rArr \phi(x)^Tw=f(x)
+p(o) = \frac{1}{z}\exp\left(\alpha^To+\sum_{i=1}^m\text{softplus}(w_i^To+\beta_i)\right)
 $$
 
-Thus, 
-
-$$
-\text{Gaussian process regression} = \text{Bayesian linear regression} + \text{kernel trick}
-$$
-
-<!-- If you found any mistakes, please contact me via email. -->
 
 ## Reference
 
