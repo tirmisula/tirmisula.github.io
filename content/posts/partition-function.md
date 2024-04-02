@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
-title: "Ristricted Boltzman Machine"
-date: "2023-09-24"
+title: "Partition Function"
+date: "2023-09-25"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: false
+draft: true
 ---
 
 :                                                         
@@ -59,101 +59,89 @@ draft: false
 }
 </style>
 
-## Overview of PGM
+## Introduction to Partition Function
 
 <cite>[^1]</cite>
 
+Any Directed Acyclic Graph(DAG) has a topological sort, that is to say our [directed probalistic graphical model is factorable by a topological ordering](https://tirmisula.github.io/posts/probabilistic-graphical-model/#definition):
+
 $$
-\text{PGM}: \begin{cases}
-    \text{Representation} \begin{cases}
-        \text{directed graph}\rarr \begin{cases} 
-            \text{Naive Bayes:} \begin{cases}
-            p(x_i|y) = \prod_{j=1}^p p(x_i^j|y) \\\
-            \argmax \prod_{i=1}^N \left(\prod_{j=1}^p p(x_i^j|y_i)\right) p(y_i)
-            \end{cases} \\\
-            \text{Gaussian Mixture} \\\
-            {\text{MEMM: }} \begin{cases}
-                p(y_t|y_{t-1}) \\\
-                p(y_t|x_{1:T},x_t)
-            \end{cases} \\\
-            \text{Bayesian network} 
-        \end{cases} \\\
-        \text{undirected graph}\rarr \begin{cases}
-            \text{CRF}\rarr\text{Linear Chain CRF: } \begin{cases}
-                p(y_t|y_{t-1}) \\\
-                p(y_{t-1}|y_t) \\\
-                p(y_t|x_{1:T},x_t)
-            \end{cases} \\\
-            \text{Boltzman Machine(BM): } \begin{cases}
-                \text{visible nodes} \\\
-                \text{hidden nodes}
-            \end{cases} \\\
-            \text{\color{red}{Restricted Boltzman Machine(RBM)}} : \text{Bipartite BM} \\\
-            \text{Markov network(MRF)}
-        \end{cases} \\\
-        \text{continous variable}\rarr \text{{Gaussian BN/Gaussian MRF}} \\\
-        \text{time$\rarr$} \underset{\text{$x_i$ not i.i.d.}}{\text{ Dynamic model}} \begin{cases}
-            \text{discrete state$\rarr$Hidden Markov Model} \\\
-            \text{continous state} \begin{cases}
-                \text{Linear model$\rarr$Karman Filter} \\\
-                \text{Nonlinear model$\rarr$Particle Filter}
-            \end{cases}
-        \end{cases}
-    \end{cases} \\\
-    \text{Inference} \begin{cases}
-        \text{MAP inference$\rarr \hat{x_A}=\argmax_{x_A}p(x_A|x_B)\propto\argmax p(x_A,x_B)$} \\\
-        \text{exact inference} \begin{cases}
-          \text{Variable elimination(VE)} \\\
-          \text{Belief propagation(BP)$\rarr$sum-product algorithm(Tree)} \\\
-          \text{Junction tree algorithm(Normal graph)}
-        \end{cases} \\\
-        \text{approximate inference} \begin{cases}
-            \text{Loop belief propagation(Cyclic graph)} \\\
-            \text{Variational inference} \\\
-            \text{MCMC: importance sampling}
-        \end{cases} 
-    \end{cases} \\\
-    \text{Learning} \begin{cases}
-        \text{parameter learning} \begin{cases}
-            \text{complete data: $(x,z)$} \\\
-            \text{hidden variable: $z$}
-        \end{cases} \\\
-        \text{structure learning}
-    \end{cases}
+p(x_1,\cdots,x_p)=\prod_{i=1}^p p(x_i|x_{pa(i)}), \text{node $x_{pa}(i)\rarr$node $x_i$}
+$$
+
+Local structures in Bayesian Networks(BN) are still probalistic models. However it is not applicable for [undirected probalistic graphical model](https://tirmisula.github.io/posts/probabilistic-graphical-model/#factorization-of-mrf):
+
+$$
+p(x) = \frac{1}{z} \prod_{i=1}^K \psi(x_{C_i})
+$$
+
+Local structures of MRF are not probabilties, only the whole graph is considered as probability model. That is why partition function is introduced.
+
+Partition function is useful in:
+
+$$
+\begin{cases}
+    \text{learning} : \hat{\theta} = \argmax_{\theta} p(O|\theta) \\\
+    \text{evaluation} : p(O=o_1,\cdots,o_t|\theta)
 \end{cases}
 $$
 
-## Review Markov Random Field
+## Log-likelihood Gradient
 
-Markov Random Field or Markov Random Network is a kind of undirected probalistic graphical model. The key content is [factorization of MRF](https://tirmisula.github.io/posts/probabilistic-graphical-model/#factorization-of-mrf), which shows MRF can be expressed with potential functions(Hammersley Clifford theorem<cite>[^2]</cite>):
+Given data:
+
+$$
+X = \lbrace x_1,\cdots,x_N \rbrace \\\
+x_i \in \mathbb{R}^p, x_i \in \lbrace 0,1 \rbrace
+$$
+
+Suppose it is undirected graph model, we have likelihood function:
 
 $$
 \begin{align*}
-p(x) &= \frac{1}{z} \prod_{i=1}^K \psi(x_{C_i})=\frac{1}{z}\prod_{i=1}^K\exp(-E(x_{C_i})) \\\
-C_i &: \text{i-th maximum clique} \\\
-x_{C_i} &: \text{variable nodes in $C_i$} \\\
-\psi &: \text{potential function, $\psi>0$} \\\
-\psi(x_{C_i}) &= \exp(-E(x_{C_i})) \\\
-E(x) &: \text{energy function} \\\
-z &: \text{nomalize factor, $z=\sum_{x_1\cdots x_p}\prod_{i=1}^K \psi(x_{C_i})$} 
+p(x|\theta) &= \frac{1}{z(\theta)} \hat{p}(x|\theta) \\\
+z(\theta) &= \int \hat{p}(x|\theta)dx
+\end{align*}
+$$
+
+The learning problem by maximum likelihood estimation is:
+
+$$
+\begin{align*}
+\hat{\theta} &= \argmax_{\theta} p(x|\theta) \\\
+&= \argmax_{\theta} \prod_{i=1}^N p(x_i|\theta) \\\
+&= \argmax_{\theta} \sum_{i=1}^N \log\left( p(x_i|\theta)  \right) \\\
+&= \argmax_{\theta} \sum_{i=1}^N\left[\log\left( \hat{p}(x_i|\theta)\right) - \log\left(z(\theta)  \right)\right] \\\
+&= \argmax_{\theta} \frac{1}{N}\sum_{i=1}^N\log(\hat{p}(x_i|\theta)) - \log(z(\theta)) \\\
+\\\
+&\text{Let } \mathcal{L}(\theta) = \frac{1}{N}\sum_{i=1}^N\log(\hat{p}(x_i|\theta)) - \log(z(\theta)) \\\
+&= \argmax_{\theta} \mathcal{L}(\theta)
+\end{align*}
+$$
+
+The log-likelihood gradient is:
+
+$$
+\begin{align*}
+\nabla_{\theta}\mathcal{L}(\theta) &= \frac{1}{N}\sum_{i=1}^N\nabla_{\theta}\log(\hat{p}(x_i|\theta)) - \nabla_{\theta}\log(z(\theta)) \\\
+&\because\frac{1}{N}\sum_{i=1}^N\nabla_{\theta}\log(\hat{p}(x_i|\theta)) \text{ is computable} \\\
+&\therefore \text{focus on } \nabla_{\theta}\log(z(\theta)) \\\
+\\\
+\nabla_{\theta}\log(z(\theta)) &= \frac{1}{z(\theta)}\nabla_{\theta}z(\theta) \\\
+&= \frac{p(x|\theta)}{\hat{p}(x|\theta)} \nabla_{\theta}\int \hat{p}(x|\theta)dx \\\
+&\because\text{Leibniz integral rule} \\\
+&= \frac{p(x|\theta)}{\hat{p}(x|\theta)} \int\nabla_{\theta} \hat{p}(x|\theta)dx \\\
+&= \int \frac{p(x|\theta)}{\hat{p}(x|\theta)}\nabla_{\theta}\hat{p}(x|\theta)dx \\\
+&= \int p(x|\theta)\nabla_{\theta}\log\hat{p}(x|\theta)dx \\\
+&= \mathbb{E}_{x\sim p(x|\theta)} \left[ \nabla_{\theta}\log\hat{p}(x|\theta) \right]
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-MRF probability model \( p(x) \) belongs to exponential family distribution, we call it Gibbs distribution or Boltzman distribution:
+Expectation approximation is available for this distribution \( x \sim p(x|\theta) \), so computing integral is avoided.
 </p>
 {{</ math.inline >}}
-
-$$
-\begin{align*}
-p(x) &= \frac{1}{z} \exp( -\sum_{i=1}^K E(x_{C_i})) \\\
-&\triangleq \frac{1}{z} \exp( -\mathrm{E}(x)) \\\
-&= \frac{1}{z(\eta)}h(x)\exp( \eta^T\phi(x) )
-\end{align*}
-$$
-
-**Boltzman machine** named after the Boltzman distribution which is equivalent to MRF + hidden nodes.
 
 ## RBM Model
 ### Inference trouble in Boltzman machine
