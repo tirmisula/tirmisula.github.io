@@ -139,11 +139,116 @@ $$
 
 {{< math.inline >}}
 <p>
-Expectation approximation is available for this distribution \( x \sim p(x|\theta) \), so computing integral is avoided.
+Expectation approximation method like MCMC is available for this distribution \( x \sim p(x|\theta) \), so computing integral is avoided.
 </p>
 {{</ math.inline >}}
 
-## RBM Model
+## Gradient Ascent Algorithm based on MCMC
+
+The **empirical distribution** associated with a vector of numbers x = (x1,...,xn) is the probability distribution with expectation operator<cite>[^2]</cite>:
+
+$$
+\mathbb{E}[g(x)] = \frac{1}{n}\sum_{i=1}^ng(x_i)
+$$
+
+{{< math.inline >}}
+<p>
+So \( \frac{1}{N}\sum_{i=1}^N\nabla_{\theta}\log(\hat{p}(x_i|\theta)) \) can be considered as sampling from empirical distribution \( p(\text{data}) \):
+</p>
+{{</ math.inline >}}
+
+$$
+\frac{1}{N}\sum_{i=1}^N\nabla_{\theta}\log(\hat{p}(x_i|\theta)) = \mathbb{E}_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] 
+$$
+
+So the log-likelihood gradient becomes:
+
+$$
+\nabla_{\theta}\mathcal{L}(\theta) = \mathbb{E}_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] - \mathbb{E}_{x\sim p(x|\theta)} \left[ \nabla_{\theta}\log\hat{p}(x|\theta) \right] \\\
+\\\
+\begin{cases}
+    p(\text{data}) &: \text{empirical distribution} \\\
+    p(x|\theta) &: \text{assumption distribution}
+\end{cases}
+$$
+
+{{< math.inline >}}
+<p>
+The essence of MLE is to let proposed distribution \( p(x|\theta) \) to approximate empirical distribution \( p(\text{data}) \).
+</p>
+{{</ math.inline >}}
+
+We use [Gibbs sampling](https://tirmisula.github.io/posts/markov-chain-monte-carlo/#gibbs-algorithm)(MCMC method) to approximate expectation of real and assumption model, suppose we sample M particles:
+
+$$
+\begin{rcases}
+&\tilde{x}_1 &\sim p(\text{data}) \\\
+&&\cdots \\\
+&\tilde{x}_M &\sim p(\text{data})
+\end{rcases} : \mathbb{E}_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] \approx \frac{1}{M}\sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}_i|\theta))
+$$
+
+$$
+\begin{rcases}
+&\hat{x}_1 &\sim p(x|\theta) \\\
+&&\cdots \\\
+&\hat{x}_M &\sim p(x|\theta)
+\end{rcases} : \mathbb{E}_{x\sim p(x|\theta)}[\nabla_{\theta}\log(\hat{p}(x|\theta))] \approx \frac{1}{M}\sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\hat{x}_i|\theta))
+$$
+
+Combining with gradient ascent algorithm, we have:
+
+$$
+\text{Gradient Ascent by Gibbs} \\\
+\begin{align*}
+&\text{For each turn } t=1\cdots T \\\
+&1. \text{ sampling directly from real data: } \\\
+    &\quad \tilde{x}_{1:M} \sim p(\text{data}) \\\
+&2. \text{ sampling by gibbs algorithm : } \\\
+    &\quad \hat{x}_{1:M} \sim p(x|\theta^{(t)}) \\\
+&3. \text{update parameters until converge: } \\\
+    &\quad \theta^{(t+1)} = \theta^{(t)} + \eta\left( \sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}_i|\theta^{(t)}))-\sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}_i|\theta^{(t)})) \right)
+\end{align*}
+$$
+
+## Contrastive Divergence Algorithm
+### Problem in Gibbs sampling
+{{< math.inline >}}
+<p>
+Gibbs sampling involves multiple steps for it's Markov chain to reach steady distribution. For each single step k before steady, it has unsteady distribution, denoted as:
+</p>
+{{</ math.inline >}}
+
+$$
+\underset{\text{k-th step}}{p^{(k)}(x|\theta)}
+$$
+
+{{< math.inline >}}
+<p>
+On the other hand, since \( x \) has \( p \) dimensions, \( p \) state transitions happened in it's Markov chain during step k to step k+1:
+</p>
+{{</ math.inline >}}
+
+$$
+\underset{\text{k-th step}}{p^{(k)}(x|\theta)} \longrightarrow \underset{\text{(k+1)th step}}{p^{(k)}(x|\theta)} : \begin{array}{c}
+    \text{state}_{k*p} \\\
+    \darr \\\
+    \cdots \\\
+    \darr \\\
+    \text{state}_{(k+1)*p}
+\end{array}
+$$
+
+{{< math.inline >}}
+<p>
+The whole sampling process is:
+</p>
+{{</ math.inline >}}
+
+$$
+\underset{\text{initial}}{p^{(0)}} \rarr \underset{\text{1-step}}{p^{(1)}(x|\theta)} \rarr \cdots \rarr \underset{\text{$\infty$-step}}{p^{(\infty)}(x|\theta)} \rarr \hat{x}_i
+$$
+
 ### Inference trouble in Boltzman machine
 Based on the statement above, nodes in Boltzman machine have 2 classes:
 
@@ -401,4 +506,4 @@ $$
 [^3]: From [Probabilistic Graphical Models (II) Inference & Leaning. Jun Zhu](https://ml.cs.tsinghua.edu.cn/~jun/courses/statml-fall2015/8-PGM-Inference.pdf).
 [^7]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
 [^6]: - [Gaussian Processes and Gaussian Markov Random Fields](https://folk.ntnu.no/joeid/MA8702/jan16.pdf)
-[^2]: - [Hammersley–Clifford theorem](http://www.statslab.cam.ac.uk/~grg/books/hammfest/hamm-cliff.pdf).
+[^2]: - [Empirical Distributions, Exact Sampling Distributions, Asymptotic Sampling Distributions. Charles J. Geyer](https://www.stat.umn.edu/geyer/5102/slides/s1.pdf).
