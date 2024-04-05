@@ -255,7 +255,7 @@ However the mixing time(refers to \( p^{(0)}\rarr p^{(\infty)} \)) for each data
 </p>
 {{</ math.inline >}}
 
-### CD-k algorithm
+### CD-k
 {{< math.inline >}}
 <p>
 To shorten mixing time, consider two options:
@@ -322,16 +322,16 @@ $$
 In conlusion, MLE can be expressed by KL divergence with the following form:
 
 $$
-\mathcal{L}(\theta) = \begin{cases}
-    -\text{KL}(p^{(0)} || p(x|\theta)) \\\
-    -\text{KL}(p^{(0)} || \hat{p}(x|\theta)) + \text{KL}(p^{(\infty)}(x|\theta) || \hat{p}(x|\theta))
+\begin{cases}
+    \mathcal{L}(\theta) = -\text{KL}(p^{(0)} || p(x|\theta)) \\\
+    \mathcal{L}(\theta) \approx -\text{KL}(p^{(0)} || \hat{p}(x|\theta)) + \text{KL}(p^{(\infty)}(x|\theta) || \hat{p}(x|\theta))
 \end{cases}
 $$
 
 $$
-\hat{\theta}_{\text{MLE}} = \begin{cases}
-    \argmin_{\theta} \space\text{KL}(p^{(0)} || p(x|\theta)) \\\
-    \begin{cases}
+\begin{cases}
+    \hat{\theta}_{\text{MLE}} = \argmin_{\theta} \space\text{KL}(p^{(0)} || p(x|\theta)) \\\
+    \hat{\theta}_{\text{MLE}} \approx \begin{cases}
         \argmin_{\theta} \space\text{KL}(p^{(0)} || \hat{p}(x|\theta)) - \text{KL}(p^{(\infty)}(x|\theta) || \hat{p}(x|\theta)) \\\
         \text{OR} \\\
         \argmin_{\theta} \space\text{KL}(p^{(0)} || \hat{p}(x|\theta)) + \log z(\theta)
@@ -352,11 +352,58 @@ we can directly perceive that MLE is equivalent to finding a model that minimize
 {{< math.inline >}}
 <p>
 In ML(maximum likelihood) learning, computing \( p^{(\infty)} \) could be costly, we learn it on k-th step \( p^{(\infty)} \) which is called Contrastive learning(CD learning):
-</p>\
+</p>
 {{</ math.inline >}}
 
 $$
 \hat{\theta}_{\text{CDL}} = \argmin_{\theta} \space\text{KL}(p^{(0)} || \hat{p}(x|\theta)) - \text{KL}(p^{(k)}(x|\theta) || \hat{p}(x|\theta)) \\\
+$$
+
+## RBM Learning
+### Log-likelihood of energy-based model
+
+We have introduced [RBM model](https://tirmisula.github.io/posts/restricted-boltzman-machine/#rbm-model-definition) in previous chapter:
+
+$$
+\text{Given: }
+x = \begin{bmatrix}
+    x_1 \\\
+    \vdots \\\
+    x_p
+\end{bmatrix}=\begin{bmatrix}
+    h \\\
+    o
+\end{bmatrix}, h = \begin{bmatrix}
+    h_1 \\\
+    \vdots \\\
+    h_m
+\end{bmatrix}, o = \begin{bmatrix}
+    o_1 \\\
+    \vdots \\\
+    o_n
+\end{bmatrix}, m+n=p \\\
+$$
+
+$$
+\begin{align*}
+p(x)=p(o,h) &= \frac{1}{z}\exp(-E(o,h)) \\\
+&= \frac{1}{z}\exp(h^Two+\alpha^To+\beta^Th) \\\
+&= \frac{1}{z} \prod_{i=1}^m\prod_{j=1}^n\exp(h_iw_{ij}o_j) \prod_{i=1}^m\exp(\beta_i h_i) \prod_{j=1}^n\exp(\alpha_j o_j)
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Suppose there are N samples, the average log-likelihood of observations based on energy model is given by:
+</p>
+{{</ math.inline >}}
+
+
+$$
+\begin{align*}
+    \mathcal{L}(\theta) &= \frac{1}{N}\log\prod_{i=1}^N \sum_{h}p(o^{(i)},h^{(i)}) \\\
+    &= \frac{1}{N} \sum_{i=1}^N \log \sum_h\frac{1}{z}\exp\left(-E(o,h)\right)
+\end{align*}
 $$
 
 ## Reference
