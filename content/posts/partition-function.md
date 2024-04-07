@@ -86,7 +86,7 @@ $$
 \end{cases}
 $$
 
-## Log-likelihood Gradient of Undirected graph
+## The Log-likelihood Gradient of Undirected graph
 
 Given data:
 
@@ -143,7 +143,7 @@ We avoid computing intractable \( z(\theta) \), expectation approximation method
 </p>
 {{</ math.inline >}}
 
-## Gradient Ascent Algorithm based on MCMC
+## Gradient Ascent based on MCMC for MLE
 
 The **empirical distribution** associated with a vector of numbers x = (x1,...,xn) is the probability distribution with expectation operator<cite>[^2]</cite>:
 
@@ -273,7 +273,7 @@ $$
     &\quad \tilde{x}_{1:M} \sim p(\text{data}) \\\
 &2. \text{ initialize $\hat{x}$ : } \\\
     &\quad \hat{x}_{1:M} = \tilde{x}_{1:M} \\\
-&3. \text{ sampling at k step by gibbs : } \\\
+&3. \text{ sampling k steps by gibbs: } \\\
     &\quad \hat{x}_{1:M} \sim p^{(k)}(x|\theta^{(t)}) \\\
 &4. \text{update parameters until converge: } \\\
     &\quad \theta^{(t+1)} = \theta^{(t)} + \eta\left( \sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}_i|\theta^{(t)}))-\sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}_i|\theta^{(t)})) \right)
@@ -308,7 +308,6 @@ $$
 &= \mathbb{E}_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] - \mathbb{E}_{x\sim p(x|\theta)} \left[ \nabla_{\theta}\log\hat{p}(x|\theta) \right] \\\
 &\because \text{Leibniz integral rule} \\\
 &= \nabla_{\theta}\mathbb{E}_{x\sim p(\text{data})}[\log\hat{p}(x|\theta)] - \nabla_{\theta}\mathbb{E}_{x\sim p(x|\theta)} \left[ \log\hat{p}(x|\theta) \right] \\\
-\\\
 \mathcal{L}(\theta) &= \mathbb{E}_{x\sim p(\text{data})}[\log\hat{p}(x|\theta)] - \mathbb{E}_{x\sim p(x|\theta)} \left[ \log\hat{p}(x|\theta) \right] \\\
 &\text{by Gibbs sampling} \\\
 &\approx \mathbb{E}_{x\sim p(\text{data})}[\log\hat{p}(x|\theta)] - \mathbb{E}_{x\sim p^{(\infty)}(x|\theta)} \left[ \log\hat{p}(x|\theta) \right] \\\
@@ -360,8 +359,7 @@ $$
 $$
 
 ## RBM Learning
-### Log-likelihood of energy-based model
-
+### Review RBM model
 We have introduced [RBM model](https://tirmisula.github.io/posts/restricted-boltzman-machine/#rbm-model-definition) in previous chapter:
 
 $$
@@ -382,29 +380,148 @@ x = \begin{bmatrix}
     \vdots \\\
     o_n
 \end{bmatrix}, m+n=p \\\
+\alpha = \begin{bmatrix}
+    \alpha_1 \\\
+    \vdots \\\
+    \alpha_n
+\end{bmatrix}, \beta = \begin{bmatrix}
+    \beta_1 \\\
+    \vdots \\\
+    \beta_m
+\end{bmatrix}, w = \begin{bmatrix}
+    w_{11} & \cdots & w_{1n} \\\
+    \vdots & \ddots & \vdots \\\
+    w_{m1} & \cdots & w_{mn}
+\end{bmatrix}, \theta = \lbrace \alpha,\beta,w  \rbrace \\\
 $$
 
 $$
 \begin{align*}
-p(x)=p(o,h) &= \frac{1}{z}\exp(-E(o,h)) \\\
+p(x|\theta)=p(o,h) &= \frac{1}{z}\exp(-E(o,h)) \\\
 &= \frac{1}{z}\exp(h^Two+\alpha^To+\beta^Th) \\\
 &= \frac{1}{z} \prod_{i=1}^m\prod_{j=1}^n\exp(h_iw_{ij}o_j) \prod_{i=1}^m\exp(\beta_i h_i) \prod_{j=1}^n\exp(\alpha_j o_j)
 \end{align*}
 $$
 
+### The Log-likelihood gradient of energy-based model
+
+A more general form is the energy-based model with latent variables:
+
+$$
+\begin{align*}
+p(o,h) = \frac{1}{z}\exp\left(-E(o,h)\right)
+\end{align*}
+$$
+
 {{< math.inline >}}
 <p>
-Suppose there are N samples, the average log-likelihood of observations based on energy model is given by:
+For energy-based model (suppose N samples), the average log-likelihood of observations is given by:
 </p>
 {{</ math.inline >}}
 
 
 $$
 \begin{align*}
-    \mathcal{L}(\theta) &= \frac{1}{N}\log\prod_{i=1}^N \sum_{h}p(o^{(i)},h^{(i)}) \\\
-    &= \frac{1}{N} \sum_{i=1}^N \log \sum_h\frac{1}{z}\exp\left(-E(o,h)\right)
+    \mathcal{L}(\theta) &= \frac{1}{N}\log\prod_{i=1}^N p(o^{(i)}) \\\
+    &= \frac{1}{N} \sum_{i=1}^N \log \sum_h\frac{1}{z}\exp\left(-E(o^{(i)},h^{(i)})\right)
 \end{align*}
 $$
+
+The log-likellihood gradient is given by:
+
+$$
+\begin{align*}
+\nabla_{\theta}\mathcal{L}(\theta) &= \frac{1}{N} \sum_{i=1}^N\nabla_{\theta}\log\sum_h\frac{1}{z}\exp\left( -E(o^{(i)}, h^{(i)}) \right) \\\
+&\text{Let } \nabla_{\theta}\mathcal{L}_i(\theta) = \nabla_{\theta}\log\sum_h\frac{1}{z}\exp\left( -E(o^{(i)}, h^{(i)}) \right) \\\
+\\\
+\nabla_{\theta}\mathcal{L}_i(\theta) &= \nabla_{\theta}\log\sum_h\exp\left(-E(o^{(i)},h^{(i)})\right) - \nabla_{\theta}\log\sum_h z \\\
+&= \nabla_{\theta}\log\sum_h\exp\left(-E(o^{(i)},h^{(i)})\right) - \nabla_{\theta}\log z \\\
+&\because \int\frac{1}{z}\exp\left( -E(o,h) \right)dodh = 1 \\\
+&= \nabla_{\theta}\log\sum_h\exp\left(-E(o^{(i)},h^{(i)})\right) - \nabla_{\theta}\log \sum_{o,h}\exp\left(-E(o,h)\right) \\\
+&\text{Let } \text{part1} = \nabla_{\theta}\log\sum_h\exp\left(-E(o^{(i)},h^{(i)})\right) \\\
+&\text{Let } \text{part2} = \nabla_{\theta}\log \sum_{o,h}\exp\left(-E(o,h)\right) \\\
+\text{part1} &= \frac{1}{\sum_h\exp\left( -E(o^{(i)},h^{(i)}) \right)}\nabla_{\theta}\sum_h\exp\left( -E(o^{(i)},h^{(i)}) \right) \\\
+&= \frac{1}{\sum_h\exp\left( -E(o^{(i)},h^{(i)}) \right)}\sum_h\nabla_{\theta}\exp\left( -E(o^{(i)},h^{(i)}) \right) \\\
+&= \frac{-1}{\sum_h\exp\left( -E(o^{(i)},h^{(i)}) \right)}\sum_h\exp\left( -E(o^{(i)},h^{(i)}) \right)\nabla_{\theta}E(o^{(i)},h^{(i)}) \\\
+&= -\sum_h\frac{\exp\left( -E(o^{(i)},h^{(i)}) \right)}{\sum_h \exp\left( -E(o^{(i)},h^{(i)}) \right)} \nabla_{\theta}E(o^{(i)},h^{(i)}) \\\
+&= -\sum_h\frac{\frac{1}{z}\exp\left( -E(o^{(i)},h^{(i)}) \right)}{\frac{1}{z}\sum_h \exp\left( -E(o^{(i)},h^{(i)}) \right)} \nabla_{\theta}E(o^{(i)},h^{(i)}) \\\
+&= -\sum_h\frac{p(o^{(i)},h^{(i)})}{p(o^{(i)})} \nabla_{\theta}E(o^{(i)},h^{(i)}) \\\
+&= -\sum_h p(h^{(i)}|o^{(i)}) \nabla_{\theta}E(o^{(i)},h^{(i)}) \\\
+\text{part2} &= \frac{1}{\sum_{o,h}\exp\left(-E(o,h)\right)}\nabla_{\theta}\sum_{o,h}\exp\left(-E(o,h)\right) \\\
+&= \frac{1}{\sum_{o,h}\exp\left(-E(o,h)\right)}\sum_{o,h}\nabla_{\theta}\exp\left(-E(o,h)\right) \\\
+&= \frac{-1}{\sum_{o,h}\exp\left(-E(o,h)\right)}\sum_{o,h}\exp\left(-E(o,h)\right)\nabla_{\theta}E(o,h) \\\
+&= -\sum_{o,h}\frac{\exp\left(-E(o,h)\right)}{\sum_{o,h}\exp\left(-E(o,h)\right)}\nabla_{\theta}E(o,h) \\\
+&= -\sum_{o,h}\frac{\exp\left(-E(o,h)\right)}{\sum_{o,h}\exp\left(-E(o,h)\right)}\nabla_{\theta}E(o,h) \\\
+&= -\sum_{o,h}\frac{p(o,h)}{\sum_{o,h}p(o,h)}\nabla_{\theta}E(o,h) \\\
+&= -\sum_{o,h} p(o,h)\nabla_{\theta}E(o,h)
+\end{align*}
+$$
+
+In conlusion, we have the gradient:
+
+$$
+\begin{align*}
+\nabla_{\theta}\mathcal{L}(\theta) &= \frac{1}{N}\sum_{i=1}^N\nabla_{\theta}\mathcal{L}_i(\theta) \\\
+&= \frac{1}{N}\sum_{i=1}^N\left( \sum_{o,h}p(o,h)\nabla_{\theta}E(o,h)-\sum_{h}p(h^{(i)}|o^{(i)})\nabla_{\theta}E(o^{(i)},h^{(i)}) \right)
+\end{align*}
+$$
+
+### The Log-likelihood gradient of RBM
+Baed on the conlusion from [last section](#the-log-likelihood-gradient-of-energy-based-model), the partial derivative of RBM can be given by:
+
+$$
+\begin{align*}
+\frac{\partial}{\partial w_{ij}} \mathcal{L}_k(\theta) &= \sum_{o,h}p(o,h)\frac{\partial}{\partial w_{ij}}E(o,h) - \sum_{h}p(h^{(k)}|o^{(k)})\frac{\partial}{\partial w_{ij}}E(o^{(k)},h^{(k)}) \\\
+&\because E(o,h) = -(h^Two+\alpha^To+\beta^Th) \\\
+&\therefore \frac{\partial}{\partial w_{ij}}E(o,h) = -\frac{\partial}{\partial w_{ij}}\sum_{i=1}^m\sum_{j=1}^n h_iw_{ij}o_j = h_io_j \\\
+&= \sum_{o,h}p(o,h)h_io_j - \sum_{h}p(h^{(k)}|o^{(k)})h^{(k)}_io^{(k)}_j \\\
+&\text{Let } \text{part1}=\sum_{o,h}p(o,h)h_io_j \\\
+&\text{Let } \text{part2}=\sum_{h}p(h^{(k)}|o^{(k)})h^{(k)}_io^{(k)}_j \\\
+\text{part1} &= \sum_{o_1\cdots o_n}\sum_{h_1\cdots h_m}p(o)p(h|o)h_io_j \\\
+&= \sum_{o_1\cdots o_n}p(o)\sum_{h_1\cdots h_m}p(h_{1:m}|o)h_io_j \\\
+&= \sum_{o_1\cdots o_n}p(o)\sum_{h_i}p(h_i|o)h_io_j \\\
+&\because h\in\lbrace 0,1 \rbrace \text{ in RBM} \\\
+&= \sum_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j \\\
+\text{part2} &= \sum_{h_1\cdots h_m}p(h^{(k)}_{1:m}|o^{(k)})h^{(k)}_io^{(k)}_j \\\
+&= \sum_{h_i}p(h^{(k)}_{i}|o^{(k)})h^{(k)}_io^{(k)}_j \\\
+&= p(h^{(k)}_{i}=1|o^{(k)})o^{(k)}_j \\\
+\\\
+&\text{so we have} \\\
+\frac{\partial}{\partial w_{ij}} \mathcal{L}_k(\theta) &= \sum_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j - p(h^{(k)}_{i}=1|o^{(k)})o^{(k)}_j
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Similarly, the partial derivatives of \(\alpha_j\) and \(\beta_i\) are given by:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\frac{\partial}{\partial \alpha_{j}} \mathcal{L}_k(\theta) &= \sum_{o,h}p(o,h)o_j - \sum_{h}p(h^{(k)}|o^{(k)})o^{(k)}_j \\\
+&= \sum_{o_1\cdots o_n}p(o)\sum_{h_1\cdots h_m}p(h_{1:m}|o)o_j - \sum_{h_1\cdots h_m}p(h^{(k)}_{1:m}|o^{(k)})o^{(k)}_j \\\
+&= \sum_{o_1\cdots o_n}p(o)o_j - o^{(k)}_j \\\
+\frac{\partial}{\partial \beta_{i}} \mathcal{L}_k(\theta) &= \sum_{o,h}p(o,h)h_i - \sum_{h}p(h^{(k)}|o^{(k)})h^{(k)}_i \\\
+&= \sum_{o_1\cdots o_n}p(o)\sum_{h_1\cdots h_m}p(h_{1:m}|o)h_i - \sum_{h_1\cdots h_m}p(h^{(k)}_{1:m}|o^{(k)})h^{(k)}_i \\\
+&= \sum_{o_1\cdots o_n}p(o)\sum_{h_i}p(h_i|o)h_i - \sum_{h_i}p(h^{(k)}_{i}|o^{(k)})h^{(k)}_i \\\
+&= \sum_{o_1\cdots o_n}p(o)p(h_i=1|o) - p(h^{(k)}_{i}=1|o^{(k)})
+\end{align*}
+$$
+
+In conlusion, we have the gradient for RBM:
+
+$$
+\begin{align*}
+\frac{\partial}{\partial w_{ij}}\mathcal{L}(\theta) &= \frac{1}{N}\sum_{k=1}^N\left( \sum_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j - p(h^{(k)}_{i}=1|o^{(k)})o^{(k)}_j \right) \\\
+\frac{\partial}{\partial \alpha_{j}} \mathcal{L}_k(\theta) &= \frac{1}{N}\sum_{k=1}^N\left( \sum_{o_1\cdots o_n}p(o)o_j - o^{(k)}_j \right) \\\
+\frac{\partial}{\partial \beta_{i}}\mathcal{L}(\theta) &= \frac{1}{N}\sum_{k=1}^N\left( \sum_{o_1\cdots o_n}p(o)p(h_i=1|o) - p(h^{(k)}_{i}=1|o^{(k)}) \right)
+\end{align*}
+$$
+
+### CD-k for RBM
+
+
 
 ## Reference
 
