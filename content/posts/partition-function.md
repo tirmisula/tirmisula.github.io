@@ -123,17 +123,17 @@ The log-likelihood gradient is:
 
 $$
 \begin{align*}
-\nabla_{\theta}\mathcal{L}(\theta) &= \frac{1}{N}\sum\_{i=1}^N\nabla_{\theta}\log(\hat{p}(x_i|\theta)) - \nabla_{\theta}\log(z(\theta)) \\\
-&\because\frac{1}{N}\sum\_{i=1}^N\nabla_{\theta}\log(\hat{p}(x_i|\theta)) \text{ is computable} \\\
-&\therefore \text{focus on } \nabla_{\theta}\log(z(\theta)) \\\
+\nabla\_{\theta}\mathcal{L}(\theta) &= \frac{1}{N}\sum\_{i=1}^N\nabla\_{\theta}\log(\hat{p}(x_i|\theta)) - \nabla\_{\theta}\log(z(\theta)) \\\
+&\because\frac{1}{N}\sum\_{i=1}^N\nabla\_{\theta}\log(\hat{p}(x_i|\theta)) \text{ is computable} \\\
+&\therefore \text{focus on } \nabla\_{\theta}\log(z(\theta)) \\\
 \\\
-\nabla_{\theta}\log(z(\theta)) &= \frac{1}{z(\theta)}\nabla_{\theta}z(\theta) \\\
-&= \frac{p(x|\theta)}{\hat{p}(x|\theta)} \nabla_{\theta}\int \hat{p}(x|\theta)dx \\\
+\nabla\_{\theta}\log(z(\theta)) &= \frac{1}{z(\theta)}\nabla\_{\theta}z(\theta) \\\
+&= \frac{p(x|\theta)}{\hat{p}(x|\theta)} \nabla\_{\theta}\int \hat{p}(x|\theta)dx \\\
 &\because\text{Leibniz integral rule} \\\
-&= \frac{p(x|\theta)}{\hat{p}(x|\theta)} \int\nabla_{\theta} \hat{p}(x|\theta)dx \\\
-&= \int \frac{p(x|\theta)}{\hat{p}(x|\theta)}\nabla_{\theta}\hat{p}(x|\theta)dx \\\
-&= \int p(x|\theta)\nabla_{\theta}\log\hat{p}(x|\theta)dx \\\
-&= \mathbb{E}\_{x \sim p(x | \theta)} \left[ \nabla_{\theta}\log\hat{p}(x|\theta) \right]
+&= \frac{p(x|\theta)}{\hat{p}(x|\theta)} \int\nabla\_{\theta} \hat{p}(x|\theta)dx \\\
+&= \int \frac{p(x|\theta)}{\hat{p}(x|\theta)}\nabla\_{\theta}\hat{p}(x|\theta)dx \\\
+&= \int p(x|\theta)\nabla\_{\theta}\log\hat{p}(x|\theta)dx \\\
+&= \mathbb{E}\_{x \sim p(x | \theta)} \left[ \nabla\_{\theta}\log\hat{p}(x|\theta) \right]
 \end{align*}
 $$
 
@@ -153,18 +153,18 @@ $$
 
 {{< math.inline >}}
 <p>
-So \( \frac{1}{N}\sum\_{i=1}^N\nabla_{\theta}\log(\hat{p}(x_i|\theta)) \) can be considered as sampling from empirical distribution \( p(\text{data}) \):
+So \( \frac{1}{N}\sum_{i=1}^N\nabla\_{\theta}\log(\hat{p}(x_i|\theta)) \) can be considered as sampling from empirical distribution \( p(\text{data}) \):
 </p>
 {{</ math.inline >}}
 
 $$
-\frac{1}{N}\sum\_{i=1}^N\nabla_{\theta}\log(\hat{p}(x_i|\theta)) = \mathbb{E}\_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] 
+\frac{1}{N}\sum\_{i=1}^N\nabla\_{\theta}\log(\hat{p}(x_i|\theta)) = \mathbb{E}\_{x\sim p(\text{data})}[\nabla\_{\theta}\log(\hat{p}(x|\theta))] 
 $$
 
 So the log-likelihood gradient becomes:
 
 $$
-\nabla_{\theta}\mathcal{L}(\theta) = \mathbb{E}\_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] - \mathbb{E}\_{x\sim p(x|\theta)} \left[ \nabla_{\theta}\log\hat{p}(x|\theta) \right] \\\
+\nabla\_{\theta}\mathcal{L}(\theta) = \mathbb{E}\_{x\sim p(\text{data})}[\nabla\_{\theta}\log(\hat{p}(x|\theta))] - \mathbb{E}\_{x\sim p(x|\theta)} \left[ \nabla\_{\theta}\log\hat{p}(x|\theta) \right] \\\
 \\\
 \begin{cases}
     p(\text{data}) &: \text{empirical distribution} \\\
@@ -185,7 +185,7 @@ $$
 &\tilde{x}\_{1} &\sim p(\text{data}) \\\
 &&\cdots \\\
 &\tilde{x}\_{M} &\sim p(\text{data})
-\end{rcases} : \mathbb{E}\_{x\sim p(\text{data})}[\nabla\_{\theta}\log(\hat{p}(x|\theta))] \approx \frac{1}{M}\sum\_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}_i|\theta))
+\end{rcases} : \mathbb{E}\_{x\sim p(\text{data})}[\nabla\_{\theta}\log(\hat{p}(x|\theta))] \approx \frac{1}{M}\sum\_{i=1}^M\nabla\_{\theta}\log(\hat{p}(\tilde{x}_i|\theta))
 $$
 
 $$
@@ -193,7 +193,7 @@ $$
 &\hat{x}\_{1} &\sim p(x|\theta) \\\
 &&\cdots \\\
 &\hat{x}\_{M} &\sim p(x|\theta)
-\end{rcases} : \mathbb{E}\_{x\sim p(x|\theta)}[\nabla\_{\theta}\log(\hat{p}(x|\theta))] \approx \frac{1}{M}\sum\_{i=1}^M\nabla_{\theta}\log(\hat{p}(\hat{x}_i|\theta))
+\end{rcases} : \mathbb{E}\_{x\sim p(x|\theta)}[\nabla\_{\theta}\log(\hat{p}(x|\theta))] \approx \frac{1}{M}\sum\_{i=1}^M\nabla\_{\theta}\log(\hat{p}(\hat{x}_i|\theta))
 $$
 
 Combining with gradient ascent algorithm, we have:
@@ -207,7 +207,7 @@ $$
 &2. \text{ sampling by gibbs algorithm : } \\\
     &\quad \hat{x}\_{1:M} \sim p(x|\theta^{(t)}) \\\
 &3. \text{update parameters until converge: } \\\
-    &\quad \theta^{(t+1)} = \theta^{(t)} + \eta\left( \sum\_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}\_{i}|\theta^{(t)}))-\sum\_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}_i|\theta^{(t)})) \right)
+    &\quad \theta^{(t+1)} = \theta^{(t)} + \eta\left( \sum\_{i=1}^M\nabla\_{\theta}\log(\hat{p}(\tilde{x}\_{i}|\theta^{(t)}))-\sum\_{i=1}^M\nabla\_{\theta}\log(\hat{p}(\tilde{x}_i|\theta^{(t)})) \right)
 \end{align*}
 $$
 
@@ -304,10 +304,10 @@ Using a partition function, the MLE object is given by [graident ascent](#gradie
 
 $$
 \begin{align*}
-\nabla_{\theta}\mathcal{L}(\theta) &= \mathbb{E}\_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] - \nabla_{\theta}\log(z(\theta)) \\\
-&= \mathbb{E}\_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] - \mathbb{E}\_{x\sim p(x|\theta)} \left[ \nabla_{\theta}\log\hat{p}(x|\theta) \right] \\\
+\nabla\_{\theta}\mathcal{L}(\theta) &= \mathbb{E}\_{x\sim p(\text{data})}[\nabla\_{\theta}\log(\hat{p}(x|\theta))] - \nabla\_{\theta}\log(z(\theta)) \\\
+&= \mathbb{E}\_{x\sim p(\text{data})}[\nabla\_{\theta}\log(\hat{p}(x|\theta))] - \mathbb{E}\_{x\sim p(x|\theta)} \left[ \nabla\_{\theta}\log\hat{p}(x|\theta) \right] \\\
 &\because \text{Leibniz integral rule} \\\
-&= \nabla_{\theta}\mathbb{E}\_{x\sim p(\text{data})}[\log\hat{p}(x|\theta)] - \nabla_{\theta}\mathbb{E}\_{x\sim p(x|\theta)} \left[ \log\hat{p}(x|\theta) \right] \\\
+&= \nabla\_{\theta}\mathbb{E}\_{x\sim p(\text{data})}[\log\hat{p}(x|\theta)] - \nabla\_{\theta}\mathbb{E}\_{x\sim p(x|\theta)} \left[ \log\hat{p}(x|\theta) \right] \\\
 \mathcal{L}(\theta) &= \mathbb{E}\_{x\sim p(\text{data})}[\log\hat{p}(x|\theta)] - \mathbb{E}\_{x\sim p(x|\theta)} \left[ \log\hat{p}(x|\theta) \right] \\\
 &\text{by Gibbs sampling} \\\
 &\approx \mathbb{E}\_{x\sim p(\text{data})}[\log\hat{p}(x|\theta)] - \mathbb{E}\_{x\sim p^{(\infty)}(x|\theta)} \left[ \log\hat{p}(x|\theta) \right] \\\
@@ -431,29 +431,29 @@ The log-likellihood gradient is given by:
 
 $$
 \begin{align*}
-\nabla_{\theta}\mathcal{L}(\theta) &= \frac{1}{N} \sum\_{i=1}^N\nabla_{\theta}\log\sum\_h\frac{1}{z}\exp\left( -E(o^{(i)}, h^{(i)}) \right) \\\
-&\text{Let } \nabla_{\theta}\mathcal{L}\_{i}(\theta) = \nabla\_{\theta}\log\sum\_h\frac{1}{z}\exp\left( -E(o^{(i)}, h^{(i)}) \right) \\\
+\nabla\_{\theta}\mathcal{L}(\theta) &= \frac{1}{N} \sum\_{i=1}^N\nabla\_{\theta}\log\sum\_h\frac{1}{z}\exp\left( -E(o^{(i)}, h^{(i)}) \right) \\\
+&\text{Let } \nabla\_{\theta}\mathcal{L}\_{i}(\theta) = \nabla\_{\theta}\log\sum\_h\frac{1}{z}\exp\left( -E(o^{(i)}, h^{(i)}) \right) \\\
 \\\
-\nabla_{\theta}\mathcal{L}_i(\theta) &= \nabla_{\theta}\log\sum\_h\exp\left(-E(o^{(i)},h^{(i)})\right) - \nabla_{\theta}\log\sum\_h z \\\
-&= \nabla_{\theta}\log\sum\_h\exp\left(-E(o^{(i)},h^{(i)})\right) - \nabla_{\theta}\log z \\\
+\nabla\_{\theta}\mathcal{L}_i(\theta) &= \nabla\_{\theta}\log\sum\_h\exp\left(-E(o^{(i)},h^{(i)})\right) - \nabla\_{\theta}\log\sum\_h z \\\
+&= \nabla\_{\theta}\log\sum\_h\exp\left(-E(o^{(i)},h^{(i)})\right) - \nabla\_{\theta}\log z \\\
 &\because \int\frac{1}{z}\exp\left( -E(o,h) \right)dodh = 1 \\\
-&= \nabla_{\theta}\log\sum\_h\exp\left(-E(o^{(i)},h^{(i)})\right) - \nabla_{\theta}\log \sum\_{o,h}\exp\left(-E(o,h)\right) \\\
-&\text{Let } \text{part1} = \nabla_{\theta}\log\sum\_h\exp\left(-E(o^{(i)},h^{(i)})\right) \\\
-&\text{Let } \text{part2} = \nabla_{\theta}\log \sum\_{o,h}\exp\left(-E(o,h)\right) \\\
-\text{part1} &= \frac{1}{\sum\_h\exp\left( -E(o^{(i)},h^{(i)}) \right)}\nabla_{\theta}\sum\_h\exp\left( -E(o^{(i)},h^{(i)}) \right) \\\
-&= \frac{1}{\sum\_h\exp\left( -E(o^{(i)},h^{(i)}) \right)}\sum\_h\nabla_{\theta}\exp\left( -E(o^{(i)},h^{(i)}) \right) \\\
-&= \frac{-1}{\sum\_h\exp\left( -E(o^{(i)},h^{(i)}) \right)}\sum\_h\exp\left( -E(o^{(i)},h^{(i)}) \right)\nabla_{\theta}E(o^{(i)},h^{(i)}) \\\
-&= -\sum\_h\frac{\exp\left( -E(o^{(i)},h^{(i)}) \right)}{\sum\_h \exp\left( -E(o^{(i)},h^{(i)}) \right)} \nabla_{\theta}E(o^{(i)},h^{(i)}) \\\
-&= -\sum\_h\frac{\frac{1}{z}\exp\left( -E(o^{(i)},h^{(i)}) \right)}{\frac{1}{z}\sum\_h \exp\left( -E(o^{(i)},h^{(i)}) \right)} \nabla_{\theta}E(o^{(i)},h^{(i)}) \\\
-&= -\sum\_h\frac{p(o^{(i)},h^{(i)})}{p(o^{(i)})} \nabla_{\theta}E(o^{(i)},h^{(i)}) \\\
-&= -\sum\_h p(h^{(i)}|o^{(i)}) \nabla_{\theta}E(o^{(i)},h^{(i)}) \\\
-\text{part2} &= \frac{1}{\sum\_{o,h}\exp\left(-E(o,h)\right)}\nabla_{\theta}\sum\_{o,h}\exp\left(-E(o,h)\right) \\\
-&= \frac{1}{\sum\_{o,h}\exp\left(-E(o,h)\right)}\sum\_{o,h}\nabla_{\theta}\exp\left(-E(o,h)\right) \\\
-&= \frac{-1}{\sum\_{o,h}\exp\left(-E(o,h)\right)}\sum\_{o,h}\exp\left(-E(o,h)\right)\nabla_{\theta}E(o,h) \\\
-&= -\sum\_{o,h}\frac{\exp\left(-E(o,h)\right)}{\sum\_{o,h}\exp\left(-E(o,h)\right)}\nabla_{\theta}E(o,h) \\\
-&= -\sum\_{o,h}\frac{\exp\left(-E(o,h)\right)}{\sum\_{o,h}\exp\left(-E(o,h)\right)}\nabla_{\theta}E(o,h) \\\
-&= -\sum\_{o,h}\frac{p(o,h)}{\sum\_{o,h}p(o,h)}\nabla_{\theta}E(o,h) \\\
-&= -\sum\_{o,h} p(o,h)\nabla_{\theta}E(o,h)
+&= \nabla\_{\theta}\log\sum\_h\exp\left(-E(o^{(i)},h^{(i)})\right) - \nabla\_{\theta}\log \sum\_{o,h}\exp\left(-E(o,h)\right) \\\
+&\text{Let } \text{part1} = \nabla\_{\theta}\log\sum\_h\exp\left(-E(o^{(i)},h^{(i)})\right) \\\
+&\text{Let } \text{part2} = \nabla\_{\theta}\log \sum\_{o,h}\exp\left(-E(o,h)\right) \\\
+\text{part1} &= \frac{1}{\sum\_h\exp\left( -E(o^{(i)},h^{(i)}) \right)}\nabla\_{\theta}\sum\_h\exp\left( -E(o^{(i)},h^{(i)}) \right) \\\
+&= \frac{1}{\sum\_h\exp\left( -E(o^{(i)},h^{(i)}) \right)}\sum\_h\nabla\_{\theta}\exp\left( -E(o^{(i)},h^{(i)}) \right) \\\
+&= \frac{-1}{\sum\_h\exp\left( -E(o^{(i)},h^{(i)}) \right)}\sum\_h\exp\left( -E(o^{(i)},h^{(i)}) \right)\nabla\_{\theta}E(o^{(i)},h^{(i)}) \\\
+&= -\sum\_h\frac{\exp\left( -E(o^{(i)},h^{(i)}) \right)}{\sum\_h \exp\left( -E(o^{(i)},h^{(i)}) \right)} \nabla\_{\theta}E(o^{(i)},h^{(i)}) \\\
+&= -\sum\_h\frac{\frac{1}{z}\exp\left( -E(o^{(i)},h^{(i)}) \right)}{\frac{1}{z}\sum\_h \exp\left( -E(o^{(i)},h^{(i)}) \right)} \nabla\_{\theta}E(o^{(i)},h^{(i)}) \\\
+&= -\sum\_h\frac{p(o^{(i)},h^{(i)})}{p(o^{(i)})} \nabla\_{\theta}E(o^{(i)},h^{(i)}) \\\
+&= -\sum\_h p(h^{(i)}|o^{(i)}) \nabla\_{\theta}E(o^{(i)},h^{(i)}) \\\
+\text{part2} &= \frac{1}{\sum\_{o,h}\exp\left(-E(o,h)\right)}\nabla\_{\theta}\sum\_{o,h}\exp\left(-E(o,h)\right) \\\
+&= \frac{1}{\sum\_{o,h}\exp\left(-E(o,h)\right)}\sum\_{o,h}\nabla\_{\theta}\exp\left(-E(o,h)\right) \\\
+&= \frac{-1}{\sum\_{o,h}\exp\left(-E(o,h)\right)}\sum\_{o,h}\exp\left(-E(o,h)\right)\nabla\_{\theta}E(o,h) \\\
+&= -\sum\_{o,h}\frac{\exp\left(-E(o,h)\right)}{\sum\_{o,h}\exp\left(-E(o,h)\right)}\nabla\_{\theta}E(o,h) \\\
+&= -\sum\_{o,h}\frac{\exp\left(-E(o,h)\right)}{\sum\_{o,h}\exp\left(-E(o,h)\right)}\nabla\_{\theta}E(o,h) \\\
+&= -\sum\_{o,h}\frac{p(o,h)}{\sum\_{o,h}p(o,h)}\nabla\_{\theta}E(o,h) \\\
+&= -\sum\_{o,h} p(o,h)\nabla\_{\theta}E(o,h)
 \end{align*}
 $$
 
@@ -461,8 +461,8 @@ In conlusion, we have the gradient:
 
 $$
 \begin{align*}
-\nabla_{\theta}\mathcal{L}(\theta) &= \frac{1}{N}\sum\_{i=1}^N\nabla_{\theta}\mathcal{L}\_{i}(\theta) \\\
-&= \frac{1}{N}\sum\_{i=1}^N\left( \sum\_{o,h}p(o,h)\nabla_{\theta}E(o,h)-\sum\_{h}p(h^{(i)}|o^{(i)})\nabla_{\theta}E(o^{(i)},h^{(i)}) \right)
+\nabla\_{\theta}\mathcal{L}(\theta) &= \frac{1}{N}\sum\_{i=1}^N\nabla\_{\theta}\mathcal{L}\_{i}(\theta) \\\
+&= \frac{1}{N}\sum\_{i=1}^N\left( \sum\_{o,h}p(o,h)\nabla\_{\theta}E(o,h)-\sum\_{h}p(h^{(i)}|o^{(i)})\nabla\_{\theta}E(o^{(i)},h^{(i)}) \right)
 \end{align*}
 $$
 
@@ -476,18 +476,18 @@ $$
 &\therefore \frac{\partial}{\partial w_{ij}}E(o,h) = -\frac{\partial}{\partial w_{ij}}\sum\_{i=1}^m\sum\_{j=1}^n h_iw_{ij}o_j = -h_io_j \\\
 &= -\sum\_{o,h}p(o,h)h_io_j + \sum\_{h}p(h^{(k)}|o^{(k)})h^{(k)}\_{i}o^{(k)}\_{j} \\\
 &\text{Let } \text{part1}=\sum\_{o,h}p(o,h)h_io_j \\\
-&\text{Let } \text{part2}=\sum\_{h}p(h^{(k)}|o^{(k)})h^{(k)}_io^{(k)}_j \\\
+&\text{Let } \text{part2}=\sum\_{h}p(h^{(k)}|o^{(k)})h^{(k)}\_{i}o^{(k)}\_{j} \\\
 \text{part1} &= \sum\_{o_1\cdots o_n}\sum\_{h_1\cdots h_m}p(o)p(h|o)h_io_j \\\
 &= \sum\_{o_1\cdots o_n}p(o)\sum\_{h_1\cdots h_m}p(h_{1:m}|o)h_io_j \\\
 &= \sum\_{o_1\cdots o_n}p(o)\sum\_{h_i}p(h_i|o)h_io_j \\\
 &\because h\in\lbrace 0,1 \rbrace \text{ in RBM} \\\
 &= \sum\_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j \\\
-\text{part2} &= \sum\_{h_1\cdots h_m}p(h^{(k)}_{1:m}|o^{(k)})h^{(k)}_io^{(k)}_j \\\
-&= \sum\_{h_i}p(h^{(k)}_{i}|o^{(k)})h^{(k)}_io^{(k)}_j \\\
-&= p(h^{(k)}_{i}=1|o^{(k)})o^{(k)}_j \\\
+\text{part2} &= \sum\_{h_1\cdots h_m}p(h^{(k)}\_{1:m}|o^{(k)})h^{(k)}\_{i}o^{(k)}\_{j} \\\
+&= \sum\_{h_i}p(h^{(k)}\_{i}|o^{(k)})h^{(k)}\_{i}o^{(k)}\_{j} \\\
+&= p(h^{(k)}\_{i}=1|o^{(k)})o^{(k)}\_{j} \\\
 \\\
 &\text{so we have} \\\
-\frac{\partial}{\partial w_{ij}} \mathcal{L}\_{k}(\theta) &= -\sum\_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j + p(h^{(k)}_{i}=1|o^{(k)})o^{(k)}_j
+\frac{\partial}{\partial w_{ij}} \mathcal{L}\_{k}(\theta) &= -\sum\_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j + p(h^{(k)}\_{i}=1|o^{(k)})o^{(k)}\_{j}
 \end{align*}
 $$
 
@@ -499,13 +499,13 @@ Similarly, the partial derivatives of \(\alpha_j\) and \(\beta_i\) are given by:
 
 $$
 \begin{align*}
-\frac{\partial}{\partial \alpha_{j}} \mathcal{L}\_{k}(\theta) &= -\sum\_{o,h}p(o,h)o_j + \sum\_{h}p(h^{(k)}|o^{(k)})o^{(k)}_j \\\
-&= -\sum\_{o_1\cdots o_n}p(o)\sum\_{h_1\cdots h_m}p(h_{1:m}|o)o_j + \sum\_{h_1\cdots h_m}p(h^{(k)}_{1:m}|o^{(k)})o^{(k)}_j \\\
-&= -\sum\_{o_1\cdots o_n}p(o)o_j + o^{(k)}_j \\\
-\frac{\partial}{\partial \beta_{i}} \mathcal{L}\_{k}(\theta) &= -\sum\_{o,h}p(o,h)h_i + \sum\_{h}p(h^{(k)}|o^{(k)})h^{(k)}_i \\\
-&= -\sum\_{o_1\cdots o_n}p(o)\sum\_{h_1\cdots h_m}p(h_{1:m}|o)h_i + \sum\_{h_1\cdots h_m}p(h^{(k)}_{1:m}|o^{(k)})h^{(k)}_i \\\
-&= -\sum\_{o_1\cdots o_n}p(o)\sum\_{h_i}p(h_i|o)h_i + \sum\_{h_i}p(h^{(k)}_{i}|o^{(k)})h^{(k)}_i \\\
-&= -\sum\_{o_1\cdots o_n}p(o)p(h_i=1|o) + p(h^{(k)}_{i}=1|o^{(k)})
+\frac{\partial}{\partial \alpha_{j}} \mathcal{L}\_{k}(\theta) &= -\sum\_{o,h}p(o,h)o_j + \sum\_{h}p(h^{(k)}|o^{(k)})o^{(k)}\_{j} \\\
+&= -\sum\_{o_1\cdots o_n}p(o)\sum\_{h_1\cdots h_m}p(h_{1:m}|o)o_j + \sum\_{h_1\cdots h_m}p(h^{(k)}\_{1:m}|o^{(k)})o^{(k)}\_{j} \\\
+&= -\sum\_{o_1\cdots o_n}p(o)o_j + o^{(k)}\_{j} \\\
+\frac{\partial}{\partial \beta_{i}} \mathcal{L}\_{k}(\theta) &= -\sum\_{o,h}p(o,h)h_i + \sum\_{h}p(h^{(k)}|o^{(k)})h^{(k)}\_{i} \\\
+&= -\sum\_{o_1\cdots o_n}p(o)\sum\_{h_1\cdots h_m}p(h_{1:m}|o)h_i + \sum\_{h_1\cdots h_m}p(h^{(k)}\_{1:m}|o^{(k)})h^{(k)}\_{i} \\\
+&= -\sum\_{o_1\cdots o_n}p(o)\sum\_{h_i}p(h_i|o)h_i + \sum\_{h_i}p(h^{(k)}\_{i}|o^{(k)})h^{(k)}\_{i} \\\
+&= -\sum\_{o_1\cdots o_n}p(o)p(h_i=1|o) + p(h^{(k)}\_{i}=1|o^{(k)})
 \end{align*}
 $$
 
@@ -513,9 +513,9 @@ In conlusion, we have the gradient for RBM:
 
 $$
 \begin{align*}
-\frac{\partial}{\partial w_{ij}}\mathcal{L}(\theta) &= \frac{1}{N}\sum\_{k=1}^N\left( -\sum\_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j + p(h^{(k)}_{i}=1|o^{(k)})o^{(k)}_j \right) \\\
-\frac{\partial}{\partial \alpha_{j}} \mathcal{L}\_{k}(\theta) &= \frac{1}{N}\sum\_{k=1}^N\left( -\sum\_{o_1\cdots o_n}p(o)o_j + o^{(k)}_j \right) \\\
-\frac{\partial}{\partial \beta_{i}}\mathcal{L}(\theta) &= \frac{1}{N}\sum\_{k=1}^N\left( -\sum\_{o_1\cdots o_n}p(o)p(h_i=1|o) + p(h^{(k)}_{i}=1|o^{(k)}) \right)
+\frac{\partial}{\partial w_{ij}}\mathcal{L}(\theta) &= \frac{1}{N}\sum\_{k=1}^N\left( -\sum\_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j + p(h^{(k)}\_{i}=1|o^{(k)})o^{(k)}\_{j} \right) \\\
+\frac{\partial}{\partial \alpha_{j}} \mathcal{L}\_{k}(\theta) &= \frac{1}{N}\sum\_{k=1}^N\left( -\sum\_{o_1\cdots o_n}p(o)o_j + o^{(k)}\_{j} \right) \\\
+\frac{\partial}{\partial \beta_{i}}\mathcal{L}(\theta) &= \frac{1}{N}\sum\_{k=1}^N\left( -\sum\_{o_1\cdots o_n}p(o)p(h_i=1|o) + p(h^{(k)}\_{i}=1|o^{(k)}) \right)
 \end{align*}
 $$
 
@@ -528,12 +528,12 @@ Suppose we are finding \( \frac{\partial}{\partial w_{ij}}\mathcal{L}(\theta) \)
 {{</ math.inline >}}
 
 $$
-o^{(s)<k>}_{j} : \text{$s$-th observation, $j$-th dimension, sampled at $k$-th step by Gibbs}
+o^{(s)<k>}\_{j} : \text{$s$-th observation, $j$-th dimension, sampled at $k$-th step by Gibbs}
 $$
 
 {{< math.inline >}}
 <p>
-We can see that \( \sum\_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j \) is intractable due to integration, while \( p(h^{(k)}_{i}=1|o^{(k)})o^{(k)}_j \) can be solved directly from observation tranining set:
+We can see that \( \sum_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j \) is intractable due to integration, while \( p(h^{(k)}_{i}=1|o^{(k)})o^{(k)}_j \) can be solved directly from observation tranining set:
 </p>
 {{</ math.inline >}}
 
