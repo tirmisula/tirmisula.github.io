@@ -126,13 +126,14 @@ $$
 \nabla_{\theta}\mathcal{L}(\theta) &= \frac{1}{N}\sum_{i=1}^N\nabla_{\theta}\log(\hat{p}(x_i|\theta)) - \nabla_{\theta}\log(z(\theta)) \\\
 &\because\frac{1}{N}\sum_{i=1}^N\nabla_{\theta}\log(\hat{p}(x_i|\theta)) \text{ is computable} \\\
 &\therefore \text{focus on } \nabla_{\theta}\log(z(\theta)) \\\
+\\\
 \nabla_{\theta}\log(z(\theta)) &= \frac{1}{z(\theta)}\nabla_{\theta}z(\theta) \\\
 &= \frac{p(x|\theta)}{\hat{p}(x|\theta)} \nabla_{\theta}\int \hat{p}(x|\theta)dx \\\
 &\because\text{Leibniz integral rule} \\\
 &= \frac{p(x|\theta)}{\hat{p}(x|\theta)} \int\nabla_{\theta} \hat{p}(x|\theta)dx \\\
 &= \int \frac{p(x|\theta)}{\hat{p}(x|\theta)}\nabla_{\theta}\hat{p}(x|\theta)dx \\\
 &= \int p(x|\theta)\nabla_{\theta}\log\hat{p}(x|\theta)dx \\\
-&= \mathbb{E}\_{x \sim p(x | \theta)} [ \nabla_{\theta}\log\hat{p}(x|\theta) ]
+&= \mathbb{E}\_{x \sim p(x | \theta)} \left[ \nabla_{\theta}\log\hat{p}(x|\theta) \right]
 \end{align*}
 $$
 
@@ -157,13 +158,13 @@ So \( \frac{1}{N}\sum_{i=1}^N\nabla_{\theta}\log(\hat{p}(x_i|\theta)) \) can be 
 {{</ math.inline >}}
 
 $$
-\frac{1}{N}\sum_{i=1}^N\nabla_{\theta}\log(\hat{p}(x_i|\theta)) = \mathbb{E}_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] 
+\frac{1}{N}\sum_{i=1}^N\nabla_{\theta}\log(\hat{p}(x_i|\theta)) = \mathbb{E}\_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] 
 $$
 
 So the log-likelihood gradient becomes:
 
 $$
-\nabla_{\theta}\mathcal{L}(\theta) = \mathbb{E}_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] - \mathbb{E}_{x\sim p(x|\theta)} \left[ \nabla_{\theta}\log\hat{p}(x|\theta) \right] \\\
+\nabla_{\theta}\mathcal{L}(\theta) = \mathbb{E}\_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] - \mathbb{E}\_{x\sim p(x|\theta)} \left[ \nabla_{\theta}\log\hat{p}(x|\theta) \right] \\\
 \\\
 \begin{cases}
     p(\text{data}) &: \text{empirical distribution} \\\
@@ -184,7 +185,7 @@ $$
 &\tilde{x}_1 &\sim p(\text{data}) \\\
 &&\cdots \\\
 &\tilde{x}_M &\sim p(\text{data})
-\end{rcases} : \mathbb{E}_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] \approx \frac{1}{M}\sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}_i|\theta))
+\end{rcases} : \mathbb{E}\_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] \approx \frac{1}{M}\sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}_i|\theta))
 $$
 
 $$
@@ -192,7 +193,7 @@ $$
 &\hat{x}_1 &\sim p(x|\theta) \\\
 &&\cdots \\\
 &\hat{x}_M &\sim p(x|\theta)
-\end{rcases} : \mathbb{E}_{x\sim p(x|\theta)}[\nabla_{\theta}\log(\hat{p}(x|\theta))] \approx \frac{1}{M}\sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\hat{x}_i|\theta))
+\end{rcases} : \mathbb{E}\_{x\sim p(x|\theta)}[\nabla_{\theta}\log(\hat{p}(x|\theta))] \approx \frac{1}{M}\sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\hat{x}_i|\theta))
 $$
 
 Combining with gradient ascent algorithm, we have:
@@ -290,7 +291,7 @@ $$
 &= \argmax_{\theta} \prod_{i=1}^N p(x_i|\theta) \\\
 &= \argmax_{\theta} \sum_{i=1}^N \log\left( p(x_i|\theta)  \right) \\\
 &= \argmax_{\theta} \frac{1}{N}\sum_{i=1}^N \log\left( p(x_i|\theta)  \right) \\\
-&= \argmax_{\theta}\mathbb{E}_{x\sim p(\text{data})}[\log(p(x|\theta))] \\\
+&= \argmax_{\theta}\mathbb{E}\_{x\sim p(\text{data})}[\log(p(x|\theta))] \\\
 &= \argmax_{\theta} \int p(\text{data})\log(p(x|\theta)) dx \\\
 &= \argmax_{\theta} \int p(\text{data})\log p(x|\theta) dx - \int p(\text{data})\log p(\text{data}) dx \\\
 &= \argmax_{\theta} \int p(\text{data})\log\frac{ p(x|\theta)}{ p(\text{data})} dx \\\
@@ -303,13 +304,13 @@ Using a partition function, the MLE object is given by [graident ascent](#gradie
 
 $$
 \begin{align*}
-\nabla_{\theta}\mathcal{L}(\theta) &= \mathbb{E}_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] - \nabla_{\theta}\log(z(\theta)) \\\
-&= \mathbb{E}_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] - \mathbb{E}_{x\sim p(x|\theta)} \left[ \nabla_{\theta}\log\hat{p}(x|\theta) \right] \\\
+\nabla_{\theta}\mathcal{L}(\theta) &= \mathbb{E}\_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] - \nabla_{\theta}\log(z(\theta)) \\\
+&= \mathbb{E}\_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] - \mathbb{E}\_{x\sim p(x|\theta)} \left[ \nabla_{\theta}\log\hat{p}(x|\theta) \right] \\\
 &\because \text{Leibniz integral rule} \\\
-&= \nabla_{\theta}\mathbb{E}_{x\sim p(\text{data})}[\log\hat{p}(x|\theta)] - \nabla_{\theta}\mathbb{E}_{x\sim p(x|\theta)} \left[ \log\hat{p}(x|\theta) \right] \\\
-\mathcal{L}(\theta) &= \mathbb{E}_{x\sim p(\text{data})}[\log\hat{p}(x|\theta)] - \mathbb{E}_{x\sim p(x|\theta)} \left[ \log\hat{p}(x|\theta) \right] \\\
+&= \nabla_{\theta}\mathbb{E}\_{x\sim p(\text{data})}[\log\hat{p}(x|\theta)] - \nabla_{\theta}\mathbb{E}\_{x\sim p(x|\theta)} \left[ \log\hat{p}(x|\theta) \right] \\\
+\mathcal{L}(\theta) &= \mathbb{E}\_{x\sim p(\text{data})}[\log\hat{p}(x|\theta)] - \mathbb{E}\_{x\sim p(x|\theta)} \left[ \log\hat{p}(x|\theta) \right] \\\
 &\text{by Gibbs sampling} \\\
-&\approx \mathbb{E}_{x\sim p(\text{data})}[\log\hat{p}(x|\theta)] - \mathbb{E}_{x\sim p^{(\infty)}(x|\theta)} \left[ \log\hat{p}(x|\theta) \right] \\\
+&\approx \mathbb{E}\_{x\sim p(\text{data})}[\log\hat{p}(x|\theta)] - \mathbb{E}\_{x\sim p^{(\infty)}(x|\theta)} \left[ \log\hat{p}(x|\theta) \right] \\\
 &\approx -\text{KL}(p^{(0)} || \hat{p}(x|\theta)) + \text{KL}(p^{(\infty)}(x|\theta) || \hat{p}(x|\theta)) \\\
 \\\
 \argmax_{\theta}\mathcal{L}(\theta) &\approx \argmin_{\theta} \text{KL}(p^{(0)} || \hat{p}(x|\theta)) - \text{KL}(p^{(\infty)}(x|\theta) || \hat{p}(x|\theta))
@@ -538,7 +539,7 @@ We can see that \( \sum_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j \) is intractable due t
 
 $$
 \begin{cases}
-\sum_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j &= \mathbb{E}_{o^{<k>}}[p(h_i=1|o)o_j] \\\
+\sum_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j &= \mathbb{E}\_{o^{<k>}}[p(h_i=1|o)o_j] \\\
 &\approx \frac{1}{N}\sum_{s=1}^N p(h_{i}=1|o^{(s)<k>})o^{(s)<k>}_j \\\
 \\\
 p(h_{i}=1|o^{(s)})o^{(s)}_j &= p(h_{i}=1|o^{(s)<0>})o^{(s)<0>}_j
