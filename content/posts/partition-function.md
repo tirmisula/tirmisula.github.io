@@ -182,18 +182,18 @@ We use [Gibbs sampling](https://tirmisula.github.io/posts/markov-chain-monte-car
 
 $$
 \begin{rcases}
-&\tilde{x}_1 &\sim p(\text{data}) \\\
+&\tilde{x}\_{1} &\sim p(\text{data}) \\\
 &&\cdots \\\
-&\tilde{x}_M &\sim p(\text{data})
-\end{rcases} : \mathbb{E}\_{x\sim p(\text{data})}[\nabla_{\theta}\log(\hat{p}(x|\theta))] \approx \frac{1}{M}\sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}_i|\theta))
+&\tilde{x}\_{M} &\sim p(\text{data})
+\end{rcases} : \mathbb{E}\_{x\sim p(\text{data})}[\nabla\_{\theta}\log(\hat{p}(x|\theta))] \approx \frac{1}{M}\sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}_i|\theta))
 $$
 
 $$
 \begin{rcases}
-&\hat{x}_1 &\sim p(x|\theta) \\\
+&\hat{x}\_{1} &\sim p(x|\theta) \\\
 &&\cdots \\\
-&\hat{x}_M &\sim p(x|\theta)
-\end{rcases} : \mathbb{E}\_{x\sim p(x|\theta)}[\nabla_{\theta}\log(\hat{p}(x|\theta))] \approx \frac{1}{M}\sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\hat{x}_i|\theta))
+&\hat{x}\_{M} &\sim p(x|\theta)
+\end{rcases} : \mathbb{E}\_{x\sim p(x|\theta)}[\nabla\_{\theta}\log(\hat{p}(x|\theta))] \approx \frac{1}{M}\sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\hat{x}_i|\theta))
 $$
 
 Combining with gradient ascent algorithm, we have:
@@ -203,11 +203,11 @@ $$
 \begin{align*}
 &\text{For each turn } t=1\cdots T \\\
 &1. \text{ sampling directly from real data: } \\\
-    &\quad \tilde{x}_{1:M} \sim p(\text{data}) \\\
+    &\quad \tilde{x}\_{1:M} \sim p(\text{data}) \\\
 &2. \text{ sampling by gibbs algorithm : } \\\
-    &\quad \hat{x}_{1:M} \sim p(x|\theta^{(t)}) \\\
+    &\quad \hat{x}\_{1:M} \sim p(x|\theta^{(t)}) \\\
 &3. \text{update parameters until converge: } \\\
-    &\quad \theta^{(t+1)} = \theta^{(t)} + \eta\left( \sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}_i|\theta^{(t)}))-\sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}_i|\theta^{(t)})) \right)
+    &\quad \theta^{(t+1)} = \theta^{(t)} + \eta\left( \sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}\_{i}|\theta^{(t)}))-\sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}_i|\theta^{(t)})) \right)
 \end{align*}
 $$
 
@@ -231,11 +231,11 @@ On the other hand, since \( x \) has \( p \) dimensions, \( p \) state transitio
 
 $$
 \underset{\text{k-th step}}{p^{(k)}(x|\theta)} \longrightarrow \underset{\text{(k+1)th step}}{p^{(k)}(x|\theta)} : \begin{array}{c}
-    \text{state}_{k*p} \\\
+    \text{state}\_{k*p} \\\
     \darr \\\
     \cdots \\\
     \darr \\\
-    \text{state}_{(k+1)*p}
+    \text{state}\_{(k+1)*p}
 \end{array}
 $$
 
@@ -270,13 +270,13 @@ $$
 \begin{align*}
 &\text{For each turn } t=1\cdots T \\\
 &1. \text{ sampling directly from real data: } \\\
-    &\quad \tilde{x}_{1:M} \sim p(\text{data}) \\\
+    &\quad \tilde{x}\_{1:M} \sim p(\text{data}) \\\
 &2. \text{ initialize $\hat{x}$ : } \\\
-    &\quad \hat{x}_{1:M} = \tilde{x}_{1:M} \\\
+    &\quad \hat{x}\_{1:M} = \tilde{x}\_{1:M} \\\
 &3. \text{ sampling k steps by gibbs: } \\\
-    &\quad \hat{x}_{1:M} \sim p^{(k)}(x|\theta^{(t)}) \\\
+    &\quad \hat{x}\_{1:M} \sim p^{(k)}(x|\theta^{(t)}) \\\
 &4. \text{update parameters until converge: } \\\
-    &\quad \theta^{(t+1)} = \theta^{(t)} + \eta\left( \sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}_i|\theta^{(t)}))-\sum_{i=1}^M\nabla_{\theta}\log(\hat{p}(\tilde{x}_i|\theta^{(t)})) \right)
+    &\quad \theta^{(t+1)} = \theta^{(t)} + \eta\left( \sum_{i=1}^M\nabla\_{\theta}\log(\hat{p}(\tilde{x}\_{i}|\theta^{(t)}))-\sum_{i=1}^M\nabla\_{\theta}\log(\hat{p}(\tilde{x}\_{i}|\theta^{(t)})) \right)
 \end{align*}
 $$
 
@@ -329,8 +329,8 @@ $$
 
 $$
 \begin{cases}
-    \hat{\theta}_{\text{MLE}} = \argmin_{\theta} \space\text{KL}(p^{(0)} || p(x|\theta)) \\\
-    \hat{\theta}_{\text{MLE}} \approx \begin{cases}
+    \hat{\theta}_{\text{MLE}} = \argmin\_{\theta} \space\text{KL}(p^{(0)} || p(x|\theta)) \\\
+    \hat{\theta}\_{\text{MLE}} \approx \begin{cases}
         \argmin_{\theta} \space\text{KL}(p^{(0)} || \hat{p}(x|\theta)) - \text{KL}(p^{(\infty)}(x|\theta) || \hat{p}(x|\theta)) \\\
         \text{OR} \\\
         \argmin_{\theta} \space\text{KL}(p^{(0)} || \hat{p}(x|\theta)) + \log z(\theta)
@@ -355,7 +355,7 @@ In ML(maximum likelihood) learning, computing \( p^{(\infty)} \) could be costly
 {{</ math.inline >}}
 
 $$
-\hat{\theta}_{\text{CDL}} = \argmin_{\theta} \space\text{KL}(p^{(0)} || \hat{p}(x|\theta)) - \text{KL}(p^{(k)}(x|\theta) || \hat{p}(x|\theta)) \\\
+\hat{\theta}\_{\text{CDL}} = \argmin\_{\theta} \space\text{KL}(p^{(0)} || \hat{p}(x|\theta)) - \text{KL}(p^{(k)}(x|\theta) || \hat{p}(x|\theta)) \\\
 $$
 
 ## RBM Learning
