@@ -132,7 +132,7 @@ $$
 &= \frac{p(x|\theta)}{\hat{p}(x|\theta)} \int\nabla_{\theta} \hat{p}(x|\theta)dx \\\
 &= \int \frac{p(x|\theta)}{\hat{p}(x|\theta)}\nabla_{\theta}\hat{p}(x|\theta)dx \\\
 &= \int p(x|\theta)\nabla_{\theta}\log\hat{p}(x|\theta)dx \\\
-&= \mathbb{E}_{x \sim p(x | \theta)} [ \nabla_{\theta}\log\hat{p}(x|\theta) ]
+&= \mathbb{E}\_{x \sim p(x | \theta)} [ \nabla_{\theta}\log\hat{p}(x|\theta) ]
 \end{align*}
 $$
 
