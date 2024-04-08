@@ -528,7 +528,7 @@ Suppose we are finding \( \frac{\partial}{\partial w_{ij}}\mathcal{L}(\theta) \)
 {{</ math.inline >}}
 
 $$
-o^{(s)<k>}\_{j} : \text{$s$-th observation, $j$-th dimension, sampled at $k$-th step by Gibbs}
+o^{(s)\langle k \rangle}\_{j} : \text{$s$-th observation, $j$-th dimension, sampled at $k$-th step by Gibbs}
 $$
 
 {{< math.inline >}}
@@ -539,10 +539,9 @@ We can see that \( \sum_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j \) is intractable due t
 
 $$
 \begin{cases}
-\sum\_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j &= \mathbb{E}\_{o^{<k>}}[p(h_i=1|o)o_j] \\\
-&\approx \frac{1}{N}\sum\_{s=1}^N p(h_{i}=1|o^{(s)<k>})o^{(s)<k>}_j \\\
-\\\
-p(h_{i}=1|o^{(s)})o^{(s)}_j &= p(h_{i}=1|o^{(s)<0>})o^{(s)<0>}_j
+\sum\_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j &= \mathbb{E}\_{o^{\langle k \rangle}}[p(h_i=1|o)o_j] \\\
+&\approx \frac{1}{N}\sum\_{s=1}^N p(h_{i}=1|o^{(s)\langle k \rangle})o^{(s)\langle k \rangle}\_{j} \\\
+p(h_{i}=1|o^{(s)})o^{(s)}\_{j} &= p(h_{i}=1|o^{(s)<0>})o^{(s)<0>}\_{j}
 \end{cases}
 $$
 
@@ -565,7 +564,7 @@ $$
 &4. \text{ cumulate $\Delta w\_{ij}$ from all samples: } \\\
     &\quad \text{For }i=1\cdots m,j=1\cdots n \\\
     &\quad\quad \text{For }s=1\cdots N \\\
-    &\quad\quad\quad \Delta w\_{ij} = \Delta w\_{ij} + \left( p(h_{i}=1|o^{(s)<0>})o^{(s)<0>}\_{j} - p(h_{i}=1|o^{(s)<k>})o^{(s)<k>}\_{j} \right) \\\
+    &\quad\quad\quad \Delta w\_{ij} = \Delta w\_{ij} + \left( p(h_{i}=1|o^{(s)<0>})o^{(s)<0>}\_{j} - p(h_{i}=1|o^{(s)\langle k \rangle})o^{(s)\langle k \rangle}\_{j} \right) \\\
 &4. \text{ update parameters until converge: } \\\
     &\quad w^{(t+1)} = w^{(t)} + \eta\left( \frac{1}{N} \begin{bmatrix}
     \Delta w\_{11} \\\
