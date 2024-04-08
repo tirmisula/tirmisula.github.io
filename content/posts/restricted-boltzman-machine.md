@@ -404,6 +404,8 @@ $$
 p(o) = \frac{1}{z}\exp\left(\alpha^To+\sum_{i=1}^m\text{softplus}(w_i^To+\beta_i)\right)
 $$
 
+### RBM Learning
+See [Confronting the Partition Function](https://tirmisula.github.io/posts/partition-function/#rbm-learning) chapter.
 
 ## Reference
 

@@ -1,6 +1,6 @@
 ---
 author: "X. Wang"
-title: "Partition Function"
+title: "Confronting the Partition Function"
 date: "2023-09-25"
 description: "A brief introduction."
 tags: ["machine learning"]
@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: true
+draft: false
 ---
 
 :                                                         
@@ -75,9 +75,9 @@ $$
 p(x) = \frac{1}{z} \prod_{i=1}^K \psi(x_{C_i})
 $$
 
-Local structures of MRF are not probabilties, only the whole graph is considered as probability model. That is why partition function is introduced.
+Local structures of MRF are not probabilties, only the whole graph is considered as probability model. Thus partition function is introduced.
 
-Partition function is useful in:
+Partition function exists in:
 
 $$
 \begin{cases}
@@ -473,8 +473,8 @@ $$
 \begin{align*}
 \frac{\partial}{\partial w_{ij}} \mathcal{L}_k(\theta) &= \sum_{o,h}p(o,h)\frac{\partial}{\partial w_{ij}}E(o,h) - \sum_{h}p(h^{(k)}|o^{(k)})\frac{\partial}{\partial w_{ij}}E(o^{(k)},h^{(k)}) \\\
 &\because E(o,h) = -(h^Two+\alpha^To+\beta^Th) \\\
-&\therefore \frac{\partial}{\partial w_{ij}}E(o,h) = -\frac{\partial}{\partial w_{ij}}\sum_{i=1}^m\sum_{j=1}^n h_iw_{ij}o_j = h_io_j \\\
-&= \sum_{o,h}p(o,h)h_io_j - \sum_{h}p(h^{(k)}|o^{(k)})h^{(k)}_io^{(k)}_j \\\
+&\therefore \frac{\partial}{\partial w_{ij}}E(o,h) = -\frac{\partial}{\partial w_{ij}}\sum_{i=1}^m\sum_{j=1}^n h_iw_{ij}o_j = -h_io_j \\\
+&= -\sum_{o,h}p(o,h)h_io_j + \sum_{h}p(h^{(k)}|o^{(k)})h^{(k)}_io^{(k)}_j \\\
 &\text{Let } \text{part1}=\sum_{o,h}p(o,h)h_io_j \\\
 &\text{Let } \text{part2}=\sum_{h}p(h^{(k)}|o^{(k)})h^{(k)}_io^{(k)}_j \\\
 \text{part1} &= \sum_{o_1\cdots o_n}\sum_{h_1\cdots h_m}p(o)p(h|o)h_io_j \\\
@@ -487,7 +487,7 @@ $$
 &= p(h^{(k)}_{i}=1|o^{(k)})o^{(k)}_j \\\
 \\\
 &\text{so we have} \\\
-\frac{\partial}{\partial w_{ij}} \mathcal{L}_k(\theta) &= \sum_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j - p(h^{(k)}_{i}=1|o^{(k)})o^{(k)}_j
+\frac{\partial}{\partial w_{ij}} \mathcal{L}_k(\theta) &= -\sum_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j + p(h^{(k)}_{i}=1|o^{(k)})o^{(k)}_j
 \end{align*}
 $$
 
@@ -499,13 +499,13 @@ Similarly, the partial derivatives of \(\alpha_j\) and \(\beta_i\) are given by:
 
 $$
 \begin{align*}
-\frac{\partial}{\partial \alpha_{j}} \mathcal{L}_k(\theta) &= \sum_{o,h}p(o,h)o_j - \sum_{h}p(h^{(k)}|o^{(k)})o^{(k)}_j \\\
-&= \sum_{o_1\cdots o_n}p(o)\sum_{h_1\cdots h_m}p(h_{1:m}|o)o_j - \sum_{h_1\cdots h_m}p(h^{(k)}_{1:m}|o^{(k)})o^{(k)}_j \\\
-&= \sum_{o_1\cdots o_n}p(o)o_j - o^{(k)}_j \\\
-\frac{\partial}{\partial \beta_{i}} \mathcal{L}_k(\theta) &= \sum_{o,h}p(o,h)h_i - \sum_{h}p(h^{(k)}|o^{(k)})h^{(k)}_i \\\
-&= \sum_{o_1\cdots o_n}p(o)\sum_{h_1\cdots h_m}p(h_{1:m}|o)h_i - \sum_{h_1\cdots h_m}p(h^{(k)}_{1:m}|o^{(k)})h^{(k)}_i \\\
-&= \sum_{o_1\cdots o_n}p(o)\sum_{h_i}p(h_i|o)h_i - \sum_{h_i}p(h^{(k)}_{i}|o^{(k)})h^{(k)}_i \\\
-&= \sum_{o_1\cdots o_n}p(o)p(h_i=1|o) - p(h^{(k)}_{i}=1|o^{(k)})
+\frac{\partial}{\partial \alpha_{j}} \mathcal{L}_k(\theta) &= -\sum_{o,h}p(o,h)o_j + \sum_{h}p(h^{(k)}|o^{(k)})o^{(k)}_j \\\
+&= -\sum_{o_1\cdots o_n}p(o)\sum_{h_1\cdots h_m}p(h_{1:m}|o)o_j + \sum_{h_1\cdots h_m}p(h^{(k)}_{1:m}|o^{(k)})o^{(k)}_j \\\
+&= -\sum_{o_1\cdots o_n}p(o)o_j + o^{(k)}_j \\\
+\frac{\partial}{\partial \beta_{i}} \mathcal{L}_k(\theta) &= -\sum_{o,h}p(o,h)h_i + \sum_{h}p(h^{(k)}|o^{(k)})h^{(k)}_i \\\
+&= -\sum_{o_1\cdots o_n}p(o)\sum_{h_1\cdots h_m}p(h_{1:m}|o)h_i + \sum_{h_1\cdots h_m}p(h^{(k)}_{1:m}|o^{(k)})h^{(k)}_i \\\
+&= -\sum_{o_1\cdots o_n}p(o)\sum_{h_i}p(h_i|o)h_i + \sum_{h_i}p(h^{(k)}_{i}|o^{(k)})h^{(k)}_i \\\
+&= -\sum_{o_1\cdots o_n}p(o)p(h_i=1|o) + p(h^{(k)}_{i}=1|o^{(k)})
 \end{align*}
 $$
 
@@ -513,15 +513,67 @@ In conlusion, we have the gradient for RBM:
 
 $$
 \begin{align*}
-\frac{\partial}{\partial w_{ij}}\mathcal{L}(\theta) &= \frac{1}{N}\sum_{k=1}^N\left( \sum_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j - p(h^{(k)}_{i}=1|o^{(k)})o^{(k)}_j \right) \\\
-\frac{\partial}{\partial \alpha_{j}} \mathcal{L}_k(\theta) &= \frac{1}{N}\sum_{k=1}^N\left( \sum_{o_1\cdots o_n}p(o)o_j - o^{(k)}_j \right) \\\
-\frac{\partial}{\partial \beta_{i}}\mathcal{L}(\theta) &= \frac{1}{N}\sum_{k=1}^N\left( \sum_{o_1\cdots o_n}p(o)p(h_i=1|o) - p(h^{(k)}_{i}=1|o^{(k)}) \right)
+\frac{\partial}{\partial w_{ij}}\mathcal{L}(\theta) &= \frac{1}{N}\sum_{k=1}^N\left( -\sum_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j + p(h^{(k)}_{i}=1|o^{(k)})o^{(k)}_j \right) \\\
+\frac{\partial}{\partial \alpha_{j}} \mathcal{L}_k(\theta) &= \frac{1}{N}\sum_{k=1}^N\left( -\sum_{o_1\cdots o_n}p(o)o_j + o^{(k)}_j \right) \\\
+\frac{\partial}{\partial \beta_{i}}\mathcal{L}(\theta) &= \frac{1}{N}\sum_{k=1}^N\left( -\sum_{o_1\cdots o_n}p(o)p(h_i=1|o) + p(h^{(k)}_{i}=1|o^{(k)}) \right)
 \end{align*}
 $$
 
 ### CD-k for RBM
 
+{{< math.inline >}}
+<p>
+Suppose we are finding \( \frac{\partial}{\partial w_{ij}}\mathcal{L}(\theta) \), denote:
+</p>
+{{</ math.inline >}}
 
+$$
+o^{(s)<k>}_{j} : \text{$s$-th observation, $j$-th dimension, sampled at $k$-th step by Gibbs}
+$$
+
+{{< math.inline >}}
+<p>
+We can see that \( \sum_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j \) is intractable due to integration, while \( p(h^{(k)}_{i}=1|o^{(k)})o^{(k)}_j \) can be solved directly from observation tranining set:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{cases}
+\sum_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j &= \mathbb{E}_{o^{<k>}}[p(h_i=1|o)o_j] \\\
+&\approx \frac{1}{N}\sum_{s=1}^N p(h_{i}=1|o^{(s)<k>})o^{(s)<k>}_j \\\
+\\\
+p(h_{i}=1|o^{(s)})o^{(s)}_j &= p(h_{i}=1|o^{(s)<0>})o^{(s)<0>}_j
+\end{cases}
+$$
+
+The CD-k algorithm for RBM is:
+
+$$
+\text{The Contrastive Divergence algorithm for RBM(CD-k)} \\\
+\begin{align*}
+&\text{For each turn } t=1\cdots T \\\
+&1. \text{ sample N observations from training set $\lbrace O \rbrace$: } \\\
+    &\quad  o^{(1)}_{1:n},\cdots,o^{(N)}_{1:n} \sim \lbrace O \rbrace \\\
+&2. \text{ initialize $o^{(1)<0>}_{1:n},\cdots,o^{(N)<0>}_{1:n}$ : } \\\
+    &\quad o^{(1)<0>}_{1:n},\cdots,o^{(N)<0>}_{1:n} = o^{(1)}_{1:n},\cdots,o^{(N)}_{1:n} \\\
+&3. \text{ sampling from $p(h|o),p(o|h)$ alternatively, stop at k-step: } \\\
+    &\quad \text{For } l=0\cdots k-1 \\\
+    &\quad\quad \text{For }i=1\cdots m \\\
+    &\quad\quad\quad h^{(1)<l>}_i,\cdots,h^{(N)<l>}_i \sim p(h_i|o^{(1)<l>}),\cdots,p(h_i|o^{(N)<l>}) \\\
+    &\quad\quad \text{For }j=1\cdots n \\\
+    &\quad\quad\quad o^{(1)<l+1>}_j,\cdots,o^{(N)<l+1>}_j \sim p(o_j|h^{(1)<l>}),\cdots,p(o_j|h^{(N)<l>}) \\\
+&4. \text{ cumulate $\Delta w_{ij}$ from all samples: } \\\
+    &\quad \text{For }i=1\cdots m,j=1\cdots n \\\
+    &\quad\quad \text{For }s=1\cdots N \\\
+    &\quad\quad\quad \Delta w_{ij} = \Delta w_{ij} + \left( p(h_{i}=1|o^{(s)<0>})o^{(s)<0>}_j - p(h_{i}=1|o^{(s)<k>})o^{(s)<k>}_j \right) \\\
+&4. \text{ update parameters until converge: } \\\
+    &\quad w^{(t+1)} = w^{(t)} + \eta\left( \frac{1}{N} \begin{bmatrix}
+    \Delta w_{11} \\\
+    \vdots \\\
+    \Delta w_{mn}
+\end{bmatrix} \right)
+\end{align*}
+$$
 
 ## Reference
 
