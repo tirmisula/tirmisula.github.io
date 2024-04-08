@@ -126,7 +126,6 @@ $$
 \nabla_{\theta}\mathcal{L}(\theta) &= \frac{1}{N}\sum_{i=1}^N\nabla_{\theta}\log(\hat{p}(x_i|\theta)) - \nabla_{\theta}\log(z(\theta)) \\\
 &\because\frac{1}{N}\sum_{i=1}^N\nabla_{\theta}\log(\hat{p}(x_i|\theta)) \text{ is computable} \\\
 &\therefore \text{focus on } \nabla_{\theta}\log(z(\theta)) \\\
-\\\
 \nabla_{\theta}\log(z(\theta)) &= \frac{1}{z(\theta)}\nabla_{\theta}z(\theta) \\\
 &= \frac{p(x|\theta)}{\hat{p}(x|\theta)} \nabla_{\theta}\int \hat{p}(x|\theta)dx \\\
 &\because\text{Leibniz integral rule} \\\
