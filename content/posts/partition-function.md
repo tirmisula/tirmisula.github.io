@@ -541,7 +541,7 @@ $$
 \begin{cases}
 \sum\_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j &= \mathbb{E}\_{o^{\langle k \rangle}}[p(h_i=1|o)o_j] \\\
 &\approx \frac{1}{N}\sum\_{s=1}^N p(h_{i}=1|o^{(s)\langle k \rangle})o^{(s)\langle k \rangle}\_{j} \\\
-p(h_{i}=1|o^{(s)})o^{(s)}\_{j} &= p(h_{i}=1|o^{(s)<0>})o^{(s)<0>}\_{j}
+p(h_{i}=1|o^{(s)})o^{(s)}\_{j} &= p(h_{i}=1|o^{(s)\langle 0 \rangle})o^{(s)\langle 0 \rangle}\_{j}
 \end{cases}
 $$
 
@@ -553,18 +553,18 @@ $$
 &\text{For each turn } t=1\cdots T \\\
 &1. \text{ sample N observations from training set $\lbrace O \rbrace$: } \\\
     &\quad  o^{(1)}\_{1:n},\cdots,o^{(N)}\_{1:n} \sim \lbrace O \rbrace \\\
-&2. \text{ initialize $o^{(1)<0>}\_{1:n},\cdots,o^{(N)<0>}\_{1:n}$ : } \\\
-    &\quad o^{(1)<0>}\_{1:n},\cdots,o^{(N)<0>}\_{1:n} = o^{(1)}\_{1:n},\cdots,o^{(N)}\_{1:n} \\\
+&2. \text{ initialize $o^{(1)\langle 0 \rangle}\_{1:n},\cdots,o^{(N)\langle 0 \rangle}\_{1:n}$ : } \\\
+    &\quad o^{(1)\langle 0 \rangle}\_{1:n},\cdots,o^{(N)\langle 0 \rangle}\_{1:n} = o^{(1)}\_{1:n},\cdots,o^{(N)}\_{1:n} \\\
 &3. \text{ sampling from $p(h|o),p(o|h)$ alternatively, stop at k-step: } \\\
     &\quad \text{For } l=0\cdots k-1 \\\
     &\quad\quad \text{For }i=1\cdots m \\\
-    &\quad\quad\quad h^{(1)<l>}\_{i},\cdots,h^{(N)<l>}\_{i} \sim p(h_i|o^{(1)<l>}),\cdots,p(h_i|o^{(N)<l>}) \\\
+    &\quad\quad\quad h^{(1)\langle l \rangle}\_{i},\cdots,h^{(N)\langle l \rangle}\_{i} \sim p(h_i|o^{(1)\langle l \rangle}),\cdots,p(h_i|o^{(N)\langle l \rangle}) \\\
     &\quad\quad \text{For }j=1\cdots n \\\
-    &\quad\quad\quad o^{(1)<l+1>}\_{j},\cdots,o^{(N)<l+1>}\_{j} \sim p(o_j|h^{(1)<l>}),\cdots,p(o_j|h^{(N)<l>}) \\\
+    &\quad\quad\quad o^{(1)<l+1>}\_{j},\cdots,o^{(N)<l+1>}\_{j} \sim p(o_j|h^{(1)\langle l \rangle}),\cdots,p(o_j|h^{(N)\langle l \rangle}) \\\
 &4. \text{ cumulate $\Delta w\_{ij}$ from all samples: } \\\
     &\quad \text{For }i=1\cdots m,j=1\cdots n \\\
     &\quad\quad \text{For }s=1\cdots N \\\
-    &\quad\quad\quad \Delta w\_{ij} = \Delta w\_{ij} + \left( p(h_{i}=1|o^{(s)<0>})o^{(s)<0>}\_{j} - p(h_{i}=1|o^{(s)\langle k \rangle})o^{(s)\langle k \rangle}\_{j} \right) \\\
+    &\quad\quad\quad \Delta w\_{ij} = \Delta w\_{ij} + \left( p(h_{i}=1|o^{(s)\langle 0 \rangle})o^{(s)\langle 0 \rangle}\_{j} - p(h_{i}=1|o^{(s)\langle k \rangle})o^{(s)\langle k \rangle}\_{j} \right) \\\
 &4. \text{ update parameters until converge: } \\\
     &\quad w^{(t+1)} = w^{(t)} + \eta\left( \frac{1}{N} \begin{bmatrix}
     \Delta w\_{11} \\\
