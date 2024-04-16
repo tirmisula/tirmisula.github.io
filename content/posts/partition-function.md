@@ -143,7 +143,7 @@ We avoid computing intractable \( z(\theta) \), expectation approximation method
 </p>
 {{</ math.inline >}}
 
-## Gradient Ascent based on MCMC for MLE
+## Gradient Ascent based on MCMC
 
 The **empirical distribution** associated with a vector of numbers x = (x1,...,xn) is the probability distribution with expectation operator<cite>[^2]</cite>:
 
@@ -212,7 +212,7 @@ $$
 $$
 
 ## Contrastive Divergence Algorithm
-### Problem in Gibbs sampling
+### Long mixing time in Gibbs
 {{< math.inline >}}
 <p>
 Gibbs sampling involves multiple steps for it's Markov chain to reach steady distribution. For each single step k before steady, it has unsteady distribution, denoted as:
@@ -330,11 +330,8 @@ $$
 $$
 \begin{cases}
     \hat{\theta}\_{\text{MLE}} = \argmin\_{\theta} \space\text{KL}(p^{(0)} || p(x|\theta)) \\\
-    \hat{\theta}\_{\text{MLE}} \approx \begin{cases}
-        \argmin\_{\theta} \space\text{KL}(p^{(0)} || \hat{p}(x|\theta)) - \text{KL}(p^{(\infty)}(x|\theta) || \hat{p}(x|\theta)) \\\
-        \text{OR} \\\
-        \argmin\_{\theta} \space\text{KL}(p^{(0)} || \hat{p}(x|\theta)) + \log z(\theta)
-    \end{cases}
+    \hat{\theta}\_{\text{MLE}} \approx
+        \argmin\_{\theta} \space\text{KL}(p^{(0)} || \hat{p}(x|\theta)) - \text{KL}(p^{(\infty)}(x|\theta) || \hat{p}(x|\theta)) = \argmin\_{\theta} \space\text{KL}(p^{(0)} || \hat{p}(x|\theta)) + \log z(\theta)
 \end{cases}
 $$
 
@@ -528,12 +525,12 @@ Suppose we are finding \( \frac{\partial}{\partial w_{ij}}\mathcal{L}(\theta) \)
 {{</ math.inline >}}
 
 $$
-o^{(s)\langle k \rangle}\_{j} : \text{$s$-th observation, $j$-th dimension, sampled at $k$-th step by Gibbs}
+o^{(s)\langle k \rangle}\_{j} : \text{$s$-th observation, $j$-th dimension, $k$-th step by Gibbs}
 $$
 
 {{< math.inline >}}
 <p>
-We can see that \( \sum_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j \) is intractable due to integration, while \( p(h^{(k)}_{i}=1|o^{(k)})o^{(k)}_j \) can be solved directly from observation tranining set:
+We can see that \( \sum_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j \) is intractable due to integration, while \( p(h^{(s)}_{i}=1|o^{(s)})o^{(s)}_j \) can be solved directly from observation tranining set:
 </p>
 {{</ math.inline >}}
 
