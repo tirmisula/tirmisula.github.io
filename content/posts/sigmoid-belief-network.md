@@ -207,15 +207,15 @@ graph TB
     end
     id1(("$$s_{j}$$")) -- "$$w_{{j}i}\quad\quad$$" --> id3(("$$s_i$$"))
     id2(("$$s_{j}$$")) -- "$$w_{{j}i}\quad\quad$$" --> id3(("$$s_i$$"))
-    id1(("$$s_{j}$$")) -.-> id4(("$$s_{...}$$"))
-    id2(("$$s_{j}$$")) -.-> id4(("$$s_{...}$$"))
-    id1(("$$s_{j}$$")) -.-> id5(("$$s_{...}$$"))
-    id2(("$$s_{j}$$")) -.-> id5(("$$s_{...}$$"))
+    id1(("$$s_{j}$$")) --> id4(("$$s_{...}$$"))
+    id2(("$$s_{j}$$")) --> id4(("$$s_{...}$$"))
+    id1(("$$s_{j}$$")) --> id5(("$$s_{...}$$"))
+    id2(("$$s_{j}$$")) --> id5(("$$s_{...}$$"))
     subgraph "visible layer"
     id3(("$$s_i$$")) --> id6(("$$s_v$$"))
     id4(("$$s_{...}$$")) --> id6(("$$s_v$$"))
-    id4(("$$s_{...}$$")) -.-> id7(("$$s_v$$"))
-    id5(("$$s_{...}$$")) -.-> id7(("$$s_v$$"))
+    id4(("$$s_{...}$$")) --> id7(("$$s_v$$"))
+    id5(("$$s_{...}$$")) --> id7(("$$s_v$$"))
 
     classDef shaded fill:#b6b8d6,stroke:#333,stroke-width:2px;
     class id6,id7 shaded
@@ -224,274 +224,88 @@ end
 
 </div>
 
-### Inference trouble in Boltzman machine
-Based on the statement above, nodes in Boltzman machine have 2 classes:
-
-$$
-\text{Nodes }x : \begin{cases}
-    \text{observed } r.v. & o \\\
-    \text{hidden } r.v. & h
-\end{cases}
-$$
-
-We have:
-
-$$
-x = \begin{bmatrix}
-    x_1 \\\
-    \vdots \\\
-    x_p
-\end{bmatrix}=\begin{bmatrix}
-    h \\\
-    o
-\end{bmatrix}, h = \begin{bmatrix}
-    h_1 \\\
-    \vdots \\\
-    h_m
-\end{bmatrix}, o = \begin{bmatrix}
-    o_1 \\\
-    \vdots \\\
-    o_n
-\end{bmatrix} \\\
-p = m+n
-$$
-
-Inference problem in PGM is finding posterier, and we have introduced exact inference and approximate inference in previous chapter::
-$$
-p(h|o) : \begin{cases}
-    \text{exact inference} &: \text{variable elimination} \\\
-    \text{approximate inference} &: \begin{cases}
-            \text{variational method} \\\
-            \text{MCMC}
-        \end{cases}
-\end{cases}
-$$
-
-However exact inference is intractable because the overall complexity [elimination algorithm](https://tirmisula.github.io/posts/probabilistic-graphical-model/#variable-elimination) is determined by the number of largest
-elimination clique[3] and finding optimal elimination order is NP-hard.
-
-[Variational inference](https://tirmisula.github.io/posts/variational-inference/#mean-field-vi-derivation) face the same problem when integrating:
-
-$$
-\int_{q_1\cdots q_N}q_1\cdots q_N\log p(o,h)dq_1\cdots dq_N
-$$
-
-[MCMC](https://tirmisula.github.io/posts/markov-chain-monte-carlo/) method takes long time to converge which requires more computation resource.
-
-### RBM model definition
-
-To resolve the inference trouble in Boltzman machine, restricted boltzman machine(RBM) has been proposed, it used a bipartite graph which simplified the graph structure:
-
 {{< math.inline >}}
-From this graph, nodes inside \( \lbrace h \rbrace \) and \( \lbrace o \rbrace \) are mutually independent by <a href="https://tirmisula.github.io/posts/probabilistic-graphical-model/#conditional-independence-of-mrf">local markov property</a>.
+<p>
+For hidden node \( s_i \) in SBN, the conditional probability is a sigmoid activate function:
 </p>
 {{</ math.inline >}}
 
-From [factor graph](https://tirmisula.github.io/posts/probabilistic-graphical-model/#factor-graph) perspective, we have RBM like:
-
-<div style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'red',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-graph TB
-    subgraph "hidden layer 2"
-    id1(("$$s_{j}$$"))
-    id2(("$$s_{j}$$"))
-    end
-    subgraph "hidden layer 1"
-    id3(("$$s_i$$"))
-    id4(("$$s_{...}$$"))
-    id5(("$$s_{...}$$"))
-    end
-    id1(("$$s_{j}$$")) -- "$$w_{{j}i}\quad\quad$$" --> id3(("$$s_i$$"))
-    id2(("$$s_{j}$$")) -- "$$w_{{j}i}\quad\quad$$" --> id3(("$$s_i$$"))
-    id1(("$$s_{j}$$")) -.-> id4(("$$s_{...}$$"))
-    id2(("$$s_{j}$$")) -.-> id4(("$$s_{...}$$"))
-    id1(("$$s_{j}$$")) -.-> id5(("$$s_{...}$$"))
-    id2(("$$s_{j}$$")) -.-> id5(("$$s_{...}$$"))
-    subgraph "visible layer"
-    id3(("$$s_i$$")) --> id6(("$$s_v$$"))
-    id4(("$$s_{...}$$")) --> id6(("$$s_v$$"))
-    id4(("$$s_{...}$$")) -.-> id7(("$$s_v$$"))
-    id5(("$$s_{...}$$")) -.-> id7(("$$s_v$$"))
-
-    classDef shaded fill:#b6b8d6,stroke:#333,stroke-width:2px;
-    class id6,id7 shaded
-end
-```
-
-</div>
-
-Combining factors above, we can model the joint pdf of RBM:
-
 $$
-\text{Given: }
-x = \begin{bmatrix}
-    x_1 \\\
-    \vdots \\\
-    x_p
-\end{bmatrix}=\begin{bmatrix}
-    h \\\
-    o
-\end{bmatrix}, h = \begin{bmatrix}
-    h_1 \\\
-    \vdots \\\
-    h_m
-\end{bmatrix}, o = \begin{bmatrix}
-    o_1 \\\
-    \vdots \\\
-    o_n
-\end{bmatrix} \\\
+\text{Let } \sigma(x)=\frac{1}{1+\exp(-x)} \\\
+\begin{cases}
+p(s_i=1 | \lbrace s_j \rbrace\in\text{parents}(x_i)) &= \sigma(\sum_jw_{ji}s_j) \\\
+\\\
+p(s_i=0 | \lbrace s_j \rbrace\in\text{parents}(x_i)) &= 1-\sigma(\sum_jw_{ji}s_j) \\\
+&= \sigma(-\sum_jw_{ji}s_j)
+\end{cases} \\\
+\dArr \\\
+p(s_i | \lbrace s_j \rbrace\in\text{parents}(x_i)) = \sigma((2s_i-1)\sum_jw_{ji}s_j) \\\
 $$
 
-$$
-\text{Let } \begin{cases}
-    f(o) = \exp(\alpha^T o) \\\
-    f(h) = \exp(\beta^T h) \\\
-    f(o,w,h) = \exp(h^Two) \\\
-    p(x) = \frac{1}{z}f(o)f(h)f(o,w,h)
-\end{cases},\text{We have }
-$$
+So we have joint distribution of SBN:
 
 $$
-\begin{align*}
-p(x)=p(o,h) &= \frac{1}{z} \prod_{i=1}^K \psi(x_{C_i}) \\\
-&= \frac{1}{z}\prod_{i=1}^K\exp(-E(x_{C_i})) \\\
-&= \frac{1}{z}\exp(-E(o,h)) \\\
-&= \frac{1}{z}\exp(h^Two+\alpha^To+\beta^Th) \\\
-&= \frac{1}{z}\exp(h^Two)\exp(\alpha^To)\exp(\beta^Th) \\\
-\because &h^Two = \sum_{i=1}^m\sum_{j=1}^n h_iw_{ij}o_j, \space\text{we have } \\\
-&= \frac{1}{z} \prod_{i=1}^m\prod_{j=1}^n\exp(h_iw_{ij}o_j) \prod_{i=1}^m\exp(\beta_i h_i) \prod_{j=1}^n\exp(\alpha_j o_j)
-\end{align*}
-$$
 
-### Posterier inference
-By local markov property, we have conditional independence:
-
-$$
-h_1 \perp \begin{matrix}
-    h_2 \\\
-    \cdots \\\
-    h_m
-\end{matrix} | o
-$$
-
-So we can write the posterier as:
-
-$$
-p(h|o) = \prod_{i=1}^m p(h_i|o)
+p(s) = \prod_{i\in\text{SBN}} p(s_i | \lbrace s_j \rbrace\in\text{parents}(x_i)) = p(v,h)
 $$
 
 {{< math.inline >}}
 <p>
-In original RBM model, hidden states are Bernoulli, having two value options \( h\in\lbrace 0,1 \rbrace \). For a individual node \( h_k \) we have:
+When inference posterier \( p(h|v) \), different hidden nodes are mutually dependent because of <a href="https://tirmisula.github.io/posts/probabilistic-graphical-model/#head-to-head">head to head structure</a>. So finding posterier directly is hard, we find the log-likelihood instead.
 </p>
 {{</ math.inline >}}
 
+## The Log-likelihood Gradient of SBN
+
+The average log-likelihood is given by:
+
 $$
 \begin{align*}
-p(h_k|o) &= p(h_k|h_{\neg k},o) \\\
-&= \frac{p(h_k,h_{\neg k},o)}{p(h_{\neg k},o)} \\\
-&= \frac{p(h_k,h_{\neg k},o)}{p(h_k=1,h_{\neg k},o)+p(h_k=0,h_{\neg k},o)} \\\
-\\\
-p(h_k=1|o) &= \frac{p(h_k=1,h_{\neg k},o)}{p(h_k=1,h_{\neg k},o)+p(h_k=0,h_{\neg k},o)} \\\
-&= \frac{1}{1+\frac{p(h_k=0,h_{\neg k},o)}{p(h_k=1,h_{\neg k},o)}} \\\
-\\\
-p(h_k=0|o) &= \frac{p(h_k=0,h_{\neg k},o)}{p(h_k=1,h_{\neg k},o)+p(h_k=0,h_{\neg k},o)} \\\
-&= \frac{1}{1+\frac{p(h_k=1,h_{\neg k},o)}{p(h_k=0,h_{\neg k},o)}} \\\
-\\\
-&\text{For numerator $p(h_k,h_{\neg k}, o)$},\text{we have}\\\
-p(h_k,h_{\neg k},o) &= p(h,o) \\\
-&= \frac{1}{z} \prod_{i=1}^m\prod_{j=1}^n\exp(h_iw_{ij}o_j) \prod_{i=1}^m\exp(\beta_i h_i) \prod_{j=1}^n\exp(\alpha_j o_j) \\\
-&= \frac{1}{z} \exp(\sum_{i=1}^m\sum_{j=1}^nh_iw_{ij}o_j+\sum_{i=1}^m\beta_ih_i+\sum_{j=1}^n\alpha_jo_j) \\\
-&= \frac{1}{z} \exp(\sum_{\begin{subarray}{c}
-   i=1 \\\
-   i\neq k
-\end{subarray}}^m\sum_{j=1}^nh_iw_{ij}o_j+\sum_{\begin{subarray}{c}
-   i=1 \\\
-   i\neq k
-\end{subarray}}^m\beta_ih_i+\sum_{j=1}^n\alpha_jo_j+\sum_{j=1}^nh_kw_{kj}o_j+\beta_kh_k) \\\
-&\text{Let } A(\neg k,o)=\sum_{\begin{subarray}{c}
-   i=1 \\\
-   i\neq k
-\end{subarray}}^m\sum_{j=1}^nh_iw_{ij}o_j+\sum_{\begin{subarray}{c}
-   i=1 \\\
-   i\neq k
-\end{subarray}}^m\beta_ih_i+\sum_{j=1}^n\alpha_jo_j \\\
-&=\frac{1}{z} \exp\left(A(\neg k, o)+h_k(\sum_{j=1}^nw_{kj}o_j+\beta_k)\right) \\\
-\\\
-&\text{So the ratio $\frac{p(h_k=0,h_{\neg k},o)}{p(h_k=1,h_{\neg k},o)}$ is }\\\
-\frac{p(h_k=0,h_{\neg k},o)}{p(h_k=1,h_{\neg k},o)} &= \frac{\frac{1}{z}\exp\left(A(\neg k, o)\right)}{\frac{1}{z}\exp\left(A(\neg k, o)+(\sum_{j=1}^nw_{kj}o_j+\beta_k)\right)} \\\
-&= \exp\left( A(\neg k,o)-\sum_{j=1}^nw_{kj}o_j-\beta_k-A(\neg k,o) \right) \\\
-&= \exp\left( -(\sum_{j=1}^nw_{kj}o_j+\beta_k) \right) \\\
-&\dArr \\\
-p(h_k=1|o) &= \frac{1}{1+\frac{p(h_k=0,h_{\neg k},o)}{p(h_k=1,h_{\neg k},o)}} \\\
-&= \frac{1}{1+\exp\left( -(\sum_{j=1}^nw_{kj}o_j+\beta_k) \right)} \\\
-&= \text{sigmoid}(\sum_{j=1}^nw_{kj}o_j+\beta_k) \\\
-&= \sigma(\sum_{j=1}^nw_{kj}o_j+\beta_k) \\\
-p(h_k=0|o) &= 1-\sigma(\sum_{j=1}^nw_{kj}o_j+\beta_k)
+\mathcal{L}(\theta) &= \frac{1}{N}\sum_{i=1}^N \log p(v^{(i)}|\theta) \\\
+&= \frac{1}{N}\sum_{i=1}^N\log\sum_hp(v^{(i)},h|\theta) \\\
+&\text{Let $V,H$ be the set of visible and hidden nodes}  \\\
+&|V|,|H| = N \\\
+&= \frac{1}{N}\sum_{v\in V}\log\sum_hp(v,h|\theta)
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-\( \sigma(\cdot) \) is sigmoid function or logistic function. Similarly, we have \( p(o_k|h) \):
+For each item \( \log\sum_hp(v^{(i)},h|\theta) \):
 </p>
 {{</ math.inline >}}
 
 $$
+\text{Let } \Delta=\log\sum_hp(v^{(i)},h|\theta) \\\
 \begin{align*}
-p(o_k=1|h) &= \sigma(\sum_{i=1}^mh_iw_{ik}+\alpha_k) \\\
-p(o_k=0|h) &= 1-\sigma(\sum_{i=1}^mh_iw_{ik}+\alpha_k) \\\
+\frac{\partial}{\partial w_{ji}}\Delta &= \frac{1}{p(v|\theta)}\frac{\partial}{\partial w_{ji}}\sum_{h}p(v,h|\theta) \\\
+&\because\text{Leibniz intergral rule} \\\
+&= \frac{1}{p(v|\theta)}\sum_{h}\frac{\partial}{\partial w_{ji}}p(v,h|\theta) \\\
+&= \sum_{h}\frac{1}{p(v|\theta)}\frac{\partial}{\partial w_{ji}}p(v,h|\theta) \\\
+&= \sum_{h}\frac{p(h|v,\theta)}{p(v,h|\theta)}\frac{\partial}{\partial w_{ji}}p(v,h|\theta) \\\
+&= \sum_{h}p(h|v,\theta)\frac{1}{p(s)}\frac{\partial}{\partial w_{ji}}p(s) \\\
+&\text{Let } \lbrace s^{\ast}_j \rbrace \triangleq \lbrace s_j \rbrace\in\text{parents}(x_i) \\\
+&= \sum_{h}p(h|v,\theta)\frac{1}{p(s_i|\lbrace s^{\ast}_j \rbrace)\prod_{ k \neq i} p(s_k | \lbrace s^{\ast}_j \rbrace)}\frac{\partial}{\partial w_{ji}}p(s_i|\lbrace s^{\ast}_j \rbrace)\prod_{ k \neq i} p(s_k | \lbrace s^{\ast}_j \rbrace) \\\
+&= \sum_{h}p(h|v,\theta)\frac{\prod_{ k \neq i} p(s_k | \lbrace s^{\ast}_j \rbrace)}{p(s_i|\lbrace s^{\ast}_j \rbrace)\prod_{ k \neq i} p(s_k | \lbrace s^{\ast}_j \rbrace)}\frac{\partial}{\partial w_{ji}}p(s_i|\lbrace s^{\ast}_j \rbrace) \\\
+&= \sum_{h}p(h|v,\theta)\frac{1}{p(s_i|\lbrace s^{\ast}_j \rbrace)}\frac{\partial}{\partial w_{ji}}p(s_i|\lbrace s^{\ast}_j \rbrace) \\\
+&= \sum_{h}p(h|v,\theta)\frac{1}{p(s_i|\lbrace s^{\ast}_j \rbrace)}\frac{\partial}{\partial w_{ji}}\sigma((2s_i-1)\sum_lw_{li}s_l) \\\
+&\because \sigma^{'}(x) = \frac{\exp(-x)}{(1+\exp(-x))^2} = \sigma(x)\sigma(-x) \\\
+&\because \frac{\partial}{\partial w_{ji}}\sigma((2s_i-1)\sum_lw_{li}s_l) = (2s_i-1)s_{j} \\\
+&= \sum_{h}p(h|v,\theta)\frac{1}{p(s_i|\lbrace s^{\ast}_j \rbrace)}\sigma\left((2s_i-1)\sum_lw_{li}s_l\right)\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j \\\
+&= \sum_{h}p(h|v,\theta)\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j \\\
+&\because p(h|v,\theta) = p(h,v|v,\theta) = p(s|v,\theta) \\\
+&= \sum_{s}p(s|v,\theta)\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j \\\
 \end{align*}
 $$
 
-### Marginal probability inference
+The log-likelihood gradient is:
 
 $$
 \begin{align*}
-p(o) &= \sum_h p(h,o) \\\
-&= \sum_h\frac{1}{z} \prod_{i=1}^m\prod_{j=1}^n\exp(h_iw_{ij}o_j) \prod_{i=1}^m\exp(\beta_i h_i) \prod_{j=1}^n\exp(\alpha_j o_j) \\\
-&= \frac{1}{z}\exp(\alpha^To)\sum_{h_1}\cdots\sum_{h_m}\exp(\sum_{i=1}^m\sum_{j=1}^nh_iw_{ij}o_j)\exp(\sum_{i=1}^m\beta_ih_i) \\\
-&= \frac{1}{z}\exp(\alpha^To)\sum_{h_1}\cdots\sum_{h_m}\exp(\sum_{i=1}^mh_i\sum_{j=1}^nw_{ij}o_j + \sum_{i=1}^m\beta_ih_i) \\\
-&\text{Let } w_i = \begin{bmatrix} w_{i1}\cdots w_{in} \end{bmatrix}^T \\\
-&= \frac{1}{z}\exp(\alpha^To)\sum_{h_1}\cdots\sum_{h_m}\exp(\sum_{i=1}^mh_iw_{i}^To + \sum_{i=1}^m\beta_ih_i) \\\
-&= \frac{1}{z}\exp(\alpha^To)\sum_{h_1}\cdots\sum_{h_m}\exp\left(\sum_{i=1}^m(h_iw_{i}^To + \beta_ih_i)\right) \\\
-&= \frac{1}{z}\exp(\alpha^To)\sum_{h_1}\cdots\sum_{h_m}\prod_{i=1}^m\exp\left(h_iw_{i}^To + \beta_ih_i\right) \\\
-&= \frac{1}{z}\exp(\alpha^To)\sum_{h_1}\exp(h_1w_1^To+\beta_1h_1)\cdots\sum_{h_m}\exp\left(h_mw_{m}^To + \beta_mh_m\right) \\\
-&\because h\in\lbrace 0,1 \rbrace \\\
-&\therefore \sum_{h_1}\exp(h_1w_1^To+\beta_1h_1) = \exp(0)+\exp(w_1^To+\beta_1) \\\
-&= \frac{1}{z}\exp(\alpha^To)\prod_{i=1}^m\left(1+\exp(w_i^To+\beta_i\right) \\\
-&= \frac{1}{z}\exp(\alpha^To)\exp\left(\log\left(\prod_{i=1}^m\left(1+\exp(w_i^To+\beta_i\right)\right)\right) \\\
-&= \frac{1}{z}\exp(\alpha^To)\exp\left(\sum_{i=1}^m\log\left(1+\exp(w_i^To+\beta_i\right)\right) \\\
-&= \frac{1}{z}\exp\left(\alpha^To+\sum_{i=1}^m\log\left(1+\exp(w_i^To+\beta_i\right)\right)
+\frac{\partial}{\partial w_{ji}}\mathcal{L} &= \frac{1}{N}\sum_{v\in V}\sum_{s}p(s|v,\theta)\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j \\\
+&= \frac{1}{N}\sum_{v\in V}\mathbb{E}_{s\sim p(s|v,\theta)}\left[\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j\right] \\\
 \end{align*}
 $$
-
-{{< math.inline >}}
-<p>
-Since \( \log(1+\mathrm{e}^x) \) is a Softplus(SmoothReLU) function we have:
-</p>
-{{</ math.inline >}}
-
-$$
-p(o) = \frac{1}{z}\exp\left(\alpha^To+\sum_{i=1}^m\text{softplus}(w_i^To+\beta_i)\right)
-$$
-
-### RBM Learning
-See [Confronting the Partition Function](https://tirmisula.github.io/posts/partition-function/#rbm-learning) chapter.
 
 ## Reference
 
