@@ -124,37 +124,6 @@ $$
 \end{cases}
 $$
 
-## Review Markov Random Field
-
-Markov Random Field or Markov Random Network is a kind of undirected probalistic graphical model. The key content is [factorization of MRF](https://tirmisula.github.io/posts/probabilistic-graphical-model/#factorization-of-mrf), which shows MRF can be expressed with potential functions(Hammersley Clifford theorem<cite>[^2]</cite>):
-
-$$
-\begin{align*}
-p(x) &= \frac{1}{z} \prod_{i=1}^K \psi(x_{C_i})=\frac{1}{z}\prod_{i=1}^K\exp(-E(x_{C_i})) \\\
-C_i &: \text{i-th maximum clique} \\\
-x_{C_i} &: \text{variable nodes in $C_i$} \\\
-\psi &: \text{potential function, $\psi>0$} \\\
-\psi(x_{C_i}) &= \exp(-E(x_{C_i})) \\\
-E(x) &: \text{energy function} \\\
-z &: \text{nomalize factor, $z=\sum_{x_1\cdots x_p}\prod_{i=1}^K \psi(x_{C_i})$} 
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-MRF probability model \( p(x) \) belongs to exponential family distribution, we call it Gibbs distribution or Boltzman distribution:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-p(x) &= \frac{1}{z} \exp( -\sum_{i=1}^K E(x_{C_i})) \\\
-&\triangleq \frac{1}{z} \exp( -\mathrm{E}(x)) \\\
-&= \frac{1}{z(\eta)}h(x)\exp( \eta^T\phi(x) )
-\end{align*}
-$$
-
-**Boltzman machine** named after the Boltzman distribution which is equivalent to MRF + hidden nodes.
 
 ## Sigmoid Belief Network Definition
 
@@ -257,6 +226,17 @@ When inference posterier \( p(h|v) \), different hidden nodes are mutually depen
 
 ## The Log-likelihood Gradient of SBN
 
+{{< math.inline >}}
+<p>
+Let \(V,H\) be the set of visible and hidden nodes:
+</p>
+{{</ math.inline >}}
+
+$$
+V,H \in P_{\text{data}} \\\
+|V|,|H| = N
+$$
+
 The average log-likelihood is given by:
 
 $$
@@ -277,6 +257,7 @@ For each item \( \log\sum_hp(v^{(i)},h|\theta) \):
 
 $$
 \text{Let } \Delta=\log\sum_hp(v^{(i)},h|\theta) \\\
+\text{Let } v = v^{(i)} \\\
 \begin{align*}
 \frac{\partial}{\partial w_{ji}}\Delta &= \frac{1}{p(v|\theta)}\frac{\partial}{\partial w_{ji}}\sum_{h}p(v,h|\theta) \\\
 &\because\text{Leibniz intergral rule} \\\
@@ -302,17 +283,82 @@ The log-likelihood gradient is:
 
 $$
 \begin{align*}
-\frac{\partial}{\partial w_{ji}}\mathcal{L} &= \frac{1}{N}\sum_{v\in V}\sum_{s}p(s|v,\theta)\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j \\\
-&= \frac{1}{N}\sum_{v\in V}\mathbb{E}_{s\sim p(s|v,\theta)}\left[\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j\right] \\\
+\frac{\partial}{\partial w_{ji}}\mathcal{L} &= \frac{1}{N}\sum_{v\in V}\sum_{s}p(s|v,\theta)\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j
+\end{align*}
+$$
+
+Since posterier p(s|v) is difficult to factorize, Neal <cite>[^2]<cite> proposed MCMC method to approximate result:
+
+$$
+\begin{align*}
+\sum_{s}p(s|v,\theta)f(s) &= \mathbb{E}_{s\sim p(s|v,\theta)}[f(s)] \\\
+\frac{1}{N}\sum_{v\in V} g(v) &= \mathbb{E}_{v\sim P_{\text{data}}}[g(v)]
+\end{align*}
+$$
+
+So we have:
+
+$$
+\begin{align*}
+\frac{\partial}{\partial w_{ji}}\mathcal{L} &= \frac{1}{N}\sum_{v\in V}\mathbb{E}_{s\sim p(s|v,\theta)}\left[\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j\right] \\\
+&\approx \mathbb{E}_{\begin{subarray}{c}
+    v\sim P_{\text{data}} \\\
+    s\sim p(s|v,\theta) \\\
+\end{subarray}}\left[\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j\right]
+\end{align*}
+$$
+
+It is efficient when it has small number of nodes.
+
+## Wake Sleep Algorithm
+### Algorithm intro
+
+Wake Sleep Algorithm is a heuristic alogrithm proposed by Hinton<cite>[^3]</cite>, which uses q(h|v) to approximate p(h|v).
+
+### Review ELBO+KL divergence in approximate inference
+
+In [EM algorithm chapter](https://tirmisula.github.io/posts/expectation-maximization/#generalized-em-algorithm), we introduced that log-likelihood can be expressed as ELBO+KL-divergence:
+
+$$
+\begin{align*}
+\log p(x|\theta) &= \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz - \int_{z}q(z)\log\frac{p(z|x,\theta)}{q(z)}\space dz \\\
+&= \text{ELBO} + KL(q||p)
+\end{align*}
+$$
+
+$$
+\begin{cases}
+\text{ELBO} &= \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz \\\
+&= E_{z\sim q(z)}[\log p(x,z|\theta)] - E_{z\sim q(z)}[\log q(z)] \\\
+&= E_{z\sim q(z)}[\log p(x,z|\theta)] + \underset{\color{red}{entropy}}{H_{q(z)}[q(z)]} \\\
+KL(q||p) &= \int_{z}q(z)\log\frac{q(z)}{p(z|x,\theta)}\space dz
+\end{cases}
+$$
+
+{{< math.inline >}}
+<p>
+Rewrite it with \( h \) and \( v \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\log p(v|\theta) &= \int_{h}q(h|v)\log\frac{p(v,h|\theta)}{q(h|v)}\space dh - \int_{h}q(h|v)\log\frac{p(h|v,\theta)}{q(h|v)}\space dh \\\
+&= E_{h\sim q(h|v)}[\log p(v,h|\theta)] - E_{h\sim q(h|v)}[\log q(h|v)] + \int_{h}q(h|v)\log\frac{q(h|v)}{p(h|v,\theta)}\space dz\\\
+&= E_{h\sim q(h|v)}[\log p(v,h|\theta)] + {H[q]} + \int_{h}q(h|v)\log\frac{q(h|v)}{p(h|v,\theta)}\space dz\\\
+&= \text{ELBO} + \text{KL}(q||p) \\\
+\\\
+\text{ELBO}(v,h,q) &= E_{h\sim q(h|v)}[\log p(v,h|\theta)] + {H[q]} \\\
+\text{KL}(q||p) &= \int_{h}q(h|v)\log\frac{q(h|v)}{p(h|v,\theta)}\space dz
 \end{align*}
 $$
 
 ## Reference
 
-[^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=117).
+[^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=140).
 [^4]: From [Higham, Nicholas (2002). Accuracy and Stability of Numerical Algorithms](https://archive.org/details/accuracystabilit00high_878).
 [^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
-[^3]: From [Probabilistic Graphical Models (II) Inference & Leaning. Jun Zhu](https://ml.cs.tsinghua.edu.cn/~jun/courses/statml-fall2015/8-PGM-Inference.pdf).
+[^3]: - [The wake-sleep algorithm for unsupervised neural networks. Geoffrey E Hinton, Peter Dayan, Brendan J Frey, Radford M Neal](https://www.cs.toronto.edu/~hinton/absps/ws.pdf).
 [^7]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
 [^6]: - [Gaussian Processes and Gaussian Markov Random Fields](https://folk.ntnu.no/joeid/MA8702/jan16.pdf)
-[^2]: - [Hammersley–Clifford theorem](http://www.statslab.cam.ac.uk/~grg/books/hammfest/hamm-cliff.pdf).
+[^2]: - [Connectionist learning of belief networks. Radford M. Neal](http://www.cs.toronto.edu/~bonner/courses/2016s/csc321/readings/Connectionist%20learning%20of%20belief%20networks.pdf).
