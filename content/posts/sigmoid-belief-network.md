@@ -313,9 +313,107 @@ It is efficient when it has small number of nodes.
 ## Wake Sleep Algorithm
 ### Algorithm intro
 
-Wake Sleep Algorithm is a heuristic alogrithm proposed by Hinton<cite>[^3]</cite>, which uses q(h|v) to approximate p(h|v).
+Wake Sleep Algorithm is a heuristic alogrithm proposed by Hinton<cite>[^3]</cite>, which uses q(h|v) to approximate p(h|v). The new graph added reversed edges between connected nodes as recognition connection, it looks like:
 
-### Review ELBO+KL divergence in approximate inference
+<div style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'red',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+graph BT
+    subgraph "hidden layer 2"
+    id1(("$$s_{j}$$"))
+    end
+    subgraph "hidden layer 1"
+    id3(("$$s_i$$"))
+    end
+    subgraph "visible layer"
+    id6(("$$s_v$$"))
+    end
+    id6(("$$s_v$$")) -.-> id3(("$$s_{j}$$"))
+    id3(("$$s_{j}$$")) ---> id6(("$$s_v$$"))
+    id3(("$$s_i$$")) -.->|"$$r_{{j}i}\quad\quad$$"| id1(("$$s_{j}$$"))
+    id1(("$$s_{j}$$")) -- "$$w_{{j}i}\quad\quad$$" --> id3(("$$s_i$$"))
+
+    classDef shaded fill:#b6b8d6,stroke:#333,stroke-width:2px;
+    class id6,id7 shaded
+```
+
+</div>
+
+{{< math.inline >}}
+<p>
+There are 2 routes, top-down and bottom-up which represents \(q(h|v)\) and \(p(h|v)\) respectively:
+</p>
+{{</ math.inline >}}
+<!-- 
+$$
+\begin{cases}
+\theta &= w \\\
+\Phi &= r
+\end{cases}
+$$ -->
+
+$$
+\begin{cases}
+\text{Generative model} &: p(v,h|\theta), \theta= \lbrace w_{ji} \rbrace \\\
+\text{Recognition model} &: q(h|v,\phi), \phi= \lbrace r_{ji} \rbrace
+\end{cases}
+$$
+
+The algorithm contains two phases:
+
+1. Wake Phase
+
+    + initialize visible nodes
+    + sampling each node in bottom-up manner
+        $$
+        v \rarr h^{(1)} \rarr h^{(2)} \rarr \cdots \rarr h^{(\text{top})} \\\
+        h \sim \sigma(\pm\sum_jr_{ji}s_j), r_{ji} \text{ is initialized}
+        $$
+    + learning generative model
+        $$
+        p(v,h|\hat{\theta})
+        $$
+
+2. Sleep Phase
+
+    + sampling each node in top-down manner (fantasy samples)
+        $$
+        h^{(\text{top})} \rarr \cdots \rarr h^{(1)} \rarr v \\\
+        h \sim \sigma(\pm\sum_jw_{ji}s_j), w_{ji} \in \hat{\theta}
+        $$
+    + learning recognition model
+        $$
+        q(h|v,\hat{\phi})
+        $$
+
+Formulate the algorithm in mathmatical way:
+
+1. Wake Phase
+
+    $$
+    \theta^{(t)} = \argmax_{\theta} \mathbb{E}_{h\sim q(h|v,\phi^{(t)})}\left[ \log p(v,h|\theta) \right]
+    $$
+
+2. Sleep Phase
+
+    $$
+    \phi^{(t+1)} = \argmax_{\phi} \mathbb{E}_{h,v\sim p(v,h|\theta^{(t)})}\left[ \log q(h|v,\phi) \right]
+    $$
+
+### Review ELBO and KL divergence
 
 In [EM algorithm chapter](https://tirmisula.github.io/posts/expectation-maximization/#generalized-em-algorithm), we introduced that log-likelihood can be expressed as ELBO+KL-divergence:
 
@@ -352,6 +450,21 @@ $$
 \text{KL}(q||p) &= \int_{h}q(h|v)\log\frac{q(h|v)}{p(h|v,\theta)}\space dz
 \end{align*}
 $$
+
+### Wake sleep vs general EM
+
+Based on the conclusion from [last section](#review-elbo-and-kl-divergence), we can express wake phase and sleep phase with KL divergence:
+
+1. Wake Phase
+
+    $$
+    \begin{align*}
+    \theta &= \argmax_{\theta} \mathbb{E}_{h\sim q(h|v,\phi)}\left[ \log p(v,h|\theta) \right] \\\
+    &\because \phi \text{ fixed}, H[q]=0 \\\
+    &= \argmax_{\theta}\text{ELBO}(\theta) \\\
+    &= \argmin_{\theta} 
+    \end{align*}
+    $$
 
 ## Reference
 
