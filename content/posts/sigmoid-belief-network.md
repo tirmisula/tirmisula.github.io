@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: true
+draft: false
 ---
 
 :                                                         
@@ -413,7 +413,8 @@ Formulate the algorithm in mathmatical way:
     \phi^{(t+1)} = \argmax_{\phi} \mathbb{E}_{h,v\sim p(v,h|\theta^{(t)})}\left[ \log q(h|v,\phi) \right]
     $$
 
-### Review ELBO and KL divergence
+### How Wake Sleep is related to EM and KL divergence
+#### Review general EM, ELBO and KL divergence
 
 In [EM algorithm chapter](https://tirmisula.github.io/posts/expectation-maximization/#generalized-em-algorithm), we introduced that log-likelihood can be expressed as ELBO+KL-divergence:
 
@@ -443,7 +444,7 @@ $$
 \begin{align*}
 \log p(v|\theta) &= \int_{h}q(h|v)\log\frac{p(v,h|\theta)}{q(h|v)}\space dh - \int_{h}q(h|v)\log\frac{p(h|v,\theta)}{q(h|v)}\space dh \\\
 &= E_{h\sim q(h|v)}[\log p(v,h|\theta)] - E_{h\sim q(h|v)}[\log q(h|v)] + \int_{h}q(h|v)\log\frac{q(h|v)}{p(h|v,\theta)}\space dz\\\
-&= E_{h\sim q(h|v)}[\log p(v,h|\theta)] + {H[q]} + \int_{h}q(h|v)\log\frac{q(h|v)}{p(h|v,\theta)}\space dz\\\
+&= E_{h\sim q(h|v)}[\log p(v,h|\theta)] + {H[q]} + \int_{h}q(h|v)\log\frac{q(h|v)}{p(h|v,\theta)}\space dh\\\
 &= \text{ELBO} + \text{KL}(q||p) \\\
 \\\
 \text{ELBO}(v,h,q) &= E_{h\sim q(h|v)}[\log p(v,h|\theta)] + {H[q]} \\\
@@ -451,9 +452,18 @@ $$
 \end{align*}
 $$
 
-### Wake sleep vs general EM
+We have concluded [Generalized EM algorithm](https://tirmisula.github.io/posts/expectation-maximization/#generalized-em-algorithm) before:
 
-Based on the conclusion from [last section](#review-elbo-and-kl-divergence), we can express wake phase and sleep phase with KL divergence:
+$$
+\begin{align*}
+\text{E-step} &: \text{Fix } \theta, q^{(t+1)}=\argmin_{q}KL(q||p)=\argmax_{q}L(q,\theta^{(t)}) \\\
+\text{M-step} &: \text{Fix } q, \theta^{(t+1)}=\argmin_{p}KL(q||p)=\argmax_{\theta} L(q^{(t+1)},\theta)
+\end{align*}
+$$
+
+#### Conclusion
+
+Based on the conclusion from [previous section](#review-general-em-elbo-and-kl-divergence), we can express wake phase and sleep phase with KL divergence:
 
 1. Wake Phase
 
@@ -461,10 +471,30 @@ Based on the conclusion from [last section](#review-elbo-and-kl-divergence), we 
     \begin{align*}
     \theta &= \argmax_{\theta} \mathbb{E}_{h\sim q(h|v,\phi)}\left[ \log p(v,h|\theta) \right] \\\
     &\because \phi \text{ fixed}, H[q]=0 \\\
-    &= \argmax_{\theta}\text{ELBO}(\theta) \\\
-    &= \argmin_{\theta} 
+    &=  \argmax_{\theta}E_{h\sim q(h|v)}[\log p(v,h|\theta)] + {H[q]} \\\
+    &= \argmax_{\theta}\text{ELBO}(q,\theta) \\\
+    &= \argmin_{\theta}\int_{h}q(h|v)\log\frac{q(h|v)}{p(h|v,\theta)}\space dh \\\
+    &= \argmin_{\theta} \text{KL}(q(h|v,\phi)||p(h|v,\theta)) \\\
+    &\rArr \text{M-step}
     \end{align*}
     $$
+
+2. Sleep Phase
+
+    $$
+    \begin{align*}
+    \phi &= \argmax_{\phi} \mathbb{E}_{h,v\sim p(v,h|\theta)}\left[ \log q(h|v,\phi) \right] \\\
+    &= \argmax_{\phi} \int p(h|v,\theta)p(v|\theta)\log q(h|v,\phi) dh \\\
+    &= \argmax_{\phi} \int p(h|v,\theta)\log q(h|v,\phi) dh \\\
+    &= \argmax_{\phi} \int p(h|v,\theta)\log\left(\frac{q(h|v,\phi)}{p(h|v,\theta)}p(h|v,\theta)\right)  dh \\\
+    &= \argmax_{\phi} \int p(h|v,\theta)\log\frac{q(h|v,\phi)}{p(h|v,\theta)} dh \\\
+    &= \argmax_{\phi} -\text{KL}(p||q) \\\
+    &= \argmin_{\phi} \text{KL}(p(h|v,\theta)||q(h|v,\phi)) \\\
+    &\rArr \text{the oppposite of E-step}, \argmin \text{KL}(q||p)
+    \end{align*}
+    $$
+
+
 
 ## Reference
 
