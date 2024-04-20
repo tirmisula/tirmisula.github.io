@@ -214,7 +214,6 @@ $$
 So we have joint distribution of SBN:
 
 $$
-
 p(s) = \prod_{i\in\text{SBN}} p(s_i | \lbrace s_j \rbrace\in\text{parents}(x_i)) = p(v,h)
 $$
 
@@ -265,14 +264,14 @@ $$
 &= \sum_{h}\frac{1}{p(v|\theta)}\frac{\partial}{\partial w_{ji}}p(v,h|\theta) \\\
 &= \sum_{h}\frac{p(h|v,\theta)}{p(v,h|\theta)}\frac{\partial}{\partial w_{ji}}p(v,h|\theta) \\\
 &= \sum_{h}p(h|v,\theta)\frac{1}{p(s)}\frac{\partial}{\partial w_{ji}}p(s) \\\
-&\text{Let } \lbrace s^{\ast}_j \rbrace \triangleq \lbrace s_j \rbrace\in\text{parents}(x_i) \\\
-&= \sum_{h}p(h|v,\theta)\frac{1}{p(s_i|\lbrace s^{\ast}_j \rbrace)\prod_{ k \neq i} p(s_k | \lbrace s^{\ast}_j \rbrace)}\frac{\partial}{\partial w_{ji}}p(s_i|\lbrace s^{\ast}_j \rbrace)\prod_{ k \neq i} p(s_k | \lbrace s^{\ast}_j \rbrace) \\\
-&= \sum_{h}p(h|v,\theta)\frac{\prod_{ k \neq i} p(s_k | \lbrace s^{\ast}_j \rbrace)}{p(s_i|\lbrace s^{\ast}_j \rbrace)\prod_{ k \neq i} p(s_k | \lbrace s^{\ast}_j \rbrace)}\frac{\partial}{\partial w_{ji}}p(s_i|\lbrace s^{\ast}_j \rbrace) \\\
-&= \sum_{h}p(h|v,\theta)\frac{1}{p(s_i|\lbrace s^{\ast}_j \rbrace)}\frac{\partial}{\partial w_{ji}}p(s_i|\lbrace s^{\ast}_j \rbrace) \\\
-&= \sum_{h}p(h|v,\theta)\frac{1}{p(s_i|\lbrace s^{\ast}_j \rbrace)}\frac{\partial}{\partial w_{ji}}\sigma((2s_i-1)\sum_lw_{li}s_l) \\\
+&\text{Let } \lbrace s^{\ast}\_{j} \rbrace \triangleq \lbrace s_j \rbrace\in\text{parents}(x_i) \\\
+&= \sum_{h}p(h|v,\theta)\frac{1}{p(s_i|\lbrace s^{\ast}\_{j} \rbrace)\prod_{ k \neq i} p(s_k | \lbrace s^{\ast}\_{j} \rbrace)}\frac{\partial}{\partial w_{ji}}p(s_i|\lbrace s^{\ast}\_{j} \rbrace)\prod_{ k \neq i} p(s_k | \lbrace s^{\ast}\_{j} \rbrace) \\\
+&= \sum_{h}p(h|v,\theta)\frac{\prod_{ k \neq i} p(s_k | \lbrace s^{\ast}\_{j} \rbrace)}{p(s_i|\lbrace s^{\ast}\_{j} \rbrace)\prod_{ k \neq i} p(s_k | \lbrace s^{\ast}\_{j} \rbrace)}\frac{\partial}{\partial w_{ji}}p(s_i|\lbrace s^{\ast}\_{j} \rbrace) \\\
+&= \sum_{h}p(h|v,\theta)\frac{1}{p(s_i|\lbrace s^{\ast}\_{j} \rbrace)}\frac{\partial}{\partial w_{ji}}p(s_i|\lbrace s^{\ast}\_{j} \rbrace) \\\
+&= \sum_{h}p(h|v,\theta)\frac{1}{p(s_i|\lbrace s^{\ast}\_{j} \rbrace)}\frac{\partial}{\partial w_{ji}}\sigma((2s_i-1)\sum_lw_{li}s_l) \\\
 &\because \sigma^{'}(x) = \frac{\exp(-x)}{(1+\exp(-x))^2} = \sigma(x)\sigma(-x) \\\
 &\because \frac{\partial}{\partial w_{ji}}\sigma((2s_i-1)\sum_lw_{li}s_l) = (2s_i-1)s_{j} \\\
-&= \sum_{h}p(h|v,\theta)\frac{1}{p(s_i|\lbrace s^{\ast}_j \rbrace)}\sigma\left((2s_i-1)\sum_lw_{li}s_l\right)\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j \\\
+&= \sum_{h}p(h|v,\theta)\frac{1}{p(s_i|\lbrace s^{\ast}\_{j} \rbrace)}\sigma\left((2s_i-1)\sum_lw_{li}s_l\right)\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j \\\
 &= \sum_{h}p(h|v,\theta)\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j \\\
 &\because p(h|v,\theta) = p(h,v|v,\theta) = p(s|v,\theta) \\\
 &= \sum_{s}p(s|v,\theta)\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j \\\
@@ -291,8 +290,8 @@ Since posterier p(s|v) is difficult to factorize, Neal <cite>[^2]<cite> proposed
 
 $$
 \begin{align*}
-\sum_{s}p(s|v,\theta)f(s) &= \mathbb{E}_{s\sim p(s|v,\theta)}[f(s)] \\\
-\frac{1}{N}\sum_{v\in V} g(v) &= \mathbb{E}_{v\sim P_{\text{data}}}[g(v)]
+\sum_{s}p(s|v,\theta)f(s) &= \mathbb{E}\_{s\sim p(s|v,\theta)}[f(s)] \\\
+\frac{1}{N}\sum_{v\in V} g(v) &= \mathbb{E}\_{v\sim P_{\text{data}}}[g(v)]
 \end{align*}
 $$
 
@@ -300,8 +299,8 @@ So we have:
 
 $$
 \begin{align*}
-\frac{\partial}{\partial w_{ji}}\mathcal{L} &= \frac{1}{N}\sum_{v\in V}\mathbb{E}_{s\sim p(s|v,\theta)}\left[\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j\right] \\\
-&\approx \mathbb{E}_{\begin{subarray}{c}
+\frac{\partial}{\partial w_{ji}}\mathcal{L} &= \frac{1}{N}\sum_{v\in V}\mathbb{E}\_{s\sim p(s|v,\theta)}\left[\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j\right] \\\
+&\approx \mathbb{E}\_{\begin{subarray}{c}
     v\sim P_{\text{data}} \\\
     s\sim p(s|v,\theta) \\\
 \end{subarray}}\left[\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j\right]
@@ -404,13 +403,13 @@ Formulate the algorithm in mathmatical way:
 1. Wake Phase
 
     $$
-    \theta^{(t)} = \argmax_{\theta} \mathbb{E}_{h\sim q(h|v,\phi^{(t)})}\left[ \log p(v,h|\theta) \right]
+    \theta^{(t)} = \argmax_{\theta} \mathbb{E}\_{h\sim q(h|v,\phi^{(t)})}\left[ \log p(v,h|\theta) \right]
     $$
 
 2. Sleep Phase
 
     $$
-    \phi^{(t+1)} = \argmax_{\phi} \mathbb{E}_{h,v\sim p(v,h|\theta^{(t)})}\left[ \log q(h|v,\phi) \right]
+    \phi^{(t+1)} = \argmax_{\phi} \mathbb{E}\_{h,v\sim p(v,h|\theta^{(t)})}\left[ \log q(h|v,\phi) \right]
     $$
 
 ### How Wake Sleep is related to EM and KL divergence
