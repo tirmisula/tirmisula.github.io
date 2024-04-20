@@ -469,9 +469,9 @@ Based on the conclusion from [previous section](#review-general-em-elbo-and-kl-d
 
     $$
     \begin{align*}
-    \theta &= \argmax_{\theta} \mathbb{E}_{h\sim q(h|v,\phi)}\left[ \log p(v,h|\theta) \right] \\\
+    \theta &= \argmax_{\theta} \mathbb{E}\_{h\sim q(h|v,\phi)}\left[ \log p(v,h|\theta) \right] \\\
     &\because \phi \text{ fixed}, H[q]=0 \\\
-    &=  \argmax_{\theta}E_{h\sim q(h|v)}[\log p(v,h|\theta)] + {H[q]} \\\
+    &=  \argmax\_{\theta}E_{h\sim q(h|v)}[\log p(v,h|\theta)] + {H[q]} \\\
     &= \argmax_{\theta}\text{ELBO}(q,\theta) \\\
     &= \argmin_{\theta}\int_{h}q(h|v)\log\frac{q(h|v)}{p(h|v,\theta)}\space dh \\\
     &= \argmin_{\theta} \text{KL}(q(h|v,\phi)||p(h|v,\theta)) \\\
@@ -483,8 +483,8 @@ Based on the conclusion from [previous section](#review-general-em-elbo-and-kl-d
 
     $$
     \begin{align*}
-    \phi &= \argmax_{\phi} \mathbb{E}_{h,v\sim p(v,h|\theta)}\left[ \log q(h|v,\phi) \right] \\\
-    &= \argmax_{\phi} \int p(h|v,\theta)p(v|\theta)\log q(h|v,\phi) dh \\\
+    \phi &= \argmax_{\phi} \mathbb{E}\_{h,v\sim p(v,h|\theta)}\left[ \log q(h|v,\phi) \right] \\\
+    &= \argmax\_{\phi} \int p(h|v,\theta)p(v|\theta)\log q(h|v,\phi) dh \\\
     &= \argmax_{\phi} \int p(h|v,\theta)\log q(h|v,\phi) dh \\\
     &= \argmax_{\phi} \int p(h|v,\theta)\log\left(\frac{q(h|v,\phi)}{p(h|v,\theta)}p(h|v,\theta)\right)  dh \\\
     &= \argmax_{\phi} \int p(h|v,\theta)\log\frac{q(h|v,\phi)}{p(h|v,\theta)} dh \\\
