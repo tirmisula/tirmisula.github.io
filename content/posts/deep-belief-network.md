@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
-title: "Sigmoid Belief Network"
-date: "2023-09-26"
+title: "Deep Belief Network"
+date: "2023-09-27"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: false
+draft: true
 ---
 
 :                                                         
@@ -76,7 +76,7 @@ $$
                 p(y_t|y_{t-1}) \\\
                 p(y_t|x_{1:T},x_t)
             \end{cases} \\\
-            \text{\color{red}{Sigmoid Belief Network}} : \text{BM}+\text{directed graph} \\\
+            \text{Sigmoid Belief Network} : \text{BM}+\text{directed graph} \\\
             \text{Bayesian network} 
         \end{cases} \\\
         \text{undirected graph}\rarr \begin{cases}
@@ -99,7 +99,8 @@ $$
                 \text{Linear model$\rarr$Karman Filter} \\\
                 \text{Nonlinear model$\rarr$Particle Filter}
             \end{cases}
-        \end{cases}
+        \end{cases} \\\
+        \text{\color{red}{Deep Belief Network(DBN)}} : \text{RBM}+\text{SBN}
     \end{cases} \\\
     \text{Inference} \begin{cases}
         \text{MAP inference$\rarr \hat{x_A}=\argmax_{x_A}p(x_A|x_B)\propto\argmax p(x_A,x_B)$} \\\
@@ -125,9 +126,9 @@ $$
 $$
 
 
-## Sigmoid Belief Network Definition
+## DBN Intro
 
-Sigmoid Belief Network(SBN) is a directed probalistic graphical model with multiple hidden layers and a visible layer:
+Deep Belef Network(DBN) is a hybrid model first proposed by Hinton<cite>[^3]</cite>. It is a stack of restricted Boltzeman machine(RBM) on top and multiple layers of Sigmoid belief network on bottom.
 
 $$
 \begin{align*}
@@ -497,10 +498,10 @@ Based on the conclusion from [previous section](#review-general-em-elbo-and-kl-d
 
 ## Reference
 
-[^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=140).
+[^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=146).
 [^4]: From [Higham, Nicholas (2002). Accuracy and Stability of Numerical Algorithms](https://archive.org/details/accuracystabilit00high_878).
 [^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
-[^3]: - [The wake-sleep algorithm for unsupervised neural networks. Geoffrey E Hinton, Peter Dayan, Brendan J Frey, Radford M Neal](https://www.cs.toronto.edu/~hinton/absps/ws.pdf).
+[^3]: - [Deep belief networks. Geoffrey E. Hinton (2009)](http://scholarpedia.org/article/Deep_belief_networks).
 [^7]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
 [^6]: - [Gaussian Processes and Gaussian Markov Random Fields](https://folk.ntnu.no/joeid/MA8702/jan16.pdf)
 [^2]: - [Connectionist learning of belief networks. Radford M. Neal](http://www.cs.toronto.edu/~bonner/courses/2016s/csc321/readings/Connectionist%20learning%20of%20belief%20networks.pdf).
