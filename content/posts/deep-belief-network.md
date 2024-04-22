@@ -128,26 +128,8 @@ $$
 
 ## DBN Intro
 
-Deep Belef Network(DBN) is a hybrid model first proposed by Hinton<cite>[^3]</cite>. It is a stack of restricted Boltzeman machine(RBM) on top and multiple layers of Sigmoid belief network on bottom.
+Deep Belef Network(DBN) is a hybrid model first proposed by Hinton<cite>[^3]</cite>. It consists of a stack of multiple layers of restricted Boltzeman machine(RBM) at the top and a layer of Sigmoid belief network(SBN) at the bottom.
 
-$$
-\begin{align*}
-s &: \text{nodes in SBN}, s \sim \text{Bernoulli}
-\\\
-s &= \begin{bmatrix}
-    s_1 \\\
-    \vdots \\\
-    s_p
-\end{bmatrix}=\begin{bmatrix}
-    h \\\
-    v
-\end{bmatrix} \\\
-w_{ji} &: \text{the weight of edge $s_j\rarr s_i$} \\\
-s_j &\in \text{parents}(s_i)
-\end{align*}
-$$
-
-The SBN structure looks like:
 
 <div style="text-align: center;">
 
@@ -165,57 +147,91 @@ The SBN structure looks like:
     }
   }
 }%%
-graph TB
-    subgraph "hidden layer 2"
-    id1(("$$s_{j}$$"))
-    id2(("$$s_{j}$$"))
+graph TD
+    subgraph "RBM layer 3"
+    id1(("$$h^{(3)}$$"))
+    id2(("$$h^{(3)}$$"))
+    id3(("$$h^{(3)}$$"))
     end
-    subgraph "hidden layer 1"
-    id3(("$$s_i$$"))
-    id4(("$$s_{...}$$"))
-    id5(("$$s_{...}$$"))
+    subgraph "RBM layer 2"
+    id4(("$$h^{(2)}$$"))
+    id5(("$$h^{(2)}$$"))
     end
-    id1(("$$s_{j}$$")) -- "$$w_{{j}i}\quad\quad$$" --> id3(("$$s_i$$"))
-    id2(("$$s_{j}$$")) -- "$$w_{{j}i}\quad\quad$$" --> id3(("$$s_i$$"))
-    id1(("$$s_{j}$$")) --> id4(("$$s_{...}$$"))
-    id2(("$$s_{j}$$")) --> id4(("$$s_{...}$$"))
-    id1(("$$s_{j}$$")) --> id5(("$$s_{...}$$"))
-    id2(("$$s_{j}$$")) --> id5(("$$s_{...}$$"))
+    subgraph "SBN layer 1"
+    id6(("$$h^{(2)}$$"))
+    id7(("$$h^{(2)}$$"))
+    id8(("$$h^{(2)}$$"))
+    end
     subgraph "visible layer"
-    id3(("$$s_i$$")) --> id6(("$$s_v$$"))
-    id4(("$$s_{...}$$")) --> id6(("$$s_v$$"))
-    id4(("$$s_{...}$$")) --> id7(("$$s_v$$"))
-    id5(("$$s_{...}$$")) --> id7(("$$s_v$$"))
+    id9(("$$v$$"))
+    id10(("$$v$$"))
+    end
+    id1(("$$h^{(3)}$$")) --- id4(("$$h^{(2)}$$"))
+    id1(("$$h^{(3)}$$")) --- id5(("$$h^{(2)}$$"))
+    id2(("$$h^{(3)}$$")) --- id4(("$$h^{(2)}$$"))
+    id2(("$$h^{(3)}$$")) --- id5(("$$h^{(2)}$$"))
+    id3(("$$h^{(3)}$$")) --- id4(("$$h^{(2)}$$"))
+    id3(("$$h^{(3)}$$")) --- id5(("$$h^{(2)}$$"))
+    id4(("$$h^{(2)}$$")) --> id6(("$$h^{(2)}$$"))
+    id4(("$$h^{(2)}$$")) --> id7(("$$h^{(2)}$$"))
+    id4(("$$h^{(2)}$$")) --> id8(("$$h^{(2)}$$"))
+    id5(("$$h^{(2)}$$")) --> id6(("$$h^{(2)}$$"))
+    id5(("$$h^{(2)}$$")) --> id7(("$$h^{(2)}$$"))
+    id5(("$$h^{(2)}$$")) --> id8(("$$h^{(2)}$$"))
+    id6(("$$h^{(2)}$$")) --> id9(("$$v$$"))
+    id6(("$$h^{(2)}$$")) --> id10(("$$v$$"))
+    id7(("$$h^{(2)}$$")) --> id9(("$$v$$"))
+    id7(("$$h^{(2)}$$")) --> id10(("$$v$$"))
+    id8(("$$h^{(2)}$$")) --> id9(("$$v$$"))
+    id8(("$$h^{(2)}$$")) --> id10(("$$v$$"))
 
     classDef shaded fill:#b6b8d6,stroke:#333,stroke-width:2px;
-    class id6,id7 shaded
-end
+    class id9,id10 shaded
 ```
 
 </div>
 
 {{< math.inline >}}
 <p>
-For hidden node \( s_i \) in SBN, the conditional probability is a sigmoid activate function:
+For each layer in DBN, define:
 </p>
 {{</ math.inline >}}
 
 $$
-\text{Let } \sigma(x)=\frac{1}{1+\exp(-x)} \\\
-\begin{cases}
-p(s_i=1 | \lbrace s_j \rbrace\in\text{parents}(x_i)) &= \sigma(\sum_jw_{ji}s_j) \\\
+\text{hidden layer k} : \begin{cases}
+h^{(k)} &: \text{nodes}, h^{(k)} \sim \text{Bernoulli}
 \\\
-p(s_i=0 | \lbrace s_j \rbrace\in\text{parents}(x_i)) &= 1-\sigma(\sum_jw_{ji}s_j) \\\
-&= \sigma(-\sum_jw_{ji}s_j)
-\end{cases} \\\
-\dArr \\\
-p(s_i | \lbrace s_j \rbrace\in\text{parents}(x_i)) = \sigma((2s_i-1)\sum_jw_{ji}s_j) \\\
+w^{(k)} &: \text{weights of edges} \\\
+b^{(k)} &: \text{bias}
+\end{cases}
 $$
 
-So we have joint distribution of SBN:
+$$
+\text{visible layer} : \begin{cases}
+v &: \text{nodes}, v \sim \text{Bernoulli} \\\
+b^{(0)} &: \text{bias}
+\end{cases}
+$$
+
+We talked about [Sigmoid belief network](https://tirmisula.github.io/posts/sigmoid-belief-network/#sigmoid-belief-network-definition) before, the conditional probability is:
 
 $$
-p(s) = \prod_{i\in\text{SBN}} p(s_i | \lbrace s_j \rbrace\in\text{parents}(x_i)) = p(v,h)
+\begin{align*}
+p(h_{j}^{(k)}=1|h^{(k+1)}) &= \sigma( w_{j}^{T(k+1)}h^{(k+1)}+b_{j}^{(k)}) \\\
+p(v_i=1|h^{(1)}) &= \sigma( w_{i}^{T(1)}h^{(1)}+b_{i}^{(0)})
+\end{align*}
+$$
+
+And the joint probabilty of [restricted Boltzaman machine](https://tirmisula.github.io/posts/restricted-boltzman-machine/#rbm-model-definition) is given by:
+
+$$
+p(h^{(l)},h^{(l+1)}) = \frac{1}{z}\exp(h^{T(l+1)}wh^{(l)}+\alpha^Th^{(l)}+\beta^Th) \\\
+$$
+
+So we have all the parameters that need to be learned:
+
+$$
+\theta = ( w^{(1)},\cdots,w^{(\infty)},b^{(0)},b^{(1)},\cdots,b^{(\infty)} )
 $$
 
 {{< math.inline >}}
