@@ -128,7 +128,7 @@ $$
 
 ## DBN Intro
 
-Deep Belef Network(DBN) is a hybrid model first proposed by Hinton<cite>[^3]</cite>. It consists of a stack of multiple layers of restricted Boltzeman machine(RBM) at the top and a layer of Sigmoid belief network(SBN) at the bottom.
+Deep Belief Network(DBN) is a bayesian network and a hybrid model proposed by Hinton<cite>[^3]</cite>. The top two layers of DBN have undirected connections while the lower layers have directed top-down connections. DBN can be considered as a stack of RBMs, and the directed part is similar to SBN.
 
 
 <div style="text-align: center;">
@@ -193,11 +193,12 @@ graph TD
 
 {{< math.inline >}}
 <p>
-For each layer in DBN, define:
+For each layer in DBN, we have:
 </p>
 {{</ math.inline >}}
 
 $$
+k = 1\cdots \infty \\\
 \text{hidden layer k} : \begin{cases}
 h^{(k)} &: \text{nodes}, h^{(k)} \sim \text{Bernoulli}
 \\\
@@ -213,7 +214,42 @@ b^{(0)} &: \text{bias}
 \end{cases}
 $$
 
-We talked about [Sigmoid belief network](https://tirmisula.github.io/posts/sigmoid-belief-network/#sigmoid-belief-network-definition) before, the conditional probability is:
+Then we get all the parameters that need to be learned:
+
+$$
+\theta = ( w^{(1)},\cdots,w^{(\infty)},b^{(0)},b^{(1)},\cdots,b^{(\infty)} )
+$$
+
+Suppose DBN contains L layers, the joint distribution of DBN can be given by [factorization of Bayesian network](https://tirmisula.github.io/posts/probabilistic-graphical-model/#conclusion):
+
+$$
+\begin{align*}
+p(v,h^{(1)},\cdots,h^{(L)}) &= p(v|h^{(1)},\cdots,h^{(L)})p(h^{(1)},\cdots,h^{(L)}) \\\
+&= p(v|h^{(1)})p(h^{(1)}|h^{(2)})\cdots p(h^{(L-2)}|h^{(L-1)})p(h^{(L-1)},h^{(L)}) \\\
+&\because \text{tail to tail structure, nodes in same layer are mutually conditional independent} \\\
+&= \prod_{i}p(v_i|h^{(1)})\prod_{j_1}p(h_{j}^{(1)}|h^{(2)})\cdots \prod_{j_{\ast}}p(h_{j}^{(L-2)}|h^{(L-1)})p(h^{(L-1)},h^{(L)})
+\end{align*}
+$$
+
+We have given the [RBM's conditional probability](https://tirmisula.github.io/posts/restricted-boltzman-machine/#posterier-inference):
+
+$$
+\begin{align*}
+p(o_k=1|h) &= \sigma(\sum_{i=1}^mh_iw_{ik}+\alpha_k) \\\
+p(o_k=0|h) &= 1-\sigma(\sum_{i=1}^mh_iw_{ik}+\alpha_k)
+\end{align*}
+$$
+
+Similarly, in [Sigmoid belief network](https://tirmisula.github.io/posts/sigmoid-belief-network/#sigmoid-belief-network-definition) we have the conditional probability:
+
+$$
+\begin{align*}
+p(s_i=1 | \lbrace s_j \rbrace\in\text{parents}(x_i)) &= \sigma(\sum_jw_{ji}s_j) \\\
+p(s_i=0 | \lbrace s_j \rbrace\in\text{parents}(x_i)) &= \sigma(-\sum_jw_{ji}s_j)
+\end{align*}
+$$
+
+Thus we can conclude:
 
 $$
 \begin{align*}
@@ -222,109 +258,80 @@ p(v_i=1|h^{(1)}) &= \sigma( w_{i}^{T(1)}h^{(1)}+b_{i}^{(0)})
 \end{align*}
 $$
 
-And the joint probabilty of [restricted Boltzaman machine](https://tirmisula.github.io/posts/restricted-boltzman-machine/#rbm-model-definition) is given by:
-
-$$
-p(h^{(l)},h^{(l+1)}) = \frac{1}{z}\exp(h^{T(l+1)}wh^{(l)}+\alpha^Th^{(l)}+\beta^Th) \\\
-$$
-
-So we have all the parameters that need to be learned:
-
-$$
-\theta = ( w^{(1)},\cdots,w^{(\infty)},b^{(0)},b^{(1)},\cdots,b^{(\infty)} )
-$$
-
-{{< math.inline >}}
-<p>
-When inference posterier \( p(h|v) \), different hidden nodes are mutually dependent because of <a href="https://tirmisula.github.io/posts/probabilistic-graphical-model/#head-to-head">head to head structure</a>. So finding posterier directly is hard, we find the log-likelihood instead.
-</p>
-{{</ math.inline >}}
-
-## The Log-likelihood Gradient of SBN
-
-{{< math.inline >}}
-<p>
-Let \(V,H\) be the set of visible and hidden nodes:
-</p>
-{{</ math.inline >}}
-
-$$
-V,H \in P_{\text{data}} \\\
-|V|,|H| = N
-$$
-
-The average log-likelihood is given by:
+The joint probabilty of [restricted Boltzaman machine](https://tirmisula.github.io/posts/restricted-boltzman-machine/#rbm-model-definition) is given by:
 
 $$
 \begin{align*}
-\mathcal{L}(\theta) &= \frac{1}{N}\sum_{i=1}^N \log p(v^{(i)}|\theta) \\\
-&= \frac{1}{N}\sum_{i=1}^N\log\sum_hp(v^{(i)},h|\theta) \\\
-&\text{Let $V,H$ be the set of visible and hidden nodes}  \\\
-&|V|,|H| = N \\\
-&= \frac{1}{N}\sum_{v\in V}\log\sum_hp(v,h|\theta)
+p(o,h) &= \frac{1}{z}\exp(h^Two+\alpha^To+\beta^Th) \\\
+&= \frac{1}{z} \prod_{i=1}^m\prod_{j=1}^n\exp(h_iw_{ij}o_j) \prod_{i=1}^m\exp(\beta_i h_i) \prod_{j=1}^n\exp(\alpha_j o_j)
+\end{align*}
+$$
+
+So we have the joint distribution of top two layers:
+
+$$
+p(h^{(L-1)},h^{(L)}) = \frac{1}{z}\exp\left(h^{T(L)}w^{(L)}h^{(L-1)}+h^{T(L-1)}b^{(L-1)}+h^{T(L)}b^{(L)} \right) \\\
+$$
+
+## Why stacking RBM
+
+Consider an original RBM model, we have marginal probability:
+
+$$
+\begin{align*}
+p(v) &= \sum_{h^{(1)}} p(v,h^{(1)}) \\\
+&= \sum_{h^{(1)}} p(h^{(1)})p(v|h^{(1)}) \\\
+&\text{$p(h^{(1)})$ is prior}
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-For each item \( \log\sum_hp(v^{(i)},h|\theta) \):
+By adding a layer \( h^{(2)} \) on top of \( h^{(1)} \), we have:
 </p>
 {{</ math.inline >}}
 
 $$
-\text{Let } \Delta=\log\sum_hp(v^{(i)},h|\theta) \\\
-\text{Let } v = v^{(i)} \\\
 \begin{align*}
-\frac{\partial}{\partial w_{ji}}\Delta &= \frac{1}{p(v|\theta)}\frac{\partial}{\partial w_{ji}}\sum_{h}p(v,h|\theta) \\\
-&\because\text{Leibniz intergral rule} \\\
-&= \frac{1}{p(v|\theta)}\sum_{h}\frac{\partial}{\partial w_{ji}}p(v,h|\theta) \\\
-&= \sum_{h}\frac{1}{p(v|\theta)}\frac{\partial}{\partial w_{ji}}p(v,h|\theta) \\\
-&= \sum_{h}\frac{p(h|v,\theta)}{p(v,h|\theta)}\frac{\partial}{\partial w_{ji}}p(v,h|\theta) \\\
-&= \sum_{h}p(h|v,\theta)\frac{1}{p(s)}\frac{\partial}{\partial w_{ji}}p(s) \\\
-&\text{Let } \lbrace s^{\ast}\_{j} \rbrace \triangleq \lbrace s_j \rbrace\in\text{parents}(x_i) \\\
-&= \sum_{h}p(h|v,\theta)\frac{1}{p(s_i|\lbrace s^{\ast}\_{j} \rbrace)\prod_{ k \neq i} p(s_k | \lbrace s^{\ast}\_{j} \rbrace)}\frac{\partial}{\partial w_{ji}}p(s_i|\lbrace s^{\ast}\_{j} \rbrace)\prod_{ k \neq i} p(s_k | \lbrace s^{\ast}\_{j} \rbrace) \\\
-&= \sum_{h}p(h|v,\theta)\frac{\prod_{ k \neq i} p(s_k | \lbrace s^{\ast}\_{j} \rbrace)}{p(s_i|\lbrace s^{\ast}\_{j} \rbrace)\prod_{ k \neq i} p(s_k | \lbrace s^{\ast}\_{j} \rbrace)}\frac{\partial}{\partial w_{ji}}p(s_i|\lbrace s^{\ast}\_{j} \rbrace) \\\
-&= \sum_{h}p(h|v,\theta)\frac{1}{p(s_i|\lbrace s^{\ast}\_{j} \rbrace)}\frac{\partial}{\partial w_{ji}}p(s_i|\lbrace s^{\ast}\_{j} \rbrace) \\\
-&= \sum_{h}p(h|v,\theta)\frac{1}{p(s_i|\lbrace s^{\ast}\_{j} \rbrace)}\frac{\partial}{\partial w_{ji}}\sigma((2s_i-1)\sum_lw_{li}s_l) \\\
-&\because \sigma^{'}(x) = \frac{\exp(-x)}{(1+\exp(-x))^2} = \sigma(x)\sigma(-x) \\\
-&\because \frac{\partial}{\partial w_{ji}}\sigma((2s_i-1)\sum_lw_{li}s_l) = (2s_i-1)s_{j} \\\
-&= \sum_{h}p(h|v,\theta)\frac{1}{p(s_i|\lbrace s^{\ast}\_{j} \rbrace)}\sigma\left((2s_i-1)\sum_lw_{li}s_l\right)\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j \\\
-&= \sum_{h}p(h|v,\theta)\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j \\\
-&\because p(h|v,\theta) = p(h,v|v,\theta) = p(s|v,\theta) \\\
-&= \sum_{s}p(s|v,\theta)\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j \\\
+p(v) &= \sum_{h^{(1)}} \sum_{h^{(2)}} p(h^{(1)},h^{(2)}) p(v|h^{(1)})
 \end{align*}
 $$
 
-The log-likelihood gradient is:
+<!-- {{< math.inline >}}
+<p>
+To improve \( p(v) \) we can improve the prior \( p(h^{(1)}) \) and leave p(v|h^{(1)}) fixed. This is done by adding a layer \( h^{(2)} \) on top of \( h^{(1)} \), remove top-down connections from \( h^{(1)} \) to \( v \), and learn \(w^{(1)},w^{(2)}\) in bottom-up manner:
+</p>
+{{</ math.inline >}} -->
+
+{{< math.inline >}}
+<p>
+We see that \( p(v) \) is improvable by stacking RBMs because:
+</p>
+{{</ math.inline >}}
 
 $$
 \begin{align*}
-\frac{\partial}{\partial w_{ji}}\mathcal{L} &= \frac{1}{N}\sum_{v\in V}\sum_{s}p(s|v,\theta)\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j
-\end{align*}
+\text{improve $p(v)$} &\hArr \text{improve $p(h^{(1)})$, fix $p(v|h^{(1)})$} \\\
+\text{fix $p(v|h^{(1)})$} &\hArr \text{learn $w^{(1)}$, remove connections from $h^{(1)}$ to $v$} \\\
+\text{improve $p(h^{(1)})$} &\hArr \text{learn $w^{(2)}$, $p(h^{(1)})$ is not a prior anymore}
+\end{align*} \\\
+\text{$w^{(1)},w^{(2)}$ is learned in bottom-up manner} \\\
 $$
 
-Since posterier p(s|v) is difficult to factorize, Neal <cite>[^2]<cite> proposed MCMC method to approximate result:
-
-$$
-\begin{align*}
-\sum_{s}p(s|v,\theta)f(s) &= \mathbb{E}\_{s\sim p(s|v,\theta)}[f(s)] \\\
-\frac{1}{N}\sum_{v\in V} g(v) &= \mathbb{E}\_{v\sim P_{\text{data}}}[g(v)]
-\end{align*}
-$$
-
-So we have:
+From [ELBO](https://tirmisula.github.io/posts/expectation-maximization/#generalized-em-algorithm) perspective, we know that:
 
 $$
 \begin{align*}
-\frac{\partial}{\partial w_{ji}}\mathcal{L} &= \frac{1}{N}\sum_{v\in V}\mathbb{E}\_{s\sim p(s|v,\theta)}\left[\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j\right] \\\
-&\approx \mathbb{E}\_{\begin{subarray}{c}
-    v\sim P_{\text{data}} \\\
-    s\sim p(s|v,\theta) \\\
-\end{subarray}}\left[\sigma\left((1-2s_i)\sum_lw_{li}s_l\right)(2s_i-1)s_j\right]
+\log p(v) &= \log \sum_{h^{(1)}} p(v,h^{(1)}) \\\
+&\geq \text{ELBO} \\\
+&\geq \sum_{h^{(1)}}q(h^{(1)}|v)\log\frac{p(v,h^{(1)})}{q(h^{(1)}|v)} \\\
+% &\geq \mathbb{E}\_{h^{(1)}\sim q(h^{(1)}|v)}\left[\log\frac{p(v,h^{(1)})}{q(h^{(1)}|v)}\right] \\\
+&= \sum_{h^{(1)}}q(h^{(1)}|v)\left[\log p(h^{(1)})+\log p(v|h^{(1)})-\log q(h^{(1)}|v)\right] \\\
+&\because \text{posterier }p(v|h^{(1)}),q(h^{(1)}|v) \text{ is fixed during RBM learning} \\\
+&= \sum_{h^{(1)}}q(h^{(1)}|v)\log p(h^{(1)})+C \\\
 \end{align*}
 $$
 
-It is efficient when it has small number of nodes.
 
 ## Wake Sleep Algorithm
 ### Algorithm intro
