@@ -382,9 +382,24 @@ $$
 
 {{< math.inline >}}
 <p>
-However, posterier \( p(h|v) \) is intractable because head to head structure exists in SBN.
+However, posterier \( p(h|v) \) in SBN is intractable because of head to head structure. Instead of directly solve \( p(h|v) \), \( q(h|v) \) is used to approximate \( p(h|v) \), \( q(h|v) \) is assumed to be factorable like  just like the posterier in RBM, so we have:
 </p>
 {{</ math.inline >}}
+
+$$
+\begin{align*}
+\because p(v|h^{(1)}) &= \prod_{i}\sigma( w_{:,i}^{T(1)}h^{(1)}+b_{i}^{(0)}) \\\
+\therefore q(h^{(1)}|v) &= \prod_{j}\sigma( w_{j,:}^{(1)}v+b_{i}^{(1)}) \\\
+&w_{:,i}^{T(1)}, w_{j,:}^{(1)} \in w^{(1)}
+\end{align*}
+$$
+
+On the other hand,
+
+$$
+\because \text{$q(h|v)$ is factorable but $p(h|v)$ is not factorable} \\\
+\therefore \text{KL}(q||p) \gg 0 \rArr \text{ELBO of $p(v)$ is relatively loose in DBN}
+$$
 
 ## Fine-tuning
 
