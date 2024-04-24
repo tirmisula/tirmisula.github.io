@@ -128,7 +128,7 @@ $$
 
 ## DBN Intro
 
-Deep Belief Network(DBN) is a bayesian network and a hybrid model proposed by Hinton<cite>[^3]</cite>. The top two layers of DBN have undirected connections while the lower layers have directed top-down connections. DBN can be considered as a stack of RBMs, and the directed part is similar to SBN.
+Deep Belief Network(DBN) is a bayesian network and a hybrid model proposed by Hinton<cite>[^3]</cite>. The top two layers of DBN have undirected connections while the lower layers have directed top-down connections. DBN can be considered as a stack of RBMs, and the directed RBM layers is considered to be SBN.
 
 
 <div style="text-align: center;">
@@ -273,7 +273,7 @@ $$
 p(h^{(L-1)},h^{(L)}) = \frac{1}{z}\exp\left(h^{T(L)}w^{(L)}h^{(L-1)}+h^{T(L-1)}b^{(L-1)}+h^{T(L)}b^{(L)} \right) \\\
 $$
 
-## Why stacking RBM
+## Stacking RBM Improves ELBO of p(v)
 
 Consider an original RBM model, we have marginal probability:
 
@@ -285,15 +285,33 @@ p(v) &= \sum_{h^{(1)}} p(v,h^{(1)}) \\\
 \end{align*}
 $$
 
+We introduced in [HMM chapter](https://tirmisula.github.io/posts/hidden-markov-model/#learning) that learning problem is equivalent to maximum likelihood estimation:
+
+$$
+\hat{\lambda} = \argmax p(O|\lambda)
+$$
+
 {{< math.inline >}}
 <p>
-By adding a layer \( h^{(2)} \) on top of \( h^{(1)} \), we have:
+By adding a layer \( h^{(2)} \) on top of \( h^{(1)} \), we see that \( p(h^{(1)}) \) is no longer a prior but a learnable object, the learning problem is maximizing likelihood of \( p(h^{(1)}|w) \):
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-p(v) &= \sum_{h^{(1)}} \sum_{h^{(2)}} p(h^{(1)},h^{(2)}) p(v|h^{(1)})
+\hat{w}^{(2)} &= \argmax_{w^{(2)}} p(h^{(1)}|h^{(2)},w^{(2)}) \\\
+\hat{p}(h^{(1)}) &= p(h^{(1)}|h^{(2)},\hat{w}^{(2)})=\max p(h^{(1)}|w)
+\end{align*}
+$$
+ 
+So for the stacked RBM model, we have marginal probability:
+
+$$
+\begin{align*}
+p(v) &= \sum_{h^{(1)}} p(h^{(1)})p(v|h^{(1)}) \\\
+&\text{replace $p(h^{(1)})$ with $\hat{p}(h^{1})$} \\\
+&= \sum_{h^{(1)}} \hat{p}(h^{(1)})p(v|h^{(1)}) \\\
+&\geq \text{single layer RBM } p(v)
 \end{align*}
 $$
 
@@ -305,17 +323,17 @@ To improve \( p(v) \) we can improve the prior \( p(h^{(1)}) \) and leave p(v|h^
 
 {{< math.inline >}}
 <p>
-We see that \( p(v) \) is improvable by stacking RBMs because:
+A notable thing for above inequality is to fix \( p(v|h^{(1)}) \). This is done by removing bottom-up(\( v \) to \( h^{(1)} \)) connections from first RBM layer:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
 \text{improve $p(v)$} &\hArr \text{improve $p(h^{(1)})$, fix $p(v|h^{(1)})$} \\\
-\text{fix $p(v|h^{(1)})$} &\hArr \text{learn $w^{(1)}$, remove connections from $h^{(1)}$ to $v$} \\\
-\text{improve $p(h^{(1)})$} &\hArr \text{learn $w^{(2)}$, $p(h^{(1)})$ is not a prior anymore}
+\text{$p(v|h^{(1)})$} &\hArr \text{learn $w^{(1)}$ from first layer RBM inference} \\\
+\text{$\hat{p}(h^{(1)})$} &\hArr \text{learn $w^{(2)}$ from second layer RBM inference}
 \end{align*} \\\
-\text{$w^{(1)},w^{(2)}$ is learned in bottom-up manner} \\\
+\text{Thus $w=(w^{(1)},w^{(2)}\cdots)$ is learned in bottom-up manner} \\\
 $$
 
 From [ELBO](https://tirmisula.github.io/posts/expectation-maximization/#generalized-em-algorithm) perspective, we know that:
@@ -324,200 +342,57 @@ $$
 \begin{align*}
 \log p(v) &= \log \sum_{h^{(1)}} p(v,h^{(1)}) \\\
 &\geq \text{ELBO} \\\
-&\geq \sum_{h^{(1)}}q(h^{(1)}|v)\log\frac{p(v,h^{(1)})}{q(h^{(1)}|v)} \\\
+\text{ELBO} &= \sum_{h^{(1)}}q(h^{(1)}|v)\log\frac{p(v,h^{(1)})}{q(h^{(1)}|v)} \\\
 % &\geq \mathbb{E}\_{h^{(1)}\sim q(h^{(1)}|v)}\left[\log\frac{p(v,h^{(1)})}{q(h^{(1)}|v)}\right] \\\
 &= \sum_{h^{(1)}}q(h^{(1)}|v)\left[\log p(h^{(1)})+\log p(v|h^{(1)})-\log q(h^{(1)}|v)\right] \\\
-&\because \text{posterier }p(v|h^{(1)}),q(h^{(1)}|v) \text{ is fixed during RBM learning} \\\
+&\because w^{(1)} \text{ is determined during RBM learning} \\\
+&\therefore \text{posterier }p(v|h^{(1)}),q(h^{(1)}|v) \text{ is fixed} \\\
 &= \sum_{h^{(1)}}q(h^{(1)}|v)\log p(h^{(1)})+C \\\
+&\text{Let } p(h^{(1)}) = \hat{p}(h^{(1)}) \\\
+&\leq \sum_{h^{(1)}}q(h^{(1)}|v)\log \hat{p}(h^{(1)})+C \\\ 
+&\therefore\text{ELBO is improved by $\hat{p}(h^{(1)})$}
 \end{align*}
 $$
 
-
-## Wake Sleep Algorithm
-### Algorithm intro
-
-Wake Sleep Algorithm is a heuristic alogrithm proposed by Hinton<cite>[^3]</cite>, which uses q(h|v) to approximate p(h|v). The new graph added reversed edges between connected nodes as recognition connection, it looks like:
-
-<div style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'red',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-graph BT
-    subgraph "hidden layer 2"
-    id1(("$$s_{j}$$"))
-    end
-    subgraph "hidden layer 1"
-    id3(("$$s_i$$"))
-    end
-    subgraph "visible layer"
-    id6(("$$s_v$$"))
-    end
-    id6(("$$s_v$$")) -.-> id3(("$$s_{j}$$"))
-    id3(("$$s_{j}$$")) ---> id6(("$$s_v$$"))
-    id3(("$$s_i$$")) -.->|"$$r_{{j}i}\quad\quad$$"| id1(("$$s_{j}$$"))
-    id1(("$$s_{j}$$")) -- "$$w_{{j}i}\quad\quad$$" --> id3(("$$s_i$$"))
-
-    classDef shaded fill:#b6b8d6,stroke:#333,stroke-width:2px;
-    class id6,id7 shaded
-```
-
-</div>
-
-{{< math.inline >}}
-<p>
-There are 2 routes, top-down and bottom-up which represents \(q(h|v)\) and \(p(h|v)\) respectively:
-</p>
-{{</ math.inline >}}
-<!-- 
-$$
-\begin{cases}
-\theta &= w \\\
-\Phi &= r
-\end{cases}
-$$ -->
+In conslusion,
 
 $$
-\begin{cases}
-\text{Generative model} &: p(v,h|\theta), \theta= \lbrace w_{ji} \rbrace \\\
-\text{Recognition model} &: q(h|v,\phi), \phi= \lbrace r_{ji} \rbrace
-\end{cases}
+\text{stacking RBM} \hArr \text{maximize likelihood of $p(h^{(1)})$} \hArr \text{maximize $p(v)$'s ELBO}
 $$
 
-The algorithm contains two phases:
+## Pre-training
 
-1. Wake Phase
+Pre-training is the first stage of DBN tranining which is used to initialize weights. 
 
-    + initialize visible nodes
-    + sampling each node in bottom-up manner
-        $$
-        v \rarr h^{(1)} \rarr h^{(2)} \rarr \cdots \rarr h^{(\text{top})} \\\
-        h \sim \sigma(\pm\sum_jr_{ji}s_j), r_{ji} \text{ is initialized}
-        $$
-    + learning generative model
-        $$
-        p(v,h|\hat{\theta})
-        $$
++ Perform bottom-up greedy training layer by layer
 
-2. Sleep Phase
++ Treat each layer as RBM model, trained with [CD-k algorithm](https://tirmisula.github.io/posts/partition-function/#cd-k-for-rbm)
 
-    + sampling each node in top-down manner (fantasy samples)
-        $$
-        h^{(\text{top})} \rarr \cdots \rarr h^{(1)} \rarr v \\\
-        h \sim \sigma(\pm\sum_jw_{ji}s_j), w_{ji} \in \hat{\theta}
-        $$
-    + learning recognition model
-        $$
-        q(h|v,\hat{\phi})
-        $$
-
-Formulate the algorithm in mathmatical way:
-
-1. Wake Phase
-
-    $$
-    \theta^{(t)} = \argmax_{\theta} \mathbb{E}\_{h\sim q(h|v,\phi^{(t)})}\left[ \log p(v,h|\theta) \right]
-    $$
-
-2. Sleep Phase
-
-    $$
-    \phi^{(t+1)} = \argmax_{\phi} \mathbb{E}\_{h,v\sim p(v,h|\theta^{(t)})}\left[ \log q(h|v,\phi) \right]
-    $$
-
-### How Wake Sleep is related to EM and KL divergence
-#### Review general EM, ELBO and KL divergence
-
-In [EM algorithm chapter](https://tirmisula.github.io/posts/expectation-maximization/#generalized-em-algorithm), we introduced that log-likelihood can be expressed as ELBO+KL-divergence:
+The tranining process roughly looks like:
 
 $$
 \begin{align*}
-\log p(x|\theta) &= \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz - \int_{z}q(z)\log\frac{p(z|x,\theta)}{q(z)}\space dz \\\
-&= \text{ELBO} + KL(q||p)
-\end{align*}
-$$
-
-$$
-\begin{cases}
-\text{ELBO} &= \int_{z}q(z)\log\frac{p(x,z|\theta)}{q(z)}\space dz \\\
-&= E_{z\sim q(z)}[\log p(x,z|\theta)] - E_{z\sim q(z)}[\log q(z)] \\\
-&= E_{z\sim q(z)}[\log p(x,z|\theta)] + \underset{\color{red}{entropy}}{H_{q(z)}[q(z)]} \\\
-KL(q||p) &= \int_{z}q(z)\log\frac{q(z)}{p(z|x,\theta)}\space dz
-\end{cases}
+&\text{$v$ is known, learn $w^{(1)},b^{(0)}$ by CD-k} \\\
+&\text{sample $h^{(1)}\sim p(h^{(1)}|v,w^{(1)})$} \\\
+&\text{$h^{(1)}$ is known, learn $w^{(2)},b^{(1)}$ by CD-k} \\\
+&\text{sample $h^{(2)}\sim p(h^{(2)}|h^{(1)},w^{(2)})$}
+\end{align*} \\\
+\cdots
 $$
 
 {{< math.inline >}}
 <p>
-Rewrite it with \( h \) and \( v \):
+However, posterier \( p(h|v) \) is intractable because head to head structure exists in SBN.
 </p>
 {{</ math.inline >}}
 
-$$
-\begin{align*}
-\log p(v|\theta) &= \int_{h}q(h|v)\log\frac{p(v,h|\theta)}{q(h|v)}\space dh - \int_{h}q(h|v)\log\frac{p(h|v,\theta)}{q(h|v)}\space dh \\\
-&= E_{h\sim q(h|v)}[\log p(v,h|\theta)] - E_{h\sim q(h|v)}[\log q(h|v)] + \int_{h}q(h|v)\log\frac{q(h|v)}{p(h|v,\theta)}\space dz\\\
-&= E_{h\sim q(h|v)}[\log p(v,h|\theta)] + {H[q]} + \int_{h}q(h|v)\log\frac{q(h|v)}{p(h|v,\theta)}\space dh\\\
-&= \text{ELBO} + \text{KL}(q||p) \\\
-\\\
-\text{ELBO}(v,h,q) &= E_{h\sim q(h|v)}[\log p(v,h|\theta)] + {H[q]} \\\
-\text{KL}(q||p) &= \int_{h}q(h|v)\log\frac{q(h|v)}{p(h|v,\theta)}\space dz
-\end{align*}
-$$
+## Fine-tuning
 
-We have concluded [Generalized EM algorithm](https://tirmisula.github.io/posts/expectation-maximization/#generalized-em-algorithm) before:
+Fine-tuning is the second stage of DBN tranining which is used to improve model performance.
 
-$$
-\begin{align*}
-\text{E-step} &: \text{Fix } \theta, q^{(t+1)}=\argmin_{q}KL(q||p)=\argmax_{q}L(q,\theta^{(t)}) \\\
-\text{M-step} &: \text{Fix } q, \theta^{(t+1)}=\argmin_{p}KL(q||p)=\argmax_{\theta} L(q^{(t+1)},\theta)
-\end{align*}
-$$
++ Supervised method: Treat DBN as feed forward nerual network, use existed labeled data to fine tune weights (back propagation algorithm)
 
-#### Conclusion
-
-Based on the conclusion from [previous section](#review-general-em-elbo-and-kl-divergence), we can express wake phase and sleep phase with KL divergence:
-
-1. Wake Phase
-
-    $$
-    \begin{align*}
-    \theta &= \argmax_{\theta} \mathbb{E}\_{h\sim q(h|v,\phi)}\left[ \log p(v,h|\theta) \right] \\\
-    &\because \phi \text{ fixed}, H[q]=0 \\\
-    &=  \argmax\_{\theta}E_{h\sim q(h|v)}[\log p(v,h|\theta)] + {H[q]} \\\
-    &= \argmax_{\theta}\text{ELBO}(q,\theta) \\\
-    &= \argmin_{\theta}\int_{h}q(h|v)\log\frac{q(h|v)}{p(h|v,\theta)}\space dh \\\
-    &= \argmin_{\theta} \text{KL}(q(h|v,\phi)||p(h|v,\theta)) \\\
-    &\rArr \text{M-step}
-    \end{align*}
-    $$
-
-2. Sleep Phase
-
-    $$
-    \begin{align*}
-    \phi &= \argmax_{\phi} \mathbb{E}\_{h,v\sim p(v,h|\theta)}\left[ \log q(h|v,\phi) \right] \\\
-    &= \argmax\_{\phi} \int p(h|v,\theta)p(v|\theta)\log q(h|v,\phi) dh \\\
-    &= \argmax_{\phi} \int p(h|v,\theta)\log q(h|v,\phi) dh \\\
-    &= \argmax_{\phi} \int p(h|v,\theta)\log\left(\frac{q(h|v,\phi)}{p(h|v,\theta)}p(h|v,\theta)\right)  dh \\\
-    &= \argmax_{\phi} \int p(h|v,\theta)\log\frac{q(h|v,\phi)}{p(h|v,\theta)} dh \\\
-    &= \argmax_{\phi} -\text{KL}(p||q) \\\
-    &= \argmin_{\phi} \text{KL}(p(h|v,\theta)||q(h|v,\phi)) \\\
-    &\rArr \text{similar to E-step$(\argmin_q \text{KL}(q||p))$ with $q$ and $p$ exchanged}
-    \end{align*}
-    $$
-
-
++ Unsupervised method: Fine-tunes the weights using a contrastive version of the wake-sleep algorithm<cite>[^2]</cite>
 
 ## Reference
 
@@ -527,4 +402,4 @@ Based on the conclusion from [previous section](#review-general-em-elbo-and-kl-d
 [^3]: - [Deep belief networks. Geoffrey E. Hinton (2009)](http://scholarpedia.org/article/Deep_belief_networks).
 [^7]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
 [^6]: - [Gaussian Processes and Gaussian Markov Random Fields](https://folk.ntnu.no/joeid/MA8702/jan16.pdf)
-[^2]: - [Connectionist learning of belief networks. Radford M. Neal](http://www.cs.toronto.edu/~bonner/courses/2016s/csc321/readings/Connectionist%20learning%20of%20belief%20networks.pdf).
+[^2]: - [A fast learning algorithm for deep belief nets. Geoffrey E. Hinton, Simon Osindero, Yee-Whye Teh](https://www.cs.toronto.edu/~hinton/absps/fastnc.pdf).
