@@ -128,7 +128,7 @@ $$
 
 ## DBN Intro
 
-Deep Belief Network(DBN) is a bayesian network and a hybrid model proposed by Hinton<cite>[^3]</cite>. The top two layers of DBN have undirected connections while the lower layers have directed top-down connections. DBN can be considered as a stack of RBMs, and the directed RBM layers is considered to be SBN.
+Deep Belief Network(DBN) is a bayesian network and a hybrid model proposed by Hinton<cite>[^3]</cite>. The top two layers of DBN have undirected connections while the lower layers have directed top-down connections. DBN can be considered as a stack of restricted boltzman machines(RBMs), and the directed layers is considered as sigmoid belief network(SBN) with tied parameters.
 
 
 <div style="text-align: center;">
@@ -157,7 +157,7 @@ graph TD
     id4(("$$h^{(2)}$$"))
     id5(("$$h^{(2)}$$"))
     end
-    subgraph "SBN layer 1"
+    subgraph "RBM layer 1"
     id6(("$$h^{(2)}$$"))
     id7(("$$h^{(2)}$$"))
     id8(("$$h^{(2)}$$"))
@@ -231,7 +231,7 @@ p(v,h^{(1)},\cdots,h^{(L)}) &= p(v|h^{(1)},\cdots,h^{(L)})p(h^{(1)},\cdots,h^{(L
 \end{align*}
 $$
 
-We have given the [RBM's conditional probability](https://tirmisula.github.io/posts/restricted-boltzman-machine/#posterier-inference):
+We have given the [RBM's conditional probability](https://tirmisula.github.io/posts/restricted-boltzman-machine/#posterier-inference) and [SBN's conditional probability](https://tirmisula.github.io/posts/sigmoid-belief-network/#sigmoid-belief-network-definition):
 
 $$
 \begin{align*}
@@ -239,8 +239,6 @@ p(o_k=1|h) &= \sigma(\sum_{i=1}^mh_iw_{ik}+\alpha_k) \\\
 p(o_k=0|h) &= 1-\sigma(\sum_{i=1}^mh_iw_{ik}+\alpha_k)
 \end{align*}
 $$
-
-Similarly, in [Sigmoid belief network](https://tirmisula.github.io/posts/sigmoid-belief-network/#sigmoid-belief-network-definition) we have the conditional probability:
 
 $$
 \begin{align*}
@@ -258,7 +256,7 @@ p(v_i=1|h^{(1)}) &= \sigma( w_{i}^{T(1)}h^{(1)}+b_{i}^{(0)})
 \end{align*}
 $$
 
-The joint probabilty of [restricted Boltzaman machine](https://tirmisula.github.io/posts/restricted-boltzman-machine/#rbm-model-definition) is given by:
+On the other hand, the joint probabilty of [restricted Boltzaman machine](https://tirmisula.github.io/posts/restricted-boltzman-machine/#rbm-model-definition) is given by:
 
 $$
 \begin{align*}
@@ -285,7 +283,7 @@ p(v) &= \sum_{h^{(1)}} p(v,h^{(1)}) \\\
 \end{align*}
 $$
 
-We introduced in [HMM chapter](https://tirmisula.github.io/posts/hidden-markov-model/#learning) that learning problem is equivalent to maximum likelihood estimation:
+We introduced in [HMM chapter](https://tirmisula.github.io/posts/hidden-markov-model/#learning) that learning problem is equivalent to solving maximum likelihood estimation:
 
 $$
 \hat{\lambda} = \argmax p(O|\lambda)
@@ -382,7 +380,7 @@ $$
 
 {{< math.inline >}}
 <p>
-However, posterier \( p(h|v) \) in SBN is intractable because of head to head structure. Instead of directly solve \( p(h|v) \), \( q(h|v) \) is used to approximate \( p(h|v) \), \( q(h|v) \) is assumed to be factorable like  just like the posterier in RBM, so we have:
+However, posterier \( p(h|v) \) in SBN is intractable because of head to head structure. Instead of directly solving \( p(h|v) \), \( q(h|v) \) is computed to approximate \( p(h|v) \), \( q(h|v) \) is assumed to be factorable like posterier in RBM, so we have:
 </p>
 {{</ math.inline >}}
 
@@ -395,7 +393,7 @@ w_{:,i}^{T(1)}, w_{j,:}^{(1)} \in w^{(1)}
 \end{cases}
 $$
 
-So the tranining process becomes:
+The trainining process becomes:
 
 $$
 \begin{align*}
@@ -407,7 +405,7 @@ $$
 \cdots
 $$
 
-And the drawback is,
+Drawback:
 
 $$
 \because \text{$q(h|v)$ is factorable but $p(h|v)$ is not factorable} \\\
