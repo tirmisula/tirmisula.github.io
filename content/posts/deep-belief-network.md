@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: true
+draft: false
 ---
 
 :                                                         
@@ -387,14 +387,27 @@ However, posterier \( p(h|v) \) in SBN is intractable because of head to head st
 {{</ math.inline >}}
 
 $$
-\begin{align*}
-\because p(v|h^{(1)}) &= \prod_{i}\sigma( w_{:,i}^{T(1)}h^{(1)}+b_{i}^{(0)}) \\\
-\therefore q(h^{(1)}|v) &= \prod_{j}\sigma( w_{j,:}^{(1)}v+b_{i}^{(1)}) \\\
-&w_{:,i}^{T(1)}, w_{j,:}^{(1)} \in w^{(1)}
-\end{align*}
+\begin{cases}
+p(v|h^{(1)}) = \prod_{i}\sigma( w_{:,i}^{T(1)}h^{(1)}+b_{i}^{(0)}) \\\
+\because\text{complementary} \text{ prior}\text{, inference is reversible with $w^T$} \\\
+q(h^{(1)}|v) = \prod_{j}\sigma( w_{j,:}^{(1)}v+b_{j}^{(0)}) \\\
+w_{:,i}^{T(1)}, w_{j,:}^{(1)} \in w^{(1)}
+\end{cases}
 $$
 
-On the other hand,
+So the tranining process becomes:
+
+$$
+\begin{align*}
+&\text{$v$ is known, learn $w^{(1)},b^{(0)}$ by CD-k} \\\
+&\text{sample $h^{(1)}\sim q(h^{(1)}|v,w^{(1)})$} \\\
+&\text{$h^{(1)}$ is known, learn $w^{(2)},b^{(1)}$ by CD-k} \\\
+&\text{sample $h^{(2)}\sim q(h^{(2)}|h^{(1)},w^{(2)})$}
+\end{align*} \\\
+\cdots
+$$
+
+And the drawback is,
 
 $$
 \because \text{$q(h|v)$ is factorable but $p(h|v)$ is not factorable} \\\
