@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
 title: "Deep Belief Network"
-date: "2023-09-27"
+date: "2023-09-28"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: false
+draft: true
 ---
 
 :                                                         
@@ -90,6 +90,7 @@ $$
                 \text{hidden nodes}
             \end{cases} \\\
             \text{{Restricted Boltzman Machine(RBM)}} : \text{Bipartite BM} \\\
+            \text{\color{red}{Boltzman Machine}} : \text{Fully connected graph} \\\
             \text{Markov network(MRF)}
         \end{cases} \\\
         \text{continous variable}\rarr \text{{Gaussian BN/Gaussian MRF}} \\\
@@ -100,7 +101,7 @@ $$
                 \text{Nonlinear model$\rarr$Particle Filter}
             \end{cases}
         \end{cases} \\\
-        \text{\color{red}{Deep Belief Network(DBN)}} : \text{RBM}+\text{SBN}
+        \text{{Deep Belief Network(DBN)}} : \text{RBM}+\text{SBN}
     \end{cases} \\\
     \text{Inference} \begin{cases}
         \text{MAP inference$\rarr \hat{x_A}=\argmax_{x_A}p(x_A|x_B)\propto\argmax p(x_A,x_B)$} \\\
@@ -126,137 +127,60 @@ $$
 $$
 
 
-## DBN Intro
+## Boltzman Machine Intro
 
-Deep Belief Network(DBN) is a bayesian network and a hybrid model proposed by Hinton<cite>[^3]</cite>. The top two layers of DBN have undirected connections while the lower layers have directed top-down connections. DBN can be considered as a stack of restricted boltzman machines(RBMs), and the directed layers is considered as sigmoid belief network(SBN) with tied parameters.
-
-
-<div style="text-align: center;">
-
-```mermaid
-%%{
-  init: {
-    'theme': 'base',
-    'themeVariables': {
-      'primaryColor': 'white',
-      'primaryTextColor': '#000',
-      'primaryBorderColor': '#7C0200',
-      'lineColor': '#F8B229',
-      'secondaryColor': 'red',
-      'tertiaryColor': '#fff'
-    }
-  }
-}%%
-graph TD
-    subgraph "hidden layer 3"
-    id1(("$$h^{(3)}$$"))
-    id2(("$$h^{(3)}$$"))
-    id3(("$$h^{(3)}$$"))
-    end
-    subgraph "hidden layer 2"
-    id4(("$$h^{(2)}$$"))
-    id5(("$$h^{(2)}$$"))
-    end
-    subgraph "hidden layer 1"
-    id6(("$$h^{(2)}$$"))
-    id7(("$$h^{(2)}$$"))
-    id8(("$$h^{(2)}$$"))
-    end
-    subgraph "visible layer"
-    id9(("$$v$$"))
-    id10(("$$v$$"))
-    end
-    id1(("$$h^{(3)}$$")) --- id4(("$$h^{(2)}$$"))
-    id1(("$$h^{(3)}$$")) --- id5(("$$h^{(2)}$$"))
-    id2(("$$h^{(3)}$$")) --- id4(("$$h^{(2)}$$"))
-    id2(("$$h^{(3)}$$")) --- id5(("$$h^{(2)}$$"))
-    id3(("$$h^{(3)}$$")) --- id4(("$$h^{(2)}$$"))
-    id3(("$$h^{(3)}$$")) --- id5(("$$h^{(2)}$$"))
-    id4(("$$h^{(2)}$$")) --> id6(("$$h^{(2)}$$"))
-    id4(("$$h^{(2)}$$")) --> id7(("$$h^{(2)}$$"))
-    id4(("$$h^{(2)}$$")) --> id8(("$$h^{(2)}$$"))
-    id5(("$$h^{(2)}$$")) --> id6(("$$h^{(2)}$$"))
-    id5(("$$h^{(2)}$$")) --> id7(("$$h^{(2)}$$"))
-    id5(("$$h^{(2)}$$")) --> id8(("$$h^{(2)}$$"))
-    id6(("$$h^{(2)}$$")) --> id9(("$$v$$"))
-    id6(("$$h^{(2)}$$")) --> id10(("$$v$$"))
-    id7(("$$h^{(2)}$$")) --> id9(("$$v$$"))
-    id7(("$$h^{(2)}$$")) --> id10(("$$v$$"))
-    id8(("$$h^{(2)}$$")) --> id9(("$$v$$"))
-    id8(("$$h^{(2)}$$")) --> id10(("$$v$$"))
-
-    classDef shaded fill:#b6b8d6,stroke:#333,stroke-width:2px;
-    class id9,id10 shaded
-```
-
-</div>
+Boltzman machine is a fully connected graph which is proposed to solve local minimum of Hopfield network.
 
 {{< math.inline >}}
 <p>
-For each layer in DBN, we have:
+The BM model is given by:
 </p>
 {{</ math.inline >}}
 
 $$
-k = 1\cdots \infty \\\
-\text{hidden layer k} : \begin{cases}
-h^{(k)} &: \text{nodes}, h^{(k)} \sim \text{Bernoulli}
+\begin{align*}
+x &: \text{nodes in BM}, x \sim \text{Bernoulli}
 \\\
-w^{(k)} &: \text{weights of edges} \\\
-b^{(k)} &: \text{bias}
-\end{cases}
-$$
-
-$$
-\text{visible layer} : \begin{cases}
-v &: \text{nodes}, v \sim \text{Bernoulli} \\\
-b^{(0)} &: \text{bias}
-\end{cases}
-$$
-
-Then we get all the parameters that need to be learned:
-
-$$
-\theta = ( w^{(1)},\cdots,w^{(\infty)},b^{(0)},b^{(1)},\cdots,b^{(\infty)} )
-$$
-
-Suppose DBN contains L layers, the joint distribution of DBN can be given by [factorization of Bayesian network](https://tirmisula.github.io/posts/probabilistic-graphical-model/#conclusion):
-
-$$
-\begin{align*}
-p(v,h^{(1)},\cdots,h^{(L)}) &= p(v|h^{(1)},\cdots,h^{(L)})p(h^{(1)},\cdots,h^{(L)}) \\\
-&= p(v|h^{(1)})p(h^{(1)}|h^{(2)})\cdots p(h^{(L-2)}|h^{(L-1)})p(h^{(L-1)},h^{(L)}) \\\
-&\because \text{tail to tail structure, nodes in same layer are mutually conditional independent} \\\
-&= \prod_{i}p(v_i|h^{(1)})\prod_{j_1}p(h_{j}^{(1)}|h^{(2)})\cdots \prod_{j_{\ast}}p(h_{j}^{(L-2)}|h^{(L-1)})p(h^{(L-1)},h^{(L)})
-\end{align*}
-$$
-
-We have given the [RBM's conditional probability](https://tirmisula.github.io/posts/restricted-boltzman-machine/#posterier-inference) and [SBN's conditional probability](https://tirmisula.github.io/posts/sigmoid-belief-network/#sigmoid-belief-network-definition):
-
-$$
-\begin{align*}
-p(o_k=1|h) &= \sigma(\sum_{i=1}^mh_iw_{ik}+\alpha_k) \\\
-p(o_k=0|h) &= 1-\sigma(\sum_{i=1}^mh_iw_{ik}+\alpha_k)
+x &= \begin{bmatrix}
+    x_1 \\\
+    \vdots \\\
+    x_p
+\end{bmatrix}=\begin{bmatrix}
+    h \\\
+    v
+\end{bmatrix}, h = \begin{bmatrix}
+    h_1 \\\
+    \vdots \\\
+    h_m
+\end{bmatrix}, v = \begin{bmatrix}
+    v_1 \\\
+    \vdots \\\
+    v_n
+\end{bmatrix} \\\
+W_{n\times m} &: \text{connection weights between $v,h$} \\\
+L_{n\times n} &: \text{connection weights inside $v$} \\\
+J_{m\times m} &: \text{connection weights inside $h$} \\\
+\theta &= (W,L,J)
 \end{align*}
 $$
 
 $$
-\begin{align*}
-p(s_i=1 | \lbrace s_j \rbrace\in\text{parents}(x_i)) &= \sigma(\sum_jw_{ji}s_j) \\\
-p(s_i=0 | \lbrace s_j \rbrace\in\text{parents}(x_i)) &= \sigma(-\sum_jw_{ji}s_j)
-\end{align*}
+W = \begin{bmatrix}
+    w_{11} & \cdots & w_{1m} \\\
+    \vdots & \ddots & \vdots \\\
+    w_{n1} & \cdots & w_{nm}
+\end{bmatrix} L = \begin{bmatrix}
+    L_{11} & \cdots & L_{1n} \\\
+    \vdots & \ddots & \vdots \\\
+    L_{n1} & \cdots & L_{nn}
+\end{bmatrix} J = \begin{bmatrix}
+    J_{11} & \cdots & J_{1m} \\\
+    \vdots & \ddots & \vdots \\\
+    J_{m1} & \cdots & J_{mm}
+\end{bmatrix}
 $$
 
-Thus we can conclude:
-
-$$
-\begin{align*}
-p(h_{j}^{(k)}=1|h^{(k+1)}) &= \sigma( w_{j}^{T(k+1)}h^{(k+1)}+b_{j}^{(k)}) \\\
-p(v_i=1|h^{(1)}) &= \sigma( w_{i}^{T(1)}h^{(1)}+b_{i}^{(0)})
-\end{align*}
-$$
-
-On the other hand, the joint probabilty of [restricted Boltzaman machine](https://tirmisula.github.io/posts/restricted-boltzman-machine/#rbm-model-definition) is given by:
+In previous chpater, the joint probabilty of [restricted Boltzaman machine(RBM)](https://tirmisula.github.io/posts/restricted-boltzman-machine/#rbm-model-definition) is given by:
 
 $$
 \begin{align*}
@@ -265,28 +189,53 @@ p(o,h) &= \frac{1}{z}\exp(h^Two+\alpha^To+\beta^Th) \\\
 \end{align*}
 $$
 
-So we have the joint distribution of top two layers:
-
-$$
-p(h^{(L-1)},h^{(L)}) = \frac{1}{z}\exp\left(h^{T(L)}w^{(L)}h^{(L-1)}+h^{T(L-1)}b^{(L-1)}+h^{T(L)}b^{(L)} \right) \\\
-$$
-
-## Stacking RBM Improves ELBO of p(v)
-
-Consider an original RBM model, we have marginal probability:
+{{< math.inline >}}
+<p>
+The BM model is a general form of RBM, by replacing \( \alpha,\beta \) with \( L,J \), we have closed form of joint distribution of BM:
+</p>
+{{</ math.inline >}}
 
 $$
 \begin{align*}
-p(v) &= \sum_{h^{(1)}} p(v,h^{(1)}) \\\
-&= \sum_{h^{(1)}} p(h^{(1)})p(v|h^{(1)}) \\\
-&\text{$p(h^{(1)})$ is prior}
+p(v,h) &= \frac{1}{z}\exp(-E(v,h)) \\\
+&= \frac{1}{z}\exp(v^TWh+\frac{1}{2}v^TLv+\frac{1}{2}h^TJh) \\\
+&= \frac{1}{z}\exp(\sum_{i=1}^n\sum_{j=1}^mv_iw_{ij}h_j+\frac{1}{2}\sum_{i=1}^n\sum_{j=1}^nv_iL_{ij}v_j+\frac{1}{2}\sum_{i=1}^m\sum_{j=1}^mh_iJ_{ij}h_j) \\\
+&= \frac{1}{z} \prod_{i=1}^n\prod_{j=1}^m\exp(v_iw_{ij}h_j) \prod_{i=1}^n\prod_{j=1}^n\exp(v_iL_{ij}v_j) \prod_{i=1}^m\prod_{j=1}^m\exp(h_iJ_{ij}h_j)
 \end{align*}
 $$
 
-We introduced in [HMM chapter](https://tirmisula.github.io/posts/hidden-markov-model/#learning) that learning problem is equivalent to solving maximum likelihood estimation:
+## Gradient of BM's Log-likelihood
+
+{{< math.inline >}}
+<p>
+Let \(V,H\) be the whole set of visible and hidden nodes from dataset:
+</p>
+{{</ math.inline >}}
 
 $$
-\hat{\lambda} = \argmax p(O|\lambda)
+V,H \in P_{\text{data}} \\\
+|V|,|H| = N
+$$
+
+The derivation of log-likelihood gradient of BM is pretty much similar to [the derivation in RBM](https://tirmisula.github.io/posts/partition-function/#the-log-likelihood-gradient-of-rbm):
+
+In conlusion, we have the gradient:
+
+$$
+\begin{align*}
+\nabla_{\theta}\mathcal{L}(\theta) &= \frac{1}{N}\sum_{i=1}^N\nabla\_{\theta}\mathcal{L}\_{i}(\theta) \\\
+&= \frac{1}{N}\sum\_{i=1}^N\left( \sum\_{o,h}p(o,h)\nabla\_{\theta}E(o,h)-\sum\_{h}p(h^{(i)}|o^{(i)})\nabla\_{\theta}E(o^{(i)},h^{(i)}) \right)
+\end{align*}
+$$
+
+$$
+\begin{align*}
+    \mathcal{L}(\theta) &= \frac{1}{N}\log\prod_{i=1}^N p(v^{(i)}) \\\
+    &= \frac{1}{N} \sum_{v\in V} \log \sum_h\frac{1}{z}\exp\left(-E(v,h)\right) \\\
+    &= \frac{1}{N}\sum_{v\in V}\log p(v) \\\
+    \nabla_{\theta}\mathcal{L} &= \frac{1}{N}\sum_{v\in V}\frac{\partial}{\partial \theta}\log \frac{p(v,h)}{p(h|v)} \\\
+    &= 
+\end{align*}
 $$
 
 {{< math.inline >}}
