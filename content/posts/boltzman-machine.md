@@ -217,97 +217,111 @@ V,H \in P_{\text{data}} \\\
 |V|,|H| = N
 $$
 
-The derivation of log-likelihood gradient of BM is pretty much similar to [the derivation in RBM](https://tirmisula.github.io/posts/partition-function/#the-log-likelihood-gradient-of-rbm):
-
-In conlusion, we have the gradient:
+For any [energy-based model](https://tirmisula.github.io/posts/partition-function/#the-log-likelihood-gradient-of-energy-based-model) we have the conclusion for log-likelihood gradient:
 
 $$
 \begin{align*}
-\nabla_{\theta}\mathcal{L}(\theta) &= \frac{1}{N}\sum_{i=1}^N\nabla\_{\theta}\mathcal{L}\_{i}(\theta) \\\
-&= \frac{1}{N}\sum\_{i=1}^N\left( \sum\_{o,h}p(o,h)\nabla\_{\theta}E(o,h)-\sum\_{h}p(h^{(i)}|o^{(i)})\nabla\_{\theta}E(o^{(i)},h^{(i)}) \right)
+\nabla_{\theta}\mathcal{L}(\theta) &= \frac{1}{N}\sum_{i=1}^N\left( \sum_{o,h}p(o,h)\nabla_{\theta}E(o,h)-\sum_{h}p(h^{(i)}|o^{(i)})\nabla_{\theta}E(o^{(i)},h^{(i)}) \right)
 \end{align*}
 $$
+
+The derivation of log-likelihood gradient of BM is pretty much the same:
 
 $$
 \begin{align*}
     \mathcal{L}(\theta) &= \frac{1}{N}\log\prod_{i=1}^N p(v^{(i)}) \\\
-    &= \frac{1}{N} \sum_{v\in V} \log \sum_h\frac{1}{z}\exp\left(-E(v,h)\right) \\\
     &= \frac{1}{N}\sum_{v\in V}\log p(v) \\\
-    \nabla_{\theta}\mathcal{L} &= \frac{1}{N}\sum_{v\in V}\frac{\partial}{\partial \theta}\log \frac{p(v,h)}{p(h|v)} \\\
-    &= 
+    &= \frac{1}{N} \sum_{v\in V} \log \sum_h\frac{1}{z}\exp\left(-E(v,h)\right) \\\
+    \nabla_{\theta}\mathcal{L} &= \frac{1}{N}\sum_{v\in V} \left( \sum_{v,h}p(v,h)\nabla_{\theta}E(v,h)-\sum_{h}p(h|v)\nabla_{\theta}E(v,h) \right)
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-By adding a layer \( h^{(2)} \) on top of \( h^{(1)} \), we see that \( p(h^{(1)}) \) is no longer a prior but a learnable object, the learning problem is maximizing likelihood of \( p(h^{(1)}|w) \):
+Take the partial derivative of \( W \), we have:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-\hat{w}^{(2)} &= \argmax_{w^{(2)}} p(h^{(1)}|h^{(2)},w^{(2)}) \\\
-\hat{p}(h^{(1)}) &= p(h^{(1)}|h^{(2)},\hat{w}^{(2)})=\max p(h^{(1)}|w)
+\frac{\partial}{\partial W}E(v,h) &= -\frac{\partial}{\partial W} v^TWh \\\
+&= -vh^T \\\
+\\\
+\frac{\partial}{\partial W}\mathcal{L} &= \frac{1}{N}\sum_{v\in V} \sum_{h}p(h|v)vh^T - \frac{1}{N}\sum_{v\in V}\sum_{v,h}p(v,h)vh^T \\\
+&= \frac{1}{N}\sum_{v\in V} \mathbb{E}_{h\sim P_{\text{model}}(h|v)}[vh^T] - \frac{1}{N}\sum_{v\in V}\mathbb{E}_{v,h\sim P_{\text{model}}(v,h)}[vh^T] \\\
+&= \mathbb{E}_{\begin{subarray}{c}
+    v \sim P_{\text{data}}(v) \\\
+    h|v \sim P_{\text{model}}(h|v)
+    \end{subarray}}[vh^T] - \mathbb{E}_{v,h\sim P_{\text{model}}(v,h)}[vh^T] \\\
 \end{align*}
 $$
  
-So for the stacked RBM model, we have marginal probability:
-
-$$
-\begin{align*}
-p(v) &= \sum_{h^{(1)}} p(h^{(1)})p(v|h^{(1)}) \\\
-&\text{replace $p(h^{(1)})$ with $\hat{p}(h^{1})$} \\\
-&= \sum_{h^{(1)}} \hat{p}(h^{(1)})p(v|h^{(1)}) \\\
-&\geq \text{single layer RBM } p(v)
-\end{align*}
-$$
-
-<!-- {{< math.inline >}}
-<p>
-To improve \( p(v) \) we can improve the prior \( p(h^{(1)}) \) and leave p(v|h^{(1)}) fixed. This is done by adding a layer \( h^{(2)} \) on top of \( h^{(1)} \), remove top-down connections from \( h^{(1)} \) to \( v \), and learn \(w^{(1)},w^{(2)}\) in bottom-up manner:
-</p>
-{{</ math.inline >}} -->
-
 {{< math.inline >}}
 <p>
-A notable thing for above inequality is to fix \( p(v|h^{(1)}) \). This is done by removing bottom-up(\( v \) to \( h^{(1)} \)) connections from first RBM layer:
+Similarly, the partial derivative of \( L \) and \( J \) is given by:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-\text{improve $p(v)$} &\hArr \text{improve $p(h^{(1)})$, fix $p(v|h^{(1)})$} \\\
-\text{$p(v|h^{(1)})$} &\hArr \text{learn $w^{(1)}$ from first layer RBM inference} \\\
-\text{$\hat{p}(h^{(1)})$} &\hArr \text{learn $w^{(2)}$ from second layer RBM inference}
-\end{align*} \\\
-\text{Thus $w=(w^{(1)},w^{(2)}\cdots)$ is learned in bottom-up manner} \\\
-$$
-
-From [ELBO](https://tirmisula.github.io/posts/expectation-maximization/#generalized-em-algorithm) perspective, we know that:
-
-$$
-\begin{align*}
-\log p(v) &= \log \sum_{h^{(1)}} p(v,h^{(1)}) \\\
-&\geq \text{ELBO} \\\
-\text{ELBO} &= \sum_{h^{(1)}}q(h^{(1)}|v)\log\frac{p(v,h^{(1)})}{q(h^{(1)}|v)} \\\
-% &\geq \mathbb{E}\_{h^{(1)}\sim q(h^{(1)}|v)}\left[\log\frac{p(v,h^{(1)})}{q(h^{(1)}|v)}\right] \\\
-&= \sum_{h^{(1)}}q(h^{(1)}|v)\left[\log p(h^{(1)})+\log p(v|h^{(1)})-\log q(h^{(1)}|v)\right] \\\
-&\because w^{(1)} \text{ is determined during RBM learning} \\\
-&\therefore \text{posterier }p(v|h^{(1)}),q(h^{(1)}|v) \text{ is fixed} \\\
-&= \sum_{h^{(1)}}q(h^{(1)}|v)\log p(h^{(1)})+C \\\
-&\text{Let } p(h^{(1)}) = \hat{p}(h^{(1)}) \\\
-&\leq \sum_{h^{(1)}}q(h^{(1)}|v)\log \hat{p}(h^{(1)})+C \\\ 
-&\therefore\text{ELBO is improved by $\hat{p}(h^{(1)})$}
+\frac{\partial}{\partial L}E(v,h) &= -\frac{\partial}{\partial L} v^TLv \\\
+&= -vv^T \\\
+\frac{\partial}{\partial L}\mathcal{L} &= \mathbb{E}_{\begin{subarray}{c}
+    v \sim P_{\text{data}}(v) \\\
+    h|v \sim P_{\text{model}}(h|v)
+    \end{subarray}}[vv^T] - \mathbb{E}_{v,h\sim P_{\text{model}}(v,h)}[vv^T] \\\
 \end{align*}
 $$
 
-In conslusion,
+$$
+\begin{align*}
+\frac{\partial}{\partial J}E(v,h) &= -\frac{\partial}{\partial J} v^TLv \\\
+&= -hh^T \\\
+\frac{\partial}{\partial J}\mathcal{L} &= \mathbb{E}_{\begin{subarray}{c}
+    v \sim P_{\text{data}}(v) \\\
+    h|v \sim P_{\text{model}}(h|v)
+    \end{subarray}}[hh^T] - \mathbb{E}_{v,h\sim P_{\text{model}}(v,h)}[hh^T] \\\
+\end{align*}
+$$
+
+In conslusion the gradient is given by,
 
 $$
-\text{stacking RBM} \hArr \text{maximize likelihood of $p(h^{(1)})$} \hArr \text{maximize $p(v)$'s ELBO}
+\begin{align*}
+\frac{\partial}{\partial W}\mathcal{L} &= \mathbb{E}_{\begin{subarray}{c}
+    v \sim P_{\text{data}}(v) \\\
+    h|v \sim P_{\text{model}}(h|v)
+    \end{subarray}}[vh^T] - \mathbb{E}_{v,h\sim P_{\text{model}}(v,h)}[vh^T] \\\
+\frac{\partial}{\partial L}\mathcal{L} &= \mathbb{E}_{\begin{subarray}{c}
+    v \sim P_{\text{data}}(v) \\\
+    h|v \sim P_{\text{model}}(h|v)
+    \end{subarray}}[vv^T] - \mathbb{E}_{v,h\sim P_{\text{model}}(v,h)}[vv^T] \\\
+\frac{\partial}{\partial J}\mathcal{L} &= \mathbb{E}_{\begin{subarray}{c}
+    v \sim P_{\text{data}}(v) \\\
+    h|v \sim P_{\text{model}}(h|v)
+    \end{subarray}}[hh^T] - \mathbb{E}_{v,h\sim P_{\text{model}}(v,h)}[hh^T]
+\end{align*}
 $$
 
-## Pre-training
+In [RBM learning](https://tirmisula.github.io/posts/partition-function/#rbm-learning) we know that:
+
+$$
+\text{RBM }\begin{cases}
+P_{\text{model}}(h|v) \text{ has closed form} \\\
+P_{\text{model}}(v,h) \text{ is intractable, sampled by CD-k}
+\end{cases}
+$$
+
+However, BM's posterier and joint distribution are both intractable due to graph structure:
+
+$$
+\text{BM }\begin{cases}
+P_{\text{model}}(h|v) \text{ is intractable} \\\
+P_{\text{model}}(v,h) \text{ is intractable}
+\end{cases} 
+$$
+
+## Gradient Ascent Based on MCMC
 
 Pre-training is the first stage of DBN tranining which is used to initialize weights. 
 
