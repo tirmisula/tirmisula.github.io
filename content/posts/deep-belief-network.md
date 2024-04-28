@@ -364,7 +364,7 @@ Pre-training is the first stage of DBN tranining which is used to initialize wei
 
 + Perform bottom-up greedy training layer by layer
 
-+ Treat each layer as RBM model, trained with [CD-k algorithm](https://tirmisula.github.io/posts/partition-function/#cd-k-for-rbm)
++ Treat each layer as RBM model, trained with [CD-k algorithm](https://tirmisula.github.io/posts/partition-function/#cd-k-for-rbm-design)
 
 The tranining process roughly looks like:
 

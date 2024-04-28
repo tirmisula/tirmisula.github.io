@@ -322,57 +322,49 @@ P_{\text{model}}(v,h) \text{ is intractable}
 $$
 
 ## Gradient Ascent Based on MCMC
+### Gibbs sampling for BM
 
-Pre-training is the first stage of DBN tranining which is used to initialize weights. 
-
-+ Perform bottom-up greedy training layer by layer
-
-+ Treat each layer as RBM model, trained with [CD-k algorithm](https://tirmisula.github.io/posts/partition-function/#cd-k-for-rbm)
-
-The tranining process roughly looks like:
+Recall from [RBM learning chapter](https://tirmisula.github.io/posts/partition-function/#rbm-learning) that the stochastic gradient ascent is performed by Gibbs sampling. Suppose we sample M particles to approximate BM's posterier and joint distribution, it  looks like:
 
 $$
-\begin{align*}
-&\text{$v$ is known, learn $w^{(1)},b^{(0)}$ by CD-k} \\\
-&\text{sample $h^{(1)}\sim p(h^{(1)}|v,w^{(1)})$} \\\
-&\text{$h^{(1)}$ is known, learn $w^{(2)},b^{(1)}$ by CD-k} \\\
-&\text{sample $h^{(2)}\sim p(h^{(2)}|h^{(1)},w^{(2)})$}
-\end{align*} \\\
-\cdots
+\mathbb{E}_{\begin{subarray}{c}
+    v \sim P_{\text{data}}(v) \\\
+    h|v \sim P_{\text{model}}(h|v)
+    \end{subarray}}[vh^T] \approx \frac{1}{M}\sum_{a=1}^M v^{(a)}h^{(a)T} \\\
+\begin{array}{c}
+    v^{(1)} \\\
+    \cdots \\\
+    v^{(M)}
+\end{array} \sim P_{\text{data}}(v), h_{j}^{(a)} \sim P_{\text{model}}(h_j|h_{\neg j},v)
 $$
 
-{{< math.inline >}}
-<p>
-However, posterier \( p(h|v) \) in SBN is intractable because of head to head structure. Instead of directly solving \( p(h|v) \), \( q(h|v) \) is computed to approximate \( p(h|v) \), \( q(h|v) \) is assumed to be factorable like posterier in RBM, so we have:
-</p>
-{{</ math.inline >}}
+$$
+\mathbb{E}_{\begin{subarray}{c}
+    v,h \sim P_{\text{model}}(v,h)
+    \end{subarray}}[vh^T] \approx \frac{1}{M}\sum_{a=1}^M v^{(a)}h^{(a)T} \\\
+x^{(a)}=(v^{(a)},h^{(a)}), x_i^{(a)} \sim P_{\text{model}}(x_i|x_{\neg i}) \\\
+v_{i}^{(a)} \sim P_{\text{model}}(v_i|v_{\neg i},h)\text{ or } h_{j}^{(a)} \sim P_{\text{model}}(h_j|h_{\neg j},v)
+$$
+
+The effectiveness of MCMC approximation is limited to graph's size. Next step is to derive the conditional probability:
 
 $$
-\begin{cases}
-p(v|h^{(1)}) = \prod_{i}\sigma( w_{:,i}^{T(1)}h^{(1)}+b_{i}^{(0)}) \\\
-\because\text{complementary} \text{ prior}\text{, inference is reversible with $w^T$} \\\
-q(h^{(1)}|v) = \prod_{j}\sigma( w_{j,:}^{(1)}v+b_{j}^{(0)}) \\\
-w_{:,i}^{T(1)}, w_{j,:}^{(1)} \in w^{(1)}
+P_{\text{model}}(x_i|x_{\neg i}) = \begin{cases}
+    P_{\text{model}}(v_i|v_{\neg i},h) \\\
+    P_{\text{model}}(h_j|h_{\neg j},v)
 \end{cases}
 $$
 
-The trainining process becomes:
+### Conditional probability of BM
 
 $$
 \begin{align*}
-&\text{$v$ is known, learn $w^{(1)},b^{(0)}$ by CD-k} \\\
-&\text{sample $h^{(1)}\sim q(h^{(1)}|v,w^{(1)})$} \\\
-&\text{$h^{(1)}$ is known, learn $w^{(2)},b^{(1)}$ by CD-k} \\\
-&\text{sample $h^{(2)}\sim q(h^{(2)}|h^{(1)},w^{(2)})$}
-\end{align*} \\\
-\cdots
-$$
-
-Drawback:
-
-$$
-\because \text{$q(h|v)$ is factorable but $p(h|v)$ is not factorable} \\\
-\therefore \text{KL}(q||p) \gg 0 \rArr \text{ELBO of $p(v)$ is relatively loose in DBN}
+p(v_i=1|v_{\neg i},h) &= \frac{p(v,h)}{p(v_{\neg i},h)} \\\
+&= \frac{\frac{1}{z}\exp(v^TWh+\frac{1}{2}v^TLv+\frac{1}{2}h^TJh)}{\sum_{v_i}\frac{1}{z}\exp(v^TWh+\frac{1}{2}v^TLv+\frac{1}{2}h^TJh)} \\\
+&= \frac{\exp(v^TWh+\frac{1}{2}v^TLv+\frac{1}{2}h^TJh)}{\exp(\frac{1}{2}h^TJh)\sum_{v_i}\exp(v^TWh+\frac{1}{2}v^TLv)} \\\
+&= \frac{\exp(v^TWh+\frac{1}{2}v^TLv)}{\sum_{v_i}\exp(v^TWh+\frac{1}{2}v^TLv)} \\\
+&= \frac{\exp(v^TWh+\frac{1}{2}v^TLv)}{\exp(v^TWh+\frac{1}{2}v^TLv)+} \\\
+\end{align*}
 $$
 
 ## Fine-tuning
@@ -385,7 +377,7 @@ Fine-tuning is the second stage of DBN tranining which is used to improve model 
 
 ## Reference
 
-[^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=146).
+[^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=150).
 [^4]: From [Higham, Nicholas (2002). Accuracy and Stability of Numerical Algorithms](https://archive.org/details/accuracystabilit00high_878).
 [^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
 [^3]: - [Deep belief networks. Geoffrey E. Hinton (2009)](http://scholarpedia.org/article/Deep_belief_networks).

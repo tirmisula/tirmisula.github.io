@@ -400,6 +400,17 @@ p(x|\theta)=p(o,h) &= \frac{1}{z}\exp(-E(o,h)) \\\
 \end{align*}
 $$
 
+The conditional probability is given by:
+
+$$
+\begin{align*}
+p(h_k=1|o) &= \sigma(\sum_{j=1}^nw_{kj}o_j+\beta_k) \\\
+p(h_k=0|o) &= 1-\sigma(\sum_{j=1}^nw_{kj}o_j+\beta_k) \\\
+p(o_k=1|h) &= \sigma(\sum_{i=1}^mh_iw_{ik}+\alpha_k) \\\
+p(o_k=0|h) &= 1-\sigma(\sum_{i=1}^mh_iw_{ik}+\alpha_k)
+\end{align*}
+$$
+
 ### The Log-likelihood gradient of energy-based model
 
 A more general form is the energy-based model with latent variables:
@@ -516,8 +527,24 @@ $$
 \end{align*}
 $$
 
-### CD-k for RBM
 
+### CD-k for RBM design
+#### A note of Gibbs sampling in RBM
+
+By [Gibbs](https://tirmisula.github.io/posts/markov-chain-monte-carlo/#gibbs-algorithm) definition, sampling from RBM should be:
+
+$$
+o_i \sim p(o_i|o_{\neg i},h)
+$$
+
+Because local markov property it is equivalent to sampling from posterier:
+
+$$
+o_i \sim p(o_i|o_{\neg i},h) \equiv o_i \sim p(o_i|h) \\\
+h_i \sim p(h_i|h_{\neg i},o) \equiv o_i \sim p(h_i|o)
+$$
+
+#### CD-k for RBM
 {{< math.inline >}}
 <p>
 Suppose we are finding \( \frac{\partial}{\partial w_{ij}}\mathcal{L}(\theta) \), denote:
@@ -552,11 +579,13 @@ $$
     &\quad  o^{(1)}\_{1:n},\cdots,o^{(N)}\_{1:n} \sim \lbrace O \rbrace \\\
 &2. \text{ initialize $o^{(1)\langle 0 \rangle}\_{1:n},\cdots,o^{(N)\langle 0 \rangle}\_{1:n}$ : } \\\
     &\quad o^{(1)\langle 0 \rangle}\_{1:n},\cdots,o^{(N)\langle 0 \rangle}\_{1:n} = o^{(1)}\_{1:n},\cdots,o^{(N)}\_{1:n} \\\
-&3. \text{ sampling from $p(h|o),p(o|h)$ alternatively, stop at k-step: } \\\
+&3. \text{ block sampling from $p(h|o),p(o|h)$ alternatively, stop at k-step: } \\\
     &\quad \text{For } l=0\cdots k-1 \\\
     &\quad\quad \text{For }i=1\cdots m \\\
+    &\quad\quad\quad \text{sample simultaneously} \\\
     &\quad\quad\quad h^{(1)\langle l \rangle}\_{i},\cdots,h^{(N)\langle l \rangle}\_{i} \sim p(h_i|o^{(1)\langle l \rangle}),\cdots,p(h_i|o^{(N)\langle l \rangle}) \\\
     &\quad\quad \text{For }j=1\cdots n \\\
+    &\quad\quad\quad \text{sample simultaneously} \\\
     &\quad\quad\quad o^{(1)<l+1>}\_{j},\cdots,o^{(N)<l+1>}\_{j} \sim p(o_j|h^{(1)\langle l \rangle}),\cdots,p(o_j|h^{(N)\langle l \rangle}) \\\
 &4. \text{ cumulate $\Delta w\_{ij}$ from all samples: } \\\
     &\quad \text{For }i=1\cdots m,j=1\cdots n \\\
