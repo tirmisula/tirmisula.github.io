@@ -346,7 +346,7 @@ x^{(a)}=(v^{(a)},h^{(a)}), x_i^{(a)} \sim P_{\text{model}}(x_i|x_{\neg i}) \\\
 v_{i}^{(a)} \sim P_{\text{model}}(v_i|v_{\neg i},h)\text{ or } h_{j}^{(a)} \sim P_{\text{model}}(h_j|h_{\neg j},v)
 $$
 
-The effectiveness of MCMC approximation is limited to graph's size. Next step is to derive the conditional probability:
+The effectiveness of MCMC approximation is limited to graph's size. The conditional probability wiil be derived in next section, it has closed form.
 
 $$
 P_{\text{model}}(x_i|x_{\neg i}) = \begin{cases}
@@ -362,18 +362,119 @@ $$
 p(v_i=1|v_{\neg i},h) &= \frac{p(v,h)}{p(v_{\neg i},h)} \\\
 &= \frac{\frac{1}{z}\exp(v^TWh+\frac{1}{2}v^TLv+\frac{1}{2}h^TJh)}{\sum_{v_i}\frac{1}{z}\exp(v^TWh+\frac{1}{2}v^TLv+\frac{1}{2}h^TJh)} \\\
 &= \frac{\exp(v^TWh+\frac{1}{2}v^TLv+\frac{1}{2}h^TJh)}{\exp(\frac{1}{2}h^TJh)\sum_{v_i}\exp(v^TWh+\frac{1}{2}v^TLv)} \\\
-&= \frac{\exp(v^TWh+\frac{1}{2}v^TLv)}{\sum_{v_i}\exp(v^TWh+\frac{1}{2}v^TLv)} \\\
-&= \frac{\exp(v^TWh+\frac{1}{2}v^TLv)}{\exp(v^TWh+\frac{1}{2}v^TLv)+} \\\
+&= \frac{\exp(v^TWh+\frac{1}{2}v^TLv)}{\sum_{v_i}\exp(v^TWh+\frac{1}{2}v^TLv)}
 \end{align*}
 $$
 
-## Fine-tuning
+{{< math.inline >}}
+<p>
+We can expand the exponential term \( \exp(v^TWh+\frac{1}{2}v^TLv) \):
+</p>
+{{</ math.inline >}}
 
-Fine-tuning is the second stage of DBN tranining which is used to improve model performance.
+$$
+\begin{align*}
+\exp(v^TWh+\frac{1}{2}v^TLv) &= \exp(\sum_{k=1}^n\sum_{j=1}^mv_kw_{kj}h_j+\frac{1}{2}\sum_{k=1}^n\sum_{j=1}^nv_kL_{kj}v_j)
+\end{align*}
+$$
 
-+ Supervised method: Treat DBN as feed forward nerual network, use existed labeled data to fine tune weights (back propagation algorithm)
+{{< math.inline >}}
+<p>
+\( \sum_{k=1}^n\sum_{j=1}^mv_kw_{kj}h_j \) and \( \frac{1}{2}\sum_{k=1}^n\sum_{j=1}^nv_kL_{kj}v_j \) can both be seperated to \( v_i \) part and non-\( v_i \) part:
+</p>
+{{</ math.inline >}}
 
-+ Unsupervised method: Fine-tunes the weights using a contrastive version of the wake-sleep algorithm<cite>[^2]</cite>
+$$
+\begin{align*}
+\sum_{k=1}^n\sum_{j=1}^mv_kw_{kj}h_j &= \sum_{j=1}^mv_iw_{ij}h_j+\sum_{k=1,\neq i}^n\sum_{j=1}^mv_kw_{kj}h_j \\\
+\\\
+\frac{1}{2}\sum_{k=1}^n\sum_{j=1}^nv_kL_{kj}v_j &= \frac{1}{2}\left(\sum_{k=1,\neq i}^n\sum_{j=1,\neq i}^nv_kL_{kj}v_j+v_iL_{ii}v_i+\sum_{k=1,\neq i}^nv_kL_{ki}v_i+\sum_{j=1,\neq i}^nv_iL_{ij}v_j\right) \\\
+&\because \text{diagonal element $L_{ii}=0$} \\\
+&= \frac{1}{2}\left(\sum_{k=1,\neq i}^n\sum_{j=1,\neq i}^nv_kL_{kj}v_j+2\sum_{j=1,\neq i}^nv_iL_{ij}v_j\right) \\\
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+When \( v_i=1 \), the exponential term is given by:
+</p>
+{{</ math.inline >}}
+
+$$
+\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=1} = \exp(\sum_{j=1}^mw_{ij}h_j+\sum_{k=1,\neq i}^n\sum_{j=1}^mv_kw_{kj}h_j+\sum_{j=1,\neq i}^nL_{ij}v_j+\frac{1}{2}\sum_{k=1,\neq i}^n\sum_{j=1,\neq i}^nv_kL_{kj}v_j)
+$$
+
+{{< math.inline >}}
+<p>
+When \( v_i=0 \), the exponential term is given by:
+</p>
+{{</ math.inline >}}
+
+$$
+\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=0} = \exp(\sum_{k=1,\neq i}^n\sum_{j=1}^mv_kw_{kj}h_j+\frac{1}{2}\sum_{k=1,\neq i}^n\sum_{j=1,\neq i}^nv_kL_{kj}v_j)
+$$
+
+So we have:
+
+$$
+\begin{align*}
+p(v_i=1|v_{\neg i},h) &= \frac{\exp(v^TWh+\frac{1}{2}v^TLv)}{\sum_{v_i}\exp(v^TWh+\frac{1}{2}v^TLv)} \\\
+&= \frac{\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=1}}{\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=1}+\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=0}} \\\
+&= \frac{\frac{\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=1}}{\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=0}}}{1+\frac{\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=1}}{\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=0}}} \\\
+&\because \frac{\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=1}}{\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=0}}=\exp(\sum_{j=1}^mw_{ij}h_j+\sum_{j=1,\neq i}^nL_{ij}v_j) \\\
+&= \frac{\exp(\sum_{j=1}^mw_{ij}h_j+\sum_{j=1,\neq i}^nL_{ij}v_j)}{1+\exp(\sum_{j=1}^mw_{ij}h_j+\sum_{j=1,\neq i}^nL_{ij}v_j)} \\\
+&= \sigma(\sum_{j=1}^mw_{ij}h_j+\sum_{j=1,\neq i}^nL_{ij}v_j) \\\
+&= \sigma(\sum_{j=1}^mw_{ij}h_j+\sum_{k=1,\neq i}^nL_{ik}v_k) \\\
+&\text{Similarly} \\\
+p(h_j=1|h_{\neg j},v) &= \sigma(\sum_{i=1}^nw_{ij}v_i+\sum_{k=1,\neq j}^mJ_{jk}h_k)
+\end{align*}
+$$
+
+In conclusion, the conditional probability of BM is a Sigmoid function. Addtionally the conditional probability of RBM is a special case of BM:
+
+$$
+\text{BM} : \begin{cases}
+    p(v_i=1|v_{\neg i},h) &= \sigma(\sum_{j=1}^mw_{ij}h_j+\sum_{k=1,\neq i}^nL_{ik}v_k) \\\
+    p(v_i=0|v_{\neg i},h) &= 1-\sigma(\sum_{j=1}^mw_{ij}h_j+\sum_{k=1,\neq i}^nL_{ik}v_k) \\\
+    p(h_j=1|h_{\neg j},v) &= \sigma(\sum_{i=1}^nw_{ij}v_i+\sum_{k=1,\neq j}^mJ_{jk}h_k) \\\
+    p(h_j=0|h_{\neg j},v) &= 1-\sigma(\sum_{i=1}^nw_{ij}v_i+\sum_{k=1,\neq j}^mJ_{jk}h_k)
+\end{cases}
+$$
+
+$$
+\text{RBM} : 
+\begin{cases}
+p(h_j=1|v) &= \sigma(\sum_{i=1}^nw_{ij}v_i+\sum_{k=1,\neq j}^mJ_{jk}h_k) \\\
+&\because \text{$h_j$ is not connected to $h_k$ in RBM, $J_{jk}=0$} \\\
+&= \sigma(\sum_{j=1}^nw_{ij}v_i+\beta_k)
+\end{cases}
+$$
+
+## Variational Inference on BM's posterier
+
+{{< math.inline >}}
+<p>
+From previous sections, we know that BM's posterier \( p(h|v) \) is intractable and is approximated by MCMC method(Gibbs sampling). Variational inference based on mean field theory is proposed to be another method.
+</p>
+{{</ math.inline >}}
+
+The derivation on BM's posterier is slightly different from [Mean Field VI Derivation](https://tirmisula.github.io/posts/variational-inference/#mean-field-vi-derivation) introduced before, since it contains discrete distribution
+
+{{< math.inline >}}
+<p>
+The evidence lower bound of \( p(v|\theta) \) is given by:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\text{ELBO}(p(v|\theta)) &= \log p(v|\theta) - \text{KL}(q(h|v)||p(h|v,\theta)) \\\
+&= E_{h\sim q(h|v)}[\log p(v,h|\theta)] + {H[q]} \\\
+&= \sum_{h}q(h|v,\phi)\log p(v,h|\theta) + H[q] \\\
+&\because q(h|v,\phi) = \prod_{j=1}^m q(h_j|v,\phi_{j}) \text{ by mean field theory} \\\
+&= \sum_{h}q(h|v,\phi)\log p(v,h|\theta) + H[q] \\\
+\end{align*}
+$$
 
 ## Reference
 

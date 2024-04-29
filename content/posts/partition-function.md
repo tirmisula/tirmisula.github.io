@@ -541,7 +541,7 @@ Because local markov property it is equivalent to sampling from posterier:
 
 $$
 o_i \sim p(o_i|o_{\neg i},h) \equiv o_i \sim p(o_i|h) \\\
-h_i \sim p(h_i|h_{\neg i},o) \equiv o_i \sim p(h_i|o)
+h_i \sim p(h_i|h_{\neg i},o) \equiv h_i \sim p(h_i|o)
 $$
 
 #### CD-k for RBM
