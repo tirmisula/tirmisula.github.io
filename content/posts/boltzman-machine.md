@@ -451,7 +451,7 @@ p(h_j=1|v) &= \sigma(\sum_{i=1}^nw_{ij}v_i+\sum_{k=1,\neq j}^mJ_{jk}h_k) \\\
 $$
 
 ## Variational Inference on BM's posterier
-
+### Derive ELBO
 {{< math.inline >}}
 <p>
 From previous sections, we know that BM's posterier \( p(h|v) \) is intractable and is approximated by MCMC method(Gibbs sampling). Variational inference based on mean field theory is proposed to be another method.
@@ -471,10 +471,110 @@ $$
 \text{ELBO}(p(v|\theta)) &= \log p(v|\theta) - \text{KL}(q(h|v)||p(h|v,\theta)) \\\
 &= E_{h\sim q(h|v)}[\log p(v,h|\theta)] + {H[q]} \\\
 &= \sum_{h}q(h|v,\phi)\log p(v,h|\theta) + H[q] \\\
-&\because q(h|v,\phi) = \prod_{j=1}^m q(h_j|v,\phi_{j}) \text{ by mean field theory} \\\
-&= \sum_{h}q(h|v,\phi)\log p(v,h|\theta) + H[q] \\\
+&= \sum_{h}q(h|v,\phi)\left[\log\exp(-E(v,h))-\log z\right] + H[q] \\\
+&= \sum_{h}q(h|v,\phi)\left[v^TWh+\frac{1}{2}v^TLv+\frac{1}{2}h^TJh-\log z\right] + H[q] \\\
+&= \sum_{h}q(h|v,\phi)\left[\frac{1}{2}v^TLv-\log z\right]+ \sum_{h}q(h|v,\phi)\left[v^TWh+\frac{1}{2}h^TJh\right] + H[q] \\\
+&\because \sum_{h}q(h|v,\phi) = 1 \\\
+&= \frac{1}{2}v^TLv-\log z + \sum_{h}q(h|v,\phi)\left[v^TWh+\frac{1}{2}h^TJh\right] + H[q] \\\
 \end{align*}
 $$
+
+### Maximize ELBO
+#### Mean field simplification
+{{< math.inline >}}
+<p>
+The optimization problem is maximizing ELBO, notice that \( \log z(\theta) \) is not affected by \( \phi \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\argmax_{\phi} \text{ELBO} &= \argmax_{\phi} \sum_{h}q(h|v,\phi)\left[v^TWh+\frac{1}{2}h^TJh\right] + H[q] \\\
+&\because q(h|v,\phi) = \prod_{j=1}^m q(h_j|v,\phi_{j}) \text{ by mean field theory} \\\
+&= \argmax_{\phi}\sum_{h}\prod_{j=1}^m q(h_j|v,\phi_{j})v^TWh + \frac{1}{2}\sum_{h}\prod_{j=1}^m q(h_j|v,\phi_{j})h^TJh + H[q]
+\end{align*}
+$$
+
+$$
+\text{Let } \begin{cases}
+    A = \sum_{h}\prod_{j=1}^m q(h_j|v,\phi_{j})v^TWh \\\
+    B = \frac{1}{2}\sum_{h}\prod_{j=1}^m q(h_j|v,\phi_{j})h^TJh \\\
+    C = H[q]
+\end{cases}
+$$
+
+The A part is given by:
+
+$$
+\begin{align*}
+A &= \sum_{h}\prod_{j=1}^m q(h_j|v,\phi_{j})v^TWh \\\
+&= \sum_{h}\prod_{j=1}^m q(h_j|v,\phi_{j})\sum_{i=1}^n\sum_{k=1}^mv_iw_{ik}h_k \\\
+&\text{for each summation item, e.g. the first one} \\\
+\sum_{h}\prod_{j=1}^mq(h_j|v,\phi_{j})v_1w_{11}h_1 &= \sum_{h_1}q(h_1|v,\phi_1)v_1w_{11}h_1\sum_{h_2\cdots h_m}\prod_{j=2}^mq(h_j|v,\phi_j) \\\
+&= \sum_{h_1}q(h_1|v,\phi_1)v_1w_{11}h_1 \\\
+&= q(h_1=1|v,\phi_1)v_1w_{11} + q(h_1=0|v,\phi_1)\cdot 0 \\\
+&= q(h_1=1|v,\phi_1)v_1w_{11} \\\
+\\\
+\therefore A &= \sum_{i=1}^n\sum_{k=1}^mq(h_i=1|v,\phi_i)v_iw_{ik}
+\end{align*}
+$$
+
+Similarly the B part is given by:
+
+$$
+\begin{align*}
+2B &= \sum_{h}\prod_{j=1}^m q(h_j|v,\phi_{j})h^TJh \\\
+&= \sum_{h}\prod_{j=1}^m q(h_j|v,\phi_{j})\sum_{i=1}^m\sum_{k=1}^mh_iJ_{ik}h_k \\\
+&\text{for each summation item, e.g. $i=a,k=b$} \\\
+\sum_{h}\prod_{j=1}^m q(h_j|v,\phi_{j})h_aJ_{ab}h_b &= \sum_{h_a,h_b}q(h_a|v,\phi_a)q(h_b|v,\phi_b)h_aJ_{ab}h_b\sum_{h\neq h_a,h_b}\prod_{j=1,\neq a,b}^mq(h_j|v,\phi_j) \\\
+&= \sum_{h_a,h_b}q(h_a|v,\phi_a)q(h_b|v,\phi_b)h_aJ_{ab}h_b \\\
+&= \sum_{h_b}q(h_b|v,\phi_b)h_b\sum_{h_a}q(h_a|v,\phi_a)h_aJ_{ab} \\\
+&= \sum_{h_b}q(h_b|v,\phi_b)q(h_a=1|v,\phi_a)J_{ab} \\\
+&= q(h_b=1|v,\phi_b)q(h_a=1|v,\phi_a)J_{ab} \\\
+\\\
+\therefore B &= \frac{1}{2}\sum_{i=1}^m\sum_{k=1}^mq(h_i=1|v,\phi_i)q(h_k=1|v,\phi_k)J_{ik}
+\end{align*}
+$$
+
+The C part is given by:
+
+$$
+\begin{align*}
+C &= H[q(h|v,\phi)] \\\
+&\because H[q(z)] = -\int_z q(z)\log q(z) \space dz \\\
+&= -\sum_{h} \prod_{j=1}^m q(h_j|v,\phi_{j})\log \prod_{i=1}^m q(h_i|v,\phi_{i}) \\\
+&= -\sum_{h} \prod_{j=1}^m q(h_j|v,\phi_{j})\sum_{i=1}^m\log  q(h_i|v,\phi_{i}) \\\
+&\text{for each summation item, e.g. $i=1$} \\\
+\sum_{h} \prod_{j=1}^m q(h_j|v,\phi_{j})\log  q(h_1|v,\phi_{1}) &= \sum_{h_1}q(h_1|v,\phi_1)\log q(h_1|v,\phi_1)\sum_{h_2\cdots h_m}\prod_{j=2}^mq(h_j|v,\phi_j) \\\
+&= \sum_{h_1}q(h_1|v,\phi_1)\log q(h_1|v,\phi_1) \\\
+&= q(h_1=1|v,\phi_1)\log q(h_1=1|v,\phi_1) + q(h_1=0|v,\phi_1)\log q(h_1=0|v,\phi_1) \\\
+\\\
+\therefore C &= -\sum_{i=1}^m q(h_i=1|v,\phi_i)\log q(h_i=1|v,\phi_i) + q(h_i=0|v,\phi_i)\log q(h_i=0|v,\phi_i)
+\end{align*}
+$$
+
+In conclusion, we have A,B,C part equals:
+
+$$
+\begin{align*}
+A &= \sum_{i=1}^n\sum_{k=1}^mq(h_i=1|v,\phi_i)v_iw_{ik} \\\
+B &= \frac{1}{2}\sum_{i=1}^m\sum_{k=1}^mq(h_i=1|v,\phi_i)q(h_k=1|v,\phi_k)J_{ik} \\\
+C &= -\sum_{i=1}^m q(h_i=1|v,\phi_i)\log q(h_i=1|v,\phi_i) + q(h_i=0|v,\phi_i)\log q(h_i=0|v,\phi_i)
+\end{align*}
+$$
+
+The partial derivative is given by:
+
+$$
+\begin{align*}
+\frac{\partial}{\partial q(h|v,\phi_j)}\text{ELBO} &= \frac{\partial}{\partial q(h|v,\phi_j)} A + \frac{\partial}{\partial q(h|v,\phi_j)} B + \frac{\partial}{\partial q(h|v,\phi_j)} C \\\
+\frac{\partial}{\partial q(h_j=1|v,\phi_j)} A &= v_jw_{jk} \\\
+\frac{\partial}{\partial q(h_j=1|v,\phi_j)} B &= \frac{1}{2}v_jJ_{jk} \\\
+\frac{\partial}{\partial q(h_j=1|v,\phi_j)} C &= v_jw_{jk} \\\
+\end{align*}
+$$
+
+#### Derive gradient
 
 ## Reference
 
