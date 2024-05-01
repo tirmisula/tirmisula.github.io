@@ -489,9 +489,9 @@ The optimization problem is maximizing ELBO, notice that \( \log z(\theta) \) is
 
 $$
 \begin{align*}
-\argmax_{\phi} \text{ELBO} &= \argmax_{\phi} \sum_{h}q(h|v,\phi)\left[v^TWh+\frac{1}{2}h^TJh\right] + H[q] \\\
+\argmax_{q_\phi} \text{ELBO} &= \argmax_{q_\phi} \sum_{h}q(h|v,\phi)\left[v^TWh+\frac{1}{2}h^TJh\right] + H[q] \\\
 &\because q(h|v,\phi) = \prod_{j=1}^m q(h_j|v,\phi_{j}) \text{ by mean field theory} \\\
-&= \argmax_{\phi}\sum_{h}\prod_{j=1}^m q(h_j|v,\phi_{j})v^TWh + \frac{1}{2}\sum_{h}\prod_{j=1}^m q(h_j|v,\phi_{j})h^TJh + H[q]
+&= \argmax_{q_\phi}\sum_{h}\prod_{j=1}^m q(h_j|v,\phi_{j})v^TWh + \frac{1}{2}\sum_{h}\prod_{j=1}^m q(h_j|v,\phi_{j})h^TJh + H[q]
 \end{align*}
 $$
 
@@ -515,7 +515,7 @@ A &= \sum_{h}\prod_{j=1}^m q(h_j|v,\phi_{j})v^TWh \\\
 &= q(h_1=1|v,\phi_1)v_1w_{11} + q(h_1=0|v,\phi_1)\cdot 0 \\\
 &= q(h_1=1|v,\phi_1)v_1w_{11} \\\
 \\\
-\therefore A &= \sum_{i=1}^n\sum_{k=1}^mq(h_i=1|v,\phi_i)v_iw_{ik}
+\therefore A &= \sum_{i=1}^n\sum_{k=1}^mq(h_k=1|v,\phi_k)v_iw_{ik}
 \end{align*}
 $$
 
@@ -563,14 +563,34 @@ C &= -\sum_{i=1}^m q(h_i=1|v,\phi_i)\log q(h_i=1|v,\phi_i) + q(h_i=0|v,\phi_i)\l
 \end{align*}
 $$
 
+{{< math.inline >}}
+<p>
+Let \(\Phi_j=q(h_j|v,\phi_j)\). The partial derivative is given by:
+</p>
+{{</ math.inline >}}
+
+$$
+\text{Let } q_j=q(h_j=1|v,\phi_j) \\\
+\hat{q}_{\phi}=\argmax_{q_\phi} \text{ELBO} \hArr \frac{\partial}{\partial q_j}\text{ELBO}=0
+$$
+
+{{< math.inline >}}
+<p>
 The partial derivative is given by:
+</p>
+{{</ math.inline >}}
 
 $$
 \begin{align*}
-\frac{\partial}{\partial q(h|v,\phi_j)}\text{ELBO} &= \frac{\partial}{\partial q(h|v,\phi_j)} A + \frac{\partial}{\partial q(h|v,\phi_j)} B + \frac{\partial}{\partial q(h|v,\phi_j)} C \\\
-\frac{\partial}{\partial q(h_j=1|v,\phi_j)} A &= v_jw_{jk} \\\
-\frac{\partial}{\partial q(h_j=1|v,\phi_j)} B &= \frac{1}{2}v_jJ_{jk} \\\
-\frac{\partial}{\partial q(h_j=1|v,\phi_j)} C &= v_jw_{jk} \\\
+ \frac{\partial}{\partial q_j}\text{ELBO} &= \frac{\partial}{\partial q_j} A + \frac{\partial}{\partial q_j} B + \frac{\partial}{\partial q_j} C \\\
+\frac{\partial}{\partial q_j} A &= \frac{\partial}{\partial q_j}\left(q_j\sum_{k=1}^mv_jw_{jk}+\sum_{i=1,\neq j}^n\sum_{k=1}^mq_iv_iw_{ik}\right) \\\
+&= \sum_{k=1}^mv_jw_{jk} \\\
+\frac{\partial}{\partial q_j} B &= \frac{1}{2}\frac{\partial}{\partial q_j}\left( q_jq_kJ_{jk}+q_iq_jJ_{ij}+\sum_{i=1,\neq j}^m\sum_{k=1,\neq j}^mq_iq_kJ_{ik} \right) \\\
+&= \frac{1}{2}(q_kJ_{jk}+q_iJ_{ij}) \\\
+&= q_kJ_{jk} \\\
+\frac{\partial}{\partial q_j} C &= \frac{\partial}{\partial q_j} -\left[q_j\log q_j+(1-q_j)\log(1-q_j)\right] \\\
+&= -\left( \log q_j+q_j\frac{1}{q_j}+\log\frac{1}{1-q_j}+(1-q_j)\frac{-1}{1-q_j} \right) \\\
+&= -\log\frac{q_j}{1-q_j}
 \end{align*}
 $$
 
