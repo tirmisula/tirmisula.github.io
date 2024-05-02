@@ -327,7 +327,7 @@ $$
 Recall from [RBM learning chapter](https://tirmisula.github.io/posts/partition-function/#rbm-learning) that the stochastic gradient ascent is performed by Gibbs sampling. Suppose we sample M particles to approximate BM's posterier and joint distribution, it  looks like:
 
 $$
-\mathbb{E}_{\begin{subarray}{c}
+\mathbb{E}\_{\begin{subarray}{c}
     v \sim P_{\text{data}}(v) \\\
     h|v \sim P_{\text{model}}(h|v)
     \end{subarray}}[vh^T] \approx \frac{1}{M}\sum_{a=1}^M v^{(a)}h^{(a)T} \\\
@@ -339,7 +339,7 @@ $$
 $$
 
 $$
-\mathbb{E}_{\begin{subarray}{c}
+\mathbb{E}\_{\begin{subarray}{c}
     v,h \sim P_{\text{model}}(v,h)
     \end{subarray}}[vh^T] \approx \frac{1}{M}\sum_{a=1}^M v^{(a)}h^{(a)T} \\\
 x^{(a)}=(v^{(a)},h^{(a)}), x_i^{(a)} \sim P_{\text{model}}(x_i|x_{\neg i}) \\\
@@ -401,7 +401,7 @@ When \( v_i=1 \), the exponential term is given by:
 {{</ math.inline >}}
 
 $$
-\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=1} = \exp(\sum_{j=1}^mw_{ij}h_j+\sum_{k=1,\neq i}^n\sum_{j=1}^mv_kw_{kj}h_j+\sum_{j=1,\neq i}^nL_{ij}v_j+\frac{1}{2}\sum_{k=1,\neq i}^n\sum_{j=1,\neq i}^nv_kL_{kj}v_j)
+\exp(v^TWh+\frac{1}{2}v^TLv)|\_{v_i=1} = \exp(\sum_{j=1}^mw_{ij}h_j+\sum_{k=1,\neq i}^n\sum_{j=1}^mv_kw_{kj}h_j+\sum_{j=1,\neq i}^nL_{ij}v_j+\frac{1}{2}\sum_{k=1,\neq i}^n\sum_{j=1,\neq i}^nv_kL_{kj}v_j)
 $$
 
 {{< math.inline >}}
@@ -411,7 +411,7 @@ When \( v_i=0 \), the exponential term is given by:
 {{</ math.inline >}}
 
 $$
-\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=0} = \exp(\sum_{k=1,\neq i}^n\sum_{j=1}^mv_kw_{kj}h_j+\frac{1}{2}\sum_{k=1,\neq i}^n\sum_{j=1,\neq i}^nv_kL_{kj}v_j)
+\exp(v^TWh+\frac{1}{2}v^TLv)|\_{v_i=0} = \exp(\sum_{k=1,\neq i}^n\sum_{j=1}^mv_kw_{kj}h_j+\frac{1}{2}\sum_{k=1,\neq i}^n\sum_{j=1,\neq i}^nv_kL_{kj}v_j)
 $$
 
 So we have:
@@ -419,9 +419,9 @@ So we have:
 $$
 \begin{align*}
 p(v_i=1|v_{\neg i},h) &= \frac{\exp(v^TWh+\frac{1}{2}v^TLv)}{\sum_{v_i}\exp(v^TWh+\frac{1}{2}v^TLv)} \\\
-&= \frac{\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=1}}{\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=1}+\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=0}} \\\
-&= \frac{\frac{\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=1}}{\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=0}}}{1+\frac{\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=1}}{\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=0}}} \\\
-&\because \frac{\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=1}}{\exp(v^TWh+\frac{1}{2}v^TLv)|_{v_i=0}}=\exp(\sum_{j=1}^mw_{ij}h_j+\sum_{j=1,\neq i}^nL_{ij}v_j) \\\
+&= \frac{\exp(v^TWh+\frac{1}{2}v^TLv)|\_{v_i=1}}{\exp(v^TWh+\frac{1}{2}v^TLv)|\_{v_i=1}+\exp(v^TWh+\frac{1}{2}v^TLv)|\_{v_i=0}} \\\
+&= \frac{\frac{\exp(v^TWh+\frac{1}{2}v^TLv)|\_{v_i=1}}{\exp(v^TWh+\frac{1}{2}v^TLv)|\_{v_i=0}}}{1+\frac{\exp(v^TWh+\frac{1}{2}v^TLv)|\_{v_i=1}}{\exp(v^TWh+\frac{1}{2}v^TLv)|\_{v_i=0}}} \\\
+&\because \frac{\exp(v^TWh+\frac{1}{2}v^TLv)|\_{v_i=1}}{\exp(v^TWh+\frac{1}{2}v^TLv)|\_{v_i=0}}=\exp(\sum_{j=1}^mw_{ij}h_j+\sum_{j=1,\neq i}^nL_{ij}v_j) \\\
 &= \frac{\exp(\sum_{j=1}^mw_{ij}h_j+\sum_{j=1,\neq i}^nL_{ij}v_j)}{1+\exp(\sum_{j=1}^mw_{ij}h_j+\sum_{j=1,\neq i}^nL_{ij}v_j)} \\\
 &= \sigma(\sum_{j=1}^mw_{ij}h_j+\sum_{j=1,\neq i}^nL_{ij}v_j) \\\
 &= \sigma(\sum_{j=1}^mw_{ij}h_j+\sum_{k=1,\neq i}^nL_{ik}v_k) \\\
