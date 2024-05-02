@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: true
+draft: false
 ---
 
 :                                                         
@@ -480,7 +480,7 @@ $$
 $$
 
 ### Maximize ELBO
-#### Mean field simplification
+#### Simplify ELBO by mean field theory
 {{< math.inline >}}
 <p>
 The optimization problem is maximizing ELBO, notice that \( \log z(\theta) \) is not affected by \( \phi \):
@@ -557,15 +557,17 @@ In conclusion, we have A,B,C part equals:
 
 $$
 \begin{align*}
-A &= \sum_{i=1}^n\sum_{k=1}^mq(h_i=1|v,\phi_i)v_iw_{ik} \\\
+A &= \sum_{i=1}^n\sum_{k=1}^mq(h_k=1|v,\phi_i)v_iw_{ik} \\\
 B &= \frac{1}{2}\sum_{i=1}^m\sum_{k=1}^mq(h_i=1|v,\phi_i)q(h_k=1|v,\phi_k)J_{ik} \\\
 C &= -\sum_{i=1}^m q(h_i=1|v,\phi_i)\log q(h_i=1|v,\phi_i) + q(h_i=0|v,\phi_i)\log q(h_i=0|v,\phi_i)
 \end{align*}
 $$
 
+#### Solve q by gradient ascent
+
 {{< math.inline >}}
 <p>
-Let \(\Phi_j=q(h_j|v,\phi_j)\). The partial derivative is given by:
+Recall that the optimization problem is maxmizing ELBO:
 </p>
 {{</ math.inline >}}
 
@@ -583,18 +585,66 @@ The partial derivative is given by:
 $$
 \begin{align*}
  \frac{\partial}{\partial q_j}\text{ELBO} &= \frac{\partial}{\partial q_j} A + \frac{\partial}{\partial q_j} B + \frac{\partial}{\partial q_j} C \\\
-\frac{\partial}{\partial q_j} A &= \frac{\partial}{\partial q_j}\left(q_j\sum_{k=1}^mv_jw_{jk}+\sum_{i=1,\neq j}^n\sum_{k=1}^mq_iv_iw_{ik}\right) \\\
-&= \sum_{k=1}^mv_jw_{jk} \\\
-\frac{\partial}{\partial q_j} B &= \frac{1}{2}\frac{\partial}{\partial q_j}\left( q_jq_kJ_{jk}+q_iq_jJ_{ij}+\sum_{i=1,\neq j}^m\sum_{k=1,\neq j}^mq_iq_kJ_{ik} \right) \\\
-&= \frac{1}{2}(q_kJ_{jk}+q_iJ_{ij}) \\\
-&= q_kJ_{jk} \\\
-\frac{\partial}{\partial q_j} C &= \frac{\partial}{\partial q_j} -\left[q_j\log q_j+(1-q_j)\log(1-q_j)\right] \\\
+ \\\
+\frac{\partial}{\partial q_j} A &= \frac{\partial}{\partial q_j}\left(q_j\sum_{i=1}^nv_iw_{ij}+\sum_{i=1}^n\sum_{k=1,\neq j}^mq_kv_iw_{ik}\right) \\\
+&= \sum_{i=1}^nv_iw_{ij} \\\
+\frac{\partial}{\partial q_j} B &= \frac{1}{2}\frac{\partial}{\partial q_j}\left( \sum_{k=1}^mq_jq_kJ_{jk}+\sum_{i=1}^mq_iq_jJ_{ij}+\sum_{i=1,\neq j}^m\sum_{k=1,\neq j}^mq_iq_kJ_{ik} \right) \\\
+&= \frac{1}{2}(\sum_{k=1,\neq j}^mq_kJ_{jk}+\sum_{i=1,\neq j}^mq_iJ_{ij}) \\\
+&= \sum_{k=1,\neq j}^mq_kJ_{jk} \\\
+\frac{\partial}{\partial q_j} C &= -\frac{\partial}{\partial q_j} \left[q_j\log q_j+(1-q_j)\log(1-q_j)+\sum_{i=1,\neq j}^m(q_i\log q_i+(1-q_i)\log(1-q_i))\right] \\\
 &= -\left( \log q_j+q_j\frac{1}{q_j}+\log\frac{1}{1-q_j}+(1-q_j)\frac{-1}{1-q_j} \right) \\\
-&= -\log\frac{q_j}{1-q_j}
+&= -\log\frac{q_j}{1-q_j} \\\
+&\dArr \\\
+0 &= \sum_{i=1}^nv_iw_{ij} + \sum_{k=1,\neq j}^mq_kJ_{jk}-\log\frac{q_j}{1-q_j} \\\
+\frac{q_j}{1-q_j} &= \exp(\sum_{i=1}^nv_iw_{ij} + \sum_{k=1,\neq j}^mq_kJ_{jk}) \\\
+\frac{1}{q_j} &= \frac{1}{\exp(\sum_{i=1}^nv_iw_{ij} + \sum_{k=1,\neq j}^mq_kJ_{jk})}+1 \\\
+\hat{q_j} &= \frac{1+\exp(\sum_{i=1}^nv_iw_{ij} + \sum_{k=1,\neq j}^mq_kJ_{jk})}{\exp(\sum_{i=1}^nv_iw_{ij} + \sum_{k=1,\neq j}^mq_kJ_{jk})} \\\
+&= \sigma(\sum_{i=1}^nv_iw_{ij} + \sum_{k=1,\neq j}^mq_kJ_{jk})
 \end{align*}
 $$
 
-#### Derive gradient
+{{< math.inline >}}
+<p>
+Thus we can use gradient ascent (fixed point iteration) to solve each \( q_j \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\hat{q_1} &\lArr \text{fix } q_2,\cdots,q_m \\\
+\hat{q_j} &\lArr \text{fix } q_1,\cdots,q_{j-1},q_{j+1},\cdots,q_m \\\
+\hat{q_m} &\lArr \text{fix } q_1,\cdots,q_{m-1} \\\
+&\text{Loop until $\hat{q_1}\cdots\hat{q_m}$ converge}
+\end{align*}
+$$
+
+Comparing with [general mean field VI](https://tirmisula.github.io/posts/variational-inference/#mean-field-vi-derivation), it is pretty similar to use fixed point iteration:
+$$
+q_j(z_j) = \exp(E_{z_{i\neq j}\sim q_{i\neq j}(z_{i\neq j})}\left[\log p(x,z)\right])\exp(-K) \\\
+q_1^{(1)} \rarr q_2^{(1)} \rarr \cdots \rarr q_N^{(1)} \rarr q_1^{(2)} \rarr \cdots q_N^{(2)} \rarr \cdots \rarr q_N^{(t)} \cdots \rarr q_N^{(t)} \\\
+$$
+
+## Conclusion of general solution of BM
+
+Combining with conlusion from [RBM](https://tirmisula.github.io/posts/partition-function/#rbm-learning), the general solution of BM is given by:
+
+$$
+\text{BM} : \begin{cases}
+    \mathbb{E}_{\begin{subarray}{c}
+    v \sim P_{\text{data}}(v) \\\
+    h|v \sim P_{\text{model}}(h|v)
+    \end{subarray}}[vh^T] \text{ solved by} \begin{cases}
+        \text{1. MCMC} \\\
+        \text{2. Mean field VI}
+    \end{cases} \\\
+    \mathbb{E}_{\begin{subarray}{c}
+    v,h \sim P_{\text{model}}(v,h)
+    \end{subarray}}[vh^T] \text{ solved by} \begin{cases}
+        \text{1. MCMC} \\\
+        \text{2. CD-k/persistent CD-k}
+    \end{cases}
+\end{cases}
+$$
 
 ## Reference
 
