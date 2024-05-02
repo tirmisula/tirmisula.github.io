@@ -1,6 +1,6 @@
 ---
 author: "X. Wang"
-title: "Deep Belief Network"
+title: "Boltzman Machine"
 date: "2023-09-28"
 description: "A brief introduction."
 tags: ["machine learning"]
@@ -248,11 +248,11 @@ $$
 &= -vh^T \\\
 \\\
 \frac{\partial}{\partial W}\mathcal{L} &= \frac{1}{N}\sum_{v\in V} \sum_{h}p(h|v)vh^T - \frac{1}{N}\sum_{v\in V}\sum_{v,h}p(v,h)vh^T \\\
-&= \frac{1}{N}\sum_{v\in V} \mathbb{E}_{h\sim P_{\text{model}}(h|v)}[vh^T] - \frac{1}{N}\sum_{v\in V}\mathbb{E}_{v,h\sim P_{\text{model}}(v,h)}[vh^T] \\\
-&= \mathbb{E}_{\begin{subarray}{c}
+&= \frac{1}{N}\sum_{v\in V} \mathbb{E}\_{h\sim P_{\text{model}}(h|v)}[vh^T] - \frac{1}{N}\sum_{v\in V}\mathbb{E}\_{v,h\sim P_{\text{model}}(v,h)}[vh^T] \\\
+&= \mathbb{E}\_{\begin{subarray}{c}
     v \sim P_{\text{data}}(v) \\\
     h|v \sim P_{\text{model}}(h|v)
-    \end{subarray}}[vh^T] - \mathbb{E}_{v,h\sim P_{\text{model}}(v,h)}[vh^T] \\\
+    \end{subarray}}[vh^T] - \mathbb{E}\_{v,h\sim P_{\text{model}}(v,h)}[vh^T] \\\
 \end{align*}
 $$
  
@@ -266,10 +266,10 @@ $$
 \begin{align*}
 \frac{\partial}{\partial L}E(v,h) &= -\frac{\partial}{\partial L} v^TLv \\\
 &= -vv^T \\\
-\frac{\partial}{\partial L}\mathcal{L} &= \mathbb{E}_{\begin{subarray}{c}
+\frac{\partial}{\partial L}\mathcal{L} &= \mathbb{E}\_{\begin{subarray}{c}
     v \sim P_{\text{data}}(v) \\\
     h|v \sim P_{\text{model}}(h|v)
-    \end{subarray}}[vv^T] - \mathbb{E}_{v,h\sim P_{\text{model}}(v,h)}[vv^T] \\\
+    \end{subarray}}[vv^T] - \mathbb{E}\_{v,h\sim P_{\text{model}}(v,h)}[vv^T] \\\
 \end{align*}
 $$
 
@@ -277,10 +277,10 @@ $$
 \begin{align*}
 \frac{\partial}{\partial J}E(v,h) &= -\frac{\partial}{\partial J} v^TLv \\\
 &= -hh^T \\\
-\frac{\partial}{\partial J}\mathcal{L} &= \mathbb{E}_{\begin{subarray}{c}
+\frac{\partial}{\partial J}\mathcal{L} &= \mathbb{E}\_{\begin{subarray}{c}
     v \sim P_{\text{data}}(v) \\\
     h|v \sim P_{\text{model}}(h|v)
-    \end{subarray}}[hh^T] - \mathbb{E}_{v,h\sim P_{\text{model}}(v,h)}[hh^T] \\\
+    \end{subarray}}[hh^T] - \mathbb{E}\_{v,h\sim P_{\text{model}}(v,h)}[hh^T] \\\
 \end{align*}
 $$
 
@@ -288,18 +288,18 @@ In conslusion the gradient is given by,
 
 $$
 \begin{align*}
-\frac{\partial}{\partial W}\mathcal{L} &= \mathbb{E}_{\begin{subarray}{c}
+\frac{\partial}{\partial W}\mathcal{L} &= \mathbb{E}\_{\begin{subarray}{c}
     v \sim P_{\text{data}}(v) \\\
     h|v \sim P_{\text{model}}(h|v)
-    \end{subarray}}[vh^T] - \mathbb{E}_{v,h\sim P_{\text{model}}(v,h)}[vh^T] \\\
-\frac{\partial}{\partial L}\mathcal{L} &= \mathbb{E}_{\begin{subarray}{c}
+    \end{subarray}}[vh^T] - \mathbb{E}\_{v,h\sim P_{\text{model}}(v,h)}[vh^T] \\\
+\frac{\partial}{\partial L}\mathcal{L} &= \mathbb{E}\_{\begin{subarray}{c}
     v \sim P_{\text{data}}(v) \\\
     h|v \sim P_{\text{model}}(h|v)
-    \end{subarray}}[vv^T] - \mathbb{E}_{v,h\sim P_{\text{model}}(v,h)}[vv^T] \\\
-\frac{\partial}{\partial J}\mathcal{L} &= \mathbb{E}_{\begin{subarray}{c}
+    \end{subarray}}[vv^T] - \mathbb{E}\_{v,h\sim P_{\text{model}}(v,h)}[vv^T] \\\
+\frac{\partial}{\partial J}\mathcal{L} &= \mathbb{E}\_{\begin{subarray}{c}
     v \sim P_{\text{data}}(v) \\\
     h|v \sim P_{\text{model}}(h|v)
-    \end{subarray}}[hh^T] - \mathbb{E}_{v,h\sim P_{\text{model}}(v,h)}[hh^T]
+    \end{subarray}}[hh^T] - \mathbb{E}\_{v,h\sim P_{\text{model}}(v,h)}[hh^T]
 \end{align*}
 $$
 
@@ -630,14 +630,14 @@ Combining with conlusion from [RBM](https://tirmisula.github.io/posts/partition-
 
 $$
 \text{BM} : \begin{cases}
-    \mathbb{E}_{\begin{subarray}{c}
+    \mathbb{E}\_{\begin{subarray}{c}
     v \sim P_{\text{data}}(v) \\\
     h|v \sim P_{\text{model}}(h|v)
     \end{subarray}}[vh^T] \text{ solved by} \begin{cases}
         \text{1. MCMC} \\\
         \text{2. Mean field VI}
     \end{cases} \\\
-    \mathbb{E}_{\begin{subarray}{c}
+    \mathbb{E}\_{\begin{subarray}{c}
     v,h \sim P_{\text{model}}(v,h)
     \end{subarray}}[vh^T] \text{ solved by} \begin{cases}
         \text{1. MCMC} \\\
