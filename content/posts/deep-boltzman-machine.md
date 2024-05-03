@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
-title: "Boltzman Machine"
-date: "2023-09-28"
+title: "Deep Boltzman Machine"
+date: "2023-09-29"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: false
+draft: true
 ---
 
 :                                                         
@@ -90,7 +90,8 @@ $$
                 \text{hidden nodes}
             \end{cases} \\\
             \text{{Restricted Boltzman Machine(RBM)}} : \text{Bipartite BM} \\\
-            \text{\color{red}{Boltzman Machine}} : \text{Fully connected graph} \\\
+            \text{{Boltzman Machine}} : \text{Fully connected graph} \\\
+            \text{\color{red}{Deep Boltzman Machine}} : \text{stacked BM} \\\
             \text{Markov network(MRF)}
         \end{cases} \\\
         \text{continous variable}\rarr \text{{Gaussian BN/Gaussian MRF}} \\\
@@ -127,82 +128,172 @@ $$
 $$
 
 
-## Boltzman Machine Intro
+## Commonality of BM RBM DBM
 
-Boltzman machine is a fully connected graph which is proposed to solve local minimum of Hopfield network.
+BM([Boltzamn Machine](https://tirmisula.github.io/posts/boltzman-machine/#conclusion-of-general-solution-of-bm)), RBM([Restricted Boltzman Machine](https://tirmisula.github.io/posts/partition-function/#the-log-likelihood-gradient-of-rbm)), DBM(Deep Boltzman Machine) are Boltzman machine series undirected probabilistic graphical model. So they share the same form of log-likelihood gradient and general learning method:
+
+$$
+\triangle W = \eta(\mathbb{E}\_{P_{\text{data}}[vh^T]}- \mathbb{E}\_{P_{\text{model}}[vh^T]}) \text{ by SGD}
+$$
+
+$$
+\begin{cases}
+    P_{\text{data}} = P_{\text{data}}(v)P_{\text{model}}(h|v) \\\
+    P_{\text{model}} = P_{\text{model}}(v,h)
+\end{cases}
+$$
+
+## DBM and DBN comparison
+### Review DBN
+
+DBN([Deep Belief Network](https://tirmisula.github.io/posts/deep-belief-network/#dbn-intro)) on the other hand is not a Boltzman series model. It is a hybird model so we don't have a closed form of it's log-likelihood. However during pre-tranining stage, RBM learning method is referenced for each layer:
+
+$$
+\begin{cases}
+    \text{Pre-training} : \begin{cases}
+        h^{(i)} \sim q(h^{(i)}|v,w^{(i)}) \\\
+        \text{Learn $w^{(i+1)}$ by CD-k}
+    \end{cases} \\\
+    \text{Fine-tuning} : \begin{cases}
+        \text{Wake Sleep} \\\
+        \text{Back Propagation}
+    \end{cases}
+\end{cases}
+$$
+
+### DBM structure
+
+The graph structure of DBM is similar to DBN:
+
+<div style="text-align: center;">
+
+```mermaid
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': 'white',
+      'primaryTextColor': '#000',
+      'primaryBorderColor': '#7C0200',
+      'lineColor': '#F8B229',
+      'secondaryColor': 'red',
+      'tertiaryColor': '#fff'
+    }
+  }
+}%%
+graph TD
+    subgraph "hidden layer 3"
+    id1(("$$h^{(3)}$$"))
+    id2(("$$h^{(3)}$$"))
+    id3(("$$h^{(3)}$$"))
+    end
+    subgraph "hidden layer 2"
+    id4(("$$h^{(2)}$$"))
+    id5(("$$h^{(2)}$$"))
+    end
+    subgraph "hidden layer 1"
+    id6(("$$h^{(1)}$$"))
+    id7(("$$h^{(1)}$$"))
+    id8(("$$h^{(1)}$$"))
+    end
+    subgraph "visible layer"
+    id9(("$$v$$"))
+    id10(("$$v$$"))
+    end
+    id1(("$$h^{(3)}$$")) --- id4(("$$h^{(2)}$$"))
+    id1(("$$h^{(3)}$$")) --- id5(("$$h^{(2)}$$"))
+    id2(("$$h^{(3)}$$")) --- id4(("$$h^{(2)}$$"))
+    id2(("$$h^{(3)}$$")) --- id5(("$$h^{(2)}$$"))
+    id3(("$$h^{(3)}$$")) --- id4(("$$h^{(2)}$$"))
+    id3(("$$h^{(3)}$$")) --- id5(("$$h^{(2)}$$"))
+    id4(("$$h^{(2)}$$")) --- id6(("$$h^{(1)}$$"))
+    id4(("$$h^{(2)}$$")) --- id7(("$$h^{(1)}$$"))
+    id4(("$$h^{(2)}$$")) --- id8(("$$h^{(1)}$$"))
+    id5(("$$h^{(2)}$$")) --- id6(("$$h^{(1)}$$"))
+    id5(("$$h^{(2)}$$")) --- id7(("$$h^{(1)}$$"))
+    id5(("$$h^{(2)}$$")) --- id8(("$$h^{(1)}$$"))
+    id6(("$$h^{(1)}$$")) --- id9(("$$v$$"))
+    id6(("$$h^{(1)}$$")) --- id10(("$$v$$"))
+    id7(("$$h^{(1)}$$")) --- id9(("$$v$$"))
+    id7(("$$h^{(1)}$$")) --- id10(("$$v$$"))
+    id8(("$$h^{(1)}$$")) --- id9(("$$v$$"))
+    id8(("$$h^{(1)}$$")) --- id10(("$$v$$"))
+
+    classDef shaded fill:#b6b8d6,stroke:#333,stroke-width:2px;
+    class id9,id10 shaded
+```
+
+</div>
+
+Although we can use general BM learning methods for DBM learning, a combination of pre-training (find initial weights) and SGD is proposed to accelerate the learning process due to computation efficiency and similarity to DBN.
+
+## Pre-tranining
+### Intuition
+Recall that in [Deep Belief Network](https://tirmisula.github.io/posts/deep-belief-network/#maximize-ph) chapter, we show p(h) is determined by:
+
+$$
+p(h^{(1)}) = \begin{cases}
+    p(h^{(1)}|w^{(1)}) \text{ in RBM} \\\
+    p(h^{(1)}|w^{(2)}) \text{ in DBN}
+\end{cases}
+$$
 
 {{< math.inline >}}
 <p>
-The BM model is given by:
+However, DBM tells us \(p(h^{(1)})\) is determined by both \( w^{(1)} \) and \( w^{(2)} \), an intuition is to combine \( p(h^{(1)}|w^{(1)}),p(h^{(1)}|w^{(2)}) \) together to approximate \( p(h^{(1)}) \):
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-x &: \text{nodes in BM}, x \sim \text{Bernoulli}
-\\\
-x &= \begin{bmatrix}
-    x_1 \\\
-    \vdots \\\
-    x_p
-\end{bmatrix}=\begin{bmatrix}
-    h \\\
-    v
-\end{bmatrix}, h = \begin{bmatrix}
-    h_1 \\\
-    \vdots \\\
-    h_m
-\end{bmatrix}, v = \begin{bmatrix}
-    v_1 \\\
-    \vdots \\\
-    v_n
-\end{bmatrix} \\\
-W_{n\times m} &: \text{connection weights between $v,h$} \\\
-L_{n\times n} &: \text{connection weights inside $v$} \\\
-J_{m\times m} &: \text{connection weights inside $h$} \\\
-\theta &= (W,L,J)
+p(h^{(1)}|w^{(1)},w^{(2)}) \approx \alpha p(h^{(1)}|w^{(1)})+\beta p(h^{(1)}|w^{(2)})
 \end{align*}
 $$
 
-$$
-W = \begin{bmatrix}
-    w_{11} & \cdots & w_{1m} \\\
-    \vdots & \ddots & \vdots \\\
-    w_{n1} & \cdots & w_{nm}
-\end{bmatrix} L = \begin{bmatrix}
-    L_{11} & \cdots & L_{1n} \\\
-    \vdots & \ddots & \vdots \\\
-    L_{n1} & \cdots & L_{nn}
-\end{bmatrix} J = \begin{bmatrix}
-    J_{11} & \cdots & J_{1m} \\\
-    \vdots & \ddots & \vdots \\\
-    J_{m1} & \cdots & J_{mm}
-\end{bmatrix}
-$$
-
-In previous chpater, the joint probabilty of [restricted Boltzaman machine(RBM)](https://tirmisula.github.io/posts/restricted-boltzman-machine/#rbm-model-definition) is given by:
-
-$$
-\begin{align*}
-p(o,h) &= \frac{1}{z}\exp(h^Two+\alpha^To+\beta^Th) \\\
-&= \frac{1}{z} \prod_{i=1}^m\prod_{j=1}^n\exp(h_iw_{ij}o_j) \prod_{i=1}^m\exp(\beta_i h_i) \prod_{j=1}^n\exp(\alpha_j o_j)
-\end{align*}
-$$
+### Double counting problem
 
 {{< math.inline >}}
 <p>
-The BM model is a general form of RBM, by replacing \( \alpha,\beta \) with \( L,J \), we have closed form of joint distribution of BM:
+\( p(h^{(1)}|w^{(1)}) \) is given by:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-p(v,h) &= \frac{1}{z}\exp(-E(v,h)) \\\
-&= \frac{1}{z}\exp(v^TWh+\frac{1}{2}v^TLv+\frac{1}{2}h^TJh) \\\
-&= \frac{1}{z}\exp(\sum_{i=1}^n\sum_{j=1}^mv_iw_{ij}h_j+\frac{1}{2}\sum_{i=1}^n\sum_{j=1}^nv_iL_{ij}v_j+\frac{1}{2}\sum_{i=1}^m\sum_{j=1}^mh_iJ_{ij}h_j) \\\
-&= \frac{1}{z} \prod_{i=1}^n\prod_{j=1}^m\exp(v_iw_{ij}h_j) \prod_{i=1}^n\prod_{j=1}^n\exp(v_iL_{ij}v_j) \prod_{i=1}^m\prod_{j=1}^m\exp(h_iJ_{ij}h_j)
+p(h^{(1)}|w^{(1)}) &= \sum_{v} p(v,h^{(1)}|w^{(1)}) \\\
+&= \sum_{v}p(v|w^{(1)})p(h^{(1)}|v,w^{(1)}) \\\
+&\approx \frac{1}{N}\sum_{v\in V}p(h^{(1)}|v,w^{(1)})
+\end{align*} \\\
+\frac{1}{N}\sum_{v\in V}p(v,h^{(1)}|w^{(1)}) \text{ is called aggregate posterier}, v \sim p(v)=p(v|w^{(1)})
+$$
+
+{{< math.inline >}}
+<p>
+\( p(h^{(1)}|w^{(2)}) \) is given by:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+p(h^{(1)}|w^{(2)}) &= \sum_{h^{(2)}} p(h^{(1)},h^{(2)}|w^{(2)}) \\\
+&= \sum_{h^{(2)}}p(h^{(2)}|w^{(2)})p(h^{(1)}|h^{(2)},w^{(2)}) \\\
+&\approx \frac{1}{N}\sum_{h^{(2)}\in H}p(h^{(1)}|h^{(2)},w^{(2)})
 \end{align*}
 $$
+
+$$
+\begin{align*}
+&v\sim p(v), \text{ then learn $w^{(1)}$ by CD-k} \\\
+&h^{(1)} \sim p(h^{(1)}|v,w^{(1)}), \text{ then learn $w^{(2)}$ by CD-k} \\\
+&h^{(2)} \sim p(h^{(2)}|h^{(1)},w^{(2)})
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Apparently, \( p(h^{(1)}|w^{(1)}) \), \( p(h^{(1)}|w^{(2)}) \) both depend on sampling observation distribution \( p(v) \). when combining two items, the represented approximation distribution \( p(h^{(1)}|w^{(1)},w^{(2)}) \) could be too concentrated, or called double-counting problem.
+</p>
+{{</ math.inline >}}
 
 ## Gradient of BM's Log-likelihood
 
@@ -648,7 +739,7 @@ $$
 
 ## Reference
 
-[^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=150).
+[^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=157).
 [^4]: From [Higham, Nicholas (2002). Accuracy and Stability of Numerical Algorithms](https://archive.org/details/accuracystabilit00high_878).
 [^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
 [^3]: - [Deep belief networks. Geoffrey E. Hinton (2009)](http://scholarpedia.org/article/Deep_belief_networks).

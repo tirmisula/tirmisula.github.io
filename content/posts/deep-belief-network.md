@@ -158,9 +158,9 @@ graph TD
     id5(("$$h^{(2)}$$"))
     end
     subgraph "hidden layer 1"
-    id6(("$$h^{(2)}$$"))
-    id7(("$$h^{(2)}$$"))
-    id8(("$$h^{(2)}$$"))
+    id6(("$$h^{(1)}$$"))
+    id7(("$$h^{(1)}$$"))
+    id8(("$$h^{(1)}$$"))
     end
     subgraph "visible layer"
     id9(("$$v$$"))
@@ -172,18 +172,18 @@ graph TD
     id2(("$$h^{(3)}$$")) --- id5(("$$h^{(2)}$$"))
     id3(("$$h^{(3)}$$")) --- id4(("$$h^{(2)}$$"))
     id3(("$$h^{(3)}$$")) --- id5(("$$h^{(2)}$$"))
-    id4(("$$h^{(2)}$$")) --> id6(("$$h^{(2)}$$"))
-    id4(("$$h^{(2)}$$")) --> id7(("$$h^{(2)}$$"))
-    id4(("$$h^{(2)}$$")) --> id8(("$$h^{(2)}$$"))
-    id5(("$$h^{(2)}$$")) --> id6(("$$h^{(2)}$$"))
-    id5(("$$h^{(2)}$$")) --> id7(("$$h^{(2)}$$"))
-    id5(("$$h^{(2)}$$")) --> id8(("$$h^{(2)}$$"))
-    id6(("$$h^{(2)}$$")) --> id9(("$$v$$"))
-    id6(("$$h^{(2)}$$")) --> id10(("$$v$$"))
-    id7(("$$h^{(2)}$$")) --> id9(("$$v$$"))
-    id7(("$$h^{(2)}$$")) --> id10(("$$v$$"))
-    id8(("$$h^{(2)}$$")) --> id9(("$$v$$"))
-    id8(("$$h^{(2)}$$")) --> id10(("$$v$$"))
+    id4(("$$h^{(2)}$$")) --> id6(("$$h^{(1)}$$"))
+    id4(("$$h^{(2)}$$")) --> id7(("$$h^{(1)}$$"))
+    id4(("$$h^{(2)}$$")) --> id8(("$$h^{(1)}$$"))
+    id5(("$$h^{(2)}$$")) --> id6(("$$h^{(1)}$$"))
+    id5(("$$h^{(2)}$$")) --> id7(("$$h^{(1)}$$"))
+    id5(("$$h^{(2)}$$")) --> id8(("$$h^{(1)}$$"))
+    id6(("$$h^{(1)}$$")) --> id9(("$$v$$"))
+    id6(("$$h^{(1)}$$")) --> id10(("$$v$$"))
+    id7(("$$h^{(1)}$$")) --> id9(("$$v$$"))
+    id7(("$$h^{(1)}$$")) --> id10(("$$v$$"))
+    id8(("$$h^{(1)}$$")) --> id9(("$$v$$"))
+    id8(("$$h^{(1)}$$")) --> id10(("$$v$$"))
 
     classDef shaded fill:#b6b8d6,stroke:#333,stroke-width:2px;
     class id9,id10 shaded
@@ -271,45 +271,64 @@ $$
 p(h^{(L-1)},h^{(L)}) = \frac{1}{z}\exp\left(h^{T(L)}w^{(L)}h^{(L-1)}+h^{T(L-1)}b^{(L-1)}+h^{T(L)}b^{(L)} \right) \\\
 $$
 
-## Stacking RBM Improves ELBO of p(v)
+## Motivation of Stacking RBM
+### Maximize p(h)
 
-Consider an original RBM model, we have marginal probability:
+In a single RBM model, we have observation's probability equals:
 
 $$
 \begin{align*}
-p(v) &= \sum_{h^{(1)}} p(v,h^{(1)}) \\\
-&= \sum_{h^{(1)}} p(h^{(1)})p(v|h^{(1)}) \\\
-&\text{$p(h^{(1)})$ is prior}
+p(v|w^{(1)}) &= \sum_{h^{(1)}} p(v,h^{(1)}|w^{(1)}) \\\
+&= \sum_{h^{(1)}} p(h^{(1)}|w^{(1)})p(v|h^{(1)},w^{(1)})
 \end{align*}
-$$
-
-We introduced in [HMM chapter](https://tirmisula.github.io/posts/hidden-markov-model/#learning) that learning problem is equivalent to solving maximum likelihood estimation:
-
-$$
-\hat{\lambda} = \argmax p(O|\lambda)
 $$
 
 {{< math.inline >}}
 <p>
-By adding a layer \( h^{(2)} \) on top of \( h^{(1)} \), we see that \( p(h^{(1)}) \) is no longer a prior but a learnable object, the learning problem is maximizing likelihood of \( p(h^{(1)}|w) \):
+In doublel RBMs model, \( p(h^{(1)}) \) is no longer a prior, similarly we can write:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-\hat{w}^{(2)} &= \argmax_{w^{(2)}} p(h^{(1)}|h^{(2)},w^{(2)}) \\\
-\hat{p}(h^{(1)}) &= p(h^{(1)}|h^{(2)},\hat{w}^{(2)})=\max p(h^{(1)}|w)
+p(h^{(1)}|w^{(2)}) &= \sum_{h^{(2)}}p(h^{(1)},h^{(2)}|w^{(2)})
 \end{align*}
 $$
- 
-So for the stacked RBM model, we have marginal probability:
+
+{{< math.inline >}}
+<p>
+Since \( p(h^{(1)}) \) is derived from \( w^{(2)} \), replace \( p(h^{(1)}|w^{(1)}) \) with \( p(h^{(1)}|w^{(2)}) \), we can rewrite observation's probability:
+</p>
+{{</ math.inline >}}
 
 $$
 \begin{align*}
-p(v) &= \sum_{h^{(1)}} p(h^{(1)})p(v|h^{(1)}) \\\
-&\text{replace $p(h^{(1)})$ with $\hat{p}(h^{1})$} \\\
-&= \sum_{h^{(1)}} \hat{p}(h^{(1)})p(v|h^{(1)}) \\\
-&\geq \text{single layer RBM } p(v)
+p(v|w^{(1)}) &= \sum_{h^{(1)}} p(h^{(1)}|w^{(1)})p(v|h^{(1)},w^{(1)}) \\\
+&\dArr \\\
+p(v|w^{(1)},w^{(2)}) &= \sum_{h^{(1)}} p(h^{(1)}|w^{(2)})p(v|h^{(1)},w^{(1)}) \\\
+&= \sum_{h^{(1)}} \sum_{h^{(2)}}p(h^{(1)},h^{(2)}|w^{(2)})p(v|h^{(1)},w^{(1)}) \\\
+\end{align*}
+$$
+
+In [HMM chapter](https://tirmisula.github.io/posts/hidden-markov-model/#learning) we introduced that learning problem is equivalent to solving maximum likelihood estimation:
+
+$$
+\hat{\lambda} = \argmax p(O|\lambda) \\\
+\because p(h^{(1)}|w^{(2)}) = \prod_i p(h\_{i}^{(1)}|w^{(2)}) \text{ is tractable} \\\
+\therefore p(h^{(1)}|\hat{w^{(2)}}) = \max p(h^{(1)}) \geq p(h^{(1)}|w^{(1)})
+$$
+
+{{< math.inline >}}
+<p>
+So \( p(h) \) derived from double layer RBM is maximized, it is greater than \( p(h) \) derived from single layer so does \( p(v) \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\sum_{h^{(2)}}p(h^{(1)},h^{(2)}|w^{(2)}) &\geq p(h^{(1)}|w^{(1)}) \\\
+\sum_{h^{(1)}} \sum_{h^{(2)}}p(h^{(1)},h^{(2)}|w^{(2)})p(v|h^{(1)},w^{(1)}) &\geq \sum_{h^{(1)}} p(h^{(1)}|w^{(1)})p(v|h^{(1)},w^{(1)}) \\\
+p(v|w^{(1)},w^{(2)}) &\geq p(v|w^{(1)})
 \end{align*}
 $$
 
@@ -334,6 +353,8 @@ $$
 \text{Thus $w=(w^{(1)},w^{(2)}\cdots)$ is learned in bottom-up manner} \\\
 $$
 
+### Improve ELBO of p(v)
+
 From [ELBO](https://tirmisula.github.io/posts/expectation-maximization/#generalized-em-algorithm) perspective, we know that:
 
 $$
@@ -346,8 +367,8 @@ $$
 &\because w^{(1)} \text{ is determined during RBM learning} \\\
 &\therefore \text{posterier }p(v|h^{(1)}),q(h^{(1)}|v) \text{ is fixed} \\\
 &= \sum_{h^{(1)}}q(h^{(1)}|v)\log p(h^{(1)})+C \\\
-&\text{Let } p(h^{(1)}) = \hat{p}(h^{(1)}) \\\
-&\leq \sum_{h^{(1)}}q(h^{(1)}|v)\log \hat{p}(h^{(1)})+C \\\ 
+&\text{Let } p(h^{(1)}) = \max p(h^{(1)}) \\\
+&\leq \sum_{h^{(1)}}q(h^{(1)}|v)\log \max p(h^{(1)})+C \\\ 
 &\therefore\text{ELBO is improved by $\hat{p}(h^{(1)})$}
 \end{align*}
 $$
