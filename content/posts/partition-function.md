@@ -517,16 +517,26 @@ $$
 \end{align*}
 $$
 
-In conlusion, we have the gradient for RBM:
+In conlusion, we have the log-likelihood gradient of RBM:
 
 $$
 \begin{align*}
 \frac{\partial}{\partial w_{ij}}\mathcal{L}(\theta) &= \frac{1}{N}\sum\_{k=1}^N\left( -\sum\_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j + p(h^{(k)}\_{i}=1|o^{(k)})o^{(k)}\_{j} \right) \\\
-\frac{\partial}{\partial \alpha_{j}} \mathcal{L}\_{k}(\theta) &= \frac{1}{N}\sum\_{k=1}^N\left( -\sum\_{o_1\cdots o_n}p(o)o_j + o^{(k)}\_{j} \right) \\\
+\frac{\partial}{\partial \alpha_{j}} \mathcal{L}(\theta) &= \frac{1}{N}\sum\_{k=1}^N\left( -\sum\_{o_1\cdots o_n}p(o)o_j + o^{(k)}\_{j} \right) \\\
 \frac{\partial}{\partial \beta_{i}}\mathcal{L}(\theta) &= \frac{1}{N}\sum\_{k=1}^N\left( -\sum\_{o_1\cdots o_n}p(o)p(h_i=1|o) + p(h^{(k)}\_{i}=1|o^{(k)}) \right)
 \end{align*}
 $$
 
+A more concised expression:
+
+$$
+\begin{align*}
+\frac{\partial}{\partial w_{ij}}\mathcal{L}(\theta) &= \frac{1}{N}\sum_{o\in O}\left( \mathbb{E}\_{h\sim p(h|o)}[h_io_j]-\mathbb{E}\_{o,h\sim p(o,h)}[h_io_j] \right) \\\
+&= \frac{1}{N}\sum_{o\in O}\left( -\sum\_{o}p(o)p(h_i=1|o)o_j + p(h_{i}=1|o)o_{j} \right) \\\
+\frac{\partial}{\partial \alpha_{j}} \mathcal{L}(\theta) &= \frac{1}{N}\sum_{o\in O}\left( -\sum\_{o}p(o)o_j + o_{j} \right) \\\
+\frac{\partial}{\partial \beta_{i}}\mathcal{L}(\theta) &= \frac{1}{N}\sum_{o\in O}\left( -\sum\_{o}p(o)p(h_i=1|o) + p(h_{i}=1|o) \right)
+\end{align*}
+$$
 
 ### CD-k for RBM design
 #### A note of Gibbs sampling in RBM
@@ -565,45 +575,72 @@ $$
 \begin{cases}
 \sum\_{o_1\cdots o_n}p(o)p(h_i=1|o)o_j &= \mathbb{E}\_{o^{\langle k \rangle}}[p(h_i=1|o)o_j] \\\
 &\approx \frac{1}{N}\sum\_{s=1}^N p(h_{i}=1|o^{(s)\langle k \rangle})o^{(s)\langle k \rangle}\_{j} \\\
-p(h_{i}=1|o^{(s)})o^{(s)}\_{j} &= p(h_{i}=1|o^{(s)\langle 0 \rangle})o^{(s)\langle 0 \rangle}\_{j}
+p(h_{i}=1|o^{(s)})o^{(s)}\_{j} &= p(h_{i}=1|o^{(s)\langle 0 \rangle})o^{(s)\langle 0 \rangle}\_{j} \\\
+\\\
+\sum\_{o_1\cdots o_n}p(o)o_j &= \mathbb{E}\_{o^{(k)}}[o_j] \\\
+&\approx \frac{1}{N}\sum\_{s=1}^N o^{(s)\langle k \rangle}\_{j} \\\
+o^{(s)}\_{j} &= o^{(s)\langle 0 \rangle}\_{j} \\\
+\\\
+\sum\_{o_1\cdots o_n}p(o)p(h_i=1|o) &= \mathbb{E}\_{o^{\langle k \rangle}}[p(h_i=1|o)] \\\
+&\approx \frac{1}{N}\sum\_{s=1}^N p(h_{i}=1|o^{(s)\langle k \rangle}) \\\
+p(h_{i}=1|o^{(s)}) &= p(h_{i}=1|o^{(s)\langle 0 \rangle})
 \end{cases}
 $$
 
-The CD-k algorithm for RBM is:
+<cite>[^4]</cite>The CD-k algorithm for RBM is:
 
 $$
 \text{The Contrastive Divergence algorithm for RBM(CD-k)} \\\
 \begin{align*}
+&\text{Notation: }o^{(s)\langle k \rangle}\_{j} : \text{$s$-th observation, $j$-th dimension, $k$-th step by Gibbs} \\\
+&\text{Initialize $\theta^{(0)}=(w^{(0)},\alpha^{(0)},\beta^{(0)})$ and $\Delta w_{ij}=0,\Delta\alpha_j=0,\Delta\beta_i=0$} \\\
 &\text{For each turn } t=1\cdots T \\\
-&1. \text{ sample N observations from training set $\lbrace O \rbrace$: } \\\
+&\text{ For each observation from training set $\lbrace O \rbrace$: } \\\
     &\quad  o^{(1)}\_{1:n},\cdots,o^{(N)}\_{1:n} \sim \lbrace O \rbrace \\\
-&2. \text{ initialize $o^{(1)\langle 0 \rangle}\_{1:n},\cdots,o^{(N)\langle 0 \rangle}\_{1:n}$ : } \\\
+&1. \text{ \textbf{Positive Phase:} initialize $o^{(1:N)\langle 0 \rangle}\_{1:n}$, sample hidden states $h^{(1:N)\langle 0 \rangle}\_{1:m}$: } \\\
     &\quad o^{(1)\langle 0 \rangle}\_{1:n},\cdots,o^{(N)\langle 0 \rangle}\_{1:n} = o^{(1)}\_{1:n},\cdots,o^{(N)}\_{1:n} \\\
-&3. \text{ block sampling from $p(h|o),p(o|h)$ alternatively, stop at k-step: } \\\
-    &\quad \text{For } l=0\cdots k-1 \\\
-    &\quad\quad \text{For }i=1\cdots m \\\
-    &\quad\quad\quad \text{sample simultaneously} \\\
-    &\quad\quad\quad h^{(1)\langle l \rangle}\_{i},\cdots,h^{(N)\langle l \rangle}\_{i} \sim p(h_i|o^{(1)\langle l \rangle}),\cdots,p(h_i|o^{(N)\langle l \rangle}) \\\
+    &\quad h^{(1)\langle 0 \rangle}\_{1:m},\cdots,h^{(N)\langle 0 \rangle}\_{1:m} \sim p(h^{(1)}\_{1:m}|o^{(1)\langle 0 \rangle}),\cdots,p(h^{(N)}\_{1:m}|o^{(N)\langle 0 \rangle}) \\\
+&2. \text{ \textbf{Negative Phase:} block sampling from $p(o|h),p(h|o)$ alternatively, stop at k-th step: } \\\
+    &\quad \text{For } l=1\cdots k-1 \\\
     &\quad\quad \text{For }j=1\cdots n \\\
     &\quad\quad\quad \text{sample simultaneously} \\\
     &\quad\quad\quad o^{(1)<l+1>}\_{j},\cdots,o^{(N)<l+1>}\_{j} \sim p(o_j|h^{(1)\langle l \rangle}),\cdots,p(o_j|h^{(N)\langle l \rangle}) \\\
-&4. \text{ cumulate $\Delta w\_{ij}$ from all samples: } \\\
+    &\quad\quad\quad\quad \text{e.g. $p(o_j=1|h^{\langle l \rangle},\theta^{(t)})=\sigma(\sum_{i=1}^mw^{(t)}\_{ik}h^{\langle l \rangle}\_{i}+\alpha^{(t)}\_{k})$}  \\\
+    &\quad\quad \text{For }i=1\cdots m \\\
+    &\quad\quad\quad \text{sample simultaneously} \\\
+    &\quad\quad\quad h^{(1)\langle l \rangle}\_{i},\cdots,h^{(N)\langle l \rangle}\_{i} \sim p(h_i|o^{(1)\langle l \rangle},\theta^{(0)}),\cdots,p(h_i|o^{(N)\langle l \rangle},\theta^{(0)}) \\\
+    &\quad\quad\quad\quad \text{e.g. $p(h_i=1|o^{\langle l \rangle},\theta^{(t)})=\sigma(\sum_{j=1}^nw^{(t)}\_{kj}o^{\langle l \rangle}\_{j}+\beta^{(t)}\_{k})$}  \\\
+&3. \text{ cumulate $\Delta w\_{ij}$ from all samples: } \\\
     &\quad \text{For }i=1\cdots m,j=1\cdots n \\\
     &\quad\quad \text{For }s=1\cdots N \\\
     &\quad\quad\quad \Delta w\_{ij} = \Delta w\_{ij} + \left( p(h_{i}=1|o^{(s)\langle 0 \rangle})o^{(s)\langle 0 \rangle}\_{j} - p(h_{i}=1|o^{(s)\langle k \rangle})o^{(s)\langle k \rangle}\_{j} \right) \\\
+    &\quad\quad\quad\quad\quad\quad\triangleq \Delta w\_{ij} + \left( h^{(s)\langle 0 \rangle}\_{i}o^{(s)\langle 0 \rangle}\_{j} - h^{(s)\langle k \rangle}\_{i}o^{(s)\langle k \rangle}\_{j} \right) \\\
+    &\quad\quad\quad \Delta \alpha\_{j} = \Delta \alpha\_{j} + \left( o^{(s)\langle 0 \rangle}\_{j}-o^{(s)\langle k \rangle}\_{j} \right) \\\
+    &\quad\quad\quad \Delta \beta\_{i} = \Delta \beta\_{i} + \left( p(h_{i}=1|o^{(s)\langle 0 \rangle})-p(h_{i}=1|o^{(s)\langle k \rangle}) \right) \\\
+    &\quad\quad\quad\quad\quad\quad\triangleq \Delta \beta\_{i} + \left( h^{(s)\langle 0 \rangle}\_{i} - h^{(s)\langle k \rangle}\_{i} \right) \\\
 &4. \text{ update parameters until converge: } \\\
     &\quad w^{(t+1)} = w^{(t)} + \eta\left( \frac{1}{N} \begin{bmatrix}
     \Delta w\_{11} \\\
     \vdots \\\
     \Delta w\_{mn}
-\end{bmatrix} \right)
+    \end{bmatrix} \right) \\\
+    &\quad \alpha^{(t+1)} = \alpha^{(t)} + \eta\left( \frac{1}{N} \begin{bmatrix}
+    \Delta \alpha\_{1} \\\
+    \vdots \\\
+    \Delta \alpha\_{n}
+    \end{bmatrix} \right) \\\
+    &\quad \beta^{(t+1)} = \beta^{(t)} + \eta\left( \frac{1}{N} \begin{bmatrix}
+    \Delta \beta\_{1} \\\
+    \vdots \\\
+    \Delta \beta\_{m}
+    \end{bmatrix} \right)
 \end{align*}
 $$
 
 ## Reference
 
 [^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=117).
-[^4]: From [Higham, Nicholas (2002). Accuracy and Stability of Numerical Algorithms](https://archive.org/details/accuracystabilit00high_878).
+[^4]: - [Training Restricted Boltzmann Machines: An Introduction. Asja Fischer and Christian Igel](https://christian-igel.github.io/paper/TRBMAI.pdf).
 [^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
 [^3]: [Confronting the PartitionFunction. Ian Goodfellow and Yoshua Bengio and Aaron Courville](https://www.deeplearningbook.org/contents/partition.html).
 [^7]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).

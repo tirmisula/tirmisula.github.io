@@ -240,7 +240,7 @@ $$
 
 {{< math.inline >}}
 <p>
-However, DBM tells us \(p(h^{(1)})\) is determined by both \( w^{(1)} \) and \( w^{(2)} \), an intuition is to combine \( p(h^{(1)}|w^{(1)}),p(h^{(1)}|w^{(2)}) \) together to approximate \( p(h^{(1)}) \):
+However, DBM tells us \(p(h^{(1)})\) is determined by both \( w^{(1)} \) and \( w^{(2)} \), an intuition is to average \( p(h^{(1)}|w^{(1)}),p(h^{(1)}|w^{(2)}) \) to approximate \( p(h^{(1)}) \):
 </p>
 {{</ math.inline >}}
 
@@ -291,7 +291,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Apparently, \( p(h^{(1)}|w^{(1)}) \), \( p(h^{(1)}|w^{(2)}) \) both depend on sampling observation distribution \( p(v) \). when combining two items, the represented approximation distribution \( p(h^{(1)}|w^{(1)},w^{(2)}) \) could be too concentrated, or called double-counting problem.
+Apparently, \( p(h^{(1)}|w^{(1)}) \), \( p(h^{(1)}|w^{(2)}) \) both depend on sampling observation distribution \( p(v) \). Combining two items would amount to double-counting the evidence, the represented approximation distribution \( p(h^{(1)}|w^{(1)},w^{(2)}) \) can be concentrated.
 </p>
 {{</ math.inline >}}
 
