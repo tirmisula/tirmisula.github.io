@@ -391,9 +391,9 @@ The tranining process roughly looks like:
 
 $$
 \begin{align*}
-&\text{$v$ is known, learn $w^{(1)},b^{(0)}$ by CD-k} \\\
+&\text{$v$ is known, learn $w^{(1)},b^{(0)}$ by CD-k for RBM} \\\
 &\text{sample $h^{(1)}\sim p(h^{(1)}|v,w^{(1)})$} \\\
-&\text{$h^{(1)}$ is known, learn $w^{(2)},b^{(1)}$ by CD-k} \\\
+&\text{$h^{(1)}$ is known, learn $w^{(2)},b^{(1)}$ by CD-k for RBM} \\\
 &\text{sample $h^{(2)}\sim p(h^{(2)}|h^{(1)},w^{(2)})$}
 \end{align*} \\\
 \cdots
@@ -401,27 +401,33 @@ $$
 
 {{< math.inline >}}
 <p>
-However, posterier \( p(h|v) \) in SBN is intractable because of head to head structure. Instead of directly solving \( p(h|v) \), \( q(h|v) \) is computed to approximate \( p(h|v) \), \( q(h|v) \) is assumed to be factorable like posterier in RBM, so we have:
+However, posterier \( p(h|v) \) in SBN is intractable (explaining away) because of head to head structure, so we can't perform original CD-k.
 </p>
 {{</ math.inline >}}
+
+Hinton etc. proposed complementary prior<cite>[^2]</cite> which is used to solve the explaining away problem:
 
 $$
 \begin{cases}
 p(v|h^{(1)}) = \prod_{i}\sigma( w_{:,i}^{T(1)}h^{(1)}+b_{i}^{(0)}) \\\
-\because\text{complementary} \text{ prior}\text{, inference is reversible with $w^T$} \\\
-q(h^{(1)}|v) = \prod_{j}\sigma( w_{j,:}^{(1)}v+b_{j}^{(0)}) \\\
+\text{ by complementary prior, exist factorable $q(h|v)$ to approximate $p(h|v)$} \\\
+q(h^{(1)}|v) = \prod_{j}\sigma( w_{j,:}^{(1)}v+b_{j}^{(1)}) \approx p(h^{(1)}|v) \\\
 w_{:,i}^{T(1)}, w_{j,:}^{(1)} \in w^{(1)}
 \end{cases}
 $$
-
-The trainining process becomes:
+\
+{{< math.inline >}}
+<p>
+By replacing \( p(h|v),p(v|h) \) with \( q(h|v),p(v|h) \) during CD-k sampling, the trainining process becomes:
+</p>
+{{</ math.inline >}}
 
 $$
 \begin{align*}
-&\text{$v$ is known, learn $w^{(1)},b^{(0)}$ by CD-k} \\\
-&\text{sample $h^{(1)}\sim q(h^{(1)}|v,w^{(1)})$} \\\
-&\text{$h^{(1)}$ is known, learn $w^{(2)},b^{(1)}$ by CD-k} \\\
-&\text{sample $h^{(2)}\sim q(h^{(2)}|h^{(1)},w^{(2)})$}
+&\text{$v$ is known, learn $w^{(1)},b^{(0)},b^{(1)}$ by modified CD-k} \\\
+&\text{sample $h^{(1)}\sim q(h^{(1)}|v,w^{(1)},b^{(1)})$} \\\
+&\text{$h^{(1)}$ is known, learn $w^{(2)},b^{(1)},b^{(2)}$ by modified CD-k} \\\
+&\text{sample $h^{(2)}\sim q(h^{(2)}|h^{(1)},w^{(2)},b^{(2)})$}
 \end{align*} \\\
 \cdots
 $$

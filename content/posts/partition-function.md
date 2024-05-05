@@ -557,7 +557,7 @@ $$
 #### CD-k for RBM
 {{< math.inline >}}
 <p>
-Suppose we are finding \( \frac{\partial}{\partial w_{ij}}\mathcal{L}(\theta) \), denote:
+Denote:
 </p>
 {{</ math.inline >}}
 
@@ -604,20 +604,18 @@ $$
     &\quad \text{For } l=1\cdots k-1 \\\
     &\quad\quad \text{For }j=1\cdots n \\\
     &\quad\quad\quad \text{sample simultaneously} \\\
-    &\quad\quad\quad o^{(1)<l+1>}\_{j},\cdots,o^{(N)<l+1>}\_{j} \sim p(o_j|h^{(1)\langle l \rangle}),\cdots,p(o_j|h^{(N)\langle l \rangle}) \\\
+    &\quad\quad\quad o^{(1)<l+1>}\_{j},\cdots,o^{(N)<l+1>}\_{j} \sim p(o_j|h^{(1)\langle l \rangle},\theta^{(t)}),\cdots,p(o_j|h^{(N)\langle l \rangle},\theta^{(t)}) \\\
     &\quad\quad\quad\quad \text{e.g. $p(o_j=1|h^{\langle l \rangle},\theta^{(t)})=\sigma(\sum_{i=1}^mw^{(t)}\_{ik}h^{\langle l \rangle}\_{i}+\alpha^{(t)}\_{k})$}  \\\
     &\quad\quad \text{For }i=1\cdots m \\\
     &\quad\quad\quad \text{sample simultaneously} \\\
-    &\quad\quad\quad h^{(1)\langle l \rangle}\_{i},\cdots,h^{(N)\langle l \rangle}\_{i} \sim p(h_i|o^{(1)\langle l \rangle},\theta^{(0)}),\cdots,p(h_i|o^{(N)\langle l \rangle},\theta^{(0)}) \\\
+    &\quad\quad\quad h^{(1)\langle l \rangle}\_{i},\cdots,h^{(N)\langle l \rangle}\_{i} \sim p(h_i|o^{(1)\langle l \rangle},\theta^{(t)}),\cdots,p(h_i|o^{(N)\langle l \rangle},\theta^{(t)}) \\\
     &\quad\quad\quad\quad \text{e.g. $p(h_i=1|o^{\langle l \rangle},\theta^{(t)})=\sigma(\sum_{j=1}^nw^{(t)}\_{kj}o^{\langle l \rangle}\_{j}+\beta^{(t)}\_{k})$}  \\\
 &3. \text{ cumulate $\Delta w\_{ij}$ from all samples: } \\\
     &\quad \text{For }i=1\cdots m,j=1\cdots n \\\
     &\quad\quad \text{For }s=1\cdots N \\\
-    &\quad\quad\quad \Delta w\_{ij} = \Delta w\_{ij} + \left( p(h_{i}=1|o^{(s)\langle 0 \rangle})o^{(s)\langle 0 \rangle}\_{j} - p(h_{i}=1|o^{(s)\langle k \rangle})o^{(s)\langle k \rangle}\_{j} \right) \\\
-    &\quad\quad\quad\quad\quad\quad\triangleq \Delta w\_{ij} + \left( h^{(s)\langle 0 \rangle}\_{i}o^{(s)\langle 0 \rangle}\_{j} - h^{(s)\langle k \rangle}\_{i}o^{(s)\langle k \rangle}\_{j} \right) \\\
+    &\quad\quad\quad \Delta w\_{ij} = \Delta w\_{ij} + \left( p(h_{i}=1|o^{(s)\langle 0 \rangle})o^{(s)\langle 0 \rangle}\_{j} - p(h_{i}=1|o^{(s)\langle k \rangle})o^{(s)\langle k \rangle}\_{j} \right) \triangleq \Delta w\_{ij} + \left( h^{(s)\langle 0 \rangle}\_{i}o^{(s)\langle 0 \rangle}\_{j} - h^{(s)\langle k \rangle}\_{i}o^{(s)\langle k \rangle}\_{j} \right) \\\
     &\quad\quad\quad \Delta \alpha\_{j} = \Delta \alpha\_{j} + \left( o^{(s)\langle 0 \rangle}\_{j}-o^{(s)\langle k \rangle}\_{j} \right) \\\
-    &\quad\quad\quad \Delta \beta\_{i} = \Delta \beta\_{i} + \left( p(h_{i}=1|o^{(s)\langle 0 \rangle})-p(h_{i}=1|o^{(s)\langle k \rangle}) \right) \\\
-    &\quad\quad\quad\quad\quad\quad\triangleq \Delta \beta\_{i} + \left( h^{(s)\langle 0 \rangle}\_{i} - h^{(s)\langle k \rangle}\_{i} \right) \\\
+    &\quad\quad\quad \Delta \beta\_{i} = \Delta \beta\_{i} + \left( p(h_{i}=1|o^{(s)\langle 0 \rangle})-p(h_{i}=1|o^{(s)\langle k \rangle}) \right) \triangleq \Delta \beta\_{i} + \left( h^{(s)\langle 0 \rangle}\_{i} - h^{(s)\langle k \rangle}\_{i} \right) \\\
 &4. \text{ update parameters until converge: } \\\
     &\quad w^{(t+1)} = w^{(t)} + \eta\left( \frac{1}{N} \begin{bmatrix}
     \Delta w\_{11} \\\
