@@ -62,7 +62,7 @@ draft: false
 ## Background
 ### Stochastic Back Propagation (Reparametrization Trick)
 
-Since NNs (Nerual Networks) are function approximators (universal approximators), an intuition is to use NN to approximate probability density just like what PGM represents, this technique is called stochastic back propagation or reparametrization trick.
+<cite>[^1]</cite>Since NNs (Nerual Networks) are function approximators (universal approximators), an intuition is to use NN to approximate probability density just like what PGM represents, this technique is called stochastic back propagation or reparametrization trick.
 
 Case 1: Approximating the Marginal Distribution
 
@@ -212,7 +212,11 @@ $$
 </p>
 {{</ math.inline >}}
 
+{{< math.inline >}}
+<p>
 The discriminator tries to dsicriminate every real and fake sample accurately. It uses a nerual network to approximate the discriminator function: \( D(x;\theta_d) \).
+</p>
+{{</ math.inline >}}
 
 $$
 x\in \lbrace P_{\text{data}}, G(z) \rbrace \rarr \text{NN}(\theta_d) \rarr Pr(x\text{ is real}) \\\
@@ -300,7 +304,7 @@ $$
 &= \min_{G} \mathbb{E}\_{x\sim p(x|\theta_g)}\left[\log\frac{p(x|\theta_g)}{p(x|\theta_g)+P_{\text{data}}}\right] + \mathbb{E}\_{x\sim P_{\text{data}}}\left[ \log \frac{P_{\text{data}}}{p(x|\theta_g)+P_{\text{data}}} \right] \\\
 &= \min_{G} \mathbb{E}\_{x\sim p(x|\theta_g)}\left[\log\frac{p(x|\theta_g)}{(p(x|\theta_g)+P_{\text{data}})\frac{1}{2}}\frac{1}{2}\right] + \mathbb{E}\_{x\sim P_{\text{data}}}\left[ \log \frac{P_{\text{data}}}{(p(x|\theta_g)+P_{\text{data}})\frac{1}{2}}\frac{1}{2} \right] \\\
 &\because \int \frac{1}{2}(p(x|\theta_g)+P_{\text{data}}) dx = \frac{1}{2}\int p(x|\theta_g)dx + \frac{1}{2}\int P_{\text{data}}dx= 1 \\\
-&\because \mathbb{E}\_{x\sim p(x|\theta_g)}\left[\log\Delta\frac{1}{2}\right] = \mathbb{E}\_{x\sim p(x|\theta_g)}\left[\log\Delta\right]+\mathbb{E}\_{x\sim p(x|\theta_g)}\left[\log\frac{1}{2}\right] \\\
+&\because \mathbb{E}\_{x\sim p(x|\theta_g)}\left[\log f(x)\frac{1}{2}\right] = \mathbb{E}\_{x\sim p(x|\theta_g)}\left[\log f(x)\right]+\mathbb{E}\_{x\sim p(x|\theta_g)}\left[\log\frac{1}{2}\right] \\\
 &= \min_{G} \text{KL}(p(x|\theta_g)||\frac{p(x|\theta_g)+P_{\text{data}}}{2}) + \text{KL}(P_{\text{data}}||\frac{p(x|\theta_g)+P_{\text{data}}}{2}) - 2\log2\\\
 &\geq -2\log2 \\\
 \\\
