@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: true
+draft: false
 ---
 
 :                                                         
@@ -59,9 +59,133 @@ draft: true
 }
 </style>
 
-## GAN Definition
+## Background
+### Stochastic Back Propagation (Reparametrization Trick)
+
+Since NNs (Nerual Networks) are function approximators (universal approximators), an intuition is to use NN to approximate probability density just like what PGM represents, this technique is called stochastic back propagation or reparametrization trick.
+
+Case 1: Approximating the Marginal Distribution
+
+{{< math.inline >}}
+<p>
+Let's consider a scenario where \(y\) follows a gaussian distribution, we use an easy to sample variable \( z \) to represents \( y \), \( z \) follows standard normal distribution:
+</p>
+{{</ math.inline >}}
+
+$$
+\text{Let } y \sim \mathcal{N}(\mu,\sigma^2), z \sim \mathcal{N}(0,1) \\\
+y = \mu+\sigma z = f(z,\mu,\sigma)
+$$
+
+{{< math.inline >}}
+<p>
+Suppose we approximate \( f(z,\mu,\sigma) \) with a neural network:
+</p>
+{{</ math.inline >}}
+
+$$
+z \rarr \text{NN}(\theta) \rarr y, \text{ where } \theta=(\mu,\sigma)
+$$
+
+{{< math.inline >}}
+<p>
+We define the loss function \(J(y)\) as the mean squared error between the predicted and actual values of \(y\):
+</p>
+{{</ math.inline >}}
+
+$$
+J(y)=\frac{1}{N}\sum_{i=1}^N\Vert y-y^{(i)} \rVert^2
+$$
+
+{{< math.inline >}}
+<p>
+We perform gradient descent to minimize this loss, where the gradient of the loss with respect to the parameters \( \theta \) is given by the chain rule:
+</p>
+{{</ math.inline >}}
+
+$$
+\nabla_{\theta}J(y) = \frac{\nabla J(y)}{\nabla y}\cdot\frac{\nabla y}{\nabla \theta}
+$$
+
+Case 2: Approximating the Conditional Distribution
+
+{{< math.inline >}}
+<p>
+Consider \( y|x \) follows a gaussian distribution, we use an easy to sample variable \( z \) to represents \( y|x \), \( z \) follows standard normal distribution:
+</p>
+{{</ math.inline >}}
+
+$$
+\text{Let } y|x \sim \mathcal{N}(x;\mu,\sigma^2), z \sim \mathcal{N}(0,1) \\\
+y = \mu(x)+\sigma(x) z = f(z,\mu_x,\sigma_x) \\\
+\mu_x = \mu(x), \sigma_x = \sigma(x)
+$$
+
+{{< math.inline >}}
+<p>
+Suppose we approximate \( \mu(x),\sigma(x) \) with a neural network:
+</p>
+{{</ math.inline >}}
+
+$$
+x \rarr \text{NN}(\theta) \rarr \begin{bmatrix}
+    \mu_x \\\
+    \sigma_x
+\end{bmatrix} \rarr f(z,\mu,\sigma) \rarr y
+$$
+
+{{< math.inline >}}
+<p>
+Define the same loss function \(J(y)\):
+</p>
+{{</ math.inline >}}
+
+$$
+J(y)=\frac{1}{N}\sum_{i=1}^N\Vert y-y^{(i)} \rVert^2
+$$
+
+{{< math.inline >}}
+<p>
+Perform gradient descent to minimize this loss:
+</p>
+{{</ math.inline >}}
+
+$$
+\nabla_{\theta}J(y) = \frac{\nabla J(y)}{\nabla y}\frac{\nabla y}{\nabla \mu(x)}\frac{\nabla \mu(x)}{\nabla \theta} + \frac{\nabla J(y)}{\nabla y}\frac{\nabla y}{\nabla \sigma(x)}\frac{\nabla \sigma(x)}{\nabla \theta}
+$$
+
+### Deep generative models
+
+<cite>[^2]</cite>
+
+$$
+\text{Maximum likelihood} \begin{cases}
+    \text{likelihood-based} \begin{cases}
+        \text{explicit density} \begin{cases}
+            \text{exact inference} 
+            \begin{cases}
+                \text{fully-observed} : \text{Autoregressive} \\\
+                \text{change of variable} : \text{Flow-based},\text{Nonlinear ICA}
+            \end{cases}\\\
+            \text{approximate inference} \begin{cases}
+                \text{variational inference} : \text{VAE} \\\
+                \text{MCMC} : \text{Energy-based}
+            \end{cases}
+        \end{cases}
+    \end{cases} \\\
+    \text{likelihood-free} \begin{cases}
+        \text{implicit density} \begin{cases}
+            \text{direct sample} : \text{GAN} \\\
+            \text{MCMC} : \text{GSN}
+        \end{cases}
+    \end{cases}
+\end{cases}
+$$
+
+GANs are likelihood-free models, which do not model the probability density.
+
+## GAN Model Definition
 ### Generator and discriminator
-<cite>[^1]</cite>
 
 {{< math.inline >}}
 <p>
@@ -73,21 +197,18 @@ $$
 P_{\text{data}} : \lbrace x_i \rbrace_{i=1}^N
 $$
 
-{{< math.inline >}}
-<p>
-As a adversarial game, the generator tries to generate fake data samples to imitate the real ones so that discriminator cannot figure it out.
-</p>
-{{</ math.inline >}}
+
+As a adversarial game, the generator tries to generate fake data samples to imitate the real ones so that discriminator cannot figure it out. The generation starts from a simple distribution ([Reparameterization trick](#stochastic-back-propagation-reparametrization-trick)).
 
 $$
 z \rarr \text{NN}(\theta_g) \rarr x \\\
 G(z;\theta_g) = \text{NN}(\theta_g) \\\
-z \sim p(z|\theta_z), x \sim p(x|\theta_g)\triangleq G(z;\theta_g) \\\
+z \sim p(z|\theta_z), x=G(z;\theta_g) \sim p(x|\theta_g)  \\\
 $$
 
 {{< math.inline >}}
 <p>
-\( G(z;\theta_g) \) is the generator function approximated by a nerual network. As mentioned in reparameterization trick, \( x \) comes from easy to sample \( z \).
+\( G(z;\theta_g) \) is the generator function approximated by a nerual network. As mentioned before, \( x \) comes from easy to sample \( z \).
 </p>
 {{</ math.inline >}}
 
@@ -134,17 +255,16 @@ $$
 The optimization object becomes:
 
 $$
-\min_{G}\max_{D}V(D,G) \\\
-D,G \text{ are probability density function}
+\min_{G}\max_{D}V(D,G)
 $$
 
 For any minimax problem, we can solve inner problem first then solve outer problem:
 
 $$
-\min_{G}\max_{D}V(D,G) : \begin{cases}
-    1. f(G) = \max_{D}V(D,G) \\\
-    2. \min_{G} f(G)
-\end{cases}
+\begin{align*}
+    &1. f(G) = \max_{D}V(D,G) \\\
+    &2. \min_{G} f(G)
+\end{align*}
 $$
 
 {{< math.inline >}}
@@ -193,6 +313,7 @@ $$
 The global optimality is:
 
 $$
+(\hat{D},\hat{G}) = \arg\min_{G}\max_{D} V(D,G) \\\
 \begin{align*}
 \hat{G}(z) &\sim P_{\text{data}} \\\
 \hat{D}(x) &= \frac{1}{2} 
@@ -210,7 +331,7 @@ In conslusion, generator's optimality reaches indentically the same distribution
 [^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=167).
 [^4]: From [Higham, Nicholas (2002). Accuracy and Stability of Numerical Algorithms](https://archive.org/details/accuracystabilit00high_878).
 [^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
-[^2]: - [Deep Boltzmann Machines. Ruslan Salakhutdinov, Geoffrey Hinton](http://www.cs.toronto.edu/~hinton/absps/dbm.pdf).
+[^2]: - [NIPS 2016 Tutorial: Generative Adversarial Networks. Ian Goodfellow](https://arxiv.org/pdf/1701.00160).
 [^7]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
 [^6]: - [Gaussian Processes and Gaussian Markov Random Fields](https://folk.ntnu.no/joeid/MA8702/jan16.pdf)
 [^3]: - [A fast learning algorithm for deep belief nets. Geoffrey E. Hinton, Simon Osindero, Yee-Whye Teh](https://www.cs.toronto.edu/~hinton/absps/fastnc.pdf).
