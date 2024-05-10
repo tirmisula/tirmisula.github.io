@@ -282,7 +282,7 @@ $$
 
 
 ## Contrative divergence vs KL divergence
-### KL divergence in MLE
+### KL divergence and MLE
 In original maximum likelihood estimation we have:
 
 $$
