@@ -76,9 +76,9 @@ $$
 \end{align*}
 $$
 
-### Objective funciton
+### Object function
 
-Since VAE is a likelihood-based generative model, according to [variational inference chapter](), the log-likelihood of any latent variable model like VAE is given by:
+Since VAE is a likelihood-based generative model, according to [variational inference chapter](), the log-likelihood of any latent variable models like VAE is given by:
 
 $$
 \begin{align*}
@@ -87,14 +87,37 @@ $$
 \end{align*}
 $$
 
+{{< math.inline >}}
+<p>
+Maximizing the ELBO is equivalent to maximizing the log-likelihood while simultaneously minimizing the KL divergence \( \text{KL}(q(z|x,\phi)||p(z|x,\theta))=0 \):
+</p>
+{{</ math.inline >}}
 
+$$
+\begin{align*}
+(\hat{\theta},\hat{\phi}) &= \argmin_{\theta,\phi} \text{KL}(q(z|x,\phi)||p(z|x,\theta)) \\\
+&= \argmax_{\theta,\phi} \text{ELBO} \\\
+&= \argmax_{\theta,\phi} \mathbb{E}\_{z\sim q(z|x,\phi)}[\log p(x,z|\theta)] + H[q_{\phi}(z)] \\\
+&= \argmax_{\theta,\phi} \mathbb{E}\_{z\sim q(z|x,\phi)}[\log p(x|z,\theta)+\log p(z|\theta)] - \mathbb{E}\_{z\sim q(z|x,\phi)}[\log q(z|x,\phi)] \\\
+&= \argmax_{\theta,\phi} \mathbb{E}\_{z\sim q(z|x,\phi)}[\log p(x|z,\theta)] - \text{KL}(q(z|x,\phi)||p(z|\theta)) \\\
+\end{align*}
+$$
 
-## Inference and Learning
-### Log-likelihood of p(x) in VAE
+### Model selection
 
 {{< math.inline >}}
 <p>
-Posterier inference in VAE is hard because \( p(z|x) \) is intractable:
+Given the training object above, \( q(z|x,\phi), p(x|z,\theta), p(z|\theta) \) are unknown and need to be defined. For sampling convenience, prior \( p(z|\theta) \) is assumed to be standard normal distribution:
+</p>
+{{</ math.inline >}}
+
+$$
+z \sim \mathcal{N}(0,I)
+$$
+
+{{< math.inline >}}
+<p>
+As for sampling from \( q(z|x,\phi) \), because posterier \( p(z|x) \) is intractable :
 </p>
 {{</ math.inline >}}
 
@@ -107,10 +130,65 @@ p(x) &= \int p(z)p(x|z,\theta)dz \\\
 \end{align*}
 $$
 
+{{< math.inline >}}
+<p>
+We assume \( q(z|x,\phi) \) is approximated by a neural network (Encoder) which follows conditional Gaussian distribution, reparameterization trick is used:
+</p>
+{{</ math.inline >}}
 
+$$
+\begin{align*}
+\epsilon &\sim \mathcal{N}(0,I) \\\
+z &= \mu(x;\phi) + \Sigma(x;\phi)^{\frac{1}{2}}\cdot\epsilon \\\
+z|x,\phi &\sim \mathcal{N}(\mu(x;\phi),\Sigma(x;\phi))
+\end{align*} \\\
+x,\epsilon \rarr \text{Encoder}(\phi) \rarr z
+$$
 
-GMM shares the similar learning object as VAE, so it will be reviewed first.
+{{< math.inline >}}
+<p>
+As for sampling from generative model \( p(x|z,\theta) \),  the simplest distribution for gradient computation is Gaussian. We assume \( p(x|z,\theta) \) is approximated by a neural network (Decoder) which follows conditional Gaussian distribution:
+</p>
+{{</ math.inline >}}
 
+$$
+\begin{align*}
+x|z,\theta &\sim \mathcal{N}(\mu(z;\theta),\Sigma(z;\theta))
+\end{align*} \\\
+z \rarr \text{Decoder}(\theta) \rarr \tilde{x}
+$$
+
+Combining encoder and decoder together we have:
+
+$$
+\text{For each obsevation $x^{(i)}, i=1\cdots N$} \\\
+x^{(i)},\epsilon \rarr \text{Encoder} \rarr z^{(i)} \rarr \text{Decoder} \rarr \tilde{x}^{(i)}
+$$
+
+### Understanding object function
+
+Understanding the object function from encoder/decoder model perspective:
+
+$$
+\begin{align*}
+\because\log p(x|z,\theta) &= \frac{1}{2}\lVert \frac{x-\mu(z;\theta)}{\sigma(z)} \rVert^2+\frac{D}{2}\log 2\pi+\frac{1}{2}\sum_{i=1}^D\log\sigma^2\_{i}(z) \\\
+&\text{Let $\sigma^2(z)$ be constant} \\\
+&\propto \frac{1}{2\sigma^2}\lVert x-\mu(z;\theta) \rVert^2 \\\
+&\propto \frac{1}{2\sigma^2}\lVert x-\tilde{x} \rVert^2
+\end{align*} \\\
+\dArr
+$$
+
+$$
+\begin{align*}
+\argmax_{\theta,\phi} \mathbb{E}\_{z\sim q(z|x,\phi)}[\log p(x|z,\theta)] &: \argmin \lVert x-\tilde{x} \rVert^2_2 \\\
+\argmax_{\theta,\phi} -\text{KL}(q(z|x,\phi)||p(z|\theta)) &: \text{Regularize $q(z|x,\phi)$ by prior $p(z)$}
+\end{align*}
+$$
+
+In conlusion, VAE tries to minimize reconstruction loss while at the same time preventing overfitting.
+
+## Inference and Learning
 ### Review learning in GMM
 
 Recall that [EM algorithm](https://tirmisula.github.io/posts/gaussian-mixture-model/#em-algorithm-on-gmm) is used for parameter learning in GMM, the E-step and M-step are given by:
@@ -126,63 +204,94 @@ $$
 \end{align*}
 $$
 
-### SGVI for VAE learning
+### SGVI for VAE
 
-As VAE's name implies, [SGVI]() (stochastic gradient variational inference) is used for posterier inference.
+As VAE's name implies, [SGVI](https://tirmisula.github.io/posts/variational-inference/#stochastic-gradient-vi) (stochastic gradient variational inference) is used for posterier inference. The ELBO is:
+
+$$
+\text{ELBO}(\theta,\phi) = \mathbb{E}\_{z\sim q(z|x,\phi)}[\log p(x|z,\theta)] - \text{KL}(q(z|x,\phi)||p(z|\theta))
+$$
+
+#### Gradient with respect to theta
+
+$$
+\begin{align*}
+\nabla_{\theta}\text{ELBO} &= \nabla_{\theta}\mathbb{E}\_{z\sim q(z|x,\phi)}[\log p(x|z,\theta)] \\\
+&= \mathbb{E}\_{z\sim q(z|x,\phi)}[\nabla_{\theta}\log p(x|z,\theta)] \\\
+&\text{By MCMC} \\\
+&\approx \frac{1}{L}\sum_{i=1}^L\nabla_{\theta}\log p(x|z^{(i)},\theta)
+\end{align*}
+$$
+
+Referencing [GDA chapter](https://tirmisula.github.io/posts/gaussian-discriminant-analysis/#solve-parameters) (Gaussian Discriminant Analysis), partial derivative w.r.t. mu and sigma are given by:
+
+$$
+\begin{align*}
+\nabla_{\theta}\log p(x|z^{(i)},\theta) &= \frac{\partial\log p(x|z^{(i)},\theta)}{\partial \mu(z^{(i)};\theta)}\cdot\nabla_{\theta}\mu(z^{(i)};\theta)  + \frac{\partial\log p(x|z^{(i)},\theta)}{\partial \Sigma(z^{(i)};\theta)}\cdot\nabla_{\theta}\Sigma(z^{(i)};\theta)  \\\
+\text{where} \\\
+\frac{\partial\log p(x|z^{(i)},\theta)}{\partial \mu(z^{(i)};\theta)} &= \Sigma^{(-1)}(z^{(i)};\theta)(x-\mu(z^{(i)};\theta)) \\\
+ \frac{\partial\log p(x|z^{(i)},\theta)}{\partial \Sigma(z^{(i)};\theta)} &= -\frac{1}{2}\left( \Sigma^{-1}(z^{(i)};\theta)-Var(x)\Sigma^{-2}(z^{(i)};\theta) \right)
+\end{align*}
+$$
+
+#### Gradient with respect to phi
 
 {{< math.inline >}}
 <p>
-Similar to <a href="https://tirmisula.github.io/posts/generative-adversarial-network/#stochastic-back-propagation-reparametrization-trick">GANs</a>, VAE uses nerual network to approximate \( \mu(z),\Sigma(z) \). However inference is hard because posterier \( p(z|x) \) is intractable:
+Gradient with respect to \( \\phi \):
 </p>
 {{</ math.inline >}}
 
-
 $$
 \begin{align*}
-p(z|x) &= \frac{p(z)p(x|z,\theta)}{p(x)}, \text{where } \\\ 
-p(x) &= \int p(z)p(x|z,\theta)dz \\\
-&\because\text{integrate on high-dimensional $z$ is hard} \\\
-&\therefore\text{$p(x)$ is intractable, $p(z|x)$ is intractable}
+\nabla_{\phi}\text{ELBO} &= \nabla_{\phi}\mathbb{E}\_{z\sim q(z|x,\phi)}[\log p(x|z,\theta)] - \nabla_{\phi}\mathbb{E}\_{z\sim q(z|x,\phi)}[\log q(z|x,\phi)-\log p(z)] \\\
+&= \mathbb{E}\_{z\sim q(z|x,\phi)}[\nabla_{\phi}\log p(x|z,\theta)] - \mathbb{E}\_{z\sim q(z|x,\phi)}[\nabla_{\phi}\log q(z|x,\phi)-\nabla_{\phi}\log p(z)] \\\
+&\text{By reparameterization trick, } z^{(i)}=g(\epsilon,x,\phi)=\mu(x^{(i)};\phi)+\Sigma(x^{(i)};\phi)^{\frac{1}{2}}\cdot\epsilon \\\
+&= \mathbb{E}\_{\epsilon\sim\mathcal{N}(0,I)}[\nabla_{\phi}\log p(x|g(\epsilon,x,\phi),\theta)] - \mathbb{E}\_{\epsilon\sim\mathcal{N}(0,I)}[\nabla_{\phi}\log q(g(\epsilon,x,\phi)|x,\phi)-\nabla_{\phi}\log p(g(\epsilon,x,\phi))] \\\
+&\text{By MCMC} \\\
+&\approx \frac{1}{L}\sum_{i=1}^L\nabla_{\phi}\log p(x|z^{(i)},\theta) - \frac{1}{L}\sum_{i=1}^L\nabla_{\phi}\log q(z^{(i)}|x,\phi)
 \end{align*}
 $$
 
-The optimization object is:
+Similarly, we have:
 
 $$
 \begin{align*}
-(\hat{\theta},\hat{\phi}) &= \argmin_{\theta,\phi} \text{KL}(q(z|x,\phi)||p(z|x,\theta)) \\\
-&= \argmax_{\theta,\phi} \text{ELBO} \\\
-&= \argmax_{\theta,\phi} \mathbb{E}\_{z\sim q(z|x,\phi)}[\log p(x,z|\theta)] + H[q_{\phi}(z)] \\\
-&= \argmax_{\theta,\phi} \mathbb{E}_{z\sim q(z|x,\phi)}[\log p(x|z,\theta)+\log p(z|\theta)] - \mathbb{E}_{z\sim q(z|x,\phi)}[\log q(z|x,\phi)] \\\
-&= \argmax_{\theta,\phi} \mathbb{E}_{z\sim q(z|x,\phi)}[\log p(x|z,\theta)] - \text{KL}(q(z|x,\phi)||p(z|\theta)) \\\
+\nabla_{\phi}\log q(z^{(i)}|x,\phi) &= \frac{\partial\log q(z^{(i)}|x,\phi)}{\partial \mu(x^{(i)};\phi)}\cdot\nabla_{\phi}\mu(x^{(i)};\phi)  + \frac{\partial\log q(z^{(i)}|x,\phi)}{\partial \Sigma(x^{(i)};\phi)}\cdot\nabla_{\phi}\Sigma(x^{(i)};\phi)  \\\
+\text{where} \\\
+\frac{\partial\log q(z^{(i)}|x,\phi)}{\partial \mu(x^{(i)};\phi)} &= \Sigma^{(-1)}(x^{(i)};\phi)(z-\mu(x^{(i)};\phi)) \\\
+ \frac{\partial\log q(z^{(i)}|x,\phi)}{\partial \Sigma(x^{(i)};\phi)} &= -\frac{1}{2}\left( \Sigma^{-1}(x^{(i)};\phi)-Var(z)\Sigma^{-2}(x^{(i)};\phi) \right)
 \end{align*}
 $$
 
-The optimization object becomes:
-
 $$
-\min_{G}\max_{D}V(D,G)
-$$
-
-For any minimax problem, we can solve inner problem first then solve outer problem:
-
-
-
-The global optimality is:
-
-$$
-(\hat{D},\hat{G}) = \arg\min_{G}\max_{D} V(D,G) \\\
 \begin{align*}
-\hat{G}(z) &\sim P_{\text{data}} \\\
-\hat{D}(x) &= \frac{1}{2} 
+\nabla_{\phi}\log p(x|z^{(i)},\theta) &= \frac{\partial \log p(x|z^{(i)},\theta)}{\partial z}\cdot\frac{\partial z}{\partial \phi} \\\
+&= \left[ \frac{\partial\log p(x|z^{(i)},\theta)}{\partial \mu(z^{(i)};\theta)}\cdot\frac{\partial\mu(z^{(i)};\theta)}{\partial z}  + \frac{\partial\log p(x|z^{(i)},\theta)}{\partial \Sigma(z^{(i)};\theta)}\cdot\frac{\partial\Sigma(z^{(i)};\theta)}{\partial z} \right]\cdot\frac{\partial z}{\partial \phi} \\\
+\text{where} \\\
+\frac{\partial\log p(x|z^{(i)},\theta)}{\partial \mu(z^{(i)};\theta)} &= \Sigma^{(-1)}(z^{(i)};\theta)(x-\mu(z^{(i)};\theta)) \\\
+ \frac{\partial\log p(x|z^{(i)},\theta)}{\partial \Sigma(z^{(i)};\theta)} &= -\frac{1}{2}\left( \Sigma^{-1}(z^{(i)};\theta)-Var(x)\Sigma^{-2}(z^{(i)};\theta) \right) \\\
+ \frac{\partial z}{\partial \phi} &= \frac{\partial \mu(x^{(i)};\phi)}{\partial \phi}+\epsilon\frac{\partial\Sigma(x^{(i)};\phi)}{\partial \phi}
 \end{align*}
 $$
 
-{{< math.inline >}}
-<p>
-In conslusion, generator's optimality reaches indentically the same distribution as \( P_{\text{data}} \) which satisfies the object: imitating real samples. At the same time, discriminator always outputs \( \frac{1}{2} \) which provides no valuable information for generator's further training.
-</p>
-{{</ math.inline >}}
+#### Stochastic gradient update
+
+$$
+\text{For iteration $t=1\cdots T$} \\\
+\begin{align*}
+\theta^{(t+1)} &\larr \theta^{(t)} + \eta^{(t)}\left( \frac{1}{L}\sum_{i=1}^L\nabla_{\theta}\log p(x|z^{(i)},\theta) \right) \\\
+\phi^{(t+1)} &\larr \phi^{(t)} + \eta^{(t)}\left( \frac{1}{L}\sum_{i=1}^L\nabla_{\phi}\log p(x|z^{(i)},\theta) - \frac{1}{L}\sum_{i=1}^L\nabla_{\phi}\log q(z^{(i)}|x,\phi) \right)
+\end{align*}
+$$
+
+## Data Generation
+
+Since encoder is used for approximating MLE, it can be dropped after training. We can generate data we want by:
+
+$$
+z\sim p(z)=\mathcal{N}(0,I) \rarr \text{Decoder} \rarr \text{new data $x$}
+$$
 
 ## Reference
 
