@@ -314,7 +314,7 @@ p(x|\theta_g) &=\frac{p(x|\theta_g)+P_{\text{data}}}{2} = P_{\text{data}} \\\
 \end{align*}
 $$
 
-The global optimality is:
+The global optimality (the unique equilibrium point) is:
 
 $$
 (\hat{D},\hat{G}) = \arg\min_{G}\max_{D} V(D,G) \\\

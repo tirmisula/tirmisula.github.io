@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: true
+draft: false
 ---
 
 :                                                         
@@ -103,7 +103,7 @@ $$
 \end{align*}
 $$
 
-### Model selection
+### Model assumption for p(z),q(z|x),p(x|z)
 
 {{< math.inline >}}
 <p>
@@ -167,7 +167,7 @@ $$
 
 ### Understanding object function
 
-Understanding the object function from encoder/decoder model perspective:
+Object function from encoder/decoder model perspective:
 
 $$
 \begin{align*}
@@ -272,6 +272,67 @@ $$
 \frac{\partial\log p(x|z^{(i)},\theta)}{\partial \mu(z^{(i)};\theta)} &= \Sigma^{(-1)}(z^{(i)};\theta)(x-\mu(z^{(i)};\theta)) \\\
  \frac{\partial\log p(x|z^{(i)},\theta)}{\partial \Sigma(z^{(i)};\theta)} &= -\frac{1}{2}\left( \Sigma^{-1}(z^{(i)};\theta)-Var(x)\Sigma^{-2}(z^{(i)};\theta) \right) \\\
  \frac{\partial z}{\partial \phi} &= \frac{\partial \mu(x^{(i)};\phi)}{\partial \phi}+\epsilon\frac{\partial\Sigma(x^{(i)};\phi)}{\partial \phi}
+\end{align*}
+$$
+
+#### Partial derivatives in NN
+
+{{< math.inline >}}
+<p>
+Suppose we have one hidden layer for encoder:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+h_1 &= \sigma(W_1x+b_1) \\\
+\mu(x;\phi) &= W_2h_1+b_2
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+\( \frac{\partial \mu(x^{(i)};\phi)}{\partial \phi} \) is given by:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\frac{\partial \mu(x^{(i)};\phi)}{\partial W_2} &= h_1 \\\
+\frac{\partial \mu(x^{(i)};\phi)}{\partial b_2} &= 1 \\\
+\frac{\partial \mu(x^{(i)};\phi)}{\partial W_1} &= \frac{\partial \mu(x^{(i)};\phi)}{\partial h_1}\frac{\partial h_1}{\partial W_1}=W_2\sigma^{'}(W_1x+b_1)x \\\
+\frac{\partial \mu(x^{(i)};\phi)}{\partial b_1} &= \frac{\partial \mu(x^{(i)};\phi)}{\partial h_1}\frac{\partial h_1}{\partial b_1}=W_2\sigma^{'}(W_1x+b_1) \\\
+&\text{The same applies to }\partial \Sigma(x^{(i)};\phi)
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Suppose we have one hidden layer for decoder:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+h_2 &= \sigma(W_3z+b_3) \\\
+\mu(z;\theta) &= W_4h_2+b_4
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Similarly, \( \frac{\partial \mu(z^{(i)};\theta)}{\partial \theta} \) is given by:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\frac{\partial \mu(z^{(i)};\theta)}{\partial W_4} &= h_3 \\\
+\frac{\partial \mu(z^{(i)};\theta)}{\partial b_4} &= 1 \\\
+\frac{\partial \mu(z^{(i)};\theta)}{\partial W_3} &= W_4\sigma^{'}(W_3x+b_3)z \\\
+\frac{\partial \mu(z^{(i)};\theta)}{\partial b_3} &= W_4\sigma^{'}(W_3x+b_3) \\\
+\frac{\partial \mu(z^{(i)};\theta)}{\partial z} &= \frac{\partial \mu(z^{(i)};\theta)}{h_2}\frac{\partial h_2}{\partial z} = W_4\sigma^{'}(W_3x+b_3)W_3  \\\
+&\text{The same applies to }\partial \Sigma(z^{(i)};\theta) \\\
 \end{align*}
 $$
 
