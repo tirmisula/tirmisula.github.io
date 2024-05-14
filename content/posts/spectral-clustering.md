@@ -1,7 +1,7 @@
 ---
 author: "X. Wang"
-title: "Variational AutoEncoder"
-date: "2023-10-02"
+title: "Spectral Clustering"
+date: "2023-10-03"
 description: "A brief introduction."
 tags: ["machine learning"]
 categories: ["themes", "syntax"]
@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: false
+draft: true
 ---
 
 :                                                         
@@ -59,90 +59,193 @@ draft: false
 }
 </style>
 
-## VAE Model Representation
-### VAE vs GMM
-A brief overview of VAEs is: they are similar to [GMM](https://tirmisula.github.io/posts/gaussian-mixture-model/#definition-of-gmm) (Gaussian Mixture Model), but with several differences:
+## Background of Clustering
+
+In the field of machine learning, particularly in the context of clustering algorithms, we often categorize methods based on their primary characteristics. Here are two such categories:
+
+$$
+\begin{cases}
+    \text{compactness: K-means, GMM} \\\
+    \text{connectivity: Spectral clustering}
+\end{cases}
+$$
+
+Compactness-based methods like K-means and GMMs tend to form clusters that are spatially close to each other, while connectivity-based methods like Spectral Clustering group together points that are connected or have a high degree of similarity.
+
+## Model Definition
+
+Spectral clustering is a clustering method based on graph. Given a dataset:
+
+$$
+X = \lbrace x_1,\cdots,x_N \rbrace, x_i\in\mathbb{R}^p
+$$
+
+Define the corresponding undirected weighted graph:
 
 $$
 \begin{align*}
-\text{GMM} &: \text{finite Gaussians mixture} \\\
-\text{VAE} &: \text{infinite Gaussians mixture} \\\
+G &= (V,E) \\\
+% V &:\text{vertices $\lbrace 1,\cdots,N \rbrace$ correspond to $\lbrace x_1,\cdots,x_N \rbrace$} \\\
+V &= \lbrace \text{vertices}|i \rbrace, i=1\cdots N \\\
+E &= \lbrace \text{edges}|(i,j) \rbrace, 1 \leq i,j \leq N \\\
+W &: \text{similarity matrix, where } w_{ij} = \begin{cases}
+    K(x_i,x_j)=\exp(-\frac{\lVert x_i-x_j \rVert^2_2}{2\sigma^2}) & (i,j)\in E \\\
+    0 & (i,j)\notin E
+\end{cases}
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Define connectivity between two clusters \( A,B \) as \( W(A,B) \):
+</p>
+{{</ math.inline >}}
+
+$$
+A,B \in V, A \cap B = \empty \\\
+W(A,B) = \sum_{\begin{subarray}{c}
+    i\in A \\\
+    j\in B
+\end{subarray}}w_{ij}
+$$
+
+{{< math.inline >}}
+<p>
+Suppose we are splitting \( X \) into \( K \) clusters, which corresponds to a graph cut:
+</p>
+{{</ math.inline >}}
+
+$$
+\text{Let }V = \cup_{j=1}^K A_k, \space A_i \cap A_j = \empty, \space i,j\in1\cdots K \\\
 \\\
-\text{GMM} &: \text{$z$ is discrete, 1 dimension} \\\
-\text{VAE} &: \text{$z$ is continous, multi-dimensions} \\\
-\\\
-\text{GMM} &: z \sim \text{Categorical}, x|z_k \sim \mathcal{N}(\mu_k,\Sigma_k) \\\
-\text{VAE} &: z \sim \mathcal{N}(0,I),z\text{ is prior}, x|z \sim \mathcal{N}(\mu(z;\theta),\Sigma(z;\theta))
-\end{align*}
-$$
-
-### Objective function
-
-Since VAE is a likelihood-based generative model, according to [variational inference chapter](), the log-likelihood of any latent variable models like VAE is given by:
-
-$$
 \begin{align*}
-\log p(x) &= \int_{z}q(z|x)\log\frac{p(x,z)}{q(z|x)}\space dz - \int_{z}q(z|x)\log\frac{p(z|x)}{q(z|x)}\space dz \\\ \\\
-&= \text{ELBO} + \text{KL}(q(z|x,\phi)||p(z|x,\theta))
+\text{cut}(V) &= \text{cut}(A_1,\cdots,A_K) \\\
+&= \sum_{k=1}^KW(A_k,\neg A_{k}) \\\
+&= \sum_{k=1}^KW(A_k,V)-W(A_k,A_k)
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-Maximizing the ELBO is equivalent to maximizing the log-likelihood while simultaneously minimizing the KL divergence \( \text{KL}(q(z|x,\phi)||p(z|x,\theta))=0 \):
+\( \text{cut}(V) \) is a measurement of similarity between clusters, which can be normalized by out-degree:
+</p>
+{{</ math.inline >}}
+
+$$
+\text{Let } \text{degree}(A_k) \text{ be the summation of out-degree from $A_k$} \\\
+\text{degree}(A_k) = \sum_{i\in A_k}\sum_{j=1}^Nw_{ij} \\\
+\text{norm-}W(A_k,\neg A_k) = \frac{W(A_k,\neg A_{k})}{\text{degree}(A_k)}
+$$
+
+The spectral clustering problem can be deduced to minimize objective function:
+
+$$
+\min_{A_1\cdots A_K}\text{norm-cut}(V) = \min_{A_1\cdots A_K}\sum_{k=1}^K\frac{W(A_k,\neg A_{k})}{\sum_{i\in A_k}\sum_{j=1}^Nw_{ij}}
+$$
+
+## Model Representation in Vector Form
+
+{{< math.inline >}}
+<p>
+Define a one-hot encode indicator matrix \( Y \), which represents \( A_1\cdots A_K \):
+</p>
+{{</ math.inline >}}
+
+$$
+Y_{N\times K} = \begin{bmatrix}
+    y_1 & \cdots & y_N
+\end{bmatrix}^T, y_i = \begin{bmatrix}
+    y_{i1} \\\
+    \vdots \\\
+    y_{iK}
+\end{bmatrix} \\\
+\sum_{j=1}^Ky_{ij}=1, \space y_{ij}=\lbrace 0,1 \rbrace \\\
+y_{ij}=1 \hArr \text{i-th sample partitioned to j-th cluster}
+$$
+
+{{< math.inline >}}
+<p>
+Thus the objective function can be written as:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-(\hat{\theta},\hat{\phi}) &= \argmin_{\theta,\phi} \text{KL}(q(z|x,\phi)||p(z|x,\theta)) \\\
-&= \argmax_{\theta,\phi} \text{ELBO} \\\
-&= \argmax_{\theta,\phi} \mathbb{E}\_{z\sim q(z|x,\phi)}[\log p(x,z|\theta)] + H[q_{\phi}(z)] \\\
-&= \argmax_{\theta,\phi} \mathbb{E}\_{z\sim q(z|x,\phi)}[\log p(x|z,\theta)+\log p(z|\theta)] - \mathbb{E}\_{z\sim q(z|x,\phi)}[\log q(z|x,\phi)] \\\
-&= \argmax_{\theta,\phi} \mathbb{E}\_{z\sim q(z|x,\phi)}[\log p(x|z,\theta)] - \text{KL}(q(z|x,\phi)||p(z|\theta)) \\\
+\hat{Y} = \argmin_{Y}\text{norm-cut}(V)
 \end{align*}
 $$
 
-### Model assumption for p(z),q(z|x),p(x|z)
-
 {{< math.inline >}}
 <p>
-Given the training object above, \( q(z|x,\phi), p(x|z,\theta), p(z|\theta) \) are unknown and need to be defined. For sampling convenience, prior \( p(z|\theta) \) is assumed to be standard normal distribution:
-</p>
-{{</ math.inline >}}
-
-$$
-z \sim \mathcal{N}(0,I)
-$$
-
-{{< math.inline >}}
-<p>
-As for sampling from \( q(z|x,\phi) \), because posterier \( p(z|x) \) is intractable :
+On the other hand, \( \sum_{k=1}^K\frac{W(A_k,\neg A_{k})}{\sum_{i\in A_k}\sum_{j=1}^Nw_{ij}} \) is representable by matrix trace:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-p(z|x,\theta) &= \frac{p(z)p(x|z,\theta)}{p(x)}, \text{where } \\\ 
-p(x) &= \int p(z)p(x|z,\theta)dz \\\
-&\because\text{find integral on high-dimensional $z$ is hard} \\\
-&\therefore\text{$p(x)$ is intractable, $p(z|x,\theta)$ is intractable}
+\sum_{k=1}^K\frac{W(A_k,\neg A_{k})}{\sum_{i\in A_k}\sum_{j=1}^Nw_{ij}} &= Tr\left( \begin{bmatrix}
+    \frac{W(A_1,\neg A_{1})}{\sum_{i\in A_1}\sum_{j=1}^Nw_{ij}} & & \\\
+    & \ddots & \\\
+    & & \frac{W(A_K,\neg A_{K})}{\sum_{i\in A_K}\sum_{j=1}^Nw_{ij}}
+\end{bmatrix} \right) \\\
+&= Tr\left( \begin{bmatrix}
+    W(A_1,\neg A_{1}) & & \\\
+    & \ddots & \\\
+    & & W(A_K,\neg A_{K})
+\end{bmatrix} \begin{bmatrix}
+    \sum_{i\in A_1}\sum_{j=1}^Nw_{ij} & & \\\
+    & \ddots & \\\
+    & & \sum_{i\in A_K}\sum_{j=1}^Nw_{ij}
+\end{bmatrix}^{-1} \right) \\\
+&\because Y^TIY = \begin{bmatrix}
+    y_1 & \cdots & y_N
+\end{bmatrix} \begin{bmatrix}
+    y^T_1 \\\
+    \vdots \\\
+    y^T_N
+\end{bmatrix} = \sum_{i=1}^Ny_i1y^T_i = \sum_{i=1}^N\text{diag}(y_i) = \begin{bmatrix}
+    |A_1| & & \\\
+    & \ddots & \\\
+    & & |A_K|
+\end{bmatrix} = \begin{bmatrix}
+    \sum_{i\in A_1}1 & & \\\
+    & \ddots & \\\
+    & & \sum_{i\in A_K}1
+\end{bmatrix} \\\
+&\text{Let } d_i =\sum_{j=1}^Nw_{ij} \text{, we have } \sum_{i=1}^Ny_id_iy^T_i = \sum_{i=1}^N\text{diag}(d_iy_i) = \begin{bmatrix}
+    \sum_{i\in A_1}d_1 & & \\\
+    & \ddots & \\\
+    & & \sum_{i\in A_K}d_K
+\end{bmatrix} = \begin{bmatrix}
+    \sum_{i\in A_1}\sum_{j=1}^Nw_{ij} & & \\\
+    & \ddots & \\\
+    & & \sum_{i\in A_K}\sum_{j=1}^Nw_{ij}
+\end{bmatrix} \\\
+&\text{Let }D = \begin{bmatrix}
+    d_1 & & \\\
+    & \ddots & \\\
+    & & d_N
+\end{bmatrix} =\text{diag}(\begin{bmatrix}
+    W_{1,:} \mathbf{1}\_{N} \\\
+    \vdots \\\
+    W_{N,:} \mathbf{1}\_{N}
+\end{bmatrix}) = \text{diag}(W\mathbf{1}\_{N}) \text{, so we have } \sum_{i=1}^Ny_id_iy^T_i = Y^TDY \\\
+&= Tr\left( \begin{bmatrix}
+    W(A_1,\neg A_{1}) & & \\\
+    & \ddots & \\\
+    & & W(A_K,\neg A_{K})
+\end{bmatrix} (Y^TDY)^{-1} \right) \\\
+&\because \sum_{j=1}^Nw_{ij} = W_{i:}\begin{bmatrix}
+    1 \\\
+    \vdots \\\
+    1
+\end{bmatrix}_{N} \\\
+&\therefore \begin{bmatrix}
+    \sum_{j=1}^Nw_{ij} & & \\\
+    & \ddots & \\\
+    & & \sum_{j=1}^Nw_{ij}
+\end{bmatrix} = 
 \end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-We assume \( q(z|x,\phi) \) is approximated by a neural network (Encoder) which follows conditional Gaussian distribution, reparameterization trick is used:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-\epsilon &\sim \mathcal{N}(0,I) \\\
-z &= \mu(x;\phi) + \Sigma(x;\phi)^{\frac{1}{2}}\cdot\epsilon \\\
-z|x,\phi &\sim \mathcal{N}(\mu(x;\phi),\Sigma(x;\phi))
-\end{align*} \\\
-x,\epsilon \rarr \text{Encoder}(\phi) \rarr z
 $$
 
 {{< math.inline >}}
@@ -165,7 +268,7 @@ $$
 x^{(i)},\epsilon \rarr \text{Encoder} \rarr z^{(i)} \rarr \text{Decoder} \rarr \tilde{x}^{(i)}
 $$
 
-### Understanding object function
+## Understanding object function
 
 Object function from encoder/decoder model perspective:
 
