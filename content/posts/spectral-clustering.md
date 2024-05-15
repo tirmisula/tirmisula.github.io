@@ -61,7 +61,7 @@ draft: true
 
 ## Background of Clustering
 
-In the field of machine learning, particularly in the context of clustering algorithms, we often categorize methods based on their primary characteristics. Here are two such categories:
+In the field of clustering algorithms, we often categorize methods based on their primary characteristics:
 
 $$
 \begin{cases}
@@ -143,7 +143,7 @@ $$
 \min_{A_1\cdots A_K}\text{norm-cut}(V) = \min_{A_1\cdots A_K}\sum_{k=1}^K\frac{W(A_k,\neg A_{k})}{\sum_{i\in A_k}\sum_{j=1}^Nw_{ij}}
 $$
 
-## Model Representation in Vector Form
+## Objective Function in Vector Form
 
 {{< math.inline >}}
 <p>
@@ -213,9 +213,9 @@ $$
     & & \sum_{i\in A_K}1
 \end{bmatrix} \\\
 &\text{Let } d_i =\sum_{j=1}^Nw_{ij} \text{, we have } \sum_{i=1}^Ny_id_iy^T_i = \sum_{i=1}^N\text{diag}(d_iy_i) = \begin{bmatrix}
-    \sum_{i\in A_1}d_1 & & \\\
+    \sum_{i\in A_1}d_{i} & & \\\
     & \ddots & \\\
-    & & \sum_{i\in A_K}d_K
+    & & \sum_{i\in A_K}d_{i}
 \end{bmatrix} = \begin{bmatrix}
     \sum_{i\in A_1}\sum_{j=1}^Nw_{ij} & & \\\
     & \ddots & \\\
@@ -235,225 +235,63 @@ $$
     & \ddots & \\\
     & & W(A_K,\neg A_{K})
 \end{bmatrix} (Y^TDY)^{-1} \right) \\\
-&\because \sum_{j=1}^Nw_{ij} = W_{i:}\begin{bmatrix}
-    1 \\\
-    \vdots \\\
-    1
-\end{bmatrix}_{N} \\\
-&\therefore \begin{bmatrix}
-    \sum_{j=1}^Nw_{ij} & & \\\
+&\because W(A_k,\neg A_k) = W(A_k,V)-W(A_k,A_k) = \sum_{i\in A_k}d_i-\sum_{i\in A_k}\sum_{j\in A_k}w_{ij}  \\\
+&\text{where } \begin{bmatrix}
+    \sum_{i\in A_1}d_{i} & & \\\
     & \ddots & \\\
-    & & \sum_{j=1}^Nw_{ij}
-\end{bmatrix} = 
+    & & \sum_{i\in A_K}d_{i}
+\end{bmatrix}=Y^TDY \\\
+&= Tr\left( \left(Y^TDY-\begin{bmatrix}
+    \sum_{i\in A_1}\sum_{j\in A_1}w_{ij} & & \\\
+    & \ddots & \\\
+    & & & \sum_{i\in A_K}\sum_{j\in A_K}w_{ij}
+\end{bmatrix}\right)(Y^TDY)^{-1} \right) \\\
+&\because Y^TWY \text{ shares the same diagnal elements with the above diagnal matrix, } \\\
+&\text{where } Y^TWY=\begin{bmatrix}
+    y_1 \cdots y_N
+\end{bmatrix}\begin{bmatrix}
+    w_{:,1} \cdots w_{:,N}
+\end{bmatrix}\begin{bmatrix}
+    y^T_1 \\\
+    \vdots \\\
+    y^T_N
+\end{bmatrix}=\begin{bmatrix}
+    \sum_{i=1}^Ny_iw_{i1} \cdots \sum_{i=1}^Ny_iw_{iN}
+\end{bmatrix}\begin{bmatrix}
+    y^T_1 \\\
+    \vdots \\\
+    y^T_N
+\end{bmatrix}=\sum_{i=1}^N\sum_{j=1}^Ny_iy^T_jw_{ij} \\\
+&\text{and } \text{diag}(\sum_{i=1}^N\sum_{j=1}^Ny_iy^T_jw_{ij})=\begin{bmatrix}
+    \sum_{i\in A_1}\sum_{j\in A_1}w_{ij} & & \\\
+    & \ddots & \\\
+    & & & \sum_{i\in A_K}\sum_{j\in A_K}w_{ij}
+\end{bmatrix} \\\
+&= Tr\left( (Y^TDY-Y^TWY)(Y^TDY)^{-1} \right) \\\
+&= Tr\left( Y^T(D-W)Y(Y^TDY)^{-1} \right)
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-As for sampling from generative model \( p(x|z,\theta) \),  the simplest distribution for gradient computation is Gaussian. We assume \( p(x|z,\theta) \) is approximated by a neural network (Decoder) which follows conditional Gaussian distribution:
+The objective function becomes
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-x|z,\theta &\sim \mathcal{N}(\mu(z;\theta),\Sigma(z;\theta))
-\end{align*} \\\
-z \rarr \text{Decoder}(\theta) \rarr \tilde{x}
-$$
-
-Combining encoder and decoder together we have:
-
-$$
-\text{For each obsevation $x^{(i)}, i=1\cdots N$} \\\
-x^{(i)},\epsilon \rarr \text{Encoder} \rarr z^{(i)} \rarr \text{Decoder} \rarr \tilde{x}^{(i)}
-$$
-
-## Understanding object function
-
-Object function from encoder/decoder model perspective:
-
-$$
-\begin{align*}
-\because\log p(x|z,\theta) &= \frac{1}{2}\lVert \frac{x-\mu(z;\theta)}{\sigma(z)} \rVert^2+\frac{D}{2}\log 2\pi+\frac{1}{2}\sum_{i=1}^D\log\sigma^2\_{i}(z) \\\
-&\text{Let $\sigma^2(z)$ be constant} \\\
-&\propto \frac{1}{2\sigma^2}\lVert x-\mu(z;\theta) \rVert^2 \\\
-&\propto \frac{1}{2\sigma^2}\lVert x-\tilde{x} \rVert^2
-\end{align*} \\\
-\dArr
-$$
-
-$$
-\begin{align*}
-\argmax_{\theta,\phi} \mathbb{E}\_{z\sim q(z|x,\phi)}[\log p(x|z,\theta)] &: \argmin \lVert x-\tilde{x} \rVert^2_2 \\\
-\argmax_{\theta,\phi} -\text{KL}(q(z|x,\phi)||p(z|\theta)) &: \text{Regularize $q(z|x,\phi)$ by prior $p(z)$}
+\hat{Y} &= \argmin_{Y} Tr\left( Y^TLY(Y^TDY)^{-1} \right) \\\
+L &: \text{Laplace matrix, where } L=D-W
 \end{align*}
 $$
 
-In conlusion, VAE tries to minimize reconstruction loss while at the same time preventing overfitting.
+## Solve objective function
 
-## Inference and Learning
-### Review learning in GMM
 
-Recall that [EM algorithm](https://tirmisula.github.io/posts/gaussian-mixture-model/#em-algorithm-on-gmm) is used for parameter learning in GMM, the E-step and M-step are given by:
-
-$$
-\begin{align*}
-\text{E-step} : Q(\theta,\theta^{(t)}) &= E_{z|x,\theta^{(t)} \sim p(z|x,\theta^{(t)})}\left[ \log p(x,z|\theta) \right] \\\
-&= \int_z \log p(x,z|\theta)p(z|x,\theta^{(t)})\space dz \\\
-&= \sum_{i=1}^N\sum_{k=1}^K\log \left(\mathcal{N}(x_i|\mu_{k},\Sigma_{k})p_{k}\right) \frac{\mathcal{N}(x_i|\mu_{k}^{(t)},\Sigma_{k}^{(t)})p_{k}^{(t)}}{\sum_{j=1}^K \mathcal{N}(x_i|\mu_j^{(t)},\Sigma_j^{(t)})p_j^{(t)}} \\\
-\\\
-\text{M-step} : \theta^{(t+1)} &= \argmax_{\theta} Q(\theta,\theta^{(t)}), \space\text{s.t.} \sum_{k=1}^K p_k=1 \\\
-&= \argmax_{\theta} \sum_{i=1}^N\sum_{k=1}^K\log \left(\mathcal{N}(x_i|\mu_{k},\Sigma_{k})p_{k}\right) \frac{\mathcal{N}(x_i|\mu_{k}^{(t)},\Sigma_{k}^{(t)})p_{k}^{(t)}}{\sum_{j=1}^K \mathcal{N}(x_i|\mu_j^{(t)},\Sigma_j^{(t)})p_j^{(t)}}
-\end{align*}
-$$
-
-### SGVI for VAE
-
-As VAE's name implies, [SGVI](https://tirmisula.github.io/posts/variational-inference/#stochastic-gradient-vi) (stochastic gradient variational inference) is used for posterier inference. The ELBO is:
-
-$$
-\text{ELBO}(\theta,\phi) = \mathbb{E}\_{z\sim q(z|x,\phi)}[\log p(x|z,\theta)] - \text{KL}(q(z|x,\phi)||p(z|\theta))
-$$
-
-#### Gradient with respect to theta
-
-$$
-\begin{align*}
-\nabla_{\theta}\text{ELBO} &= \nabla_{\theta}\mathbb{E}\_{z\sim q(z|x,\phi)}[\log p(x|z,\theta)] \\\
-&= \mathbb{E}\_{z\sim q(z|x,\phi)}[\nabla_{\theta}\log p(x|z,\theta)] \\\
-&\text{By MCMC} \\\
-&\approx \frac{1}{L}\sum_{i=1}^L\nabla_{\theta}\log p(x|z^{(i)},\theta)
-\end{align*}
-$$
-
-Referencing [GDA chapter](https://tirmisula.github.io/posts/gaussian-discriminant-analysis/#solve-parameters) (Gaussian Discriminant Analysis), partial derivative w.r.t. mu and sigma are given by:
-
-$$
-\begin{align*}
-\nabla_{\theta}\log p(x|z^{(i)},\theta) &= \frac{\partial\log p(x|z^{(i)},\theta)}{\partial \mu(z^{(i)};\theta)}\cdot\nabla_{\theta}\mu(z^{(i)};\theta)  + \frac{\partial\log p(x|z^{(i)},\theta)}{\partial \Sigma(z^{(i)};\theta)}\cdot\nabla_{\theta}\Sigma(z^{(i)};\theta)  \\\
-\text{where} \\\
-\frac{\partial\log p(x|z^{(i)},\theta)}{\partial \mu(z^{(i)};\theta)} &= \Sigma^{(-1)}(z^{(i)};\theta)(x-\mu(z^{(i)};\theta)) \\\
- \frac{\partial\log p(x|z^{(i)},\theta)}{\partial \Sigma(z^{(i)};\theta)} &= -\frac{1}{2}\left( \Sigma^{-1}(z^{(i)};\theta)-Var(x)\Sigma^{-2}(z^{(i)};\theta) \right)
-\end{align*}
-$$
-
-#### Gradient with respect to phi
-
-$$
-\begin{align*}
-\nabla_{\phi}\text{ELBO} &= \nabla_{\phi}\mathbb{E}\_{z\sim q(z|x,\phi)}[\log p(x|z,\theta)] - \nabla_{\phi}\mathbb{E}\_{z\sim q(z|x,\phi)}[\log q(z|x,\phi)-\log p(z)] \\\
-&= \mathbb{E}\_{z\sim q(z|x,\phi)}[\nabla_{\phi}\log p(x|z,\theta)] - \mathbb{E}\_{z\sim q(z|x,\phi)}[\nabla_{\phi}\log q(z|x,\phi)-\nabla_{\phi}\log p(z)] \\\
-&\text{By reparameterization trick, } z^{(i)}=g(\epsilon,x,\phi)=\mu(x^{(i)};\phi)+\Sigma(x^{(i)};\phi)^{\frac{1}{2}}\cdot\epsilon \\\
-&= \mathbb{E}\_{\epsilon\sim\mathcal{N}(0,I)}[\nabla_{\phi}\log p(x|g(\epsilon,x,\phi),\theta)] - \mathbb{E}\_{\epsilon\sim\mathcal{N}(0,I)}[\nabla_{\phi}\log q(g(\epsilon,x,\phi)|x,\phi)-\nabla_{\phi}\log p(g(\epsilon,x,\phi))] \\\
-&\text{By MCMC} \\\
-&\approx \frac{1}{L}\sum_{i=1}^L\nabla_{\phi}\log p(x|z^{(i)},\theta) - \frac{1}{L}\sum_{i=1}^L\nabla_{\phi}\log q(z^{(i)}|x,\phi)
-\end{align*}
-$$
-
-Similarly, we have:
-
-$$
-\begin{align*}
-\nabla_{\phi}\log q(z^{(i)}|x,\phi) &= \frac{\partial\log q(z^{(i)}|x,\phi)}{\partial \mu(x^{(i)};\phi)}\cdot\nabla_{\phi}\mu(x^{(i)};\phi)  + \frac{\partial\log q(z^{(i)}|x,\phi)}{\partial \Sigma(x^{(i)};\phi)}\cdot\nabla_{\phi}\Sigma(x^{(i)};\phi)  \\\
-\text{where} \\\
-\frac{\partial\log q(z^{(i)}|x,\phi)}{\partial \mu(x^{(i)};\phi)} &= \Sigma^{(-1)}(x^{(i)};\phi)(z-\mu(x^{(i)};\phi)) \\\
- \frac{\partial\log q(z^{(i)}|x,\phi)}{\partial \Sigma(x^{(i)};\phi)} &= -\frac{1}{2}\left( \Sigma^{-1}(x^{(i)};\phi)-Var(z)\Sigma^{-2}(x^{(i)};\phi) \right)
-\end{align*}
-$$
-
-$$
-\begin{align*}
-\nabla_{\phi}\log p(x|z^{(i)},\theta) &= \frac{\partial \log p(x|z^{(i)},\theta)}{\partial z}\cdot\frac{\partial z}{\partial \phi} \\\
-&= \left[ \frac{\partial\log p(x|z^{(i)},\theta)}{\partial \mu(z^{(i)};\theta)}\cdot\frac{\partial\mu(z^{(i)};\theta)}{\partial z}  + \frac{\partial\log p(x|z^{(i)},\theta)}{\partial \Sigma(z^{(i)};\theta)}\cdot\frac{\partial\Sigma(z^{(i)};\theta)}{\partial z} \right]\cdot\frac{\partial z}{\partial \phi} \\\
-\text{where} \\\
-\frac{\partial\log p(x|z^{(i)},\theta)}{\partial \mu(z^{(i)};\theta)} &= \Sigma^{(-1)}(z^{(i)};\theta)(x-\mu(z^{(i)};\theta)) \\\
- \frac{\partial\log p(x|z^{(i)},\theta)}{\partial \Sigma(z^{(i)};\theta)} &= -\frac{1}{2}\left( \Sigma^{-1}(z^{(i)};\theta)-Var(x)\Sigma^{-2}(z^{(i)};\theta) \right) \\\
- \frac{\partial z}{\partial \phi} &= \frac{\partial \mu(x^{(i)};\phi)}{\partial \phi}+\epsilon\frac{\partial\Sigma(x^{(i)};\phi)}{\partial \phi}
-\end{align*}
-$$
-
-#### Partial derivatives in NN
-
-{{< math.inline >}}
-<p>
-Suppose we have one hidden layer for encoder:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-h_1 &= \sigma(W_1x+b_1) \\\
-\mu(x;\phi) &= W_2h_1+b_2
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-\( \frac{\partial \mu(x^{(i)};\phi)}{\partial \phi} \) is given by:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-\frac{\partial \mu(x^{(i)};\phi)}{\partial W_2} &= h_1 \\\
-\frac{\partial \mu(x^{(i)};\phi)}{\partial b_2} &= 1 \\\
-\frac{\partial \mu(x^{(i)};\phi)}{\partial W_1} &= \frac{\partial \mu(x^{(i)};\phi)}{\partial h_1}\frac{\partial h_1}{\partial W_1}=W_2\sigma^{'}(W_1x+b_1)x \\\
-\frac{\partial \mu(x^{(i)};\phi)}{\partial b_1} &= \frac{\partial \mu(x^{(i)};\phi)}{\partial h_1}\frac{\partial h_1}{\partial b_1}=W_2\sigma^{'}(W_1x+b_1) \\\
-&\text{The same applies to }\partial \Sigma(x^{(i)};\phi)
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-Suppose we have one hidden layer for decoder:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-h_2 &= \sigma(W_3z+b_3) \\\
-\mu(z;\theta) &= W_4h_2+b_4
-\end{align*}
-$$
-
-{{< math.inline >}}
-<p>
-Similarly, \( \frac{\partial \mu(z^{(i)};\theta)}{\partial \theta} \) is given by:
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-\frac{\partial \mu(z^{(i)};\theta)}{\partial W_4} &= h_3 \\\
-\frac{\partial \mu(z^{(i)};\theta)}{\partial b_4} &= 1 \\\
-\frac{\partial \mu(z^{(i)};\theta)}{\partial W_3} &= W_4\sigma^{'}(W_3x+b_3)z \\\
-\frac{\partial \mu(z^{(i)};\theta)}{\partial b_3} &= W_4\sigma^{'}(W_3x+b_3) \\\
-\frac{\partial \mu(z^{(i)};\theta)}{\partial z} &= \frac{\partial \mu(z^{(i)};\theta)}{h_2}\frac{\partial h_2}{\partial z} = W_4\sigma^{'}(W_3x+b_3)W_3  \\\
-&\text{The same applies to }\partial \Sigma(z^{(i)};\theta) \\\
-\end{align*}
-$$
-
-#### Stochastic gradient update
-
-$$
-\text{For iteration $t=1\cdots T$} \\\
-\begin{align*}
-\theta^{(t+1)} &\larr \theta^{(t)} + \eta^{(t)}\left( \frac{1}{L}\sum_{i=1}^L\nabla_{\theta}\log p(x|z^{(i)},\theta) \right) \\\
-\phi^{(t+1)} &\larr \phi^{(t)} + \eta^{(t)}\left( \frac{1}{L}\sum_{i=1}^L\nabla_{\phi}\log p(x|z^{(i)},\theta) - \frac{1}{L}\sum_{i=1}^L\nabla_{\phi}\log q(z^{(i)}|x,\phi) \right)
-\end{align*}
-$$
-
-## Data Generation
-
-Since encoder is used for approximating MLE, it can be dropped after training. We can generate data we want by:
-
-$$
-z\sim p(z)=\mathcal{N}(0,I) \rarr \text{Decoder} \rarr \text{new data $x$}
-$$
 
 ## Reference
 
-[^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=167).
+[^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=123).
 [^4]: From [Higham, Nicholas (2002). Accuracy and Stability of Numerical Algorithms](https://archive.org/details/accuracystabilit00high_878).
 [^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
 [^2]: - [NIPS 2016 Tutorial: Generative Adversarial Networks. Ian Goodfellow](https://arxiv.org/pdf/1701.00160).
