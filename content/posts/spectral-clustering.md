@@ -61,7 +61,7 @@ draft: true
 
 ## Background of Clustering
 
-In the field of clustering algorithms, we often categorize methods based on their primary characteristics:
+<cite>[^1]</cite>In the field of clustering algorithms, we often categorize methods based on their primary characteristics:
 
 $$
 \begin{cases}
@@ -287,7 +287,56 @@ $$
 
 ## Solve objective function
 
+### Rayleigh quotient
 
+The Rayleigh quotient is defined as:
+
+$$
+R(A,y) = \frac{y^TAy}{y^Ty}, \text{where } \\\
+\text{$y$ is non-zero vector} \\\
+\text{$A$ is Hermitian matrix}
+$$
+
+And the generalized Rayleigh quotient is defined as:
+
+$$
+R(A,B,y) = \frac{y^TAy}{y^TBy} \\\
+$$
+
+We can prove that minimizing Rayleigh quotient is euiqvalent to finding the extreme eigenvalue in generalized eigenvalue problem:
+
+$$
+
+$$
+
+### Eigen decomposition
+
+We can prove the objective function is a form of generalized Rayleigh quotient:
+
+$$
+\text{Let }Y = \begin{bmatrix}
+    \gamma_1 \cdots \gamma_K
+\end{bmatrix}, \gamma_k = \begin{bmatrix}
+    y_{1k} \\\
+    \vdots \\\
+    y_{Nk}
+\end{bmatrix} \\\
+\text{$\gamma_k$ is column vector, $y_i$ is row vector} \\\
+\\\
+\begin{align*}
+&\because Y^TLY \text{ is a $K\times K$ matrix, where $\gamma^T_iL\gamma_j$ is the $(i,j)$-th element}, \text{the same applies to $Y^TDY$} \\\
+&\because \text{$D,W,L$ are clearly positive semi-definite} \\\
+&\therefore \gamma^T_iL\gamma_j(\gamma^T_iD\gamma_j)^{-1} = \frac{\gamma^T_iL\gamma_j}{\gamma^T_iD\gamma_j} \rArr Y^TLY(Y^TDY)^{-1}=\begin{bmatrix}
+    \frac{\gamma^T_1L\gamma_1}{\gamma^T_1D\gamma_1} & \cdots & \frac{\gamma^T_1L\gamma_K}{\gamma^T_1D\gamma_K} \\\
+    \vdots & \ddots & \vdots \\\
+    \frac{\gamma^T_KL\gamma_1}{\gamma^T_KL\gamma_1} & \cdots & \frac{\gamma^T_KL\gamma_K}{\gamma^T_KD\gamma_K}
+\end{bmatrix} \rArr Tr(Y^TLY(Y^TDY)^{-1}) = \sum_{k}^K\frac{\gamma^T_kL\gamma_k}{\gamma^T_kD\gamma_k}
+\end{align*}
+$$
+
+$$
+\because \gamma^T_k\gamma_k = |A_k|
+$$
 
 ## Reference
 
