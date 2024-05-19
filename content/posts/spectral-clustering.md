@@ -303,15 +303,41 @@ $$
 R(A,B,y) = \frac{y^TAy}{y^TBy} \\\
 $$
 
-We can prove that minimizing Rayleigh quotient is euiqvalent to finding the extreme eigenvalue in generalized eigenvalue problem:
+<cite>[^2]</cite>We can prove that minimizing Rayleigh quotient is euiqvalent to finding the smallest eigenvalue in corresponding generalized eigenvalue problem:
 
 $$
-
+\begin{align*}
+&\because \text{$B$ is semi-positive definite} \\\
+&\text{there exist orthogonal matrix $Q$ and diagonal matrix $\Lambda$, so that $B=Q\Lambda Q^T$} \\\
+&\text{Let $\Lambda^{\frac{1}{2}}=$diag$(\lambda^{\frac{1}{2}}_1,\cdots,\lambda^{\frac{1}{2}}_n)$, we have $\Lambda=\Lambda^{\frac{1}{2}}\Lambda^{\frac{1}{2}}$} \\\
+&\therefore B=Q\Lambda Q^T=Q\Lambda^{\frac{1}{2}}Q^TQ\Lambda^{\frac{1}{2}}Q^T, \text{ where $B^{\frac{1}{2}}=Q\Lambda^{\frac{1}{2}}Q^T$ is the \textbf{square root} of $B$} \\\
+&\dArr \\\
+&\text{Since $B$ has square root, we have: } y^TBy = y^TB^{\frac{1}{2}}B^{\frac{1}{2}}y \\\
+&\text{Let $B^{\frac{1}{2}}y=z$, we have: $y^TBy=z^Tz$, generalized Rayleigh quotient is converted back to Rayleigh quotient:} \\\
+&\frac{y^TAy}{y^TBy} = \frac{y^TAy}{z^Tz} = \frac{z^TB^{-\frac{1}{2}}AB^{-\frac{1}{2}}z}{z^Tz}=R(B^{-\frac{1}{2}}AB^{-\frac{1}{2}},z) \text{ , we can construct Lagrange multiplier to solve it} \\\
+&\dArr \\\
+&\because \text{while $\alpha$ is a scalar, }\frac{(\alpha y)^TA(\alpha y)}{(\alpha y)^TB(\alpha y)}=\frac{\alpha^2(y^TAy)}{\alpha^2(y^TBy)}=\frac{y^TAy}{y^TBy} \\\
+&\therefore\text{Rayleigh quotient is scaling invariant, we restrict $||z||=1$} \\\
+&\text{Let $L(z,\lambda)=z^TB^{-\frac{1}{2}}AB^{-\frac{1}{2}}z - \lambda(||z||^2-1)$} \\\
+&\frac{\partial L}{\partial z} = 2B^{-\frac{1}{2}}AB^{-\frac{1}{2}}z - 2\lambda z \space\rarr\space \frac{\partial L}{\partial z} =0 \space\rarr\space B^{-\frac{1}{2}}AB^{-\frac{1}{2}}z=\lambda z \space\rarr\space Ay=\lambda B^{\frac{1}{2}}B^{\frac{1}{2}}y \space\rarr\space Ay=\lambda By \\\
+&\frac{\partial L}{\partial \lambda} = ||z||^2 - 1 = 0 \\\
+&\dArr \\\
+&\text{This implies $(y,\lambda)$ are generalized eigen pair of $(A,B)$, and $||B^{\frac{1}{2}}y||=1$} \\\
+&Ay=\lambda By \hArr y^TAy=\lambda y^TBy \hArr \lambda = \frac{y^TAy}{y^TBy} \\\
+&\text{Finding $\lambda_{\min}$} \hArr \text{minimizing } \frac{y^TAy}{y^TBy}
+\end{align*}
 $$
 
-### Eigen decomposition
+The conclusion is:
 
-We can prove the objective function is a form of generalized Rayleigh quotient:
+$$
+R(A,B,y) \hArr R(B^{-\frac{1}{2}}AB^{-\frac{1}{2}},z) \text{ , where $z=B^{\frac{1}{2}}y$} \\\
+\min R(A,B,y) \hArr \min_{||z||=1}\frac{z^TB^{-\frac{1}{2}}AB^{-\frac{1}{2}}z}{z^Tz} \hArr Ay=\lambda_{\min}By
+$$
+
+### Convert optimization problem
+
+The objective function is a form of generalized Rayleigh quotient:
 
 $$
 \text{Let }Y = \begin{bmatrix}
@@ -330,20 +356,45 @@ $$
     \frac{\gamma^T_1L\gamma_1}{\gamma^T_1D\gamma_1} & \cdots & \frac{\gamma^T_1L\gamma_K}{\gamma^T_1D\gamma_K} \\\
     \vdots & \ddots & \vdots \\\
     \frac{\gamma^T_KL\gamma_1}{\gamma^T_KL\gamma_1} & \cdots & \frac{\gamma^T_KL\gamma_K}{\gamma^T_KD\gamma_K}
-\end{bmatrix} \rArr Tr(Y^TLY(Y^TDY)^{-1}) = \sum_{k}^K\frac{\gamma^T_kL\gamma_k}{\gamma^T_kD\gamma_k}
+\end{bmatrix} \rArr Tr(Y^TLY(Y^TDY)^{-1}) = \sum_{k=1}^K\frac{\gamma^T_kL\gamma_k}{\gamma^T_kD\gamma_k} \\\
+&\text{According to the attribute of generalized Rayleigh quotient from previous section, we have: } \\\
+&Tr(Y^TLY(Y^TDY)^{-1}) = \sum_{k=1}^KR(L,D,\gamma_k) \\\
+&\text{Using Lagrange multipliers: } \\\
+&\text{Let } z_k = D^{\frac{1}{2}}\gamma_k\text{, since we want $||z_k||=1$, redefine $\gamma_k=\frac{\gamma_k-old}{\sqrt{|A_k|}}$} \\\
+&\mathcal{L}(z_k,\lambda_k)=z^T_kD^{-\frac{1}{2}}LD^{-\frac{1}{2}}z_k-\lambda_k(||z_k||^2-1) \\\
+&\mathcal{L}(Z,\Lambda) = \sum_{k=1}^K\left( z^T_kD^{-\frac{1}{2}}LD^{-\frac{1}{2}}z_k-\lambda_k(||z_k||^2-1) \right) \\\
+&\frac{\partial \mathcal{L}}{\partial z_k} = 0 \hArr L\gamma_k=\lambda_kD\gamma_k \hArr \min\sum_{k=1}^K\lambda_k=\min\sum_{k=1}^K\frac{\gamma^T_kL\gamma_k}{\gamma^T_kD\gamma_k}
 \end{align*}
 $$
 
+Thus minimizing objective function is euiqvalent to finding first K smallest eigenpairs in corresponding generalized eigenvalue problem:
+
 $$
-\because \gamma^T_k\gamma_k = |A_k|
+\begin{align*}
+\argmin_{Y} Tr\left( Y^TLY(Y^TDY)^{-1} \right) &\hArr \argmin_{\hat{\gamma_1} \cdots \hat{\gamma_K}} \sum_{k=1}^K\lambda_k \quad\text{ s.t. } L\hat{Y}=\Lambda D\hat{Y}\quad\text{ s.t. }\sum_{k=1}^K||\hat{\gamma_k}||^2=N \\\
+\text{where } \\\
+\hat{Y} &= \begin{bmatrix}
+    \hat{\gamma_1} \cdots \hat{\gamma_K} 
+\end{bmatrix} \\\
+\Lambda &= \text{diag}(\lambda_1,\cdots,\lambda_K), \lambda_{\min}=\lambda_1\leq\cdots\leq\lambda_K<\lambda_N=\lambda_{\max}
+\end{align*}
 $$
+<!-- \argmin_{\begin{subarray}{c}
+\gamma_1\cdots\gamma_K \\\
+\lambda_1\leq\cdots\leq\lambda_K
+\end{subarray}}L\gamma=\lambda D\gamma -->
+<!-- &\hArr \lbrace \text{eigen pairs:}\left(\begin{array}{c}
+\hat{\gamma_1} \cdots \hat{\gamma_K} \\\
+\lambda_{\min}=\lambda_1\leq\cdots\leq\lambda_K<\lambda_N=\lambda_{\max}
+\end{array}\right) | L\gamma=\lambda D\gamma \rbrace \\\ -->
+
 
 ## Reference
 
 [^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=123).
 [^4]: From [Higham, Nicholas (2002). Accuracy and Stability of Numerical Algorithms](https://archive.org/details/accuracystabilit00high_878).
 [^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
-[^2]: - [NIPS 2016 Tutorial: Generative Adversarial Networks. Ian Goodfellow](https://arxiv.org/pdf/1701.00160).
+[^2]: - [Math 253: Mathematical Methods for Data Visualization Lecture 4: Rayleigh Quotients. Guangliang Chen](https://arxiv.org/pdf/1701.00160).
 [^7]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
 [^6]: - [Gaussian Processes and Gaussian Markov Random Fields](https://folk.ntnu.no/joeid/MA8702/jan16.pdf)
 [^3]: - [A fast learning algorithm for deep belief nets. Geoffrey E. Hinton, Simon Osindero, Yee-Whye Teh](https://www.cs.toronto.edu/~hinton/absps/fastnc.pdf).
