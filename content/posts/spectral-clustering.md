@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: true
+draft: false
 ---
 
 :                                                         
@@ -357,28 +357,119 @@ $$
     \vdots & \ddots & \vdots \\\
     \frac{\gamma^T_KL\gamma_1}{\gamma^T_KL\gamma_1} & \cdots & \frac{\gamma^T_KL\gamma_K}{\gamma^T_KD\gamma_K}
 \end{bmatrix} \rArr Tr(Y^TLY(Y^TDY)^{-1}) = \sum_{k=1}^K\frac{\gamma^T_kL\gamma_k}{\gamma^T_kD\gamma_k} \\\
-&\text{According to the attribute of generalized Rayleigh quotient from previous section, we have: } \\\
-&Tr(Y^TLY(Y^TDY)^{-1}) = \sum_{k=1}^KR(L,D,\gamma_k) \\\
+&\therefore Tr(Y^TLY(Y^TDY)^{-1}) = \sum_{k=1}^KR(L,D,\gamma_k)
+\end{align*}
+$$
+
+According to the attribute of generalized Rayleigh quotient, the problem becomes minimizing summation of K eigenvalues: 
+
+$$
+\min_{Y} Tr(Y^TLY(Y^TDY)^{-1}) = \min\sum_{k=1}^K\lambda_k\quad\text{s.t. $L\gamma_k=\lambda_kD\gamma_k$}
+$$
+
+{{< math.inline >}}
+<p>
+Apparently minimizing summation of K eigenvalues is equivalent to finding K smallest eigenpairs in corresponding generalized eigenvalue problem. For each Rayleigh quotient item, if \( \gamma_k \) is relaxed to \( \mathbb{R} \), the generalized eigenvalue problem \( L\gamma_k=\lambda_kD\gamma_k \) can be tranformed to:
+</p>
+{{</ math.inline >}}
+
+$$
+D^{-\frac{1}{2}}LD^{-\frac{1}{2}}z_k=\lambda_kz_k, \text{where $z_k=D^{\frac{1}{2}}\gamma_k$} \\\
+$$
+
+<cite>[^4]</cite>We can easily find the eigenvector corresponds to the smallest eigenvalue of 0:
+
+$$
+\begin{align*}
+\text{Let } z_0 &= D^{\frac{1}{2}}1_N \\\
+&\dArr \\\
+D^{-\frac{1}{2}}LD^{-\frac{1}{2}}z_0 &= D^{-\frac{1}{2}}(D-W)1_N \\\
+&= D^{-\frac{1}{2}}D1_N - D^{-\frac{1}{2}}W1_N \\\
+&\because D1_N=\begin{bmatrix}
+    d_1 \cdots d_N
+\end{bmatrix}^T=\begin{bmatrix}
+    W_{1,:} 1_{N} \cdots W_{N,:} 1_{N}
+\end{bmatrix}^T \\\
+&\because W1_N=\begin{bmatrix}
+    W_{1,:} 1_{N} \cdots W_{N,:} 1_{N}
+\end{bmatrix}^T \\\
+&= 0
+\end{align*} \\\
+\text{$z_0$ is the eigenvector of smallest eigenvalue, $\gamma_0=1_N$}
+$$
+
+{{< math.inline >}}
+<p>
+Since \( D^{-\frac{1}{2}}LD^{-\frac{1}{2}} \) is positive semidefinite. The second smallest eigenvector \( z_1 \) is perpendicular to \( z_0 \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+z^T_1z_0 = 0 &\hArr (D^{\frac{1}{2}}\gamma_1)^TD^{\frac{1}{2}}1_N=0 \\\
+&\hArr \gamma^T_1D1_N=0 \\\
+&\cdots \\\
+&\hArr \gamma^T_{N-1}D1_N=0
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+So we have found the restriction for \( \gamma \), the problem becomes:
+</p>
+{{</ math.inline >}}
+
+$$
+\min_{Y} Tr(Y^TLY(Y^TDY)^{-1}) \hArr \begin{array}{l}
+    \min_{\gamma_1\cdots\gamma_K}\sum_{k=1}^K\lambda_k \\\
+    \text{s.t. $L\gamma_k=\lambda_kD\gamma_k$} \\\
+    \text{s.t. $\gamma^T_1=1_N$} \\\
+    \text{s.t. $\gamma^T_kD1_N=0, k=2\cdots K$} \\\
+    0=\lambda_1\leq\cdots\leq\lambda_K\leq\lambda_{\max}
+\end{array}
+$$
+
+Convert it into matrix form:
+
+$$
+\min_{Y} Tr(Y^TLY(Y^TDY)^{-1}) \hArr \begin{array}{l}
+    \min_{\gamma_1\cdots\gamma_K}Tr(\Lambda) \\\
+    \text{s.t. $LY=\Lambda DY$} \\\
+    \text{s.t. $\gamma^T_1=1_N$} \\\
+    \text{s.t. $\gamma^T_kD1_N=0, k=2\cdots K$} \\\
+    0=\lambda_1\leq\cdots\leq\lambda_K\leq\lambda_{\max}
+\end{array} \\\
+\\\
+\text{where } \hat{Y} = \begin{bmatrix}
+    \hat{\gamma_1} \cdots \hat{\gamma_K} 
+\end{bmatrix}, \space\Lambda = \text{diag}(\lambda_1,\cdots,\lambda_K)
+$$
+
+<!-- $$
+\begin{align*}
+% &\text{For each Rayleigh quotient item, if $\gamma_k$ is relxed to $\mathbb{R}$: } \\\
+&\min R(L,D,\gamma_k) \hArr L\gamma_k=\lambda_kD\gamma_k \hArr D^{-\frac{1}{2}}LD^{-\frac{1}{2}}z_k=\lambda_kz_k, \text{where $z_k=D^{\frac{1}{2}}\gamma_k$} \\\
 &\text{Using Lagrange multipliers: } \\\
-&\text{Let } z_k = D^{\frac{1}{2}}\gamma_k\text{, since we want $||z_k||=1$, redefine $\gamma_k=\frac{\gamma_k-old}{\sqrt{|A_k|}}$} \\\
+&\text{Let } z_k = D^{\frac{1}{2}}\gamma_k\text{, since we want $||z_k||=1$, redefine $\gamma_k=\frac{\gamma_k}{\sqrt{|A_k|}}$} \\\
 &\mathcal{L}(z_k,\lambda_k)=z^T_kD^{-\frac{1}{2}}LD^{-\frac{1}{2}}z_k-\lambda_k(||z_k||^2-1) \\\
 &\mathcal{L}(Z,\Lambda) = \sum_{k=1}^K\left( z^T_kD^{-\frac{1}{2}}LD^{-\frac{1}{2}}z_k-\lambda_k(||z_k||^2-1) \right) \\\
 &\frac{\partial \mathcal{L}}{\partial z_k} = 0 \hArr L\gamma_k=\lambda_kD\gamma_k \hArr \min\sum_{k=1}^K\lambda_k=\min\sum_{k=1}^K\frac{\gamma^T_kL\gamma_k}{\gamma^T_kD\gamma_k}
 \end{align*}
-$$
+$$ -->
 
-Thus minimizing objective function is euiqvalent to finding first K smallest eigenpairs in corresponding generalized eigenvalue problem:
+<!-- Thus minimizing objective function is euiqvalent to finding first K smallest eigenpairs in corresponding generalized eigenvalue problem:
 
 $$
 \begin{align*}
-\argmin_{Y} Tr\left( Y^TLY(Y^TDY)^{-1} \right) &\hArr \argmin_{\hat{\gamma_1} \cdots \hat{\gamma_K}} \sum_{k=1}^K\lambda_k \quad\text{ s.t. } L\hat{Y}=\Lambda D\hat{Y}\quad\text{ s.t. }\sum_{k=1}^K||\hat{\gamma_k}||^2=N \\\
+\argmin_{Y} Tr\left( Y^TLY(Y^TDY)^{-1} \right) &\hArr \argmin_{\hat{\gamma_1} \cdots \hat{\gamma_K}} \sum_{k=1}^K\lambda_k \quad\text{ s.t. } L\hat{Y}=\Lambda D\hat{Y}\quad\text{ s.t. }||\hat{\gamma_k}||^2=1 \\\
 \text{where } \\\
 \hat{Y} &= \begin{bmatrix}
     \hat{\gamma_1} \cdots \hat{\gamma_K} 
 \end{bmatrix} \\\
 \Lambda &= \text{diag}(\lambda_1,\cdots,\lambda_K), \lambda_{\min}=\lambda_1\leq\cdots\leq\lambda_K<\lambda_N=\lambda_{\max}
 \end{align*}
-$$
+$$ -->
+
 <!-- \argmin_{\begin{subarray}{c}
 \gamma_1\cdots\gamma_K \\\
 \lambda_1\leq\cdots\leq\lambda_K
@@ -388,13 +479,22 @@ $$
 \lambda_{\min}=\lambda_1\leq\cdots\leq\lambda_K<\lambda_N=\lambda_{\max}
 \end{array}\right) | L\gamma=\lambda D\gamma \rbrace \\\ -->
 
+<cite>[^3]</cite>To convert the real valued solution to discrete partition, the common way is to use K-means algorithm:
+
+$$
+\begin{align*}
+&\text{For each row $y_1\cdots y_N$ in $\hat{Y}$: } \\\
+&\quad\text{Assign the points into clusters $C_1\cdots C_K$: } \\\
+&\quad k\text{-means}(y_i) \mapsto C_k
+\end{align*}
+$$
 
 ## Reference
 
 [^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=123).
-[^4]: From [Higham, Nicholas (2002). Accuracy and Stability of Numerical Algorithms](https://archive.org/details/accuracystabilit00high_878).
+[^4]: - [Normalized Cuts and Image Segmentation Jianbo Shi and Jitendra Malik, Member, IEEE](https://people.eecs.berkeley.edu/~malik/papers/SM-ncut.pdf).
 [^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
 [^2]: - [Math 253: Mathematical Methods for Data Visualization Lecture 4: Rayleigh Quotients. Guangliang Chen](https://arxiv.org/pdf/1701.00160).
 [^7]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
 [^6]: - [Gaussian Processes and Gaussian Markov Random Fields](https://folk.ntnu.no/joeid/MA8702/jan16.pdf)
-[^3]: - [A fast learning algorithm for deep belief nets. Geoffrey E. Hinton, Simon Osindero, Yee-Whye Teh](https://www.cs.toronto.edu/~hinton/absps/fastnc.pdf).
+[^3]: - [A Tutorial on Spectral Clustering. Ulrike von Luxburg](https://people.csail.mit.edu/dsontag/courses/ml14/notes/Luxburg07_tutorial_spectral_clustering.pdf).
