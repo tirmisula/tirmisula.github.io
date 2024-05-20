@@ -309,7 +309,7 @@ $$
 \begin{align*}
 &\because \text{$B$ is semi-positive definite} \\\
 &\text{there exist orthogonal matrix $Q$ and diagonal matrix $\Lambda$, so that $B=Q\Lambda Q^T$} \\\
-&\text{Let $\Lambda^{\frac{1}{2}}=$diag$(\lambda^{\frac{1}{2}}_1,\cdots,\lambda^{\frac{1}{2}}_n)$, we have $\Lambda=\Lambda^{\frac{1}{2}}\Lambda^{\frac{1}{2}}$} \\\
+&\text{Let $\Lambda^{\frac{1}{2}}=$diag$(\lambda^{\frac{1}{2}}_1,\cdots,\lambda^{\frac{1}{2}}\_n)$, we have $\Lambda=\Lambda^{\frac{1}{2}}\Lambda^{\frac{1}{2}}$} \\\
 &\therefore B=Q\Lambda Q^T=Q\Lambda^{\frac{1}{2}}Q^TQ\Lambda^{\frac{1}{2}}Q^T, \text{ where $B^{\frac{1}{2}}=Q\Lambda^{\frac{1}{2}}Q^T$ is the \textbf{square root} of $B$} \\\
 &\dArr \\\
 &\text{Since $B$ has square root, we have: } y^TBy = y^TB^{\frac{1}{2}}B^{\frac{1}{2}}y \\\
