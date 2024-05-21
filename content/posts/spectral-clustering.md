@@ -301,6 +301,9 @@ And the generalized Rayleigh quotient is defined as:
 
 $$
 R(A,B,y) = \frac{y^TAy}{y^TBy} \\\
+\text{$y$ is non-zero vector} \\\
+\text{$A$ is Hermitian matrix} \\\
+\text{$B$ is positive definite}
 $$
 
 <cite>[^2]</cite>We can prove that minimizing Rayleigh quotient is euiqvalent to finding the smallest eigenvalue in corresponding generalized eigenvalue problem:
@@ -319,23 +322,36 @@ $$
 &\because \text{while $\alpha$ is a scalar, }\frac{(\alpha y)^TA(\alpha y)}{(\alpha y)^TB(\alpha y)}=\frac{\alpha^2(y^TAy)}{\alpha^2(y^TBy)}=\frac{y^TAy}{y^TBy} \\\
 &\therefore\text{Rayleigh quotient is scaling invariant, we restrict $||z||=1$} \\\
 &\text{Let $L(z,\lambda)=z^TB^{-\frac{1}{2}}AB^{-\frac{1}{2}}z - \lambda(||z||^2-1)$} \\\
-&\frac{\partial L}{\partial z} = 2B^{-\frac{1}{2}}AB^{-\frac{1}{2}}z - 2\lambda z \space\rarr\space \frac{\partial L}{\partial z} =0 \space\rarr\space B^{-\frac{1}{2}}AB^{-\frac{1}{2}}z=\lambda z \space\rarr\space Ay=\lambda B^{\frac{1}{2}}B^{\frac{1}{2}}y \space\rarr\space Ay=\lambda By \\\
+&\frac{\partial L}{\partial z} = 2B^{-\frac{1}{2}}AB^{-\frac{1}{2}}z - 2\lambda z = 0 \space\rarr\space B^{-\frac{1}{2}}AB^{-\frac{1}{2}}z=\lambda z \space\rarr\space Ay=\lambda B^{\frac{1}{2}}B^{\frac{1}{2}}y \space\rarr\space Ay=\lambda By \\\
+&\quad\quad\rarr B^{-\frac{1}{2}}AB^{-\frac{1}{2}}z=\lambda z \\\
+&\quad\quad\because z=B^{\frac{1}{2}}y \\\
+&\quad\quad\rarr B^{-\frac{1}{2}}AB^{-\frac{1}{2}}B^{\frac{1}{2}}y=\lambda B^{\frac{1}{2}}y \\\
+&\quad\quad\rarr B^{-\frac{1}{2}}Ay=\lambda B^{\frac{1}{2}}y \\\
+&\quad\quad\rarr Ay=\lambda By \\\
 &\frac{\partial L}{\partial \lambda} = ||z||^2 - 1 = 0 \\\
 &\dArr \\\
-&\text{This implies $(y,\lambda)$ are generalized eigen pair of $(A,B)$, and $||B^{\frac{1}{2}}y||=1$} \\\
+&\text{This implies $(y,\lambda)$ is generalized eigenpair of $(A,B)$, and $||B^{\frac{1}{2}}y||=1$} \\\
 &Ay=\lambda By \hArr y^TAy=\lambda y^TBy \hArr \lambda = \frac{y^TAy}{y^TBy} \\\
-&\text{Finding $\lambda_{\min}$} \hArr \text{minimizing } \frac{y^TAy}{y^TBy}
+&\text{This implies $(z,\lambda)$ is eigenpair of $B^{-\frac{1}{2}}AB^{-\frac{1}{2}}$, and $||z||=1$} \\\
+&B^{-\frac{1}{2}}AB^{-\frac{1}{2}}z=\lambda z \hArr z^TB^{-\frac{1}{2}}AB^{-\frac{1}{2}}z=\lambda z^Tz \hArr \lambda = \frac{z^TB^{-\frac{1}{2}}AB^{-\frac{1}{2}}z}{z^Tz} \\\
+&\text{Finding $\lambda_{\min}$} \hArr \text{minimizing } \frac{y^TAy}{y^TBy} \hArr \text{minimizing } \frac{z^TB^{-\frac{1}{2}}AB^{-\frac{1}{2}}z}{z^Tz}
 \end{align*}
 $$
+
 
 The conclusion is:
 
 $$
-R(A,B,y) \hArr R(B^{-\frac{1}{2}}AB^{-\frac{1}{2}},z) \text{ , where $z=B^{\frac{1}{2}}y$} \\\
-\min R(A,B,y) \hArr \min_{||z||=1}\frac{z^TB^{-\frac{1}{2}}AB^{-\frac{1}{2}}z}{z^Tz} \hArr Ay=\lambda_{\min}By
+\begin{align*}
+&1.\space R(A,B,y) \hArr R(B^{-\frac{1}{2}}AB^{-\frac{1}{2}},z) \text{ , where $z=B^{\frac{1}{2}}y$} \\\
+% \min R(A,B,y) \hArr \min_{||z||=1}\frac{z^TB^{-\frac{1}{2}}AB^{-\frac{1}{2}}z}{z^Tz} \hArr Ay=\lambda_{\min}By \hArr B^{-\frac{1}{2}}AB^{-\frac{1}{2}}z=\lambda_{\min}z \\\
+&2.\space\min R(A,B,y) \hArr Ay=\lambda_{\min}By \\\
+&3.\space\min R(B^{-\frac{1}{2}}AB^{-\frac{1}{2}},z) \hArr B^{-\frac{1}{2}}AB^{-\frac{1}{2}}z=\lambda_{\min}z \\\
+&4.\space \text{$B^{-1}A$ and $B^{-\frac{1}{2}}AB^{-\frac{1}{2}}$ share the same eigenvalues}
+\end{align*}
 $$
 
-### Convert optimization problem
+### Laplacian matrix
 
 The objective function is a form of generalized Rayleigh quotient:
 
@@ -356,34 +372,86 @@ $$
     \frac{\gamma^T_1L\gamma_1}{\gamma^T_1D\gamma_1} & \cdots & \frac{\gamma^T_1L\gamma_K}{\gamma^T_1D\gamma_K} \\\
     \vdots & \ddots & \vdots \\\
     \frac{\gamma^T_KL\gamma_1}{\gamma^T_KL\gamma_1} & \cdots & \frac{\gamma^T_KL\gamma_K}{\gamma^T_KD\gamma_K}
-\end{bmatrix} \rArr Tr(Y^TLY(Y^TDY)^{-1}) = \sum_{k=1}^K\frac{\gamma^T_kL\gamma_k}{\gamma^T_kD\gamma_k} \\\
-&\therefore Tr(Y^TLY(Y^TDY)^{-1}) = \sum_{k=1}^KR(L,D,\gamma_k)
+\end{bmatrix} \\\
+&\therefore Tr(Y^TLY(Y^TDY)^{-1}) = \sum_{k=1}^K\frac{\gamma^T_kL\gamma_k}{\gamma^T_kD\gamma_k}, \text{ which gives us: }
 \end{align*}
 $$
 
-According to the attribute of generalized Rayleigh quotient, the problem becomes minimizing summation of K eigenvalues: 
+$$
+\begin{align*}
+Tr(Y^TLY(Y^TDY)^{-1}) &= \sum_{k=1}^KR(L,D,\gamma_k) \\\
+&= \sum_{k=1}^KR(D^{-\frac{1}{2}}LD^{-\frac{1}{2}},z_k), \text{where $z_k=D^{\frac{1}{2}}\gamma_k$}
+\end{align*}
+$$
 
-$$
-\min_{Y} Tr(Y^TLY(Y^TDY)^{-1}) = \min\sum_{k=1}^K\lambda_k\quad\text{s.t. $L\gamma_k=\lambda_kD\gamma_k$}
-$$
+<cite>[^3]</cite>
 
 {{< math.inline >}}
 <p>
-Apparently minimizing summation of K eigenvalues is equivalent to finding K smallest eigenpairs in corresponding generalized eigenvalue problem. For each Rayleigh quotient item, if \( \gamma_k \) is relaxed to \( \mathbb{R} \), the generalized eigenvalue problem \( L\gamma_k=\lambda_kD\gamma_k \) can be tranformed to:
+Laplacian matrix corresponds to \( R(L,D,\gamma_k) \) is defined as random walk normalized Laplacian \( L_{rw} \):
 </p>
 {{</ math.inline >}}
 
 $$
-D^{-\frac{1}{2}}LD^{-\frac{1}{2}}z_k=\lambda_kz_k, \text{where $z_k=D^{\frac{1}{2}}\gamma_k$} \\\
+L_{rw} = D^{-1}L
 $$
 
-<cite>[^4]</cite>We can easily find the eigenvector corresponds to the smallest eigenvalue of 0:
+{{< math.inline >}}
+<p>
+Laplacian matrix corresponds to \( R(D^{-\frac{1}{2}}LD^{-\frac{1}{2}},z_k) \) is defined as symmetric normalized Laplacian \( L_{rw} \):
+</p>
+{{</ math.inline >}}
+
+$$
+L_{sym} = D^{-\frac{1}{2}}LD^{-\frac{1}{2}}
+$$
+
+{{< math.inline >}}
+<p>
+From previous section, \( L_{rw} \) and \( L_{sym} \) share the same eigenvalues clearly:
+</p>
+{{</ math.inline >}}
+
+$$
+L_{rw}\gamma_k = \lambda\gamma_k \\\
+L_{sym}z_k = \lambda z_k
+$$
+
+And according to the conclusion of minimizing generalized Rayleigh quotient, the objective function turns to minimizing summation of K eigenvalues, which is equivalent to finding the first K smallest eigenpairs: 
 
 $$
 \begin{align*}
-\text{Let } z_0 &= D^{\frac{1}{2}}1_N \\\
+\min_{Y} Tr(Y^TLY(Y^TDY)^{-1}) &= \min\sum_{k=1}^K\lambda_k \quad\text{s.t. } L_{rw}\gamma_k = \lambda_k\gamma_k, k=1\cdots K \\\
+&= \min\sum_{k=1}^K\lambda_k \quad\text{s.t. }L_{sym}z_k = \lambda_kz_k, k=1\cdots K \\\
+&z_k=D^{\frac{1}{2}}\gamma_k ,\quad \lambda_1\leq\cdots\leq\lambda_K
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+In previous definition, \( \gamma_k \) is discrete indicator while \( z_k \) is relaxed to \( \mathbb{R} \), there are constraints on \( z_k \) and \( \gamma_k \):
+</p>
+{{</ math.inline >}}
+
+<!-- $$
+D^{-1}L\gamma_k = \lambda_k\gamma_k \\\
+D^{\frac{1}{2}}D^{-1}L\gamma_k = \lambda_kD^{\frac{1}{2}}\gamma_k \\\
+
+D^{-\frac{1}{2}}LD^{-\frac{1}{2}}D^{\frac{1}{2}}\gamma_k = \lambda_kD^{-\frac{1}{2}}DD^{-\frac{1}{2}}D^{\frac{1}{2}}\gamma_k \\\
+D^{-\frac{1}{2}}LD^{-\frac{1}{2}}z_k=\lambda_kz_k, \text{where $z_k=D^{\frac{1}{2}}\gamma_k$}
+$$ -->
+
+
+### Upper bound of eigenvalues and constraints of eigenvectors
+
+<cite>[^4]</cite>We can easily find the first eigenvector corresponds to the smallest eigenvalue of 0 in both symmetric Laplacian and random walk Laplacian:
+
+$$
+\begin{align*}
+\text{Let } z_1 &= D^{\frac{1}{2}}1_N, \gamma_1=1_N \\\
 &\dArr \\\
-D^{-\frac{1}{2}}LD^{-\frac{1}{2}}z_0 &= D^{-\frac{1}{2}}(D-W)1_N \\\
+L_{sym}z_1 &= D^{-\frac{1}{2}}LD^{-\frac{1}{2}}z_1 \\\
+&= D^{-\frac{1}{2}}(D-W)1_N \\\
 &= D^{-\frac{1}{2}}D1_N - D^{-\frac{1}{2}}W1_N \\\
 &\because D1_N=\begin{bmatrix}
     d_1 \cdots d_N
@@ -393,29 +461,45 @@ D^{-\frac{1}{2}}LD^{-\frac{1}{2}}z_0 &= D^{-\frac{1}{2}}(D-W)1_N \\\
 &\because W1_N=\begin{bmatrix}
     W_{1,:} 1_{N} \cdots W_{N,:} 1_{N}
 \end{bmatrix}^T \\\
+&= 0 \\\
+L_{rw}\gamma_1 &= D^{-1}L1_N \\\
+&= D^{-1}(D-W)1_N \\\
 &= 0
 \end{align*} \\\
-\text{$z_0$ is the eigenvector of smallest eigenvalue, $\gamma_0=1_N$}
+% \text{$z_1$ is the eigenvector of smallest eigenvalue, $\gamma_1=1_N$}
 $$
 
 {{< math.inline >}}
 <p>
-Since \( D^{-\frac{1}{2}}LD^{-\frac{1}{2}} \) is positive semidefinite. The second smallest eigenvector \( z_1 \) is perpendicular to \( z_0 \):
+Since \( D^{-\frac{1}{2}}LD^{-\frac{1}{2}} \) is positive semidefinite. Eigenvectors are perpendicular to each other, so we have \( z \perp z_1 \):
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-z^T_1z_0 = 0 &\hArr (D^{\frac{1}{2}}\gamma_1)^TD^{\frac{1}{2}}1_N=0 \\\
-&\hArr \gamma^T_1D1_N=0 \\\
+z^Tz_1 = 0 &\hArr (D^{\frac{1}{2}}\gamma_2)^TD^{\frac{1}{2}}1_N=0 \\\
+&\hArr \gamma^T_2D1_N=0 \\\
 &\cdots \\\
-&\hArr \gamma^T_{N-1}D1_N=0
+&\hArr \gamma^T_{N}D1_N=0
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-So we have found the restriction for \( \gamma \), the problem becomes:
+On the other hand:
+</p>
+{{</ math.inline >}}
+
+$$
+\gamma^T_k\gamma_k = |A_k| \\\
+\gamma^T_kD\gamma_k = \sum_{i=1}^Nd_iy_{ik}y_{ik} = \sum_{i\in A_k}\sum_{j=1}^Nw_{ij} = \text{degree}(A_k)
+$$
+
+### Formalize optimization problem
+
+{{< math.inline >}}
+<p>
+So we have found the restriction for eigenvector \( \gamma \), the problem becomes:
 </p>
 {{</ math.inline >}}
 
