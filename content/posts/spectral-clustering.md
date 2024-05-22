@@ -281,7 +281,7 @@ The objective function becomes
 $$
 \begin{align*}
 \hat{Y} &= \argmin_{Y} Tr\left( Y^TLY(Y^TDY)^{-1} \right) \\\
-L &: \text{Laplace matrix, where } L=D-W
+L &: \text{Laplacian matrix, where } L=D-W
 \end{align*}
 $$
 
@@ -338,15 +338,14 @@ $$
 \end{align*}
 $$
 
-
 The conclusion is:
 
 $$
 \begin{align*}
 &1.\space R(A,B,y) \hArr R(B^{-\frac{1}{2}}AB^{-\frac{1}{2}},z) \text{ , where $z=B^{\frac{1}{2}}y$} \\\
 % \min R(A,B,y) \hArr \min_{||z||=1}\frac{z^TB^{-\frac{1}{2}}AB^{-\frac{1}{2}}z}{z^Tz} \hArr Ay=\lambda_{\min}By \hArr B^{-\frac{1}{2}}AB^{-\frac{1}{2}}z=\lambda_{\min}z \\\
-&2.\space\min R(A,B,y) \hArr Ay=\lambda_{\min}By \\\
-&3.\space\min R(B^{-\frac{1}{2}}AB^{-\frac{1}{2}},z) \hArr B^{-\frac{1}{2}}AB^{-\frac{1}{2}}z=\lambda_{\min}z \\\
+&2.\space\min R(A,B,y) \hArr \min\lambda \quad\text{ s.t. } Ay=\lambda By \\\
+&3.\space\min R(B^{-\frac{1}{2}}AB^{-\frac{1}{2}},z) \hArr \min\lambda \quad\text{s.t. }  B^{-\frac{1}{2}}AB^{-\frac{1}{2}}z=\lambda z \\\
 &4.\space \text{$B^{-1}A$ and $B^{-\frac{1}{2}}AB^{-\frac{1}{2}}$ share the same eigenvalues}
 \end{align*}
 $$
@@ -388,7 +387,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Laplacian matrix corresponds to \( R(L,D,\gamma_k) \) is defined as random walk normalized Laplacian \( L_{rw} \):
+\( L \) is defined as unnormalized Laplacian. Meanwhile, Laplacian matrix corresponds to \( R(L,D,\gamma_k) \) is defined as random walk normalized Laplacian \( L_{rw} \):
 </p>
 {{</ math.inline >}}
 
@@ -423,7 +422,7 @@ $$
 \begin{align*}
 \min_{Y} Tr(Y^TLY(Y^TDY)^{-1}) &= \min\sum_{k=1}^K\lambda_k \quad\text{s.t. } L_{rw}\gamma_k = \lambda_k\gamma_k, k=1\cdots K \\\
 &= \min\sum_{k=1}^K\lambda_k \quad\text{s.t. }L_{sym}z_k = \lambda_kz_k, k=1\cdots K \\\
-&z_k=D^{\frac{1}{2}}\gamma_k ,\quad \lambda_1\leq\cdots\leq\lambda_K
+&z_k=D^{\frac{1}{2}}\gamma_k ,\quad \lambda_{\min}=\lambda_1\leq\cdots\leq\lambda_K
 \end{align*}
 $$
 
@@ -442,7 +441,7 @@ D^{-\frac{1}{2}}LD^{-\frac{1}{2}}z_k=\lambda_kz_k, \text{where $z_k=D^{\frac{1}{
 $$ -->
 
 
-### Upper bound of eigenvalues and constraints of eigenvectors
+### Constraints of eigenvectors
 
 <cite>[^4]</cite>We can easily find the first eigenvector corresponds to the smallest eigenvalue of 0 in both symmetric Laplacian and random walk Laplacian:
 
@@ -471,7 +470,7 @@ $$
 
 {{< math.inline >}}
 <p>
-Since \( D^{-\frac{1}{2}}LD^{-\frac{1}{2}} \) is positive semidefinite. Eigenvectors are perpendicular to each other, so we have \( z \perp z_1 \):
+Since \( D^{-\frac{1}{2}}LD^{-\frac{1}{2}} \) is positive semidefinite. All eigenvectors are perpendicular to each other, so we have \( z \perp z_1 \):
 </p>
 {{</ math.inline >}}
 
@@ -486,20 +485,191 @@ $$
 
 {{< math.inline >}}
 <p>
-On the other hand:
+On the other hand, \( Y^TY=\text{diag}(|A_1|,\cdots,|A_K|) \) is given in previous definition which can be detailed:
 </p>
 {{</ math.inline >}}
 
 $$
-\gamma^T_k\gamma_k = |A_k| \\\
-\gamma^T_kD\gamma_k = \sum_{i=1}^Nd_iy_{ik}y_{ik} = \sum_{i\in A_k}\sum_{j=1}^Nw_{ij} = \text{degree}(A_k)
+\begin{align*}
+\gamma^T_k\gamma_k &= |A_k| \\\
+\gamma^T_kD\gamma_k &= \sum_{i=1}^Nd_iy_{ik}y_{ik} = \sum_{i\in A_k}\sum_{j=1}^Nw_{ij} = \text{degree}(A_k) \\\
+Y^TDY &= \begin{bmatrix}
+    \text{degree}(A_1) & & \\\
+    & \ddots & \\\
+    & & \text{degree}(A_K)
+\end{bmatrix} \\\
+\\\
+\text{Let } \gamma_k &= D^{-\frac{1}{2}}z_k \\\
+z^T_kD^{-\frac{1}{2}}D^{-\frac{1}{2}}z_k &= z^T_kD^{-1}z_k = |A_k| \\\
+z^T_kD^{-\frac{1}{2}}DD^{-\frac{1}{2}}z_k &= z^T_kz_k = \text{degree}(A_k) \\\
+Z^TZ &= \begin{bmatrix}
+    \text{degree}(A_1) & & \\\
+    & \ddots & \\\
+    & & \text{degree}(A_K)
+\end{bmatrix}
+\end{align*}
 $$
-
-### Formalize optimization problem
 
 {{< math.inline >}}
 <p>
-So we have found the restriction for eigenvector \( \gamma \), the problem becomes:
+In conclusion, constraints of \( z \) and \{ \gamma \} are given by:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+z_1 &= D^{\frac{1}{2}}1_N \\\
+z^TD^{\frac{1}{2}}1_N &= 0 \\\
+z^T_kz_k &= \text{degree}(A_k) \\\
+Z^TZ &= \text{diag}(\text{degree}(A_1),\cdots,\text{degree}(A_K)) \\\
+\gamma_1 &= 1_N \\\
+\gamma^TD1_N &= 0 \\\
+\gamma^T_kD\gamma_k &= \text{degree}(A_k) \\\
+Y^TDY &= \text{diag}(\text{degree}(A_1),\cdots,\text{degree}(A_K))
+\end{align*}
+$$
+
+### Upper bound of eigenvalues
+<!-- #### Gershgorin Circle Theorem
+
+{{< math.inline >}}
+<p>
+Gershgorin Circle Theorem: For a matrix \( A \), each eigenvalue of a matrix lies within at least one Gershgorin disc. The Gershgorin disc centered at \( a_{ii} \) with radius \( R_i \) is given by:
+</p>
+{{</ math.inline >}}
+
+$$
+R_i = \sum_{j\neq i}|a_{ij}| \\\
+|\lambda-a_{ii}| \leq R_i
+$$
+
+{{< math.inline >}}
+<p>
+Applying Gershgorin Circle Theorem to \( A_{norm} \), the Gershgorin disc centered at \( (A_{norm})_{ii} \) is given by:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+R_i &= \sum_{j\neq i}|(A_{norm})_{ij}| \\\
+&= \sum_{j\neq i,j=1}^N\frac{W_{ij}}{\sqrt{d_id_j}} \\\
+&\because W_{ij}\in\text{Gaussian kernel} \\\
+&\therefore W_{ii}=w_{ii}=1 \\\
+&= \sum_{j\neq i,j=1}^N\frac{w_{ij}}{\sqrt{\sum_{j=1}^Nw_{ij}}\sqrt{\sum_{k=1}^Nw_{jk}}} \\\
+\end{align*}
+$$ -->
+
+{{< math.inline >}}
+<p>
+Let \( A_{norm} \) be the normalized adjacency matrix:
+</p>
+{{</ math.inline >}}
+
+$$
+A_{norm} = D^{-\frac{1}{2}}WD^{-\frac{1}{2}}
+$$
+
+<cite>[^5]</cite>
+
+{{< math.inline >}}
+<p>
+Because \( D^{-\frac{1}{2}}LD^{-\frac{1}{2}} \) is positive semidefinite, we have:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+z^TD^{-\frac{1}{2}}LD^{-\frac{1}{2}}z \geq 0 &\rArr z^T(I-A_{norm})z \geq 0 \\\
+&\rArr 1 \geq \frac{z^TA_{norm}z}{z^Tz}
+\end{align*} \\\
+\lambda \text{ correspond to $A_{norm}$ has, $\lambda\leq 1$} 
+$$
+
+{{< math.inline >}}
+<p>
+Next, we can prove that \( I+A_{norm} \) is positive semidefinite:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+(I+A_{norm})v &= v + A_{norm}v \\\
+&= (1 + \lambda)v
+\end{align*} \\\
+\text{Since $0\leq\lambda\leq 1$, $1\leq 1+\lambda\leq 2$} \\\
+\text{All eigenvalues correspond to $I+A_{norm}$ are positve, $I+A_{norm}$ is PSD}
+$$
+
+{{< math.inline >}}
+<p>
+Since \( I+A_{norm} \) is positive semidefinite, we have:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+z^T(I+A_{norm})z \geq 0 &\rArr z^Tz+z^TA_{norm}z\geq0 \\\
+&\rArr -1 \leq \frac{z^TA_{norm}z}{z^Tz}
+\end{align*} \\\
+\lambda \text{ correspond to $A_{norm}$ has, $-1\leq\lambda$} 
+$$
+
+Combine together, we have:
+
+$$
+-1 \leq \frac{z^TA_{norm}z}{z^Tz} \leq 1
+$$
+
+{{< math.inline >}}
+<p>
+Recall that \( R(D^{-\frac{1}{2}}LD^{-\frac{1}{2}},z_k) \) is given by:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+R(D^{-\frac{1}{2}}LD^{-\frac{1}{2}},z) &= \frac{z^TD^{-\frac{1}{2}}LD^{-\frac{1}{2}}z}{z^Tz} \\\
+&= \frac{z^T(D^{-\frac{1}{2}}DD^{-\frac{1}{2}}-D^{-\frac{1}{2}}WD^{-\frac{1}{2}})z}{z^Tz} \\\
+&= \frac{z^T(I-A_{norm})z}{z^Tz} \\\
+% &= \frac{z^Tz-z^TD^{-\frac{1}{2}}WD^{-\frac{1}{2}}z}{z^Tz} \\\
+&= 1 - \frac{z^TA_{norm}z}{z^Tz}
+\end{align*} \\\
+\dArr \\\
+0 \leq R(D^{-\frac{1}{2}}LD^{-\frac{1}{2}},z) \leq 2
+$$
+
+{{< math.inline >}}
+<p>
+Thus eigenvalues of \( L_{sym} \) and \( L_{rw} \) are bounded by 2.
+</p>
+{{</ math.inline >}}
+
+<!-- 1. x^TA_{norm}x=y^TWy \geq 0. Since W is the adjacency matrix of a graph with non-negative weights, A_{norm} is positive semidefinite.
+
+2. eigenvalues correspond to A_{norm} lies in [-1,1], A_{norm} is generally not positive semidefinite. -->
+
+<!-- {{< math.inline >}}
+<p>
+Each element of \( A_{norm} \) is given by:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+(A_{norm})_{ij} &= \sum_k (D^{-\frac{1}{2}})_{ik}\sum_lW_{kl}(D^{-\frac{1}{2}})_{lj} \\\
+&\because D^{-\frac{1}{2}}=\text{diag}(\frac{1}{\sqrt{d_1}},\cdots,\frac{1}{\sqrt{d_N}}) \\\
+&\therefore (D^{-\frac{1}{2}})_{ii}=\frac{1}{\sqrt{d_i}}, (D^{-\frac{1}{2}})_{ij}=0 \\\
+&= \sum_k (D^{-\frac{1}{2}})_{ik}W_{kj}(D^{-\frac{1}{2}})_{jj} \\\
+&= (D^{-\frac{1}{2}})_{ii}W_{ij}(D^{-\frac{1}{2}})_{jj} \\\
+&= \frac{W_{ij}}{\sqrt{d_id_j}} \\\
+\end{align*}
+$$ -->
+
+### Formalize optimization object
+
+{{< math.inline >}}
+<p>
+The minimizing Ncut problem becomes:
 </p>
 {{</ math.inline >}}
 
@@ -509,19 +679,21 @@ $$
     \text{s.t. $L\gamma_k=\lambda_kD\gamma_k$} \\\
     \text{s.t. $\gamma^T_1=1_N$} \\\
     \text{s.t. $\gamma^T_kD1_N=0, k=2\cdots K$} \\\
-    0=\lambda_1\leq\cdots\leq\lambda_K\leq\lambda_{\max}
+    \text{s.t. $\gamma^T_kD\gamma_k = \text{degree}(A_k)$} \\\
+    0=\lambda_1\leq\cdots\leq\lambda_K\leq 2
 \end{array}
 $$
 
-Convert it into matrix form:
+In matrix form:
 
 $$
-\min_{Y} Tr(Y^TLY(Y^TDY)^{-1}) \hArr \begin{array}{l}
+\quad\quad\quad\quad\min_{Y} Tr(Y^TLY(Y^TDY)^{-1}) \hArr \begin{array}{l}
     \min_{\gamma_1\cdots\gamma_K}Tr(\Lambda) \\\
     \text{s.t. $LY=\Lambda DY$} \\\
     \text{s.t. $\gamma^T_1=1_N$} \\\
-    \text{s.t. $\gamma^T_kD1_N=0, k=2\cdots K$} \\\
-    0=\lambda_1\leq\cdots\leq\lambda_K\leq\lambda_{\max}
+    \text{s.t. $Y_{:,2:K}^TD1_N=0$} \\\
+    \text{s.t. $Y^TDY = \text{diag}(\text{degree}(A_1),\cdots,\text{degree}(A_K))$} \\\
+    0=\lambda_1\leq\cdots\leq\lambda_K\leq 2
 \end{array} \\\
 \\\
 \text{where } \hat{Y} = \begin{bmatrix}
@@ -577,7 +749,7 @@ $$
 
 [^1]: - [video](https://www.bilibili.com/video/BV1aE411o7qd?p=123).
 [^4]: - [Normalized Cuts and Image Segmentation Jianbo Shi and Jitendra Malik, Member, IEEE](https://people.eecs.berkeley.edu/~malik/papers/SM-ncut.pdf).
-[^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
+[^5]: - [Spectral Graph Theory. David P. Williamson, Sam Gutekunst](https://people.orie.cornell.edu/dpw/orie6334/Fall2016/lecture7.pdf).
 [^2]: - [Math 253: Mathematical Methods for Data Visualization Lecture 4: Rayleigh Quotients. Guangliang Chen](https://arxiv.org/pdf/1701.00160).
 [^7]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
 [^6]: - [Gaussian Processes and Gaussian Markov Random Fields](https://folk.ntnu.no/joeid/MA8702/jan16.pdf)
