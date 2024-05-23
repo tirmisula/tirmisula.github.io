@@ -151,29 +151,6 @@ $$
 
 ## Reverse Diffusion Process
 
-{{< math.inline >}}
-<p>
-Define a one-hot encode indicator matrix \( Y \), which represents \( A_1\cdots A_K \):
-</p>
-{{</ math.inline >}}
-
-
-
-{{< math.inline >}}
-<p>
-The objective function becomes
-</p>
-{{</ math.inline >}}
-
-$$
-\begin{align*}
-\hat{Y} &= \argmin_{Y} Tr\left( Y^TLY(Y^TDY)^{-1} \right) \\\
-L &: \text{Laplace matrix, where } L=D-W
-\end{align*}
-$$
-
-## Solve objective function
-
 
 
 ## Reference
