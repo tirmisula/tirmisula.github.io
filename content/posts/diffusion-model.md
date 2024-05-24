@@ -97,7 +97,7 @@ By <a href="https://tirmisula.github.io/posts/generative-adversarial-network/#st
 {{</ math.inline >}}
 
 $$
-x_t \sim \mathcal{N}(\sqrt{1-\beta_t}x_{t-1}, \beta_t)
+x_t \sim \mathcal{N}(\sqrt{1-\beta_t}x_{t-1}, \beta_tI)
 $$
 
 {{< math.inline >}}
@@ -107,7 +107,7 @@ By homogeneous markov assumption, assuming the transition function is determined
 {{</ math.inline >}}
 
 $$
-q(x_t|x_{t-1}) = \mathcal{N}(x_t|\sqrt{1-\beta_t}x_{t-1}, \beta_t) \\\
+q(x_t|x_{t-1}) = \mathcal{N}(x_t|\sqrt{1-\beta_t}x_{t-1}, \beta_tI) \\\
 x_0 \sim P_{\text{data}}
 $$
 
@@ -144,14 +144,55 @@ Thus the ending Gaussian noise has closed form from the inital data, \( q(x_T|x_
 
 $$
 \begin{align*}
-q(x_T|x_0) &= \mathcal{N}(\sqrt{\prod_{i=1}^t\alpha_i}x_0, (1-\prod_{i=1}^t\alpha_i)I) \\\
+q(x_T|x_0) &= \mathcal{N}(\sqrt{\prod_{i=1}^T\alpha_i}x_0, (1-\prod_{i=1}^T\alpha_i)I) \\\
 x_T &= \sqrt{\prod_{i=1}^T\alpha_i}\cdot x_0 + \sqrt{1-\prod_{i=1}^T\alpha_i}\cdot\epsilon
 \end{align*}
 $$
 
 ## Reverse Diffusion Process
+### Reversed inference is deterministic
+{{< math.inline >}}
+<p>
+Given \( x_0 \), the reversed inference \( q(x_{t-1})|x_t \) has a closed form:
+</p>
+{{</ math.inline >}}
 
+$$
+\begin{align*}
+&\text{By Bayes' theorem: } q(x_{t-1}|x_t) = \frac{q(x_t|x_{t-1})q(x_{t-1})}{q(x_t)} \\\
+&\text{Let $x_0$ be in the conditional probability, we have: } \\\
+&q(x_{t-1}|x_t,x_0) = \frac{q(x_t|x_{t-1},x_0)q(x_{t-1}|x_0)}{q(x_t|x_0)} \\\
+&\text{$q(x_t|x_{t-1},x_0),q(x_{t-1}|x_0),q(x_t|x_0)$ are well defined in forward diffision process, which are: } \\\
+&\quad \ast q(x_t|x_{t-1},x_0) = q(x_t|x_{t-1}) = \mathcal{N}(x_t|\sqrt{1-\beta_t}x_{t-1}, \beta_tI)=\mathcal{N}(x_t|\sqrt{\alpha_t}x_{t-1}, \beta_tI) \\\
+&\quad \ast q(x_t|x_0) = \mathcal{N}(\sqrt{\prod_{i=1}^t\alpha_i}x_0, (1-\prod_{i=1}^t\alpha_i)I) \\\
+&\quad \ast q(x_{t-1}|x_0) = \mathcal{N}(\sqrt{\prod_{i=1}^{t-1}\alpha_i}x_0, (1-\prod_{i=1}^{t-1}\alpha_i)I) \\\
+&\text{Recall that multivariate Gaussian with diagonal matrix has the following form: } \\\
+&|\Sigma| = \prod_{i=1}^p\sigma^2_i, \quad (x-\mu)^T\Sigma^{-1}(x-\mu) = \sum_{i=1}^p\frac{(x_i-\mu_i)^2}{\sigma^2_i} \\\
+&\mathcal{N}(x_1\cdots x_p|\mu,\Sigma) = \frac{1}{(2\pi)^\frac{p}{2}\prod_{i=1}^p\sigma_i}\exp(-\frac{1}{2}\sum_{i=1}^p\frac{(x_i-\mu_i)^2}{\sigma^2_i})=\prod_{i=1}^p\mathcal{N}(x_i|\mu_i,\sigma_i) \\\
+&\text{For $q(x_t|x_{t-1},x_0),q(x_{t-1}|x_0),q(x_t|x_0)$, we have: } \\\
+&\quad q(x_t|x_{t-1}) = \frac{1}{(2\pi)^\frac{p}{2}\beta_t^{\frac{p}{2}}}\exp(-\frac{1}{2\beta_t}(x_t-\sqrt{\alpha_t}x_{t-1})^T(x_t-\sqrt{\alpha_t}x_{t-1}))=\left(\frac{1}{(2\pi)^{\frac{1}{2}}\beta_t^{\frac{1}{2}}}\right)^p\exp(-\frac{1}{2}\frac{(x_t-\sqrt{\alpha_t}x_{t-1})^T(x_t-\sqrt{\alpha_t}x_{t-1})}{\beta_t}) \\\
+&\quad q(x_t|x_0) = \left(\frac{1}{(2\pi)^{\frac{1}{2}}(1-\prod_{i=1}^t\alpha_i)^{\frac{1}{2}}}\right)^p\exp(-\frac{1}{2}\frac{(x_t-\sqrt{\prod_{i=1}^t\alpha_i}x_0)^T(x_t-\sqrt{\prod_{i=1}^t\alpha_i}x_0)}{1-\prod_{i=1}^t\alpha_i}) \\\
+&\quad q(x_{t-1}|x_0) = \left(\frac{1}{(2\pi)^{\frac{1}{2}}(1-\prod_{i=1}^{t-1}\alpha_i)^{\frac{1}{2}}}\right)^p\exp(-\frac{1}{2}\frac{(x_{t-1}-\sqrt{\prod_{i=1}^{t-1}\alpha_i}x_0)^T(x_{t-1}-\sqrt{\prod_{i=1}^{t-1}\alpha_i}x_0)}{1-\prod_{i=1}^{t-1}\alpha_i}) \\\
+&\text{For simplification let $p=1$, we have: } \\\
+&\frac{q(x_t|x_{t-1},x_0)q(x_{t-1}|x_0)}{q(x_t|x_0)} = \frac{\sqrt{2\pi(1-\prod_{i=1}^t\alpha_i)}}{2\pi\sqrt{\beta_t(1-\prod_{i=1}^{t-1}\alpha_i)}}\exp\left( -\frac{1}{2}\left[ \frac{(x_t-\sqrt{\alpha_t}x_{t-1})^2}{\beta_t}+\frac{(x_{t-1}-\sqrt{\prod_{i=1}^{t-1}\alpha_i}x_0)^2}{1-\prod_{i=1}^{t-1}\alpha_i}-\frac{(x_{t}-\sqrt{\prod_{i=1}^{t}\alpha_i}x_0)^2}{1-\prod_{i=1}^{t}\alpha_i} \right] \right) \\\
+&\quad\quad\quad\propto \exp\left( -\frac{1}{2}\left[ \frac{(x_t-\sqrt{\alpha_t}x_{t-1})^2}{\beta_t}+\frac{(x_{t-1}-\sqrt{\prod_{i=1}^{t-1}\alpha_i}x_0)^2}{1-\prod_{i=1}^{t-1}\alpha_i}-\frac{(x_{t}-\sqrt{\prod_{i=1}^{t}\alpha_i}x_0)^2}{1-\prod_{i=1}^{t}\alpha_i} \right] \right) \\\
+&\text{Recall that $q(x_{t-1})$ is assumed to be in a Gaussian form $\mathcal{N}(\mu,\sigma^2)$ : } \\\
+&q(x_{t-1}|x_t,x_0) \propto \exp\left( -\frac{1}{2}\left[ \frac{(x_{t-1}-\mu)^2}{\sigma^2} \right] \right) = \exp\left( -\frac{1}{2}\left[ (\sigma^{-2})x_{t-1}^2-(\sigma^{-2}2\mu)x_{t-1}+\sigma^{-2}\mu^2 \right] \right) \\\
+&\text{In order to match the Gaussian case, Rearrange the above Bayes equation: } \\\
+&\quad \text{quadratic part: }(\sigma^{-2})x_{t-1}^2 \hArr (\beta_t^{-1}\alpha_t+(1-\prod_{i=1}^{t-1}\alpha_i)^{-1})x_{t-1}^2 \\\
+&\quad\quad \sigma^2 = \frac{1}{\frac{\alpha_t}{\beta_t}+\frac{1}{1-\prod_{i=1}^{t-1}\alpha_i}} = \frac{\beta_t(1-\prod_{i=1}^{t-1}\alpha_i)}{\alpha_t-\prod_{i=1}^t\alpha_i+\beta_t} = \beta_t\frac{(1-\prod_{i=1}^{t-1}\alpha_i)}{1-\prod_{i=1}^t\alpha_i} \\\
+&\quad \text{linear part: }(\sigma^{-2}2\mu)x_{t-1} \hArr \left(2\beta_t^{-1}x_t\sqrt{\alpha_t}+2(1-\prod_{i=1}^{t-1}\alpha_i)^{-1}\sqrt{\prod_{i=1}^{t-1}\alpha_i}x_0\right)x_{t-1} \\\
+&\quad\quad \mu = (\frac{x_t\sqrt{\alpha_t}}{\beta_t}+\frac{\sqrt{\prod_{i=1}^{t-1}\alpha_i}x_0}{1-\prod_{i=1}^{t-1}\alpha_i})\beta_t\frac{1-\prod_{i=1}^{t-1}\alpha_i}{1-\prod_{i=1}^t\alpha_i} = \frac{\sqrt{\alpha_t}(1-\prod_{i=1}^{t-1}\alpha_i)}{1-\prod_{i=1}^t\alpha_i}x_t+\frac{\beta_t\sqrt{\prod_{i=1}^{t-1}\alpha_i}}{1-\prod_{i=1}^t\alpha_i}x_0 \\\
+&\quad\quad\quad\because x_t=\sqrt{\prod_{i=1}^t\alpha_i}\cdot x_0 + \sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon, \space\therefore x_0=\frac{x_t-\sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon}{\sqrt{\prod_{i=1}^t\alpha_i}} \\\
+&\quad\quad \mu = \frac{\sqrt{\alpha_t}(1-\prod_{i=1}^{t-1}\alpha_i)}{1-\prod_{i=1}^t\alpha_i}x_t+\frac{\beta_t\sqrt{\prod_{i=1}^{t-1}\alpha_i}}{1-\prod_{i=1}^t\alpha_i}\frac{x_t-\sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon}{\sqrt{\prod_{i=1}^t\alpha_i}} \\\
+&\quad\quad\quad = \frac{\sqrt{\alpha_t}(1-\prod_{i=1}^{t-1}\alpha_i)}{1-\prod_{i=1}^t\alpha_i}x_t+\frac{\beta_t}{\sqrt{\alpha_t}(1-\prod_{i=1}^t\alpha_i)}x_t - \frac{\beta_t}{\sqrt{\alpha_t}\sqrt{1-\prod_{i=1}^t\alpha_i}}\cdot\epsilon \\\
+&\quad\quad\quad = \frac{\alpha_t(1-\prod_{i=1}^{t-1}\alpha_i)+1-\alpha_t}{\sqrt{\alpha_t}(1-\prod_{i=1}^t\alpha_i)}x_t - \frac{\beta_t}{\sqrt{\alpha_t}\sqrt{1-\prod_{i=1}^t\alpha_i}}\cdot\epsilon \\\
+&\quad\quad\quad =\frac{1}{\sqrt{\alpha_t}}(x_t - \frac{1-\alpha_t}{\sqrt{1-\prod_{i=1}^t\alpha_i}}\epsilon) \\\
+&\quad \text{constant part: } \sigma^{-2}\mu^2 \hArr \beta_t^{-1}x_t^2 + (1-\prod_{i=1}^{t-1}\alpha_i)^{-1}\prod_{i=1}^{t-1}\alpha_ix_0^2 - (1-\prod_{i=1}^{t}\alpha_i)^{-1}(x_{t}-\sqrt{\prod_{i=1}^{t}\alpha_i}x_0)^2
+\end{align*}
+$$
 
+### Noise removing
 
 ## Reference
 
