@@ -78,7 +78,7 @@ $$
 The transition process is modeled by Markov chain, by using Markov chain one distribution can be converted to another distribution gradually.
 
 ## Forward Diffusion Process
-
+### Deterministic noise adding
 The noise adding operation is given by:
 
 $$
@@ -110,6 +110,8 @@ $$
 q(x_t|x_{t-1}) = \mathcal{N}(x_t|\sqrt{1-\beta_t}x_{t-1}, \beta_tI) \\\
 x_0 \sim P_{\text{data}}
 $$
+
+### Ending state is derivable from initial data
 
 {{< math.inline >}}
 <p>
@@ -150,7 +152,7 @@ x_T &= \sqrt{\prod_{i=1}^T\alpha_i}\cdot x_0 + \sqrt{1-\prod_{i=1}^T\alpha_i}\cd
 $$
 
 ## Reverse Diffusion Process
-### Reversed inference is deterministic
+### Deterministic reversed data generating
 {{< math.inline >}}
 <p>
 Given \( x_0 \), the reversed inference \( q(x_{t-1})|x_t \) has a closed form:
@@ -187,12 +189,29 @@ $$
 &\quad\quad \mu = \frac{\sqrt{\alpha_t}(1-\prod_{i=1}^{t-1}\alpha_i)}{1-\prod_{i=1}^t\alpha_i}x_t+\frac{\beta_t\sqrt{\prod_{i=1}^{t-1}\alpha_i}}{1-\prod_{i=1}^t\alpha_i}\frac{x_t-\sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon}{\sqrt{\prod_{i=1}^t\alpha_i}} \\\
 &\quad\quad\quad = \frac{\sqrt{\alpha_t}(1-\prod_{i=1}^{t-1}\alpha_i)}{1-\prod_{i=1}^t\alpha_i}x_t+\frac{\beta_t}{\sqrt{\alpha_t}(1-\prod_{i=1}^t\alpha_i)}x_t - \frac{\beta_t}{\sqrt{\alpha_t}\sqrt{1-\prod_{i=1}^t\alpha_i}}\cdot\epsilon \\\
 &\quad\quad\quad = \frac{\alpha_t(1-\prod_{i=1}^{t-1}\alpha_i)+1-\alpha_t}{\sqrt{\alpha_t}(1-\prod_{i=1}^t\alpha_i)}x_t - \frac{\beta_t}{\sqrt{\alpha_t}\sqrt{1-\prod_{i=1}^t\alpha_i}}\cdot\epsilon \\\
-&\quad\quad\quad =\frac{1}{\sqrt{\alpha_t}}(x_t - \frac{1-\alpha_t}{\sqrt{1-\prod_{i=1}^t\alpha_i}}\epsilon) \\\
+&\quad\quad\quad = \frac{1}{\sqrt{\alpha_t}}(x_t - \frac{1-\alpha_t}{\sqrt{1-\prod_{i=1}^t\alpha_i}}\epsilon) \\\
 &\quad \text{constant part: } \sigma^{-2}\mu^2 \hArr \beta_t^{-1}x_t^2 + (1-\prod_{i=1}^{t-1}\alpha_i)^{-1}\prod_{i=1}^{t-1}\alpha_ix_0^2 - (1-\prod_{i=1}^{t}\alpha_i)^{-1}(x_{t}-\sqrt{\prod_{i=1}^{t}\alpha_i}x_0)^2
 \end{align*}
 $$
 
+In conclusion, we have:
+
+$$
+q(x_{t-1}|x_t,x_0) = \mathcal{N}(\frac{1}{\sqrt{\alpha_t}}(x_t - \frac{1-\alpha_t}{\sqrt{1-\prod_{i=1}^t\alpha_i}}\epsilon), \beta_t\frac{1-\prod_{i=1}^{t-1}\alpha_i}{1-\prod_{i=1}^t\alpha_i}I)
+$$
+
 ### Noise removing
+
+The noise removing operation is given by:
+
+$$
+\begin{align*}
+x_{t-1} &= \frac{1}{\sqrt{\alpha_t}}(x_t - \frac{1-\alpha_t}{\sqrt{1-\prod_{i=1}^t\alpha_i}}\hat{\epsilon_t}) + \sqrt{\beta_t\frac{1-\prod_{i=1}^{t-1}\alpha_i}{1-\prod_{i=1}^t\alpha_i}}\epsilon \\\
+&\text{where } \\\
+\epsilon_t &\sim \mathcal{N}(0,I), \space t=1\cdots T \\\
+\beta_t &\text{ is hyperparameter}
+\end{align*}
+$$
 
 ## Reference
 
