@@ -152,7 +152,7 @@ x_T &= \sqrt{\prod_{i=1}^T\alpha_i}\cdot x_0 + \sqrt{1-\prod_{i=1}^T\alpha_i}\cd
 $$
 
 ## Reverse Diffusion Process
-### Deterministic reversed data generating
+### Deterministic reversed noise adding
 {{< math.inline >}}
 <p>
 Given \( x_0 \), the reversed inference \( q(x_{t-1})|x_t \) has a closed form:
@@ -194,22 +194,107 @@ $$
 \end{align*}
 $$
 
-In conclusion, we have:
+In conclusion, the reversed step is given by:
 
 $$
-q(x_{t-1}|x_t,x_0) = \mathcal{N}(\frac{1}{\sqrt{\alpha_t}}(x_t - \frac{1-\alpha_t}{\sqrt{1-\prod_{i=1}^t\alpha_i}}\epsilon), \beta_t\frac{1-\prod_{i=1}^{t-1}\alpha_i}{1-\prod_{i=1}^t\alpha_i}I)
+q(x_{t-1}|x_t,x_0) = \mathcal{N}(\frac{1}{\sqrt{\alpha_t}}(x_t - \frac{1-\alpha_t}{\sqrt{1-\prod_{i=1}^t\alpha_i}}\epsilon_t), \beta_t\frac{1-\prod_{i=1}^{t-1}\alpha_i}{1-\prod_{i=1}^t\alpha_i}I)
 $$
-
-### Noise removing
-
-The noise removing operation is given by:
 
 $$
 \begin{align*}
-x_{t-1} &= \frac{1}{\sqrt{\alpha_t}}(x_t - \frac{1-\alpha_t}{\sqrt{1-\prod_{i=1}^t\alpha_i}}\hat{\epsilon_t}) + \sqrt{\beta_t\frac{1-\prod_{i=1}^{t-1}\alpha_i}{1-\prod_{i=1}^t\alpha_i}}\epsilon \\\
+x_{t-1} &= \frac{1}{\sqrt{\alpha_t}}(x_t - \frac{1-\alpha_t}{\sqrt{1-\prod_{i=1}^t\alpha_i}}\hat{\epsilon_t}) + \sqrt{\beta_t\frac{1-\prod_{i=1}^{t-1}\alpha_i}{1-\prod_{i=1}^t\alpha_i}}\epsilon_t \\\
 &\text{where } \\\
 \epsilon_t &\sim \mathcal{N}(0,I), \space t=1\cdots T \\\
-\beta_t &\text{ is hyperparameter}
+\hat{\epsilon_t} &\text{ is the noise sampled at t-th step in forwards difussion process} \\\
+\end{align*}
+$$
+
+### Denoising autoencoder
+
+{{< math.inline >}}
+<p>
+Like VAE, we finally care about the generative model (the decoder part). Suppose the joint distribution of observations \( x_0 \) and latent variables \( x_{1:T} \) is defined as \( p(x_{0:T}|\theta) \), it has following attributes:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+&p(x_0|\theta) = \int_{x_1\cdots x_T} p(x_{0:T}|\theta) dx_{1:T} \\\
+&p(x_{0:T}|\theta) = p(x_T|\theta)p(x_{T-1}|x_T,\theta)\cdots p(x_0|x_1,\theta)
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+In order to better being approximated by \( q(x_{t-1}|x_t) \), \( p(x_{t-1}|x_t,\theta) \) is defined to be Gaussian:
+</p>
+{{</ math.inline >}}
+
+$$
+p(x_{t-1}|x_t,\theta) = \mathcal{N}(\mu(x_t,t;\theta),\Sigma(x_t,t;\theta))
+$$
+
+Recall that MLE for latent variable model is equivalent to maximizing it's ELBO via variational inference:
+
+$$
+\begin{align*}
+(\hat{\theta},\hat{\phi}) &= \argmax_{\theta,\phi} \log p(x|\theta) \\\
+&= \argmax_{\theta,\phi} \text{ELBO} \\\
+&= \argmax_{\theta,\phi} \mathbb{E}\_{z\sim q(z|x,\phi)}[\log \frac{p(x,z|\theta)}{q(z|x,\phi)} ]
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+By replacing \( x=x_0, z=x_{1:T} \), we have the objective function:
+</p>
+{{</ math.inline >}}
+
+$$
+\text{ELBO} =  \mathbb{E}\_{x_{1:T}\sim q(x_{1:T}|x_0,\phi)}[\log \frac{p(x_{0:T}|\theta)}{q(x_{1:T}|x_0,\phi)} ] \\\
+\\\
+\begin{align*}
+(\hat{\theta},\hat{\phi}) &= \argmax_{\theta,\phi}\mathbb{E}\_{x_{1:T}\sim q(x_{1:T}|x_0,\phi)}[\log \frac{p(x_{0:T}|\theta)}{q(x_{1:T}|x_0,\phi)} ] \\\
+&= \argmin_{\theta,\phi}\mathbb{E}\_{x_{1:T}\sim q(x_{1:T}|x_0,\phi)}[\log \frac{q(x_{1:T}|x_0,\phi)}{p(x_{0:T}|\theta)} ] \\\
+&\because \text{loss is computed on whole dataset, take average on $x_0$} \\\
+&= \argmin_{\theta,\phi}\mathbb{E}\_{x_{0}\sim q(x_0|\phi)}[\mathbb{E}\_{x_{1:T}\sim q(x_{1:T}|x_0,\phi)}[\log \frac{q(x_{1:T}|x_0,\phi)}{p(x_{0:T}|\theta)} ]] \\\
+&= \argmin_{\theta,\phi}\mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\log \frac{q(x_{1:T}|x_0,\phi)}{p(x_{0:T}|\theta)} ] \\\
+&\text{Let } L = \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\log \frac{q(x_{1:T}|x_0,\phi)}{p(x_{0:T}|\theta)} ] \\\
+&= \argmin_{\theta,\phi} L
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Let the approximation distribution be related with the Forward diffusion process  \( q(x_{1:T}|x_0,\phi)=\prod_{t=1}^Tq(x_t|x_{t-1}) \). We can expand the negative evidence lower bound:
+</p>
+{{</ math.inline >}}
+
+
+$$
+\begin{align*}
+L &= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\log \frac{q(x_{1:T}|x_0,\phi)}{p(x_{0:T}|\theta)} ] \\\
+&\because d \\\
+&= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\log \frac{\prod_{t=1}^Tq(x_t|x_{t-1})}{p(x_T|\theta)\prod_{t=1}^Tp(x_{t-1}|x_t,\theta)} ] \\\
+&= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\log \prod_{t=1}^T\frac{q(x_t|x_{t-1})}{p(x_{t-1}|x_t,\theta)}-\log p(x_T|\theta) ] \\\
+&= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=1}^T\log\frac{q(x_t|x_{t-1})}{p(x_{t-1}|x_t,\theta)}-\log p(x_T|\theta) ] \\\
+&= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\log\frac{q(x_t|x_{t-1},x_0)}{p(x_{t-1}|x_t,\theta)}+\log\frac{q(x_1|x_{0})}{p(x_{0}|x_1,\theta)}-\log p(x_T|\theta) ] \\\
+&\because q(x_{t-1}|x_t,x_0) = \frac{q(x_t|x_{t-1},x_0)q(x_{t-1}|x_0)}{q(x_t|x_0)} \\\
+&= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)q(x_t|x_0)\frac{1}{q(x_{t-1}|x_0)}}{p(x_{t-1}|x_t,\theta)}+\log\frac{q(x_1|x_{0})}{p(x_{0}|x_1,\theta)}-\log p(x_T|\theta) ] \\\
+&= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)}+\sum_{t=2}^T\log\frac{q(x_t|x_0)}{q(x_{t-1}|x_0)}+\log\frac{q(x_1|x_{0})}{p(x_{0}|x_1,\theta)}-\log p(x_T|\theta) ] \\\
+&\because \sum_{t=2}^T\log\frac{q(x_t|x_0)}{q(x_{t-1}|x_0)} = \log(\frac{q(x_2|x_0)}{q(x_1|x_0)}\frac{q(x_3|x_0)}{q(x_2|x_0)}\cdots\frac{q(x_T|x_0)}{q(x_{T-1}|x_0)}) = \log\frac{q(x_T|x_0)}{q(x_1|x_0)} \\\
+&= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)}+\log\frac{q(x_T|x_0)}{q(x_1|x_0)}+\log\frac{q(x_1|x_{0})}{p(x_{0}|x_1,\theta)}-\log p(x_T|\theta) ] \\\
+&= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)}+\log\frac{q(x_T|x_0)q(x_1|x_{0})}{q(x_1|x_0)p(x_{0}|x_1,\theta)p(x_T|\theta)} ] \\\
+&= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)}+\log\frac{q(x_T|x_0)}{p(x_T|\theta)}-\log p(x_0|x_1,\theta) ] \\\
+&= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)}+\log\frac{q(x_T|x_0)}{p(x_T|\theta)}-\log p(x_0|x_1,\theta) ] \\\
+\\\
+&\text{Let }A=\mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)} ] \\\
+A &= \mathbb{E}\_{q(x_0,x_{t-1},x_t|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)} ] \quad (\text{integrate on irrelavent $x_i$}) \\\
+&\because \int p(a)\left(\int p(b|a)f(a,b)\space db\right)da = \int \left(\int p(b|a)p(a)f(a,b)\space db\right)da = \mathbb{E}_{p(a,b)}[f(a,b)] \\\
+&= \mathbb{E}\_{q(x_0,x_t|\phi)}[\mathbb{E}\_{q(x_{t-1}|x_0,x_t,\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)} ]] \\\
+&= \mathbb{E}\_{q(x_0,x_t|\phi)}\sum_{t=2}^T\mathbb{E}\_{q(x_{t-1}|x_0,x_t,\phi)}[\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)} ] \\\
+&= \mathbb{E}\_{q(x_0,x_t|\phi)}\sum_{t=2}^T\text{KL}(q(x_{t-1}|x_t,x_0)||p(x_{t-1}|x_t,\theta)) \\\
+&= \mathbb{E}\_{q(x_{0:T}|\phi)}\sum_{t=2}^T\text{KL}(q(x_{t-1}|x_t,x_0)||p(x_{t-1}|x_t,\theta)) \quad (\text{add integral of irrelavent $x_i$}) \\\
 \end{align*}
 $$
 
