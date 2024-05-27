@@ -213,14 +213,15 @@ $$
 
 {{< math.inline >}}
 <p>
-Like VAE, we finally care about the generative model (the decoder part). Suppose the joint distribution of observations \( x_0 \) and latent variables \( x_{1:T} \) is defined as \( p(x_{0:T}|\theta) \), it has following attributes:
+Like VAE, we finally care about the generative model (the decoder part). Suppose the joint distribution of observations \( x_0 \) and latent variables \( x_{1:T} \) is defined as \( p(x_{0:T}|\theta) \), the starting state is standard norm noise:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
 &p(x_0|\theta) = \int_{x_1\cdots x_T} p(x_{0:T}|\theta) dx_{1:T} \\\
-&p(x_{0:T}|\theta) = p(x_T|\theta)p(x_{T-1}|x_T,\theta)\cdots p(x_0|x_1,\theta)
+&p(x_{0:T}|\theta) = p(x_T|\theta)p(x_{T-1}|x_T,\theta)\cdots p(x_0|x_1,\theta) \\\
+&p(x_T|\theta) = \mathcal{N}(0,I)
 \end{align*}
 $$
 
@@ -274,7 +275,6 @@ Let the approximation distribution be related with the Forward diffusion process
 $$
 \begin{align*}
 L &= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\log \frac{q(x_{1:T}|x_0,\phi)}{p(x_{0:T}|\theta)} ] \\\
-&\because d \\\
 &= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\log \frac{\prod_{t=1}^Tq(x_t|x_{t-1})}{p(x_T|\theta)\prod_{t=1}^Tp(x_{t-1}|x_t,\theta)} ] \\\
 &= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\log \prod_{t=1}^T\frac{q(x_t|x_{t-1})}{p(x_{t-1}|x_t,\theta)}-\log p(x_T|\theta) ] \\\
 &= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=1}^T\log\frac{q(x_t|x_{t-1})}{p(x_{t-1}|x_t,\theta)}-\log p(x_T|\theta) ] \\\
@@ -290,12 +290,37 @@ L &= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\log \frac{q(x_{1:T}|x_0,\phi)}{p
 \\\
 &\text{Let }A=\mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)} ] \\\
 A &= \mathbb{E}\_{q(x_0,x_{t-1},x_t|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)} ] \quad (\text{integrate on irrelavent $x_i$}) \\\
-&\because \int p(a)\left(\int p(b|a)f(a,b)\space db\right)da = \int \left(\int p(b|a)p(a)f(a,b)\space db\right)da = \mathbb{E}_{p(a,b)}[f(a,b)] \\\
+&\because \mathbb{E}_{p(a)}\mathbb{E}_{p(b|a)}[f(a,b)] = \int \left(\int p(b|a)p(a)f(a,b)\space db\right)da = \mathbb{E}_{p(a,b)}[f(a,b)] \\\
 &= \mathbb{E}\_{q(x_0,x_t|\phi)}[\mathbb{E}\_{q(x_{t-1}|x_0,x_t,\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)} ]] \\\
 &= \mathbb{E}\_{q(x_0,x_t|\phi)}\sum_{t=2}^T\mathbb{E}\_{q(x_{t-1}|x_0,x_t,\phi)}[\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)} ] \\\
 &= \mathbb{E}\_{q(x_0,x_t|\phi)}\sum_{t=2}^T\text{KL}(q(x_{t-1}|x_t,x_0)||p(x_{t-1}|x_t,\theta)) \\\
 &= \mathbb{E}\_{q(x_{0:T}|\phi)}\sum_{t=2}^T\text{KL}(q(x_{t-1}|x_t,x_0)||p(x_{t-1}|x_t,\theta)) \quad (\text{add integral of irrelavent $x_i$}) \\\
+&\text{Let }B=\mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[ \log\frac{q(x_T|x_0)}{p(x_T|\theta)} ] \\\
+B &= \mathbb{E}\_{q(x_0,x_T|\phi)}[ \log\frac{q(x_T|x_0)}{p(x_T|\theta)} ] \quad (\text{integrate on irrelavent $x_i$}) \\\
+&= \mathbb{E}\_{q(x_0|\phi)}\mathbb{E}\_{q(x_T|x_0|\phi)}[ \log\frac{q(x_T|x_0)}{p(x_T|\theta)} ] \\\
+&= \mathbb{E}\_{q(x_0|\phi)}\text{KL}(q(x_T|x_0 || p(x_T|\theta))) \\\
+&= \mathbb{E}\_{q(x_{0:T}|\phi)}\text{KL}(q(x_T|x_0 || p(x_T|\theta))) \\\
+&\text{Put $A,B$ back to $L$: } \\\
+L &= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\text{KL}(q(x_{t-1}|x_t,x_0)||p(x_{t-1}|x_t,\theta))+\text{KL}(q(x_T|x_0 || p(x_T|\theta)))-\log p(x_0|x_1,\theta) ] \\\
+&\text{Let } \begin{array}{l}
+L_T &= \text{KL}(q(x_T|x_0 || p(x_T|\theta))) \\\
+L_{t-1} &= \text{KL}(q(x_{t-1}|x_t,x_0)||p(x_{t-1}|x_t,\theta)) \\\
+L_0 &= \log p(x_0|x_1,\theta)
+\end{array} \\\
+&= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[ L_T+L_{T-1}+\cdots+L_{1}+L_0 ] \\\
 \end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Understanding each part of loss \( L_T,L_t,L_0 \) in negative evidence lower bound \( L \):
+</p>
+{{</ math.inline >}}
+
+$$
+\min \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[ L_T+L_{T-1}+\cdots+L_{1}+L_0 ] \\\
+L_T : \text{ending state of forward process is close to starting state of reverse process} \\\
+L_0 : 
 $$
 
 ## Reference
