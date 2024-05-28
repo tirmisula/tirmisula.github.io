@@ -78,8 +78,8 @@ $$
 The transition process is modeled by Markov chain, by using Markov chain one distribution can be converted to another distribution gradually.
 
 ## Forward Diffusion Process
-### Deterministic noise adding
-The noise adding operation is given by:
+### Forward process has closed form
+The noise adding operation (forward diffusion process) has closed form which is given by:
 
 $$
 \begin{align*}
@@ -111,7 +111,7 @@ q(x_t|x_{t-1}) = \mathcal{N}(x_t|\sqrt{1-\beta_t}x_{t-1}, \beta_tI) \\\
 x_0 \sim P_{\text{data}}
 $$
 
-### Ending state is derivable from initial data
+### Derive ending state from initial data
 
 {{< math.inline >}}
 <p>
@@ -140,6 +140,22 @@ $$
 
 {{< math.inline >}}
 <p>
+Let \( \epsilon=\epsilon_t \), we can directly sample \( x_t \) with the input of \( x_0,\alpha_{1:t},\epsilon_t \). So the forward process can be redefined as:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+x_t &= \sqrt{\prod_{i=1}^t\alpha_i}\cdot x_0 + \sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon_t \\\
+q(x_t|x_0) &= \mathcal{N}(\sqrt{\prod_{i=1}^t\alpha_i}x_0, (1-\prod_{i=1}^t\alpha_i)I) \\\
+&\text{where } \\\
+\epsilon_t &\sim \mathcal{N}(0,I), \space t=1\cdots T \\\
+\alpha_{1:t} &\text{ are hyperparameters}
+\end{align*}
+$$
+
+<!-- {{< math.inline >}}
+<p>
 Thus the ending Gaussian noise has closed form from the inital data, \( q(x_T|x_0) \) is given by:
 </p>
 {{</ math.inline >}}
@@ -149,10 +165,27 @@ $$
 q(x_T|x_0) &= \mathcal{N}(\sqrt{\prod_{i=1}^T\alpha_i}x_0, (1-\prod_{i=1}^T\alpha_i)I) \\\
 x_T &= \sqrt{\prod_{i=1}^T\alpha_i}\cdot x_0 + \sqrt{1-\prod_{i=1}^T\alpha_i}\cdot\epsilon
 \end{align*}
+$$ -->
+
+### Summary
+
+Forward diffusion process has 2 forms:
+
+$$
+x_t = \begin{cases}
+\sqrt{1-\beta_t}x_{t-1} + \sqrt{\beta_t}\epsilon_{t-1} \\\
+\sqrt{\prod_{i=1}^t\alpha_i}\cdot x_0 + \sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon_t
+\end{cases} \quad
+\begin{array}{l}
+\epsilon_t \sim \mathcal{N}(0,I), \space t=1\cdots T \\\
+\beta_{1:t},\alpha_{1:t} \text{ are hyperparameters}
+\end{array}
 $$
 
-## Reverse Diffusion Process
-### Deterministic reversed noise adding
+In practice, the second form is used for noise adding.
+
+## Reverse Process
+### Forward process posterier has closed form
 {{< math.inline >}}
 <p>
 Given \( x_0 \), the reversed inference \( q(x_{t-1})|x_t \) has a closed form:
@@ -185,44 +218,62 @@ $$
 &\quad\quad \sigma^2 = \frac{1}{\frac{\alpha_t}{\beta_t}+\frac{1}{1-\prod_{i=1}^{t-1}\alpha_i}} = \frac{\beta_t(1-\prod_{i=1}^{t-1}\alpha_i)}{\alpha_t-\prod_{i=1}^t\alpha_i+\beta_t} = \beta_t\frac{(1-\prod_{i=1}^{t-1}\alpha_i)}{1-\prod_{i=1}^t\alpha_i} \\\
 &\quad \text{linear part: }(\sigma^{-2}2\mu)x_{t-1} \hArr \left(2\beta_t^{-1}x_t\sqrt{\alpha_t}+2(1-\prod_{i=1}^{t-1}\alpha_i)^{-1}\sqrt{\prod_{i=1}^{t-1}\alpha_i}x_0\right)x_{t-1} \\\
 &\quad\quad \mu = (\frac{x_t\sqrt{\alpha_t}}{\beta_t}+\frac{\sqrt{\prod_{i=1}^{t-1}\alpha_i}x_0}{1-\prod_{i=1}^{t-1}\alpha_i})\beta_t\frac{1-\prod_{i=1}^{t-1}\alpha_i}{1-\prod_{i=1}^t\alpha_i} = \frac{\sqrt{\alpha_t}(1-\prod_{i=1}^{t-1}\alpha_i)}{1-\prod_{i=1}^t\alpha_i}x_t+\frac{\beta_t\sqrt{\prod_{i=1}^{t-1}\alpha_i}}{1-\prod_{i=1}^t\alpha_i}x_0 \\\
-&\quad\quad\quad\because x_t=\sqrt{\prod_{i=1}^t\alpha_i}\cdot x_0 + \sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon, \space\therefore x_0=\frac{x_t-\sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon}{\sqrt{\prod_{i=1}^t\alpha_i}} \\\
-&\quad\quad \mu = \frac{\sqrt{\alpha_t}(1-\prod_{i=1}^{t-1}\alpha_i)}{1-\prod_{i=1}^t\alpha_i}x_t+\frac{\beta_t\sqrt{\prod_{i=1}^{t-1}\alpha_i}}{1-\prod_{i=1}^t\alpha_i}\frac{x_t-\sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon}{\sqrt{\prod_{i=1}^t\alpha_i}} \\\
-&\quad\quad\quad = \frac{\sqrt{\alpha_t}(1-\prod_{i=1}^{t-1}\alpha_i)}{1-\prod_{i=1}^t\alpha_i}x_t+\frac{\beta_t}{\sqrt{\alpha_t}(1-\prod_{i=1}^t\alpha_i)}x_t - \frac{\beta_t}{\sqrt{\alpha_t}\sqrt{1-\prod_{i=1}^t\alpha_i}}\cdot\epsilon \\\
-&\quad\quad\quad = \frac{\alpha_t(1-\prod_{i=1}^{t-1}\alpha_i)+1-\alpha_t}{\sqrt{\alpha_t}(1-\prod_{i=1}^t\alpha_i)}x_t - \frac{\beta_t}{\sqrt{\alpha_t}\sqrt{1-\prod_{i=1}^t\alpha_i}}\cdot\epsilon \\\
-&\quad\quad\quad = \frac{1}{\sqrt{\alpha_t}}(x_t - \frac{1-\alpha_t}{\sqrt{1-\prod_{i=1}^t\alpha_i}}\epsilon) \\\
+&\quad\quad\quad\because x_t=\sqrt{\prod_{i=1}^t\alpha_i}\cdot x_0 + \sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon_t, \space\therefore x_0=\frac{x_t-\sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon_t}{\sqrt{\prod_{i=1}^t\alpha_i}} \\\
+&\quad\quad \mu = \frac{\sqrt{\alpha_t}(1-\prod_{i=1}^{t-1}\alpha_i)}{1-\prod_{i=1}^t\alpha_i}x_t+\frac{\beta_t\sqrt{\prod_{i=1}^{t-1}\alpha_i}}{1-\prod_{i=1}^t\alpha_i}\frac{x_t-\sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon_t}{\sqrt{\prod_{i=1}^t\alpha_i}} \\\
+&\quad\quad\quad = \frac{\sqrt{\alpha_t}(1-\prod_{i=1}^{t-1}\alpha_i)}{1-\prod_{i=1}^t\alpha_i}x_t+\frac{\beta_t}{\sqrt{\alpha_t}(1-\prod_{i=1}^t\alpha_i)}x_t - \frac{\beta_t}{\sqrt{\alpha_t}\sqrt{1-\prod_{i=1}^t\alpha_i}}\cdot\epsilon_t \\\
+&\quad\quad\quad = \frac{\alpha_t(1-\prod_{i=1}^{t-1}\alpha_i)+1-\alpha_t}{\sqrt{\alpha_t}(1-\prod_{i=1}^t\alpha_i)}x_t - \frac{\beta_t}{\sqrt{\alpha_t}\sqrt{1-\prod_{i=1}^t\alpha_i}}\cdot\epsilon_t \\\
+&\quad\quad\quad = \frac{1}{\sqrt{\alpha_t}}(x_t - \frac{1-\alpha_t}{\sqrt{1-\prod_{i=1}^t\alpha_i}}\epsilon_t) \\\
 &\quad \text{constant part: } \sigma^{-2}\mu^2 \hArr \beta_t^{-1}x_t^2 + (1-\prod_{i=1}^{t-1}\alpha_i)^{-1}\prod_{i=1}^{t-1}\alpha_ix_0^2 - (1-\prod_{i=1}^{t}\alpha_i)^{-1}(x_{t}-\sqrt{\prod_{i=1}^{t}\alpha_i}x_0)^2
 \end{align*}
 $$
 
-In conclusion, the reversed step is given by:
+{{< math.inline >}}
+<p>
+In conclusion, the closed form of forward process posterier conditioned on \( x_0 \) is given by:
+</p>
+{{</ math.inline >}}
 
 $$
-q(x_{t-1}|x_t,x_0) = \mathcal{N}(\frac{1}{\sqrt{\alpha_t}}(x_t - \frac{1-\alpha_t}{\sqrt{1-\prod_{i=1}^t\alpha_i}}\epsilon_t), \beta_t\frac{1-\prod_{i=1}^{t-1}\alpha_i}{1-\prod_{i=1}^t\alpha_i}I)
+\begin{align*}
+q(x_{t-1}|x_t,x_0) &= \mathcal{N}(\tilde{\mu}(x_t,x_0), \tilde{\Sigma}(t) ) \\\
+&\text{where } \\\
+\tilde{\mu}(x_t,x_0) &= \frac{\sqrt{\alpha_t}(1-\prod_{i=1}^{t-1}\alpha_i)}{1-\prod_{i=1}^t\alpha_i}x_t+\frac{\beta_t\sqrt{\prod_{i=1}^{t-1}\alpha_i}}{1-\prod_{i=1}^t\alpha_i}x_0 = \frac{1}{\sqrt{\alpha_t}}(x_t - \frac{1-\alpha_t}{\sqrt{1-\prod_{i=1}^t\alpha_i}}\epsilon_t) \\\
+\tilde{\Sigma}(t)  &= \beta_t\frac{1-\prod_{i=1}^{t-1}\alpha_i}{1-\prod_{i=1}^t\alpha_i}I
+\end{align*}
 $$
 
 $$
 \begin{align*}
-x_{t-1} &= \frac{1}{\sqrt{\alpha_t}}(x_t - \frac{1-\alpha_t}{\sqrt{1-\prod_{i=1}^t\alpha_i}}\hat{\epsilon_t}) + \sqrt{\beta_t\frac{1-\prod_{i=1}^{t-1}\alpha_i}{1-\prod_{i=1}^t\alpha_i}}\epsilon_t \\\
+x_{t-1} &= \frac{1}{\sqrt{\alpha_t}}(x_t - \frac{1-\alpha_t}{\sqrt{1-\prod_{i=1}^t\alpha_i}}\epsilon_t) + \sqrt{\beta_t\frac{1-\prod_{i=1}^{t-1}\alpha_i}{1-\prod_{i=1}^t\alpha_i}}\hat{\epsilon_t} \\\
 &\text{where } \\\
-\epsilon_t &\sim \mathcal{N}(0,I), \space t=1\cdots T \\\
-\hat{\epsilon_t} &\text{ is the noise sampled at t-th step in forwards difussion process} \\\
+\hat{\epsilon_t} &\sim \mathcal{N}(0,I), \space t=1\cdots T \\\
+\epsilon_t &\text{ is sampled noise in forward diffusion process } (x_0,\epsilon_t)\mapsto x_t \\\
 \end{align*}
 $$
 
-### Denoising autoencoder
+### Reverse process definition
 
 {{< math.inline >}}
 <p>
-Like VAE, we finally care about the generative model (the decoder part). Suppose the joint distribution of observations \( x_0 \) and latent variables \( x_{1:T} \) is defined as \( p(x_{0:T}|\theta) \), the starting state is standard norm noise:
+Like VAE, we finally care about the generative model (the decoder part). Suppose the joint distribution of observations \( x_0 \) and latent variables \( x_{1:T} \) is defined as \( p(x_{0:T}|\theta) \), which is called the reverse process:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
 &p(x_0|\theta) = \int_{x_1\cdots x_T} p(x_{0:T}|\theta) dx_{1:T} \\\
-&p(x_{0:T}|\theta) = p(x_T|\theta)p(x_{T-1}|x_T,\theta)\cdots p(x_0|x_1,\theta) \\\
-&p(x_T|\theta) = \mathcal{N}(0,I)
+&p(x_{0:T}|\theta) = p(x_T|\theta)p(x_{T-1}|x_T,\theta)\cdots p(x_0|x_1,\theta)
 \end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+The starting state of reverse process \( p(x_T|\theta) \) is a prior of standard norm because the ending state of forward diffusion process is standard norm:
+</p>
+{{</ math.inline >}}
+
+$$
+p(x_T|\theta) = \mathcal{N}(0,I) \quad\because q(x_T|x_0)\rarr \mathcal{N}(0,I)
 $$
 
 {{< math.inline >}}
@@ -232,8 +283,11 @@ In order to better being approximated by \( q(x_{t-1}|x_t) \), \( p(x_{t-1}|x_t,
 {{</ math.inline >}}
 
 $$
-p(x_{t-1}|x_t,\theta) = \mathcal{N}(\mu(x_t,t;\theta),\Sigma(x_t,t;\theta))
+p(x_{t-1}|x_t,\theta) = \mathcal{N}(\mu(x_t,t;\theta),\Sigma(x_t,t;\theta)) \\\
+\text{$p(x_{t-1}|x_t,\theta)$ is defined as reverse sampling}
 $$
+
+### Derive loss function
 
 Recall that MLE for latent variable model is equivalent to maximizing it's ELBO via variational inference:
 
@@ -247,7 +301,7 @@ $$
 
 {{< math.inline >}}
 <p>
-By replacing \( x=x_0, z=x_{1:T} \), we have the objective function:
+In DDPM context, forward diffusion process \( q(x_{1:T}|x_0) \) stands for \( q(z|x,\phi) \) because it is easy to sample. There are two options for denoising: 1. tractable posterier \( q(x_{t-1}|x_t,x_0) \) 2.  generative model \( p(x_{0:T}|\theta) \). We want results from generative model close to results from tractable posterier, by replacing \( x=x_0, z=x_{1:T} \), we have the objective function:
 </p>
 {{</ math.inline >}}
 
@@ -286,7 +340,6 @@ L &= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\log \frac{q(x_{1:T}|x_0,\phi)}{p
 &= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)}+\log\frac{q(x_T|x_0)}{q(x_1|x_0)}+\log\frac{q(x_1|x_{0})}{p(x_{0}|x_1,\theta)}-\log p(x_T|\theta) ] \\\
 &= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)}+\log\frac{q(x_T|x_0)q(x_1|x_{0})}{q(x_1|x_0)p(x_{0}|x_1,\theta)p(x_T|\theta)} ] \\\
 &= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)}+\log\frac{q(x_T|x_0)}{p(x_T|\theta)}-\log p(x_0|x_1,\theta) ] \\\
-&= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)}+\log\frac{q(x_T|x_0)}{p(x_T|\theta)}-\log p(x_0|x_1,\theta) ] \\\
 \\\
 &\text{Let }A=\mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)} ] \\\
 A &= \mathbb{E}\_{q(x_0,x_{t-1},x_t|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)} ] \quad (\text{integrate on irrelavent $x_i$}) \\\
@@ -300,13 +353,12 @@ B &= \mathbb{E}\_{q(x_0,x_T|\phi)}[ \log\frac{q(x_T|x_0)}{p(x_T|\theta)} ] \quad
 &= \mathbb{E}\_{q(x_0|\phi)}\mathbb{E}\_{q(x_T|x_0|\phi)}[ \log\frac{q(x_T|x_0)}{p(x_T|\theta)} ] \\\
 &= \mathbb{E}\_{q(x_0|\phi)}\text{KL}(q(x_T|x_0 || p(x_T|\theta))) \\\
 &= \mathbb{E}\_{q(x_{0:T}|\phi)}\text{KL}(q(x_T|x_0 || p(x_T|\theta))) \\\
-&\text{Put $A,B$ back to $L$: } \\\
-L &= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\text{KL}(q(x_{t-1}|x_t,x_0)||p(x_{t-1}|x_t,\theta))+\text{KL}(q(x_T|x_0 || p(x_T|\theta)))-\log p(x_0|x_1,\theta) ] \\\
 &\text{Let } \begin{array}{l}
-L_T &= \text{KL}(q(x_T|x_0 || p(x_T|\theta))) \\\
-L_{t-1} &= \text{KL}(q(x_{t-1}|x_t,x_0)||p(x_{t-1}|x_t,\theta)) \\\
-L_0 &= \log p(x_0|x_1,\theta)
-\end{array} \\\
+L_T = \text{KL}(q(x_T|x_0 || p(x_T|\theta))) \\\
+L_{t-1} = \text{KL}(q(x_{t-1}|x_t,x_0)||p(x_{t-1}|x_t,\theta)) \\\
+L_0 = -\log p(x_0|x_1,\theta)
+\end{array}, \text{ we have} \\\
+L &= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\text{KL}(q(x_{t-1}|x_t,x_0)||p(x_{t-1}|x_t,\theta))+\text{KL}(q(x_T|x_0 || p(x_T|\theta)))-\log p(x_0|x_1,\theta) ] \\\
 &= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[ L_T+L_{T-1}+\cdots+L_{1}+L_0 ] \\\
 \end{align*}
 $$
@@ -317,10 +369,116 @@ Understanding each part of loss \( L_T,L_t,L_0 \) in negative evidence lower bou
 </p>
 {{</ math.inline >}}
 
+
+
+{{< math.inline >}}
+<p>
+<ul>
+  <li>
+    \( L_T \)
+    <p>Distance between termination of forward process and start of reverse process</p>
+    <p>\min L_T \hArr \sqrt{\prod_{i=1}^T\alpha_i}\cdot x_0 + \sqrt{1-\prod_{i=1}^T\alpha_i}\cdot\epsilon_t \approx \epsilon_t</p>
+    <p>\text{if } T\rarr\infty, \prod_{i=1}^T\alpha_i\rarr0, \text{ equation satisfies naturally}</p>
+  </li>
+  <li>
+    \( -L_0 \)
+    <p>Probability of last stage of reverse process</p>
+    <p>\min L_0 \hArr \max\mathcal{N}(x_0|\mu(x_1;\theta),\Sigma(x_1;\theta))</p>
+    <p>\text{where } x_0 = \mu(x_1;\theta), \text{$x_0$ is close to $x_1$}, meaningless item</p>
+  </li>
+  <li>
+    \( L_t \)
+    <p>Distance between intermediate stage of forward process posterier conditioned on \( x_0 \) and intermediate stage of reverse process</p>
+    <p>Distance between mean of \( q(x_t|x_{t+1}) \) and mean of \( p(x_t|\theta) \)</p>
+  </li>
+</ul>
+</p>
+{{</ math.inline >}}
+
 $$
+\begin{align*}
+\min L_t &\rArr \min \text{KL}(q(x_{t}|x_{t+1},x_0)||p(x_{t}|x_{t+1},\theta)) \\\
+&= \min\int q(x_{t}|x_{t+1},x_0)\log\frac{q(x_{t}|x_{t+1},x_0)}{p(x_{t}|x_{t+1},\theta)} dx_t \\\
+&\because q(x_{t}|x_{t+1},x_0) \text{ has closed form which is proved previously} \\\
+&\text{For simplification, let } q(x_{t}|x_{t+1},x_0)=\mathcal{N}(\tilde{\mu}(x_{t+1},x_0), \tilde{\Sigma}(t+1)) \text{ , let dim$(x)=1$} \\\
+&= \min\int q(x_{t}|x_{t+1},x_0)\log\frac{\frac{1}{(2\pi)^\frac{1}{2}\tilde{\sigma}^2(t+1)}\exp(-\frac{1}{2}\frac{(x_{t}-\tilde{\mu}(x_{t+1},x_0))^2}{\tilde{\sigma}^2(t+1)})}{\frac{1}{(2\pi)^\frac{1}{2}\sigma^2(x_{t+1};\theta)}\exp(-\frac{1}{2}\frac{(x_t-\mu(x_{t+1};\theta))^2}{\sigma^2(x_{t+1};\theta)})} dx_t \\\
+&= \min\int q(x_{t}|x_{t+1},x_0)\left[\log\left( \frac{\sigma^2(x_{t+1};\theta)}{\tilde{\sigma}^2(t+1)} \right) - \frac{(x_{t}-\tilde{\mu}(x_{t+1},x_0))^2}{2\tilde{\sigma}^2(t+1)} + \frac{(x_{t}-\mu(x_{t+1};\theta))^2}{2\sigma^2(x_{t+1};\theta)} \right] dx_t \\\
+&= \min\log\left( \frac{\sigma^2(x_{t+1};\theta)}{\tilde{\sigma}^2(t+1)} \right) - \int q(x_{t}|x_{t+1},x_0)\frac{(x_{t}-\tilde{\mu}(x_{t+1},x_0))^2}{2\tilde{\sigma}^2(t+1)} dx_t + \int q(x_{t}|x_{t+1},x_0) \frac{(x_{t}-\mu(x_{t+1};\theta))^2}{2\sigma^2(x_{t+1};\theta)} dx_t \\\
+&\because \sigma = \int (x-\mu)^2f(x)dx \\\
+&= \min\log\frac{\sigma^2(x_{t+1};\theta)}{\tilde{\sigma}^2(t+1)} - \frac{\tilde{\sigma}^2(t+1)}{2\tilde{\sigma}^2(t+1)} + \frac{1}{2\sigma^2(x_{t+1};\theta)}\int q(x_{t}|x_{t+1},x_0) (x_{t}-\mu(x_{t+1};\theta))^2 dx_t \\\
+&= \min\log\frac{\sigma^2(x_{t+1};\theta)}{\tilde{\sigma}^2(t+1)} - \frac{1}{2} + \frac{1}{2\sigma^2(x_{t+1};\theta)}\int q(x_{t}|x_{t+1},x_0) \left(x_{t}-\mu(x_{t+1};\theta)+\tilde{\mu}(x_{t+1},x_0)-\tilde{\mu}(x_{t+1},x_0)\right)^2 dx_t \\\
+&= \min\log\frac{\sigma^2(x_{t+1};\theta)}{\tilde{\sigma}^2(t+1)} - \frac{1}{2} + \frac{1}{2\sigma^2(x_{t+1};\theta)}\int q(x_{t}|x_{t+1},x_0) \left[(x_{t}-\tilde{\mu}(x_{t+1},x_0))^2+(\tilde{\mu}(x_{t+1},x_0)-\mu(x_{t+1};\theta))^2-2(x_t\tilde{\mu}(x_{t+1},x_0)-x_t\mu(x_{t+1};\theta)-\tilde{\mu}(x_{t+1},x_0)^2+\tilde{\mu}(x_{t+1},x_0)\mu(x_{t+1};\theta))\right] dx_t \\\
+&x_t\tilde{\mu}(x_{t+1},x_0)-x_t\mu(x_{t+1};\theta)-\tilde{\mu}(x_{t+1},x_0)^2+\tilde{\mu}(x_{t+1},x_0)\mu(x_{t+1};\theta) \\\
+&\because \mu = \int xf(x)dx \\\
+&= \min\log\frac{\sigma^2(x_{t+1};\theta)}{\tilde{\sigma}^2(t+1)} - \frac{1}{2} + \frac{1}{2\sigma^2(x_{t+1};\theta)}\left[\tilde{\sigma}^2(t+1)+(\tilde{\mu}(x_{t+1},x_0)-\mu(x_{t+1};\theta))^2-2(\tilde{\mu}(x_{t+1},x_0)^2-\tilde{\mu}(x_{t+1},x_0)\mu(x_{t+1};\theta)-\tilde{\mu}(x_{t+1},x_0)^2+\tilde{\mu}(x_{t+1},x_0)\mu(x_{t+1};\theta)) \right] \\\
+&= \min\log\frac{\sigma^2(x_{t+1};\theta)}{\tilde{\sigma}^2(t+1)} - \frac{1}{2} + \frac{1}{2\sigma^2(x_{t+1};\theta)}\left[\tilde{\sigma}^2(t+1)+(\tilde{\mu}(x_{t+1},x_0)-\mu(x_{t+1};\theta))^2 \right] \\\
+&= \min\log\frac{\sigma^2(x_{t+1};\theta)}{\tilde{\sigma}^2(t+1)} - \frac{1}{2} + \frac{\tilde{\sigma}^2(t+1)}{2\sigma^2(x_{t+1};\theta)}+\frac{(\tilde{\mu}(x_{t+1},x_0)-\mu(x_{t+1};\theta))^2}{2\sigma^2(x_{t+1};\theta)} \\\
+&\text{Notice that variances are the same in forward and reverse process in assumption} \\\
+&\therefore \tilde{\sigma}^2(t+1) = \sigma^2(x_{t+1};\theta) \\\
+&= \min\frac{(\tilde{\mu}(x_{t+1},x_0)-\mu(x_{t+1};\theta))^2}{2\sigma^2(x_{t+1};\theta)} \\\
+&= \min\space(\tilde{\mu}(x_{t+1},x_0)-\mu(x_{t+1};\theta))^2 \\\
+&= \min||\tilde{\mu}(x_{t+1},x_0)-\mu(x_{t+1};\theta)||^2 \\\
+&= \min\lVert\frac{1}{\sqrt{\alpha_{t+1}}}(x_{t+1} - \frac{1-\alpha_{t+1}}{\sqrt{1-\prod_{i=1}^{t+1}\alpha_i}}\epsilon_{t+1})-\mu(x_{t+1};\theta)\rVert^2 \\\
+&\text{Since we are actually predicting forward process noise $\epsilon_{t+1}$, while $\alpha$ fixed} \\\
+&\text{Design } \mu(x_{t+1};\theta) = \frac{1}{\sqrt{\alpha_{t+1}}}(x_{t+1} - \frac{1-\alpha_{t+1}}{\sqrt{1-\prod_{i=1}^{t+1}\alpha_i}}\epsilon(x_{t+1};\theta)) \\\
+&\rArr \min\lVert \epsilon(x_{t+1};\theta)-\epsilon_{t+1} \rVert^2
+\end{align*}
+$$
+
+<!-- $$
 \min \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[ L_T+L_{T-1}+\cdots+L_{1}+L_0 ] \\\
-L_T : \text{ending state of forward process is close to starting state of reverse process} \\\
-L_0 : 
+L_T : \text{distance between termination of forward process and start of reverse process} \\\
+\min L_T \hArr \sqrt{\prod_{i=1}^T\alpha_i}\cdot x_0 + \sqrt{1-\prod_{i=1}^T\alpha_i}\cdot\epsilon_t \approx \epsilon_t \\\
+\text{if } T\rarr\infty, \prod_{i=1}^T\alpha_i\rarr0, \text{ equation natrually satisfies} \\\
+-L_0 : \text{termination probability of reverse process} \\\
+\min L_0 \hArr \max\mathcal{N}(x_0|\mu(x_1;\theta),\Sigma(x_1;\theta)) \\\
+\text{where } x_0 = \mu(x_1;\theta), \text{$x_0$ is close to $x_1$} \\\
+L_t : \text{distance between denoising process and reverse process}
+$$ -->
+
+
+
+The objective loss function can be reduced to:
+
+$$
+\begin{align*}
+\min_{\theta} L &= \min_{\theta} \sum_{t=2}^TL_{t-1} \\\
+&= \min_{\theta}\sum_{t=2}^T\lVert \epsilon(x_{t};\theta)-\epsilon_{t} \rVert^2 \\\
+&= \min_{\theta}\left\lVert \epsilon\left(\sqrt{\prod_{i=1}^t\alpha_i}\cdot x_0 + \sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon_t;\theta\right)-\epsilon_{t} \right\rVert^2 \space, t=2\cdots T \\\
+\end{align*}
+% \text{$\epsilon_t$ is used as both input of NN for $p(x_{t-1}|x_t,\theta)$ inference and partial closed form for $q(x_{t-1}|x_t)$ inference}
+$$
+
+{{< math.inline >}}
+<p>
+\( \epsilon(x_{t};\theta) \) is designed to be learned with a nerual network (autoencoder).
+</p>
+{{</ math.inline >}}
+
+{{< math.inline >}}
+<p>
+\( \epsilon_t \) is used as both input of NN for \( p(x_{t-1}|x_t,\theta) \) inference and partial closed form for \( q(x_{t-1}|x_t) \) inference.
+</p>
+{{</ math.inline >}}
+
+## Optimize objective function
+### Training
+
+{{< math.inline >}}
+<p>
+In practical training, timestamp \( t \) is also a part of input of nerual network. A gradient descent method is used:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+&\text{For } l=1\cdots\infty \\\
+&\quad x_0 \sim q(x_0)=P_{\text{data}} \\\
+&\quad t \sim \mathrm{U}(1,T) \\\
+&\quad \epsilon_t \sim \mathcal{N}(0,I) \\\
+&\quad \theta^{(l+1)} = \theta^{(l)} + \nabla_{\theta}\left\lVert \epsilon\left(\sqrt{\prod_{i=1}^t\alpha_i}\cdot x_0 + \sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon_t,t;\theta\right)-\epsilon_{t} \right\rVert^2 \\\
+&\text{Loop until converge} \\\
+\end{align*}
 $$
 
 ## Reference
