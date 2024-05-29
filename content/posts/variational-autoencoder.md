@@ -117,7 +117,7 @@ $$
 
 {{< math.inline >}}
 <p>
-As for sampling from \( q(z|x,\phi) \), because posterier \( p(z|x) \) is intractable :
+When sampling from \( q(z|x,\phi) \), because posterier \( p(z|x) \) is intractable :
 </p>
 {{</ math.inline >}}
 
@@ -132,7 +132,7 @@ $$
 
 {{< math.inline >}}
 <p>
-We assume \( q(z|x,\phi) \) is approximated by a neural network (Encoder) which follows conditional Gaussian distribution, reparameterization trick is used:
+Variational inference tells us to design an easy to sample model for proposed distribution \( q(z|x,\phi) \). An alternative is to assume \( q(z|x,\phi) \) being approximated in a neural network (Encoder) which follows conditional Gaussian distribution. Reparameterization trick in Encoder ensures that sampling is feasible:
 </p>
 {{</ math.inline >}}
 
@@ -158,7 +158,7 @@ x|z,\theta &\sim \mathcal{N}(\mu(z;\theta),\Sigma(z;\theta))
 z \rarr \text{Decoder}(\theta) \rarr \tilde{x}
 $$
 
-Combining encoder and decoder together we have:
+Combining encoder and decoder together we have the VAE structure:
 
 $$
 \text{For each obsevation $x^{(i)}, i=1\cdots N$} \\\

@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: true
+draft: false
 ---
 
 :                                                         
@@ -69,16 +69,16 @@ Denoising diffusion probabilistic model (DDPM) is a type of generative model, a 
 
 + Reverse diffusion process (decoder)
 
-    Sampling from Gaussian distribution to gradually remove noise until it becomes clear data
+    Sampling from Gaussian distribution to gradually remove noise until it recovers data
 
 $$
-x_0 \xtofrom[decoder]{encoder} \cdots \xtofrom[decoder]{encoder}x_{t-1}\xtofrom[decoder]{encoder}x_{t}\xtofrom[decoder]{encoder} \cdots \xtofrom[decoder]{encoder} x_T
+x_0 \xtofrom[]{} \cdots \xtofrom[]{}x_{t-1}\xtofrom[p(x_{t-1}|x_{t},\theta)]{q(x_t|x_{t-1})}x_{t}\xtofrom[]{} \cdots \xtofrom[]{} x_T
 $$
 
-The transition process is modeled by Markov chain, by using Markov chain one distribution can be converted to another distribution gradually.
+<cite>[^1]</cite>The transition process is modeled by Markov chain, by using Markov chain one distribution can be converted to another distribution gradually.
 
 ## Forward Diffusion Process
-### Forward process has closed form
+### Deterministic forward process
 The noise adding operation (forward diffusion process) has closed form which is given by:
 
 $$
@@ -185,7 +185,7 @@ $$
 In practice, the second form is used for noise adding.
 
 ## Reverse Process
-### Forward process posterier has closed form
+### Deterministic forward process posterier conditioned on x0
 {{< math.inline >}}
 <p>
 Given \( x_0 \), the reversed inference \( q(x_{t-1})|x_t \) has a closed form:
@@ -266,6 +266,7 @@ $$
 \end{align*}
 $$
 
+<cite>[^2]</cite>
 {{< math.inline >}}
 <p>
 The starting state of reverse process \( p(x_T|\theta) \) is a prior of standard norm because the ending state of forward diffusion process is standard norm:
@@ -353,6 +354,7 @@ B &= \mathbb{E}\_{q(x_0,x_T|\phi)}[ \log\frac{q(x_T|x_0)}{p(x_T|\theta)} ] \quad
 &= \mathbb{E}\_{q(x_0|\phi)}\mathbb{E}\_{q(x_T|x_0|\phi)}[ \log\frac{q(x_T|x_0)}{p(x_T|\theta)} ] \\\
 &= \mathbb{E}\_{q(x_0|\phi)}\text{KL}(q(x_T|x_0 || p(x_T|\theta))) \\\
 &= \mathbb{E}\_{q(x_{0:T}|\phi)}\text{KL}(q(x_T|x_0 || p(x_T|\theta))) \\\
+\\\
 &\text{Let } \begin{array}{l}
 L_T = \text{KL}(q(x_T|x_0 || p(x_T|\theta))) \\\
 L_{t-1} = \text{KL}(q(x_{t-1}|x_t,x_0)||p(x_{t-1}|x_t,\theta)) \\\
@@ -442,16 +444,23 @@ The objective loss function can be reduced to:
 
 $$
 \begin{align*}
-\min_{\theta} L &= \min_{\theta} \sum_{t=2}^TL_{t-1} \\\
-&= \min_{\theta}\sum_{t=2}^T\lVert \epsilon(x_{t};\theta)-\epsilon_{t} \rVert^2 \\\
-&= \min_{\theta}\left\lVert \epsilon\left(\sqrt{\prod_{i=1}^t\alpha_i}\cdot x_0 + \sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon_t;\theta\right)-\epsilon_{t} \right\rVert^2 \space, t=2\cdots T \\\
+\min_{\theta} L &= \min_{\theta} \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^TL_{t-1}] \\\
+&= \min_{\theta}\mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\lVert \epsilon(x_{t};\theta)-\epsilon_{t} \rVert^2] \\\
+&= \min_{\theta}\left\lVert \epsilon\left(\sqrt{\prod_{i=1}^t\alpha_i}\cdot x_0 + \sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon_t;\theta\right)-\epsilon_{t} \right\rVert^2 \space, t=2\cdots T,\space x_0\in P_{\text{data}} \\\
 \end{align*}
 % \text{$\epsilon_t$ is used as both input of NN for $p(x_{t-1}|x_t,\theta)$ inference and partial closed form for $q(x_{t-1}|x_t)$ inference}
 $$
 
 {{< math.inline >}}
 <p>
-\( \epsilon(x_{t};\theta) \) is designed to be learned with a nerual network (autoencoder).
+For the loss function, we are actually finding a forward process noise predictor with parameter \( \theta \).
+</p>
+{{</ math.inline >}}
+
+
+{{< math.inline >}}
+<p>
+noise predictor \( \epsilon(x_{t};\theta) \) is designed to be learned with a nerual network (autoencoder).
 </p>
 {{</ math.inline >}}
 
@@ -466,7 +475,7 @@ $$
 
 {{< math.inline >}}
 <p>
-In practical training, timestamp \( t \) is also a part of input of nerual network. A gradient descent method is used:
+In practical training, timestamp \( t \) is encoded with time embedding as a part of input of nerual network. With the new NN input \( \epsilon(x_t,t;\theta) \), a gradient descent method is used:
 </p>
 {{</ math.inline >}}
 
@@ -474,10 +483,52 @@ $$
 \begin{align*}
 &\text{For } l=1\cdots\infty \\\
 &\quad x_0 \sim q(x_0)=P_{\text{data}} \\\
-&\quad t \sim \mathrm{U}(1,T) \\\
+&\quad t \sim \mathcal{U}(1,T) \\\
 &\quad \epsilon_t \sim \mathcal{N}(0,I) \\\
 &\quad \theta^{(l+1)} = \theta^{(l)} + \nabla_{\theta}\left\lVert \epsilon\left(\sqrt{\prod_{i=1}^t\alpha_i}\cdot x_0 + \sqrt{1-\prod_{i=1}^t\alpha_i}\cdot\epsilon_t,t;\theta\right)-\epsilon_{t} \right\rVert^2 \\\
 &\text{Loop until converge} \\\
+\end{align*}
+$$
+
+### Inference
+
+{{< math.inline >}}
+<p>
+While \( \theta \) is learned for reverse process \( p(x_{0:T}|\theta) \). We can perform reverse sampling step by step from \( p(x_T|\theta) \). Each step \( p(x_{t-1}|x_t,\theta) \) is given by:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+p(x_{t-1}|x_t,\theta) &= \mathcal{N}(\mu(x_t,t;\theta),\Sigma(x_t,t;\theta)) \\\
+&= \mathcal{N}(\frac{1}{\sqrt{\alpha_{t}}}(x_{t} - \frac{1-\alpha_{t}}{\sqrt{1-\prod_{i=1}^{t}\alpha_i}}\epsilon(x_{t},t;\theta)), \beta_t\frac{1-\prod_{i=1}^{t-1}\alpha_i}{1-\prod_{i=1}^t\alpha_i}I)
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Notice that for the marginal condition \( L_0 \), we have: 
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\min L_0 &\hArr \max\mathcal{N}(x_0|\mu(x_1;\theta),\Sigma(x_1;\theta)) \\\
+&\hArr p(x_0|x_1,\theta) = 1, \text{replace $\Sigma(x_1;\theta)$ with zero} \\\
+&\hArr x_0 = \mu(x_1;\theta)
+\end{align*}
+$$
+
+The sampling algorithm is given by:
+
+$$
+\begin{align*}
+&x_T \sim \mathcal{N}(0,I) \\\
+&\text{For } t=T\cdots 1 \\\
+&\quad z\sim\mathcal{N}(0,I) \text{ if } t>1 \text{ else } z=0 \\\
+&\quad x_{t-1} = \frac{1}{\sqrt{\alpha_{t}}}(x_{t} - \frac{1-\alpha_{t}}{\sqrt{1-\prod_{i=1}^{t}\alpha_i}}\epsilon(x_{t},t;\theta)) + \sqrt{\beta_t\frac{1-\prod_{i=1}^{t-1}\alpha_i}{1-\prod_{i=1}^t\alpha_i}}\cdot z \\\
+&\text{End} \\\
+&\text{Return $x_0$}
 \end{align*}
 $$
 
@@ -486,7 +537,7 @@ $$
 [^1]: - [video](https://www.bilibili.com/video/BV19H4y1G73r).
 [^4]: From [Higham, Nicholas (2002). Accuracy and Stability of Numerical Algorithms](https://archive.org/details/accuracystabilit00high_878).
 [^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
-[^2]: - [NIPS 2016 Tutorial: Generative Adversarial Networks. Ian Goodfellow](https://arxiv.org/pdf/1701.00160).
+[^2]: - [Denoising Diffusion Probabilistic Models. Jonathan Ho, Ajay Jain, Pieter Abbee](https://arxiv.org/pdf/2006.11239).
 [^7]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
 [^6]: - [Gaussian Processes and Gaussian Markov Random Fields](https://folk.ntnu.no/joeid/MA8702/jan16.pdf)
 [^3]: - [A fast learning algorithm for deep belief nets. Geoffrey E. Hinton, Simon Osindero, Yee-Whye Teh](https://www.cs.toronto.edu/~hinton/absps/fastnc.pdf).
