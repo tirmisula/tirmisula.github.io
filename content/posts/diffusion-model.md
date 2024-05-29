@@ -344,7 +344,7 @@ L &= \mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\log \frac{q(x_{1:T}|x_0,\phi)}{p
 \\\
 &\text{Let }A=\mathbb{E}\_{x_{0:T}\sim q(x_{0:T}|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)} ] \\\
 A &= \mathbb{E}\_{q(x_0,x_{t-1},x_t|\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)} ] \quad (\text{integrate on irrelavent $x_i$}) \\\
-&\because \mathbb{E}_{p(a)}\mathbb{E}_{p(b|a)}[f(a,b)] = \int \left(\int p(b|a)p(a)f(a,b)\space db\right)da = \mathbb{E}_{p(a,b)}[f(a,b)] \\\
+&\because \mathbb{E}\_{p(a)}\mathbb{E}\_{p(b|a)}[f(a,b)] = \int \left(\int p(b|a)p(a)f(a,b)\space db\right)da = \mathbb{E}\_{p(a,b)}[f(a,b)] \\\
 &= \mathbb{E}\_{q(x_0,x_t|\phi)}[\mathbb{E}\_{q(x_{t-1}|x_0,x_t,\phi)}[\sum_{t=2}^T\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)} ]] \\\
 &= \mathbb{E}\_{q(x_0,x_t|\phi)}\sum_{t=2}^T\mathbb{E}\_{q(x_{t-1}|x_0,x_t,\phi)}[\log\frac{q(x_{t-1}|x_t,x_0)}{p(x_{t-1}|x_t,\theta)} ] \\\
 &= \mathbb{E}\_{q(x_0,x_t|\phi)}\sum_{t=2}^T\text{KL}(q(x_{t-1}|x_t,x_0)||p(x_{t-1}|x_t,\theta)) \\\
