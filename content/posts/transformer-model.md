@@ -178,7 +178,164 @@ Seq2seq model which used in NLP area is commonly composed of an encoder and a de
     p(y_{1:N};\theta) = \prod_{i=1}^N p(y_i|y_{1:i-1},Y;\theta)
     $$
 
-## Motivation
+## Transformer versus Earlier Models
+
+### RNN
+
+The recurrent neural network (RNN) cell is given by:
+
+$$
+\begin{align*}
+&Y_{i}=\tanh(X_iW+Y_{i-1}U) \\\
+&\tanh : \text{hyperbolic tangent activation function, $\tanh(x)\in[-1,1]$} \\\
+&W : \text{weight matrix that transforms input $X$} \\\
+&U : \text{weight matrix that transforms previous hidden state $Y_{i-1}$} \\\
+\end{align*}
+$$
+
+By the definition, it is clear that the problem is:
+
+1. Encoding in RNN is serialized.
+
+    $$
+    Y_0 \rarr Y_1 \rarr \cdots Y_N
+    $$
+
+2. Each hidden state depends on previous states.
+
+    $$
+    Y_i \text{ directly depends on $X_i,Y_{i-1}$} \\\
+    Y_i \text{ indirectly depends on $X_{1:i-1}$}
+    $$
+
+### CNN
+
+The convolutional neural network (CNN) has encoder like:
+
+$$
+\begin{align*}
+&Y_{1:N} = f(X_{1:N}\circledast W+b) \\\
+&Y_i = (X_{i-1},X_i,X_{i+1})\circledast W \\\
+&f : \text{activation function, e.g. ReLU} \\\
+&W : \text{conv window, suppose the kernel size is 3} \\\
+&b : \text{bias term} \\\
+\end{align*}
+$$
+
+By the definition:
+
+1. Encoding in CNN is parallelized.
+
+    $$
+    Y_1 \larr (\text{pad},X_1,X_2)\circledast W \\\
+    Y_2 \larr (X_1,X_2,X_3)\circledast W \\\
+    \cdots \\\
+    Y_N \larr (X_{N-1},X_{N},\text{pad})\circledast W \\\
+    $$
+
+2. Each hidden state depends on states inside the conv window.
+
+    $$
+    Y_i \text{ depends on $X_{i-1:i+1}$}
+    $$
+
+### Transformer
+
+The motivation of Transformer is to design a encoder so that:
+
+$$
+\begin{align*}
+&Y_i = f(X_1,\cdots,X_N) \\\
+&\text{ $Y_i$ depends on all tokens} \\\
+&Y_1 \cdots Y_N \text{ computation can be parallelized}
+\end{align*} 
+$$
+
+{{< math.inline >}}
+<p>
+In order to acheive these 2 goals, Transformer is designed to have 2 matrix transformations from \( X \) to \( Y \), denote the matrix transformation by 2 operators:
+</p>
+{{</ math.inline >}}
+
+$$
+Y = (\mathcal{F}\circ\mathcal{A})(X)
+$$
+
+1. Multi-head Attention
+
+    $$
+    \begin{align*}
+    &Y' = \mathcal{A}(X) \\\
+    &\mathcal{A}(X_i) = \frac{\sum_{j=1}^N\text{sim}(X_i,X_j)X_j}{\sum_{j=1}^N\text{sim}(X_i,X_j)} \\\
+    &\text{sim}(X_i,X_j) : \text{defined with attention mechanism}
+    \end{align*}
+    $$
+
+    The first operator computes weighted average of similarities of different word embeddings.
+
+2. Position-Wise Feed-Forward
+
+    $$
+    \begin{align*}
+    &Y = \mathcal{F}(Y') \\\
+    &\mathcal{F} : \text{non-linear transformation}
+    \end{align*}
+    $$
+
+## Multi-head Attention
+### Attention mechanism
+Recall the similarity mentioned above, functions like cosine similarity provide no parameter:
+
+$$
+\text{sim}(X_i,X_j) = \frac{X_i \cdot X_j}{||X_i||||X_j||}
+$$
+
+{{< math.inline >}}
+<p>
+In order to parameterize the model, an alternative way is to first project \( X \) to other spaces, then compute similarity:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+&\text{Let } \begin{array}{l}
+    X_i \rarr X_iW_Q \\\
+    X_j \rarr X_jW_K \text{ or } X_jW_V
+\end{array} \text{ we have } \\\
+&\mathcal{A}(X_i) = \frac{\sum_{j=1}^N\text{sim}(X_iW_Q,X_jW_K)X_jW_V}{\sum_{j=1}^N\text{sim}(X_iW_Q,X_jW_K)} \\\
+\\\
+&\text{Denote } \begin{array}{l}
+    Q_i = X_iW_Q \\\
+    K_j = X_jW_K \\\
+    V_j = X_jW_V
+\end{array} \text{ we have } \\\
+&\mathcal{A}(X_i) = \frac{\sum_{j=1}^N\text{sim}(Q_i,K_j)V_j}{\sum_{j=1}^N\text{sim}(Q_i,K_j)}
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Each token \( X_i \) is projected to 3 different vectors \( Q_i,K_i,V_i \). Understanding \( Q,K,V \) and the equation:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+Q_i &: \text{query related to i-th sample} \\\
+K_i,V_i &: \text{key-value pair of i-th sample} \\\
+\text{sim}(Q_i,K_j) &: \text{attention score} \\\
+\frac{\text{sim}(Q_i,K_j)}{\sum_{j=1}^N\text{sim}(Q_i,K_j)} &: \text{nomalized attention score} \\\
+\frac{\sum_{j=1}^N\text{sim}(Q_i,K_j)V_j}{\sum_{j=1}^N\text{sim}(Q_i,K_j)} &: \begin{array}{l}
+    \text{weighted sum of all value vectors for query $Q_i$} \\\
+    \text{weight is nomalized attention score}
+\end{array}
+\end{align*}
+$$
+
+Attention mechanism used in Transformer is also called **Self-Attention**, because it used the sequence itself for queries, keys, and values.
+
+### Understanding Q,K,V
+
 
 
 ## Reference
