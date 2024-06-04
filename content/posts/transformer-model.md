@@ -325,18 +325,103 @@ Q_i &: \text{query related to i-th sample} \\\
 K_i,V_i &: \text{key-value pair of i-th sample} \\\
 \text{sim}(Q_i,K_j) &: \text{attention score} \\\
 \frac{\text{sim}(Q_i,K_j)}{\sum_{j=1}^N\text{sim}(Q_i,K_j)} &: \text{nomalized attention score} \\\
-\frac{\sum_{j=1}^N\text{sim}(Q_i,K_j)V_j}{\sum_{j=1}^N\text{sim}(Q_i,K_j)} &: \begin{array}{l}
-    \text{weighted sum of all value vectors for query $Q_i$} \\\
-    \text{weight is nomalized attention score}
-\end{array}
+\sum_{j=1}^N\frac{\text{sim}(Q_i,K_j)}{\sum_{j=1}^N\text{sim}(Q_i,K_j)}V_j &: 
+\text{weighted sum of all value vectors} \\\
+% \begin{array}{l}
+%     \text{weighted sum of all value vectors for query $Q_i$}
+% \end{array}
+\end{align*} \\\
+\text{sim}(Q_i , \begin{array}{l}
+    K_1 \\\
+    \vdots \\\
+    K_N
+\end{array}) \xrightarrow{attention} \begin{array}{l}
+    \alpha_1 \\\
+    \vdots \\\
+    \alpha_N
+\end{array} \xrightarrow{weighted sum} \sum_{j=1}^N\alpha_jV_j
+$$
+
+Attention used in Transformer is called **Self-Attention**, because it used the sequence itself for queries, keys, and values.
+
+### Single-head attention
+
+{{< math.inline >}}
+<p>
+Define the projection matrices \( W_Q,W_K,W_V \) as:
+</p>
+{{</ math.inline >}}
+
+$$
+W_Q \in \mathbb{R}^{D\times M} , W_K \in \mathbb{R}^{D\times M}, W_V \in \mathbb{R}^{D\times P}
+$$
+
+{{< math.inline >}}
+<p>
+We can get the \( Q,K,V \) dimensions:
+</p>
+{{</ math.inline >}}
+
+$$
+Q,K,V \in \mathbb{R}^{N\times M}
+$$
+
+{{< math.inline >}}
+<p>
+For \( Q_i \) and all \( K_j \)'s similarity, calculate it's attention scores based on dot product:
+</p>
+{{</ math.inline >}}
+
+$$
+Q_i,K_i,V_i \in \mathbb{R}^{1\times M} \\\
+\text{sim}(Q_i,K_j) = \frac{Q_i \cdot K^T_j}{\sqrt{M}} \\\
+\sqrt{M} \text{ is the scaling factor}\\\
+$$
+
+$$
+\begin{align*}
+\text{sim}(Q_i , \begin{array}{l}
+    K_1 \\\
+    \vdots \\\
+    K_N
+\end{array}) &= \frac{1}{\sqrt{M}}\begin{bmatrix}
+    Q_iK^T_1 & \cdots & Q_iK^T_N
+\end{bmatrix} \\\
+&= \frac{1}{\sqrt{M}}Q_iK^T \\\
 \end{align*}
 $$
 
-Attention mechanism used in Transformer is also called **Self-Attention**, because it used the sequence itself for queries, keys, and values.
+{{< math.inline >}}
+<p>
+Use Softmax function to obtain \( Q_i \)'s attention weights:
+</p>
+{{</ math.inline >}}
 
-### Understanding Q,K,V
+$$
+\begin{align*}
+\alpha_i &= \text{softmax}(\frac{1}{\sqrt{M}}Q_iK^T) \\\
+&= \begin{bmatrix}
+    \alpha_{i1} & \cdots & \alpha_{iN}
+\end{bmatrix} \\\
+\alpha_{ij} &= \frac{\exp(Q_iK^T_j)}{\sum_{l=1}^N\exp(Q_iK^T_l)}
+\end{align*}
+$$
 
+Compute weighted sum:
 
+$$
+\begin{align*}
+\sum_{j=1}^N\alpha_{ij}V_j &= \begin{bmatrix}
+    \alpha_{i1} & \cdots & \alpha_{iN}
+\end{bmatrix} \begin{bmatrix}
+    V_1 \\\
+    \vdots \\\
+    V_N
+\end{bmatrix} \\\
+&= \alpha_iV \\\
+&= \text{softmax}(\frac{1}{\sqrt{M}}Q_iK^T)V
+\end{align*}
+$$
 
 ## Reference
 
