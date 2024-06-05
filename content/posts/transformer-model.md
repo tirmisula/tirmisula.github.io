@@ -282,9 +282,10 @@ $$
     \end{align*}
     $$
 
-## Multi-head Attention
-### Attention mechanism
-Recall the similarity mentioned above, functions like cosine similarity provide no parameter:
+## Single-head Attention
+### Attention score versus similarity
+
+Recall the similarity mentioned above, a conventional function like cosine similarity provides no parameter which is not suitable for a complex model:
 
 $$
 \text{sim}(X_i,X_j) = \frac{X_i \cdot X_j}{||X_i||||X_j||}
@@ -292,7 +293,7 @@ $$
 
 {{< math.inline >}}
 <p>
-In order to parameterize the model, an alternative way is to first project \( X \) to other spaces, then compute similarity:
+An alternative way is to project \( X \) to other spaces first, then compute similarity in a dot-product manner:
 </p>
 {{</ math.inline >}}
 
@@ -300,51 +301,118 @@ $$
 \begin{align*}
 &\text{Let } \begin{array}{l}
     X_i \rarr X_iW_Q \\\
-    X_j \rarr X_jW_K \text{ or } X_jW_V
+    X_j \rarr X_jW_K \text{ , } X_jW_V \\\
+    X_l \rarr W_K
 \end{array} \text{ we have } \\\
-&\mathcal{A}(X_i) = \frac{\sum_{j=1}^N\text{sim}(X_iW_Q,X_jW_K)X_jW_V}{\sum_{j=1}^N\text{sim}(X_iW_Q,X_jW_K)} \\\
+&\mathcal{A}(X_i) = \frac{\sum_{j=1}^N\text{sim}(X_iW_Q,X_jW_K)X_jW_V}{\sum_{l=1}^N\text{sim}(X_iW_Q,X_lW_K)} \\\
 \\\
 &\text{Denote } \begin{array}{l}
     Q_i = X_iW_Q \\\
     K_j = X_jW_K \\\
     V_j = X_jW_V
 \end{array} \text{ we have } \\\
-&\mathcal{A}(X_i) = \frac{\sum_{j=1}^N\text{sim}(Q_i,K_j)V_j}{\sum_{j=1}^N\text{sim}(Q_i,K_j)}
+&\mathcal{A}(X_i) = \frac{\sum_{j=1}^N\text{sim}(Q_i,K_j)V_j}{\sum_{l=1}^N\text{sim}(Q_i,K_l)} \\\
+\\\
+&\text{Let } \text{sim}(Q_i,K_j) = \frac{Q_iK^T_j}{\sqrt{d}} = \text{score}(Q_i,K_j) \\\
+&\text{$\sqrt{d}$ is the scaling factor, $Q_i,K_i\in\mathbb{R}^d$} \\\
+\\\
+&\text{The final form: } \\\
+&\mathcal{A}(X_i) = \frac{\sum_{j=1}^N\text{score}(Q_i,K_j)V_j}{\sum_{l=1}^N\text{score}(Q_i,K_l)} \\\
+&\quad Q_i : \text{query related to token $X_i$} \\\
+&\quad K_i,V_i : \text{key-value pair of token $X_i$}
 \end{align*}
 $$
 
 {{< math.inline >}}
 <p>
-Each token \( X_i \) is projected to 3 different vectors \( Q_i,K_i,V_i \). Understanding \( Q,K,V \) and the equation:
+\( \text{score}(Q_i,K_j) \) is the <b>attention score</b> which take the place of similarity measurement.
+</p>
+{{</ math.inline >}}
+
+
+### Attention weights
+
+{{< math.inline >}}
+<p>
+\( \mathcal{A}(X_i) \) can be further written as:
 </p>
 {{</ math.inline >}}
 
 $$
 \begin{align*}
-Q_i &: \text{query related to i-th sample} \\\
-K_i,V_i &: \text{key-value pair of i-th sample} \\\
-\text{sim}(Q_i,K_j) &: \text{attention score} \\\
-\frac{\text{sim}(Q_i,K_j)}{\sum_{j=1}^N\text{sim}(Q_i,K_j)} &: \text{nomalized attention score} \\\
-\sum_{j=1}^N\frac{\text{sim}(Q_i,K_j)}{\sum_{j=1}^N\text{sim}(Q_i,K_j)}V_j &: 
-\text{weighted sum of all value vectors} \\\
+\mathcal{A}(X_i) &= \sum_{j=1}^N\frac{\text{score}(Q_i,K_j)}{\sum_{l=1}^N\text{score}(Q_i,K_l)}V_j \\\
+&\text{Let } \alpha_{ij}=\frac{\text{score}(Q_i,K_j)}{\sum_{l=1}^N\text{score}(Q_i,K_l)} \\\
+&= \sum_{j=1}^N\alpha_{ij}V_j \\\
+&\alpha_{ij} \text{ is the normalized weight}
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+From this perspective, \( \mathcal{A}(X_i) \) is the weighted sum of projected values. Since \( V_1 \cdots V_N \) are different semantics which is similar to multiple classes, a better choice for getting weights \( \alpha_{i1}\cdots\alpha_{iN} \) is passing similarities to Softmax function:
+</p>
+{{</ math.inline >}}
+
+$$
+\text{Let } \begin{bmatrix}
+    \alpha_{i1} \\\
+    \vdots \\\
+    \alpha_{iN}
+\end{bmatrix} = \text{Softmax}(\begin{bmatrix}
+    \text{score}(Q_i,K_1) \\\
+    \vdots \\\
+    \text{score}(Q_i,K_N)
+\end{bmatrix}) \\\
+\\\
+\begin{align*}
+\alpha_{ij} &= \frac{\exp(\text{score}(Q_i,K_j))}{\sum_{l=1}^N\exp(\text{score}(Q_i,K_l))}
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+The new \( \alpha_{i1}\cdots\alpha_{iN} \) weights are called <b>attention weights</b>. A summary of attention concepts in these 2 sections:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\text{score}(Q_i,K_j) &: \text{attention score $\frac{Q_iK^T_j}{\sqrt{d}}$} \\\
+\frac{\text{score}(Q_i,K_j)}{\sum_{j=1}^N\text{score}(Q_i,K_j)} &: \text{nomalized attention score} \\\
+\frac{\exp(\text{score}(Q_i,K_j))}{\sum_{l=1}^N\exp(\text{score}(Q_i,K_l))} &: 
+\text{attention weight} \\\
+\mathcal{A}(X_i) = \sum_{j=1}^N\frac{\text{score}(Q_i,K_j)}{\sum_{l=1}^N\text{score}(Q_i,K_l)}V_j &: \text{scaled dot-product attention}
 % \begin{array}{l}
 %     \text{weighted sum of all value vectors for query $Q_i$}
 % \end{array}
-\end{align*} \\\
-\text{sim}(Q_i , \begin{array}{l}
+\end{align*}
+$$
+
+In Transformer, attention mechanism is referred to as **Self-Attention**, because it used the sequence itself for queries, keys, and values.
+
+$$
+\text{score}(Q_1 , \begin{array}{l}
     K_1 \\\
     \vdots \\\
     K_N
-\end{array}) \xrightarrow{attention} \begin{array}{l}
-    \alpha_1 \\\
+\end{array}) \xrightarrow{attention\space weights} \begin{array}{l}
+    \alpha_{11} \\\
     \vdots \\\
-    \alpha_N
-\end{array} \xrightarrow{weighted sum} \sum_{j=1}^N\alpha_jV_j
+    \alpha_{1N}
+\end{array} \xrightarrow{weighted\space sum} \sum_{j=1}^N\alpha_{1j}V_j \\\
+\cdots \\\
+\text{score}(Q_N , \begin{array}{l}
+    K_1 \\\
+    \vdots \\\
+    K_N
+\end{array}) \xrightarrow{attention\space weights} \begin{array}{l}
+    \alpha_{N1} \\\
+    \vdots \\\
+    \alpha_{NN}
+\end{array} \xrightarrow{weighted\space sum} \sum_{j=1}^N\alpha_{Nj}V_j \\\
 $$
 
-Attention used in Transformer is called **Self-Attention**, because it used the sequence itself for queries, keys, and values.
-
-### Single-head attention
+### Single-head Attention formalization
 
 {{< math.inline >}}
 <p>
@@ -353,7 +421,7 @@ Define the projection matrices \( W_Q,W_K,W_V \) as:
 {{</ math.inline >}}
 
 $$
-W_Q \in \mathbb{R}^{D\times M} , W_K \in \mathbb{R}^{D\times M}, W_V \in \mathbb{R}^{D\times P}
+W_Q \in \mathbb{R}^{D\times M} , W_K \in \mathbb{R}^{D\times M}, W_V \in \mathbb{R}^{D\times M}
 $$
 
 {{< math.inline >}}
@@ -363,31 +431,31 @@ We can get the \( Q,K,V \) dimensions:
 {{</ math.inline >}}
 
 $$
+Q_i,K_i,V_i \in \mathbb{R}^{1\times M} \\\
 Q,K,V \in \mathbb{R}^{N\times M}
 $$
 
 {{< math.inline >}}
 <p>
-For \( Q_i \) and all \( K_j \)'s similarity, calculate it's attention scores based on dot product:
+For \( Q_i \) and all \( K_j \)'s similarity, calculate attention scores based on dot product:
 </p>
 {{</ math.inline >}}
 
 $$
-Q_i,K_i,V_i \in \mathbb{R}^{1\times M} \\\
-\text{sim}(Q_i,K_j) = \frac{Q_i \cdot K^T_j}{\sqrt{M}} \\\
+\text{score}(Q_i,K_j) = \frac{Q_i \cdot K^T_j}{\sqrt{M}} \\\
 \sqrt{M} \text{ is the scaling factor}\\\
 $$
 
 $$
 \begin{align*}
-\text{sim}(Q_i , \begin{array}{l}
+\text{score}(Q_i , \begin{array}{l}
     K_1 \\\
     \vdots \\\
     K_N
-\end{array}) &= \frac{1}{\sqrt{M}}\begin{bmatrix}
-    Q_iK^T_1 & \cdots & Q_iK^T_N
+\end{array}) &= \begin{bmatrix}
+    \frac{1}{\sqrt{M}}Q_iK^T_1 & \cdots & \frac{1}{\sqrt{M}}Q_iK^T_N
 \end{bmatrix} \\\
-&= \frac{1}{\sqrt{M}}Q_iK^T \\\
+&= \frac{Q_iK^T}{\sqrt{M}} \\\
 \end{align*}
 $$
 
@@ -399,19 +467,24 @@ Use Softmax function to obtain \( Q_i \)'s attention weights:
 
 $$
 \begin{align*}
-\alpha_i &= \text{softmax}(\frac{1}{\sqrt{M}}Q_iK^T) \\\
+\alpha_{i} &= \text{softmax}(\frac{Q_iK^T}{\sqrt{M}}) \\\
 &= \begin{bmatrix}
     \alpha_{i1} & \cdots & \alpha_{iN}
 \end{bmatrix} \\\
-\alpha_{ij} &= \frac{\exp(Q_iK^T_j)}{\sum_{l=1}^N\exp(Q_iK^T_l)}
+\alpha_{ij} &= \frac{\exp(\frac{Q_iK^T_j}{\sqrt{M}})}{\sum_{l=1}^N\exp(\frac{Q_iK^T_l}{\sqrt{M}})}
 \end{align*}
 $$
 
-Compute weighted sum:
+{{< math.inline >}}
+<p>
+Compute weighted sum (Attention):
+</p>
+{{</ math.inline >}}
 
 $$
 \begin{align*}
-\sum_{j=1}^N\alpha_{ij}V_j &= \begin{bmatrix}
+\mathcal{A}(X_i) &= \sum_{j=1}^N\alpha_{ij}V_j \\\
+&= \begin{bmatrix}
     \alpha_{i1} & \cdots & \alpha_{iN}
 \end{bmatrix} \begin{bmatrix}
     V_1 \\\
@@ -419,9 +492,69 @@ $$
     V_N
 \end{bmatrix} \\\
 &= \alpha_iV \\\
-&= \text{softmax}(\frac{1}{\sqrt{M}}Q_iK^T)V
+&= \text{softmax}(\frac{Q_iK^T}{\sqrt{M}})V \\\
+&= \text{Attention}(Q_i,K,V)
 \end{align*}
 $$
+
+{{< math.inline >}}
+<p>
+Convert it to matrix form (Self-Attention):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\mathcal{A}(X) &= \begin{bmatrix}
+    \mathcal{A}(X_1) \\\
+    \vdots \\\
+    \mathcal{A}(X_N)
+\end{bmatrix} \\\
+&= \begin{bmatrix}
+    \text{softmax}(\frac{Q_1K^T}{\sqrt{M}})V \\\
+    \vdots \\\
+    \text{softmax}(\frac{Q_NK^T}{\sqrt{M}})V
+\end{bmatrix} \\\
+&= \begin{bmatrix}
+    \begin{bmatrix}
+    \alpha_{11} & \cdots & \alpha_{1N}
+\end{bmatrix} \\\
+    \vdots \\\
+    \begin{bmatrix}
+    \alpha_{N1} & \cdots & \alpha_{NN}
+\end{bmatrix}
+\end{bmatrix}V \\\
+&\because Q_iK^T_j \xmapsto{\text{Softmax}} \alpha_{ij} \\\
+&\therefore \begin{bmatrix}
+    Q_1 \\\
+    \vdots \\\
+    Q_N
+\end{bmatrix} \begin{bmatrix}
+    K^T_1 & \cdots & K^T_N
+\end{bmatrix} \xmapsto{\text{Softmax}} \begin{bmatrix}
+    \alpha_{11} & \cdots & \alpha_{1N} \\\
+    \vdots & \ddots & \vdots \\\
+    \alpha_{N1} & \cdots & \alpha_{NN}
+\end{bmatrix} \\\
+&= \text{Softmax}(\frac{QK^T}{\sqrt{M}})V \\\
+&= \text{Attention}(Q,K,V)
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+Then the Single-head Attention is given:
+</p>
+{{</ math.inline >}}
+
+$$
+\text{Attention}(Q,K,V) = \text{Softmax}(\frac{QK^T}{\sqrt{M}})V \\\
+Q,K,V \in \mathbb{R}^{N\times M}
+$$
+
+## Multi-head Attention
+
+
 
 ## Reference
 
