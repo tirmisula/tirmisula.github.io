@@ -265,9 +265,9 @@ $$
 
     $$
     \begin{align*}
-    &Y' = \mathcal{A}(X) \\\
+    &Y = \mathcal{A}(X) \\\
     &\mathcal{A}(X_i) = \frac{\sum_{j=1}^N\text{sim}(X_i,X_j)X_j}{\sum_{j=1}^N\text{sim}(X_i,X_j)} \\\
-    &\text{sim}(X_i,X_j) : \text{defined with attention mechanism}
+    &\text{sim}(X_i,X_j) : \text{defined by attention mechanism}
     \end{align*}
     $$
 
@@ -277,7 +277,7 @@ $$
 
     $$
     \begin{align*}
-    &Y = \mathcal{F}(Y') \\\
+    &Y' = \mathcal{F}(Y) \\\
     &\mathcal{F} : \text{non-linear transformation}
     \end{align*}
     $$
@@ -552,9 +552,126 @@ $$
 Q,K,V \in \mathbb{R}^{N\times M}
 $$
 
+{{< math.inline >}}
+<p>
+For tokens \( X_1 \cdots X_N \), the encoding result is:
+</p>
+{{</ math.inline >}}
+
+$$
+(Y_1, \cdots, Y_N) = \text{Attention}(XW_Q,XW_K,XW_V)
+$$
+
+It's corresponding function operator representation is:
+
+$$
+Y = \mathcal{A}(X) = \text{Softmax}(\frac{QK^T}{\sqrt{M}})V
+$$
+
 ## Multi-head Attention
 
+{{< math.inline >}}
+<p>
+Multi-head Attention (MHA) is composed of multiple Single-head Attention (SHA) encoding results, each SHA has it's own set of weight matrices \( W_Q^{(i)},W_K^{(i)},W_V^{(i)} \).
+</p>
+{{</ math.inline >}}
 
+{{< math.inline >}}
+<p>
+Suppose MHA has \( H \) heads, each head \( \text{head}^{(i)} \) has the same dimensionality of weight matrices. The math formulation is given by:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\text{head}^{(i)} &= \text{Attention}(XW_Q^{(i)},XW_K^{(i)},XW_V^{(i)}) \\\
+W_Q^{(i)},W_K^{(i)},W_V^{(i)} &\in \mathbb{R}^{D\times M} \\\
+\text{head}^{(i)} &\in \mathbb{R}^{N\times M}
+\end{align*}
+$$
+
+These heads are concatenated and linear transformed in MHA:
+
+$$
+\begin{align*}
+\text{MultiHead}(Q,K,V) &= \text{concat}(\text{head}^{(1)},\cdots,\text{head}^{(H)})W_O \\\
+W_O &\in \mathbb{R}^{(H M)\times D} \text{ , output projection matrix} \\\
+\text{MultiHead} &\in \mathbb{R}^{N\times D}
+\end{align*}
+$$
+
+The corresponding function operator representation is:
+
+$$
+\text{head}^{(i)} = \mathcal{A}^{(i)}(X) \\\
+Y = \mathcal{A}(X) = \text{concat}(\mathcal{A}^{(1)}(X),\cdots,\mathcal{A}^{(H)}(X))W_O
+$$
+
+{{< math.inline >}}
+<p>
+The outputs of MHA is designed to have the same dimensionality with input tokens \( X \).
+</p>
+{{</ math.inline >}}
+
+In summary of MHA:
+
++ Each single head focuses on (a single aspect of the input sequence)/(a specific part of the input sequence).
+
++ Compared to Single-head Attention which uses a single set of query, key, value projections, Multi-head Attention uses multiple sets of query, key, value projections. Raw information is projected to different subspaces to get different representations.
+
++ Allows the model to learn from multiple perspectives and features simultaneously.
+
+## Position-Wise Feed-Forward
+
+In Transformer, the Position-wise Feed-Forward Network (FFN) is applied independently to each position (encoded token) in the sequence. It consists of 2 fully connected layers:
+
+$$
+\begin{align*}
+\text{FFN}(Y_i) &= f(Y_iW_1+b_1)W_2+b_2 \\\
+f(\cdot) &: \text{ReLu activation function} \\\
+W_1,b_1 &: \text{first layer weights and biases} \\\
+W_2,b_2 &: \text{second layer weights and biases}
+\end{align*}
+$$
+
+The corresponding function operator representation is:
+
+$$
+Y_i' = \mathcal{F}(Y_i) = f(Y_iW_1+b_1)W_2+b_2 \\\
+Y' = \mathcal{F}(Y) = \begin{bmatrix} 
+    f(Y_1W_1+b_1)W_2+b_2 \\\
+    \vdots \\\
+    f(Y_NW_1+b_1)W_2+b_2
+\end{bmatrix}
+$$
+
+## Layer Normalization and Residual Nets
+
+Layer normalization is defined as:
+
+$$
+\begin{align*}
+\text{LayerNorm}(X_i) &= \frac{x-\mu}{\sqrt{\sigma^2}+\epsilon}\gamma + \beta \\\
+\mu &: \\\
+\sigma^2 &: \\\
+\epsilon &: \\\
+\gamma,\beta &: \text{learnable parameters}
+\end{align*} \\\
+\\\
+\text{Let } \mathcal{N}(X) = \text{LayerNorm}(X_i)
+$$
+
+In Transformer, layer normalization can be applied either before or after the main sub-layers (MHA and FFN). In this post assume layer normalization is applied before sub-layers:
+
+$$
+\text{Denote}
+$$
+
+## Transformer Block
+
+### Multi-Head Self-Attention
+
+### MLP
 
 ## Reference
 
