@@ -565,7 +565,7 @@ $$
 It's corresponding function operator representation is:
 
 $$
-Y = \mathcal{A}(X) = \text{Softmax}(\frac{QK^T}{\sqrt{M}})V
+Y = \text{Softmax}(\frac{QK^T}{\sqrt{M}})V
 $$
 
 ## Multi-head Attention
@@ -651,34 +651,181 @@ Layer normalization is defined as:
 
 $$
 \begin{align*}
-\text{LayerNorm}(X_i) &= \frac{x-\mu}{\sqrt{\sigma^2}+\epsilon}\gamma + \beta \\\
-\mu &: \\\
-\sigma^2 &: \\\
-\epsilon &: \\\
+\text{LayerNorm}(X_i) &= \frac{X_i-\mu}{\sqrt{\sigma^2}+\epsilon}\gamma + \beta \\\
+\mu &: \text{the mean of $X_i$} \\\
+\sigma^2 &: \text{the variance of $X_i$} \\\
+\epsilon &: \text{small constant for numerical stability} \\\
 \gamma,\beta &: \text{learnable parameters}
-\end{align*} \\\
-\\\
-\text{Let } \mathcal{N}(X) = \text{LayerNorm}(X_i)
+\end{align*}
 $$
 
-In Transformer, layer normalization can be applied either before or after the main sub-layers (MHA and FFN). In this post assume layer normalization is applied before sub-layers:
+In Transformer, layer normalization can be applied either before or after the main sub-layers (MHA and FFN). In this post, layer normalization is assumed to be applied before sub-layers, it's operator is given by:
 
 $$
-\text{Denote}
+\mathcal{N}(X) = \begin{bmatrix}
+    \mathcal{N}(X_1) \\\
+    \vdots \\\
+    \mathcal{N}(X_N)
+\end{bmatrix} = \begin{bmatrix}
+    \text{LayerNorm}(X_1) \\\
+    \vdots \\\
+    \text{LayerNorm}(X_N)
+\end{bmatrix}
 $$
 
-## Transformer Block
+And the residual connection is added afterward:
 
-### Multi-Head Self-Attention
+$$
+X_{\text{output}} = X_{\text{input}} + \text{SubLayer}(\mathcal{N}(X))
+$$
 
-### MLP
+## Transformer Block Definition
+
+Summarize briefly each module mentioned above:
+
+$$
+\begin{align*}
+\text{Single-head Attention} &: \mathcal{A}^{(h)}(X) = \text{Softmax}(\frac{QK^T}{\sqrt{M}})V \\\
+\text{Multi-head Attention} &: \mathcal{A}(X) = \text{concat}(\mathcal{A}^{(1)}(X),\cdots,\mathcal{A}^{(H)}(X))W_O \\\
+\text{Position-Wise Feed-Forward} &: \mathcal{F}(Y) = \begin{bmatrix} 
+    f(Y_1W_1+b_1)W_2+b_2 \\\
+    \vdots \\\
+    f(Y_NW_1+b_1)W_2+b_2
+\end{bmatrix} \\\
+\text{LayerNorm+Residual Connect} &: X_{\text{output}} = X + \text{SubLayer}(\mathcal{N}(X))
+\end{align*}
+$$
+
+A complete Transformer block has one Multi-head Self-Attention layer and one feed-forward layer, which can be formalized:
+
+$$
+\begin{align*}
+\text{Let } Y &= \mathcal{T}(X) , \text{ $\mathcal{T}$ is the Transformer block} \\\
+X' &= X + \mathcal{A}\circ\mathcal{N}(X) \\\
+\mathcal{T}(X) &= X' + \mathcal{F}\circ\mathcal{N}(X') \\\
+&\text{$X$ is the input to the Transformer block} \\\
+&\text{$X'$ is the output of Self-Attention layer} \\\
+&\text{$Y$ is the output of Transformer block}
+\end{align*}
+$$
+
+## Number of Parameters
+
+### Parameters in Multi-head Attention
+
+{{< math.inline >}}
+<p>
+There are \( 3H \) projection matrices and one output projection matrix:
+</p>
+{{</ math.inline >}}
+
+$$
+W_Q, W_K, W_V \in \mathbb{R}^{D\times M} \\\
+W_O \in \mathbb{R}^{HM\times D}
+$$
+
+{{< math.inline >}}
+<p>
+Usually \( H\times M=D \). The total number of parametes in MHA is:
+</p>
+{{</ math.inline >}}
+
+$$
+3 \times H \times D \times M + H\times M\times D = 4D^2
+$$
+
+### Parameters in Feed-Forward Net
+
+In the original paper<cite>[^2]</cite>, the number of parameters of the first and second linear layer are 512 and 2048 respectively. The total number of parametes in MHA is:
+
+$$
+D\times 4D + 4D \times D = 8D^2
+$$
+
+### Total number of parameters
+
+Consider input word embeddings \( X\in\mathbb{R}^{N\times D} \) are parameters, the total number of parameters is given by:
+
+$$
+12D^2 +ND
+$$
+
+## Computation Complexity
+
+### Multi-head Attention complexity
+
+{{< math.inline >}}
+<p>
+The computation complexity is mainly based on \( Q,K,V \) matrix multiplications:
+</p>
+{{</ math.inline >}}
+
+
+1. Projection of Queries, Keys, and Values:
+
+$$
+\begin{align*}
+\text{Each projection has a complexity of } O(N\times M\times D)
+\end{align*}
+$$
+
+2. Scaled Dot-Product Attention:
+
+$$
+\text{$QK^T$ has a complexity of } O(N\times N\times M) \\\
+\text{$\text{Softmax}(\cdot)$ has a complexity of } O(N^2) \\\
+\text{$\text{Softmax}(\cdot)V$ has a complexity of } O(N\times N\times M)
+$$
+
+3. Output projection:
+
+$$
+\text{Under the assumption: $D=HM$} \\\
+\text{$\text{concat}(\cdots)W_O$ has a complexity of } O(N\times D\times D) \\\
+$$
+
+The total complexity for a single head is:
+
+$$
+O(3N\times M\times D+N^2(2M+1)) = O(N^2M)
+$$
+
+The total complexity for multi-head is:
+
+$$
+O(N^2M\times H)+O(ND^2) = O(N^2D+ND^2)
+$$
+
+### Feed-Forward Net complexity
+
+1. First layer:
+
+$$
+\text{$X_iW_1$ has a complexity of } O(N\times 4D\times D) \\\
+$$
+
+2. Second layer:
+
+$$
+\text{$X_iW_2$ has a complexity of } O(N\times D\times 4D) \\\
+$$
+
+The total complexity of FFN is:
+
+$$
+O(8ND^2) = O(ND^2)
+$$
+
+## Linear Transformer
+
+### Motivation
 
 ## Reference
 
 [^1]: - [video](https://www.bilibili.com/video/BV19H4y1G73r).
-[^4]: From [Higham, Nicholas (2002). Accuracy and Stability of Numerical Algorithms](https://archive.org/details/accuracystabilit00high_878).
+[^2]: From [Attention Is All You Need. Ashish Vaswani, Llion Jones, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Aidan N. Gomez, Łukasz Kaiser](https://arxiv.org/pdf/1706.03762).
 [^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
-[^2]: - [Denoising Diffusion Probabilistic Models. Jonathan Ho, Ajay Jain, Pieter Abbee](https://arxiv.org/pdf/2006.11239).
+[^4]: - [Denoising Diffusion Probabilistic Models. Jonathan Ho, Ajay Jain, Pieter Abbee](https://arxiv.org/pdf/2006.11239).
 [^7]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
 [^6]: - [Gaussian Processes and Gaussian Markov Random Fields](https://folk.ntnu.no/joeid/MA8702/jan16.pdf)
 [^3]: - [A fast learning algorithm for deep belief nets. Geoffrey E. Hinton, Simon Osindero, Yee-Whye Teh](https://www.cs.toronto.edu/~hinton/absps/fastnc.pdf).
