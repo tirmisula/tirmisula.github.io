@@ -271,7 +271,7 @@ $$
     \end{align*}
     $$
 
-    The first operator computes weighted average of similarities of different word embeddings.
+    The first operator indicates weighted sum (based on normalized similarity weights) of all word embeddings. In other words, the output is a weighted average representation of all input tokens. 
 
 2. Position-Wise Feed-Forward
 
@@ -801,13 +801,13 @@ $$
 1. First layer:
 
 $$
-\text{$X_iW_1$ has a complexity of } O(N\times 4D\times D) \\\
+\text{$XW_1$ has a complexity of } O(N\times 4D\times D) \\\
 $$
 
 2. Second layer:
 
 $$
-\text{$X_iW_2$ has a complexity of } O(N\times D\times 4D) \\\
+\text{$XW_2$ has a complexity of } O(N\times D\times 4D) \\\
 $$
 
 The total complexity of FFN is:
@@ -820,6 +820,156 @@ $$
 
 ### Motivation
 
+{{< math.inline >}}
+<p>
+When token number is large enough (\( N \gg D \)), the complexity from above can be reduced to:
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\text{Multi-head Self-Attention} &: O(N^2D+ND^2) = O(N^2) \\\
+\text{Feed-Forward Net} &: O(ND^2) = O(N)
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+The main complexity \( O(N^2) \) comes from \( \text{Softmax}(QK^T) \). An alternative way is to compute \( K^TV \) first, then compute \( Q(K^TV) \):
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+\text{Complexity of $K^TV$} &: O(M\times M\times N)=O(N) \\\
+\text{Complexity of $Q(K^TV)$} &: O(N\times M\times M) = O(N)
+\end{align*}
+$$
+
+The overall complexity is reduced from quadratic to linear.
+
+### Linearized Attention
+
+Recall that the weighted sum representation:
+
+$$
+\mathcal{A}(X_i) = \frac{\sum_{j=1}^N\text{sim}(Q_i,K_j)V_j}{\sum_{l=1}^N\text{sim}(Q_i,K_l)} \\\
+\text{sim}(Q_i,K_j) = \exp(\frac{Q_iK^T_j}{\sqrt{M}})
+$$
+
+<cite>[^3]</cite>Linear Transformer uses a kernel function to represent similarity measurement:
+
+$$
+\text{Let } \text{sim}(Q_i,K_j) = k(Q_i,K_j) = \langle\phi(Q_i),\phi(K_j)\rangle \\\
+\mathcal{A}(X_i) = \frac{\sum_{j=1}^N\phi(Q_i)\phi(K_j)^TV_j}{\sum_{l=1}^N\phi(Q_i)\phi(K_l)^T} \\\
+$$
+
+The numerator can be simplified:
+
+$$
+\begin{align*}
+\sum_{j=1}^N\phi(Q_i)\phi(K_j)^TV_j &= \sum_{j=1}^N\begin{bmatrix}
+    \phi(Q_{i1}) & \cdots & \phi(Q_{iM})
+\end{bmatrix} \begin{bmatrix}
+    \phi(K_{j1}) \\\
+    \vdots \\\
+    \phi(K_{jM})
+\end{bmatrix} \begin{bmatrix}
+    V_{j1} & \cdots & V_{jM}
+\end{bmatrix} \\\
+&= \begin{bmatrix}
+    \phi(Q_{i1}) & \cdots & \phi(Q_{iM})
+\end{bmatrix}\sum_{j=1}^N \begin{bmatrix}
+    \phi(K_{j1}) \\\
+    \vdots \\\
+    \phi(K_{jM})
+\end{bmatrix} \begin{bmatrix}
+    V_{j1} & \cdots & V_{jM}
+\end{bmatrix} \\\
+&= \phi(Q_i)\sum_{j=1}^N \begin{bmatrix}
+    \phi(K_{j1})V_{j1} & \cdots & \phi(K_{j1})V_{jM} \\\
+    \vdots & \ddots & \vdots \\\
+    \phi(K_{jM})V_{j1} & \cdots & \phi(K_{jM})V_{jM}
+\end{bmatrix} \\\
+&= \phi(Q_i) \begin{bmatrix}
+    \sum_{j=1}^N\phi(K_{j1})V_{j1} & \cdots & \sum_{j=1}^N\phi(K_{j1})V_{jM} \\\
+    \vdots & \ddots & \vdots \\\
+    \sum_{j=1}^N\phi(K_{jM})V_{j1} & \cdots & \sum_{j=1}^N\phi(K_{jM})V_{jM}
+\end{bmatrix} \\\
+&= \phi(Q_i) \begin{bmatrix}
+    \phi(K_{:,1})^TV_{:,1} & \cdots & \phi(K_{:,1})^TV_{:,M} \\\
+    \vdots & \ddots & \vdots \\\
+    \phi(K_{:,M})^TV_{:,1} & \cdots & \phi(K_{:,M})^TV_{:,M}
+\end{bmatrix} \\\
+&= \phi(Q_i) \begin{bmatrix}
+    \begin{bmatrix}
+        \phi(K_{:,1})^T \\\
+        \vdots \\\
+        \phi(K_{:,M})^T
+    \end{bmatrix}V_{:,1} & \cdots & \begin{bmatrix}
+        \phi(K_{:,1})^T \\\
+        \vdots \\\
+        \phi(K_{:,M})^T
+    \end{bmatrix}V_{:,M}
+\end{bmatrix} \\\
+&= \phi(Q_i) \begin{bmatrix}
+    \phi(K)^TV_{:,1} & \cdots & \phi(K)^TV_{:,M}
+\end{bmatrix} \\\
+&= \phi(Q_i) \phi(K)^TV
+% &= \frac{\phi(Q_i)\sum_{j=1}^N\phi(K_j)V^T_j}{\phi(Q_i)\sum_{l=1}^N\phi(K_l)^T} \\\
+\end{align*}
+$$
+
+The denominator can be simplified:
+
+$$
+\begin{align*}
+\sum_{l=1}^N\phi(Q_i)\phi(K_l)^T &= \sum_{l=1}^N\sum_{z=1}^M\phi(Q_{iz})\phi(K_{lz})^T \\\
+&= \sum_{z=1}^M\phi(Q_{iz})\sum_{l=1}^N\phi(K_{lz})^T \\\
+&= \phi(Q_i)\sum_{l=1}^N\phi(K_l)^T
+\end{align*}
+$$
+
+So we have:
+
+$$
+\mathcal{A}(X_i) = \frac{\phi(Q_i) \phi(K)^TV}{\phi(Q_i)\sum_{l=1}^N\phi(K_l)^T}
+$$
+
+$$
+\begin{align*}
+\mathcal{A}(X) &= \left(\begin{bmatrix}
+    \phi(Q_1) \\\
+    \vdots \\\
+    \phi(Q_N)
+\end{bmatrix} \phi(K)^TV\right) \oslash \left(\begin{bmatrix}
+    \phi(Q_1) \\\
+    \vdots \\\
+    \phi(Q_N)
+\end{bmatrix} \sum_{l=1}^N\phi(K_l)^T\right)  \\\
+&= \left(\phi(Q) \phi(K)^TV\right) \oslash \left(\phi(Q)\sum_{l=1}^N\phi(K_l)^T\right)
+\end{align*} \\\
+\oslash \text{ is element-wise division}
+$$
+
+{{< math.inline >}}
+<p>
+Linear Transformer compute \( \phi(K)^TV \) and \( \sum_{l=1}^N\phi(K_l)^T \) once for all queries, it has linear complexity:
+</p>
+{{</ math.inline >}}
+
+$$
+\text{The complexity of }
+\begin{cases}
+\text{$\phi(K)^TV$} &: O(M\times M\times N) = O(N) \\\
+\text{$\phi(Q)(\phi(K)^TV)$} &: O(N\times M\times M) = O(N) \\\
+\text{$\sum_{l=1}^N\phi(K_l)^T$} &: O(N+N\times M\times D) = O(N) \\\
+\text{$\phi(Q)\sum_{l=1}^N\phi(K_l)^T$} &: O(N\times 1\times M) = O(N)
+\end{cases} \\\
+\\\
+\text{The overall complexity of $\mathcal{A}(X)$ is } O(N)
+$$
+
 ## Reference
 
 [^1]: - [video](https://www.bilibili.com/video/BV19H4y1G73r).
@@ -828,4 +978,4 @@ $$
 [^4]: - [Denoising Diffusion Probabilistic Models. Jonathan Ho, Ajay Jain, Pieter Abbee](https://arxiv.org/pdf/2006.11239).
 [^7]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
 [^6]: - [Gaussian Processes and Gaussian Markov Random Fields](https://folk.ntnu.no/joeid/MA8702/jan16.pdf)
-[^3]: - [A fast learning algorithm for deep belief nets. Geoffrey E. Hinton, Simon Osindero, Yee-Whye Teh](https://www.cs.toronto.edu/~hinton/absps/fastnc.pdf).
+[^3]: - [Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention. Angelos Katharopoulos, Apoorv Vyas, Nikolaos Pappas, Franc ̧ois Fleuret](https://arxiv.org/pdf/2006.16236).
