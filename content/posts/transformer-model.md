@@ -11,7 +11,7 @@ math: true
 ShowBreadCrumbs: false
 ShowToc: true
 TocOpen: true
-draft: true
+draft: false
 ---
 
 :                                                         
@@ -253,7 +253,7 @@ $$
 
 {{< math.inline >}}
 <p>
-In order to acheive these 2 goals, Transformer is designed to have 2 matrix transformations from \( X \) to \( Y \), denote the matrix transformation by 2 operators:
+In order to acheive these 2 goals, Transformer is designed to have 2 transformations from \( X \) to \( Y \), denote the transformations by 2 operators:
 </p>
 {{</ math.inline >}}
 
@@ -261,17 +261,18 @@ $$
 Y = (\mathcal{F}\circ\mathcal{A})(X)
 $$
 
-1. Multi-head Attention
+1. Multi-head Self-Attention
 
     $$
     \begin{align*}
     &Y = \mathcal{A}(X) \\\
+    &\mathcal{A}(X) : \text{ matrix transformation which is linear} \\\
     &\mathcal{A}(X_i) = \frac{\sum_{j=1}^N\text{sim}(X_i,X_j)X_j}{\sum_{j=1}^N\text{sim}(X_i,X_j)} \\\
     &\text{sim}(X_i,X_j) : \text{defined by attention mechanism}
     \end{align*}
     $$
 
-    The first operator indicates weighted sum (based on normalized similarity weights) of all word embeddings. In other words, the output is a weighted average representation of all input tokens. 
+    The first operator indicates weighted sum (based on normalized similarity weights) of all word embeddings. In other words, the output is a weighted average representation of all input tokens (depends on all tokens). Matrix transformation indicates getting outputs parallel.
 
 2. Position-Wise Feed-Forward
 
@@ -281,6 +282,8 @@ $$
     &\mathcal{F} : \text{non-linear transformation}
     \end{align*}
     $$
+
+    While self-attention captures dependencies and relationships, the FFN processes these representations further by adding non-linearity.
 
 ## Single-head Attention
 ### Attention score versus similarity
@@ -877,16 +880,27 @@ $$
 \end{bmatrix} \begin{bmatrix}
     V_{j1} & \cdots & V_{jM}
 \end{bmatrix} \\\
-&= \begin{bmatrix}
-    \phi(Q_{i1}) & \cdots & \phi(Q_{iM})
-\end{bmatrix}\sum_{j=1}^N \begin{bmatrix}
-    \phi(K_{j1}) \\\
-    \vdots \\\
-    \phi(K_{jM})
-\end{bmatrix} \begin{bmatrix}
+&= \sum_{j=1}^N(\sum_{z=1}^M\phi(Q_{iz})\phi(K_{jz}))\begin{bmatrix}
     V_{j1} & \cdots & V_{jM}
 \end{bmatrix} \\\
-&= \phi(Q_i)\sum_{j=1}^N \begin{bmatrix}
+&= \sum_{j=1}^N\begin{bmatrix}
+    \sum_{z=1}^M\phi(Q_{iz})\phi(K_{jz})V_{j1} & \cdots & \sum_{z=1}^M\phi(Q_{iz})\phi(K_{jz})V_{jM}
+\end{bmatrix} \\\
+&= \begin{bmatrix}
+    \sum_{z=1}^M\sum_{j=1}^N\phi(Q_{iz})\phi(K_{jz})V_{j1} & \cdots & \sum_{z=1}^M\sum_{j=1}^N\phi(Q_{iz})\phi(K_{jz})V_{jM}
+\end{bmatrix} \\\
+&= \begin{bmatrix}
+    \sum_{z=1}^M\phi(Q_{iz})\sum_{j=1}^N\phi(K_{jz})V_{j1} & \cdots & \sum_{z=1}^M\phi(Q_{iz})\sum_{j=1}^N\phi(K_{jz})V_{jM}
+\end{bmatrix} \\\
+&= \begin{bmatrix}
+    \phi(Q_i)\sum_{j=1}^N\phi(K_{j})^TV_{j1} & \cdots & \phi(Q_i)\sum_{j=1}^N\phi(K_{j})^TV_{jM}
+\end{bmatrix} \\\
+&= \phi(Q_i)\sum_{j=1}^N\begin{bmatrix}
+    \phi(K_{j})^TV_{j1} & \cdots & \phi(K_{j})^TV_{jM}
+\end{bmatrix} \\\
+&= \phi(Q_i)\sum_{j=1}^N\phi(K_{j})^TV_{j} \\\
+\text{Furthermore} \\\
+\phi(Q_i)\sum_{j=1}^N\phi(K_{j})^TV_{j} &= \phi(Q_i)\sum_{j=1}^N \begin{bmatrix}
     \phi(K_{j1})V_{j1} & \cdots & \phi(K_{j1})V_{jM} \\\
     \vdots & \ddots & \vdots \\\
     \phi(K_{jM})V_{j1} & \cdots & \phi(K_{jM})V_{jM}
@@ -924,13 +938,17 @@ The denominator can be simplified:
 
 $$
 \begin{align*}
-\sum_{l=1}^N\phi(Q_i)\phi(K_l)^T &= \sum_{l=1}^N\sum_{z=1}^M\phi(Q_{iz})\phi(K_{lz})^T \\\
-&= \sum_{z=1}^M\phi(Q_{iz})\sum_{l=1}^N\phi(K_{lz})^T \\\
+\sum_{l=1}^N\phi(Q_i)\phi(K_l)^T &= \sum_{l=1}^N\sum_{z=1}^M\phi(Q_{iz})\phi(K_{lz}) \\\
+&= \sum_{z=1}^M\phi(Q_{iz})\sum_{l=1}^N\phi(K_{lz}) \\\
 &= \phi(Q_i)\sum_{l=1}^N\phi(K_l)^T
 \end{align*}
 $$
 
-So we have:
+{{< math.inline >}}
+<p>
+So we have \( K^TV \) computed first:
+</p>
+{{</ math.inline >}}
 
 $$
 \mathcal{A}(X_i) = \frac{\phi(Q_i) \phi(K)^TV}{\phi(Q_i)\sum_{l=1}^N\phi(K_l)^T}
@@ -968,6 +986,13 @@ $$
 \end{cases} \\\
 \\\
 \text{The overall complexity of $\mathcal{A}(X)$ is } O(N)
+$$
+
+<cite>[^3]</cite>The feature mapping function is suggested to be the following:
+
+$$
+\phi(x) = \text{elu}(x)+1 \\\
+\text{elu}(\cdot) : \text{exponential linear unit function}
 $$
 
 ## Reference
