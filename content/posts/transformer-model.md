@@ -73,7 +73,7 @@ z &= \begin{bmatrix}
 \sigma(z) &= \begin{bmatrix}
     \sigma(z)_1 & \cdots & \sigma(z)_K
 \end{bmatrix}^T, \sigma(z) \in (0,1)^K \\\
-\sigma(z)_i &= \frac{\exp(z_i)}{\sum_{j=1}^K\exp(z_j)} \\\
+\sigma(z)\_i &= \frac{\exp(z_i)}{\sum_{j=1}^K\exp(z_j)} \\\
 \end{align*}
 $$
 
@@ -153,7 +153,7 @@ $$
 
 ### Seq2seq
 
-Seq2seq model which used in NLP area is commonly composed of an encoder and a decoder.
+<cite>[^1]</cite>Seq2seq model which used in NLP area is commonly composed of an encoder and a decoder.
 
 + Encoder part
 
@@ -997,7 +997,7 @@ $$
 
 ## Reference
 
-[^1]: - [video](https://www.bilibili.com/video/BV19H4y1G73r).
+[^1]: - [video](https://www.bilibili.com/video/BV17D42177Au).
 [^2]: From [Attention Is All You Need. Ashish Vaswani, Llion Jones, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Aidan N. Gomez, Łukasz Kaiser](https://arxiv.org/pdf/1706.03762).
 [^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
 [^4]: - [Denoising Diffusion Probabilistic Models. Jonathan Ho, Ajay Jain, Pieter Abbee](https://arxiv.org/pdf/2006.11239).
