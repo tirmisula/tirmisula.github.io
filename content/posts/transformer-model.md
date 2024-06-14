@@ -995,12 +995,95 @@ $$
 \text{elu}(\cdot) : \text{exponential linear unit function}
 $$
 
+## Averaging past context
+
+<cite>[^4]</cite>This is a note of Andrej Karpathy's tutorial on building GPT. There are 3 different forms of weighted aggregation for averaging the past context, all of them result in the same outcome.
+
+$$
+\text{Let } X = \begin{bmatrix}
+    X_{11} & \cdots & X_{1C} \\\
+    \vdots & \ddots & \vdots \\\
+    X_{T1} & \cdots & X_{TC}
+\end{bmatrix}
+$$
+
+1. Using for loop
+
+$$
+A_1 = \begin{bmatrix}
+    X_{1,:} \\\
+    \frac{1}{2}(X_{2,:}+X_{1,:}) \\\
+    \frac{1}{3}(X_{3,:}+X_{2,:}+X_{1,:}) \\\
+    \vdots \\\
+    \frac{1}{T}(X_{T,:}+\cdots+X_{1,:})
+\end{bmatrix}
+$$
+
+2. Using matrix multiplication
+
+$$
+\begin{align*}
+A_2 &= \begin{bmatrix}
+    [1 & 0 & \cdots & 0] \\\
+    \frac{1}{2}[1 & 1 & \cdots & 0] \\\
+    \vdots & \vdots & \ddots & \vdots \\\
+    \frac{1}{T}[1 & 1 & \cdots & 1]
+\end{bmatrix} X \\\
+&= A_1
+\end{align*}
+$$
+
+3. Using Softmax
+
+$$
+\begin{align*}
+A_3 &= \text{Softmax}(\begin{bmatrix}
+    0 & -\infty & \cdots & -\infty \\\
+    0 & 0 & \cdots & -\infty \\\
+    \vdots & \vdots & \ddots & \vdots \\\
+    0 & 0 & \cdots & 0
+\end{bmatrix})X \\\
+&= \begin{bmatrix}
+    1 & 0 & \cdots & 0 \\\
+    \frac{1}{2} & \frac{1}{2} & \cdots & 0 \\\
+    \vdots & \vdots & \ddots & \vdots \\\
+    \frac{1}{T} & \frac{1}{T} & \cdots & \frac{1}{T}
+\end{bmatrix}X \\\
+&= A_1
+\end{align*}
+$$
+
+When aggregation is not based on average weight, it brings to the Self-Attention.
+
+4. Using Self-Attention
+
+$$
+\text{Let } Q=XW_Q, K=XW_K, V=XW_V \\\
+\\\
+\begin{align*}
+A_4 &= \text{Softmax}(\begin{bmatrix}
+    Q_1K^T_1 & -\infty & \cdots & -\infty \\\
+    Q_2K^T_1 & Q_2K^T_2 & \cdots & -\infty \\\
+    \vdots & \vdots & \ddots & \vdots \\\
+    Q_TK^T_1 & Q_TK^T_2 & \cdots & Q_TK^T_T
+\end{bmatrix})V \\\
+&= \begin{bmatrix}
+    1 & 0 & \cdots & 0 \\\
+    w_{21} & w_{22} & \cdots & 0 \\\
+    \vdots & \vdots & \ddots & \vdots \\\
+    w_{T1} & w_{TT} & \cdots & w_{TT}
+\end{bmatrix} V \\\
+\end{align*}
+$$
+
+It differs from the general concept of Self-Attention by using lower triangular matrix, because the output depends only on past context.
+
 ## Reference
 
 [^1]: - [video](https://www.bilibili.com/video/BV17D42177Au).
 [^2]: - [Attention Is All You Need. Ashish Vaswani, Llion Jones, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Aidan N. Gomez, Łukasz Kaiser](https://arxiv.org/pdf/1706.03762).
 [^5]: From [The Multivariate Gaussian. Michael I. Jordan](https://people.eecs.berkeley.edu/~jordan/courses/260-spring10/other-readings/chapter13.pdf).
-[^4]: - [Denoising Diffusion Probabilistic Models. Jonathan Ho, Ajay Jain, Pieter Abbee](https://arxiv.org/pdf/2006.11239).
+[^4]: - [Let's build GPT: from scratch, in code, spelled out. Andrej Karpathy](https://colab.research.google.com/drive/1JMLa53HDuA-i7ZBmqV7ZnA3c_fvtXnx-?usp=sharing).
 [^7]: - [GAUSS-MARKOV MODELS, JONATHAN HUANG AND J. ANDREW BAGNELL](https://www.cs.cmu.edu/~16831-f14/notes/F14/gaussmarkov.pdf).
 [^6]: - [Gaussian Processes and Gaussian Markov Random Fields](https://folk.ntnu.no/joeid/MA8702/jan16.pdf)
 [^3]: - [Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention. Angelos Katharopoulos, Apoorv Vyas, Nikolaos Pappas, Franc ̧ois Fleuret](https://arxiv.org/pdf/2006.16236).
