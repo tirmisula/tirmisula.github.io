@@ -571,6 +571,52 @@ $$
 Y = \text{Softmax}(\frac{QK^T}{\sqrt{M}})V
 $$
 
+### Why scaled Attention
+
+{{< math.inline >}}
+<p>
+When Attention is divided by \( \sqrt{d} \), it makes variance of \( QK^T \) close to a unit variance: 
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{align*}
+Var(Q_iK^T_j) &= Var(\sum_{z=1}^d Q_{iz}K_{jz}) \\\
+&\because \text{$Q_{iz},K_{jz}$ are independent} \\\
+&= \sum_{z=1}^dVar(Q_{iz}K_{jz}) \\\
+&= \sum_{z=1}^dVar(Q_{iz})Var(K_{jz}) \\\
+&\text{Let }Var(Q_{iz})=Var(K_{jz})=\sigma^2 \\\
+&= d\sigma^4 \\\
+\\\
+Var(\frac{Q_iK^T_j}{\sqrt{d}}) &= \frac{1}{d}Var(Q_iK^T_j) \\\
+&= \sigma^4
+\end{align*}
+$$
+
+{{< math.inline >}}
+<p>
+The variance of scaled dot product is independent from dimensionality \( d \). When dimensionality goes high, it helps maintaining variance in a small value.
+</p>
+{{</ math.inline >}}
+
+​{{< math.inline >}}
+<p>
+From other aspect, if \(z\) has a high variance, the values of \( \text{Softmax}(z) \) can vary greatly, leading to a very peaky distribution where one element dominates the others.
+</p>
+{{</ math.inline >}}
+
+$$
+\begin{cases}
+\text{if $Var(z)\uparrow$, } \frac{\exp(z_i)}{\sum_{j=1}^K\exp(z_j)} \rarr \begin{cases}
+\lim_{\exp(z_i)\rarr\infty}\frac{\exp(z_i)}{1+\cdots+1+\exp(z_i)} = 1 \\\
+\lim_{\exp(z_i)\rarr\infty}\frac{1}{1+\cdots+1+\exp(z_i)} = 0
+\end{cases} \\\
+\text{if $Var(z)\downarrow$, } \frac{\exp(z_i)}{\sum_{j=1}^K\exp(z_j)} \rarr \frac{1}{K}
+\end{cases}
+$$
+
+It shows that with a high variance of input, the output of Softmax converges to one-hot vector, otherwise it converges to uniform distribution.
+
 ## Multi-head Attention
 
 {{< math.inline >}}
@@ -995,7 +1041,7 @@ $$
 \text{elu}(\cdot) : \text{exponential linear unit function}
 $$
 
-## Averaging past context
+## Averaging Past Context
 
 <cite>[^4]</cite>This is a note of Andrej Karpathy's tutorial on building GPT. There are 3 different forms of weighted aggregation for averaging the past context, all of them result in the same outcome.
 
@@ -1077,6 +1123,8 @@ A_4 &= \text{Softmax}(\begin{bmatrix}
 $$
 
 It differs from the general concept of Self-Attention by using lower triangular matrix, because the output depends only on past context.
+
+
 
 ## Reference
 
